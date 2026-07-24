@@ -7,14 +7,19 @@ pip install -r requirements.txt
 python manage.py collectstatic --noinput
 python manage.py migrate
 
-# Create default superuser on deployment if not existing
+# Create default superusers on deployment
 python manage.py shell -c "
 from apps.users.models import User
-if not User.objects.filter(username='M_100184').exists():
-    u = User.objects.create_superuser('M_100184', 'school100184@gmail.com', 'admin1234', role='ADMIN')
-    print('Superuser M_100184 created successfully')
-if not User.objects.filter(username='admin').exists():
-    u = User.objects.create_superuser('admin', 'admin@example.com', 'admin1234', role='ADMIN')
-    print('Superuser admin created successfully')
+for uname, uemail in [('M_100184', 'school100184@gmail.com'), ('admin', 'admin@example.com')]:
+    u, created = User.objects.get_or_create(username=uname, defaults={'email': uemail, 'role': 'ADMIN', 'is_staff': True, 'is_superuser': True, 'is_active': True})
+    u.set_password('admin1234')
+    u.email = uemail
+    u.role = 'ADMIN'
+    u.is_staff = True
+    u.is_superuser = True
+    u.is_active = True
+    u.save()
+    print(f'Superuser {uname} synchronized successfully')
 "
+
 

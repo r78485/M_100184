@@ -14,7 +14,7 @@ SECRET_KEY = 'django-insecure-replace-this-in-production'
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ['https://*.railway.app', 'https://*.up.railway.app', 'https://*.onrender.com']
+CSRF_TRUSTED_ORIGINS = ['https://*.railway.app', 'https://*.up.railway.app', 'https://*.onrender.com', 'https://m-100184.onrender.com']
 
 # Application definition
 INSTALLED_APPS = [

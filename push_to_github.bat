@@ -11,7 +11,7 @@ git remote remove origin 2>nul
 git remote add origin https://github.com/r78485/M_100184.git
 git branch -M main
 git add .
-git commit -m "Fix missing dependencies: qrcode, python-barcode, Pillow, reportlab"
+git commit -m "Fix login authentication, email lookup fallback, and Render superuser sync"
 git push -u origin main
 
 echo.
