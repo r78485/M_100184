@@ -1,0 +1,8 @@
+Django>=4.2,<5.0
+gunicorn
+dj-database-url
+psycopg2-binary
+whitenoise
+google-api-python-client
+google-auth-httplib2
+google-auth-oauthlib

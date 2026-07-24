@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block title %}Account Settings - EduManage ERP{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1" style="color: var(--primary-blue);">Account Settings</h2>
+        <p class="text-muted">Manage your personal profile settings, password, and UI theme preferences.</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card custom-card p-4 mb-4">
+                <h5 class="fw-bold mb-4">Update Profile Details</h5>
+                <form>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">First Name</label>
+                            <input type="text" class="form-control" value="{{ user.first_name|default:'Guest' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Last Name</label>
+                            <input type="text" class="form-control" value="{{ user.last_name|default:'User' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Email Address</label>
+                            <input type="email" class="form-control" value="{{ user.email|default:'user@school.com' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Phone Number</label>
+                            <input type="tel" class="form-control" value="+1 555-019-923">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn text-white px-4" style="background-color: var(--primary-blue); border: none;">Update Profile</button>
+                </form>
+            </div>
+
+            <div class="card custom-card p-4">
+                <h5 class="fw-bold mb-4">Change Password</h5>
+                <form>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold">Current Password</label>
+                            <input type="password" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">New Password</label>
+                            <input type="password" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Confirm New Password</label>
+                            <input type="password" class="form-control" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn text-white px-4" style="background-color: var(--secondary-purple); border: none;">Save New Password</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card custom-card p-4 mb-4">
+                <h5 class="fw-bold mb-3">Theme Preferences</h5>
+                <div class="d-flex flex-column gap-2">
+                    <div class="form-check p-2 border rounded d-flex align-items-center justify-content-between">
+                        <div>
+                            <input class="form-check-input ms-0 me-2" type="radio" name="themeRadio" id="themeLight" checked>
+                            <label class="form-check-label fw-semibold" for="themeLight">Light Theme</label>
+                        </div>
+                        <i class="bi bi-sun-fill text-warning fs-5"></i>
+                    </div>
+                    <div class="form-check p-2 border rounded d-flex align-items-center justify-content-between">
+                        <div>
+                            <input class="form-check-input ms-0 me-2" type="radio" name="themeRadio" id="themeDark">
+                            <label class="form-check-label fw-semibold" for="themeDark">Dark Theme</label>
+                        </div>
+                        <i class="bi bi-moon-stars-fill text-primary fs-5"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

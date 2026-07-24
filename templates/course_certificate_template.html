@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Course Certificate</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Great+Vibes&family=Montserrat:wght@400;600;700&family=Old+Standard+TT:ital@0;1&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Montserrat', sans-serif; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        
+        .certificate-container {
+            width: 1000px;
+            height: 700px;
+            background: #fdfbf7;
+            position: relative;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0 auto;
+        }
+        
+        /* Security Pattern Background */
+        .security-bg {
+            position: absolute;
+            top: 25px;
+            left: 25px;
+            right: 25px;
+            bottom: 25px;
+            background-color: #fdfbf7;
+            background-image: 
+                radial-gradient(rgba(164, 137, 89, 0.03) 15%, transparent 20%),
+                radial-gradient(rgba(164, 137, 89, 0.03) 15%, transparent 20%);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+            border: 2px solid #a48959;
+            z-index: 1;
+        }
+
+        /* Border */
+        .outer-border {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 12px double #a48959;
+            box-shadow: inset 0 0 0 6px rgba(164, 137, 89, 0.2);
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .text-border-frame {
+            position: absolute;
+            top: 32px;
+            left: 32px;
+            right: 32px;
+            bottom: 32px;
+            border: 1px solid rgba(164, 137, 89, 0.4);
+            z-index: 2;
+        }
+
+        /* Content */
+        .inner-content {
+            position: relative;
+            z-index: 3;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 40px;
+            text-align: center;
+        }
+
+        .certificate-title {
+            font-family: 'Cinzel', serif;
+            font-size: 46px;
+            color: #1a1a1a;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 5px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .subtitle {
+            font-family: 'Old Standard TT', serif;
+            font-style: italic;
+            font-size: 20px;
+            color: #444;
+            margin-bottom: 15px;
+        }
+
+        .recipient-name {
+            font-family: 'Great Vibes', cursive;
+            font-size: 58px;
+            color: #111;
+            margin: 10px 0;
+            border-bottom: 2px solid #a48959;
+            width: 75%;
+            padding-bottom: 5px;
+        }
+
+        .description {
+            font-family: 'Old Standard TT', serif;
+            font-style: italic;
+            font-size: 18px;
+            color: #555;
+            line-height: 1.8;
+            max-width: 820px;
+            margin: 15px 0;
+        }
+
+        .school-name {
+            font-family: 'Cinzel', serif;
+            font-size: 26px;
+            color: #0c2340; 
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .footer-row {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: auto;
+        }
+
+        .signature-block { width: 200px; text-align: center; }
+        .line { border-top: 1.5px solid #a48959; margin-bottom: 8px; }
+        .label { font-size: 12px; text-transform: uppercase; letter-spacing: 2px; font-weight: 700; color: #333; }
+
+        .gold-seal {
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #ffe082 0%, #ffb300 60%, #ff8f00 100%);
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .inner-seal {
+            width: 65px;
+            height: 65px;
+            border: 2px dashed #fff;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        @media print {
+            body { padding: 0; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            .certificate-container { box-shadow: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="certificate-container">
+    <div class="outer-border"></div>
+    <div class="security-bg"></div>
+    <div class="text-border-frame"></div>
+
+    <div class="inner-content">
+        <h1 class="certificate-title">Certificate of Completion</h1>
+        <p class="subtitle">This Certificate is Proudly Presented to</p>
+
+        <div class="recipient-name">{{ student.student_name_en|default:student.student_name_bn|default:"Demo Student" }}</div>
+
+        <p class="description">
+            This is to certify that the above-named student of <strong>{{ student.student_class|default:"Class 9" }}</strong> has successfully demonstrated outstanding academic behavior and dedication during their tenure. We wish them the absolute best in their future endeavors.
+        </p>
+
+        <div style="font-size: 12px; font-weight: 600; color: #666; margin-bottom: 15px;">PRESENTED ON: <script>document.write(new Date().toLocaleDateString())</script></div>
+
+        <div class="school-name">EduManage International School</div>
+
+        <div class="footer-row">
+            <div class="signature-block">
+                <div class="line"></div>
+                <div class="label">Course Instructor</div>
+            </div>
+            
+            <div class="gold-seal">
+                <div class="inner-seal">OFFICIAL</div>
+            </div>
+
+            <div class="signature-block">
+                <div class="line"></div>
+                <div class="label">Principal / Head</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Auto print when opened in iframe
+    window.onload = function() {
+        if(window.self !== window.top) {
+            // inside iframe
+        }
+    }
+</script>
+</body>
+</html>

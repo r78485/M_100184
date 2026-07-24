@@ -1,0 +1,8 @@
+<resources>
+    <style name="Theme.EduManage" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#3262a8</item>
+        <item name="colorPrimaryVariant">#173b6b</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="android:statusBarColor">#3262a8</item>
+    </style>
+</resources>

@@ -1,0 +1,1224 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Report Generation Module - EduManage ERP{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --slate-blue: #1E293B;
+        --pure-white: #FFFFFF;
+        --soft-gray: #F8FAFC;
+        --emerald-green: #10B981;
+        --crimson-red: #EF4444;
+    }
+
+    body {
+        font-family: 'Inter', 'Noto Sans Bengali', sans-serif;
+    }
+
+    .report-sidebar {
+        background: var(--pure-white);
+        border-right: 1px solid #e2e8f0;
+        min-height: calc(100vh - 70px);
+    }
+    
+    .report-menu-item {
+        padding: 12px 20px;
+        color: var(--slate-blue);
+        cursor: pointer;
+        border-bottom: 1px solid #f1f5f9;
+        font-weight: 500;
+        transition: 0.2s;
+        display: flex;
+        align-items: center;
+    }
+    .report-menu-item:hover, .report-menu-item.active {
+        background: var(--soft-gray);
+        color: var(--primary-blue);
+        border-left: 4px solid var(--primary-blue);
+    }
+
+    .report-config-panel {
+        background: var(--pure-white);
+        border-radius: 8px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        padding: 24px;
+        margin-bottom: 24px;
+    }
+
+    /* Printable Sheet Specifications */
+    @media print {
+        .no-print, 
+        .top-navbar, 
+        header, 
+        nav, 
+        .sidebar, 
+        .report-sidebar, 
+        .report-config-panel, 
+        #previewPlaceholder,
+        .btn,
+        button {
+            display: none !important;
+        }
+
+        body, html {
+            background: #ffffff !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            height: auto !important;
+        }
+
+        .container-fluid, .row, .col-md-9, .col-lg-10, .bg-canvas {
+            padding: 0 !important;
+            margin: 0 !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            background: #ffffff !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        #printArea {
+            display: block !important;
+            visibility: visible !important;
+            position: relative !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 5mm !important;
+            background: #ffffff !important;
+            box-shadow: none !important;
+            border: none !important;
+        }
+
+        .page-break {
+            page-break-after: always;
+        }
+        
+        .footer-signature-table {
+            width: 100% !important;
+            margin-top: 35px !important;
+            border-collapse: collapse !important;
+            border: none !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+            clear: both !important;
+        }
+
+        .footer-signature-table tr, .footer-signature-table td {
+            border: none !important;
+            background: transparent !important;
+            padding: 0 10px !important;
+            vertical-align: bottom !important;
+        }
+
+        .table-responsive {
+            overflow: visible !important;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            background-color: var(--slate-blue) !important;
+            color: var(--pure-white) !important;
+            -webkit-print-color-adjust: exact;
+            padding: 8px;
+            border: 1px solid #cbd5e1;
+        }
+        tr:nth-child(even) {
+            background-color: var(--soft-gray) !important;
+            -webkit-print-color-adjust: exact;
+        }
+        td {
+            padding: 8px;
+            border: 1px solid #cbd5e1;
+        }
+        
+        .watermark {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.05;
+            z-index: -1;
+            width: 400px;
+        }
+    }
+
+    /* Screen preview styling for print area */
+    #printArea {
+        display: none; /* Hidden by default on screen unless previewing */
+        background: white;
+        padding: 40px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        margin: 20px auto;
+        max-width: 210mm; /* A4 width */
+        min-height: 297mm; /* A4 height */
+        position: relative;
+    }
+    #printArea.landscape {
+        max-width: 297mm;
+        min-height: 210mm;
+    }
+    
+    .status-green { color: var(--emerald-green); font-weight: bold; }
+    .status-red { color: var(--crimson-red); font-weight: bold; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="row g-0">
+        <!-- Sidebar Menu -->
+        <div class="col-md-3 col-lg-2 report-sidebar border-end no-print">
+            <div class="p-3 border-bottom bg-light">
+                <h6 class="fw-bold mb-0 text-uppercase text-secondary" style="font-size: 0.85rem;">Report Modules</h6>
+            </div>
+            <div id="reportMenus">
+                <div class="report-menu-item active" onclick="switchReport('student_report_card', this)"><i class="bi bi-card-heading me-2"></i>Students Report Card</div>
+                <div class="report-menu-item" onclick="switchReport('student_info', this)"><i class="bi bi-person-lines-fill me-2"></i>Students Info Report</div>
+                <div class="report-menu-item" onclick="switchReport('parent_info', this)"><i class="bi bi-people-fill me-2"></i>Parents Info Report</div>
+                <div class="report-menu-item" onclick="switchReport('student_attendance', this)"><i class="bi bi-calendar-check me-2"></i>Students Attendance</div>
+                <div class="report-menu-item" onclick="switchReport('staff_attendance', this)"><i class="bi bi-person-badge me-2"></i>Staff Attendance</div>
+                <div class="report-menu-item" onclick="switchReport('fee_collection', this)"><i class="bi bi-cash-stack me-2"></i>Fee Collection</div>
+                <div class="report-menu-item" onclick="switchReport('student_progress', this)"><i class="bi bi-graph-up-arrow me-2"></i>Student Progress</div>
+                <div class="report-menu-item" onclick="switchReport('accounts_ledger', this)"><i class="bi bi-journal-text me-2"></i>Accounts Ledger</div>
+                <div class="report-menu-item" onclick="switchReport('customised', this)"><i class="bi bi-sliders me-2"></i>Customised Reports</div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="col-md-9 col-lg-10 p-4 bg-canvas">
+            
+            <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+                <h3 class="fw-bold" style="color: var(--slate-blue);" id="activeReportTitle">Students Report Card</h3>
+                <div>
+                    <button class="btn btn-outline-success me-2" onclick="exportToExcel()"><i class="bi bi-file-earmark-excel me-1"></i> Export Excel</button>
+                    <button class="btn btn-primary" onclick="generateAndPrint()"><i class="bi bi-printer me-1"></i> Generate & Print</button>
+                </div>
+            </div>
+
+            <!-- Dynamic Configuration Panel (Search & Filter Controls) -->
+            <div class="report-config-panel mb-3 no-print" id="configPanel">
+                <!-- Rendered dynamically via JS based on selected report -->
+            </div>
+            
+            <!-- On-Screen Report Card Preview Container (Positioned right under searchbar) -->
+            <div id="previewPlaceholder" class="text-center py-4 bg-white rounded shadow-sm d-none no-print">
+                <i class="bi bi-file-earmark-text text-muted" style="font-size: 3rem;"></i>
+                <h5 class="text-muted mt-2">Select filters to view the report.</h5>
+            </div>
+
+            <!-- PRINT / REPORT CARD CONTAINER (Right under searchbar) -->
+            <div id="printArea" class="bg-white p-4 rounded shadow-sm mt-3" style="display: block;">
+                <!-- Watermark -->
+                <img src="https://via.placeholder.com/400?text=SCHOOL+LOGO" id="printWatermark" class="watermark" alt="Watermark">
+
+    <!-- Header Block -->
+    <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-4">
+        <div class="text-start" style="min-width: 160px;">
+            <!-- Barcode Placeholder -->
+            <svg id="headerBarcode"></svg>
+        </div>
+        <div class="text-center px-2" style="flex: 1;">
+            <h2 class="fw-bold mb-1" style="color: var(--slate-blue); white-space: nowrap; font-size: 1.25rem;" id="printSchoolName">EDUMANAGE INTERNATIONAL SCHOOL</h2>
+            <p class="mb-0 text-muted" id="printSchoolAddress">123 Education Boulevard, City Center | EIIN: 100184</p>
+            <h4 class="fw-bold mt-2 text-uppercase" id="printReportTitle">STUDENTS REPORT CARD</h4>
+        </div>
+        <div class="text-end" style="min-width: 160px; display:flex; justify-content:flex-end;">
+            <!-- QR Code Placeholder -->
+            <div id="headerQRCode"></div>
+        </div>
+    </div>
+
+    <!-- Dynamic Report Content -->
+    <div id="printReportContent">
+        <!-- Injected via JavaScript -->
+    </div>
+
+    <!-- 100% Print-Reliable Table Footer Signatures -->
+    <table class="footer-signature-table mt-4" style="width: 100%; border: none !important; background: transparent !important; page-break-inside: avoid; break-inside: avoid;">
+        <tr style="background: transparent !important;">
+            <td style="width: 33%; text-align: center; border: none !important; vertical-align: bottom; padding: 0 10px;">
+                <div style="height: 45px;"></div>
+                <div style="border-top: 1.5px solid #000; padding-top: 4px;">
+                    <strong>Prepared By</strong><br>
+                    <small style="font-size: 8pt; color: #333;">Signature & Date</small><br>
+                    <small style="font-size: 8pt; color: #333;">Name: <span id="operatorName">System Admin</span></small>
+                </div>
+            </td>
+            <td style="width: 34%; text-align: center; border: none !important; vertical-align: bottom; padding: 0 10px;">
+                <div style="height: 45px; display: flex; align-items: center; justify-content: center; margin: 0 auto; width: 70px;">
+                    <img id="printSeal" style="max-height: 45px; max-width: 70px; display: none;">
+                    <div id="printSealFallback" style="opacity: 0.6; color: #64748b; border: 2px dashed #94a3b8; display: flex; align-items: center; justify-content: center; width: 60px; height: 40px; border-radius: 50%; margin: 0 auto;"><small style="font-size: 7pt; font-weight: bold;">SEAL</small></div>
+                </div>
+                <div style="padding-top: 4px;">
+                    <strong>Institutional Seal</strong><br>
+                    <small style="font-size: 8pt; color: #333;">System Timestamp: <span id="systemTimestamp"></span></small>
+                </div>
+            </td>
+            <td style="width: 33%; text-align: center; border: none !important; vertical-align: bottom; padding: 0 10px;">
+                <div style="height: 45px; display: flex; align-items: center; justify-content: center; margin: 0 auto;">
+                    <img id="printSig" style="max-height: 45px; display: none;">
+                </div>
+                <div style="border-top: 1.5px solid #000; padding-top: 4px;">
+                    <strong>Headmaster / Principal</strong><br>
+                    <small style="font-size: 8pt; color: #333;">Signature & Seal</small><br>
+                    <small style="font-size: 8pt; color: #333;">Name: Prof. A. Rahman</small>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<!-- Include Libraries (Try Local First, fallback to CDN) -->
+<script src="{% static 'vendor/jsbarcode/JsBarcode.all.min.js' %}" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js';"></script>
+<script src="{% static 'vendor/qrcodejs/qrcode.min.js' %}" onerror="this.onerror=null;this.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';"></script>
+<script src="{% static 'vendor/sheetjs/xlsx.full.min.js' %}" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';"></script>
+
+<script>
+    let currentReport = 'student_report_card';
+    let qrCodeInstance = null;
+
+    function getReportStudents() {
+        const stored = localStorage.getItem('school_students');
+        let students = [];
+        if (stored) {
+            try { students = JSON.parse(stored); } catch(e){}
+        }
+        if (!students || students.length === 0) {
+            students = [
+                { id: 101, db_id: 1, name: "Abrar Ahad Sahil", name_bn: "আবরার আহাদ সাহিল", name_en: "Abrar Ahad Sahil", roll: 1, cls: "Class 6", guardian: "Rafiqul Islam", father: "Rafiqul Islam", mother: "Shahnaz Parvin", phone: "01711223344", status: "Approved", active: true, dob: "2012-05-10", address: "Dhaka, Bangladesh" },
+                { id: 102, db_id: 2, name: "Tanvir Hossain", name_bn: "তানভীর হোসেন", name_en: "Tanvir Hossain", roll: 2, cls: "Class 6", guardian: "Khorshed Alam", father: "Khorshed Alam", mother: "Farida Begum", phone: "01811223355", status: "Approved", active: true, dob: "2012-08-15", address: "Gazi Pur, Dhaka" },
+                { id: 103, db_id: 3, name: "Nusrat Jahan", name_bn: "নুসরাত জাহান", name_en: "Nusrat Jahan", roll: 3, cls: "Class 7", guardian: "Mahbubur Rahman", father: "Mahbubur Rahman", mother: "Rina Akter", phone: "01911223366", status: "Approved", active: true, dob: "2011-03-22", address: "Uttara, Dhaka" }
+            ];
+        }
+        return students;
+    }
+
+    // Config Panel Builders
+    const reportConfigs = {
+        student_report_card: {
+            title: "Students Report Card",
+            layout: "portrait",
+            renderHtml: function() {
+                const students = getReportStudents();
+                let studentOpts = '<option value="All">All Students in Selected Class</option>';
+                students.forEach(st => {
+                    studentOpts += `<option value="${st.id}">${st.name_en || st.name_bn || st.name} (Roll: ${st.roll} - ${st.cls || 'Class 6'})</option>`;
+                });
+                return `
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Select Class</label>
+                            <select class="form-select" id="rep_class" onchange="updateReportStudentDropdown(); generateLivePreview();">
+                                <option value="All">All Classes</option>
+                                <option value="Class 6">Class 6</option>
+                                <option value="Class 7">Class 7</option>
+                                <option value="Class 8">Class 8</option>
+                                <option value="Class 9">Class 9</option>
+                                <option value="Class 10">Class 10</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Select Exam / Evaluation</label>
+                            <select class="form-select" id="rep_exam" onchange="generateLivePreview()">
+                                <option value="Combined">Combined Exam & Class Test Report</option>
+                                <option value="Half-Yearly">Half-Yearly Examination 2026</option>
+                                <option value="Annual">Annual Examination 2026</option>
+                                <option value="ClassTest">Class Tests Overall Evaluation</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Select Student</label>
+                            <select class="form-select" id="rep_student" onchange="generateLivePreview()">
+                                ${studentOpts}
+                            </select>
+                        </div>
+                    </div>
+                `;
+            }
+        },
+        student_info: {
+            title: "Students Info Report",
+            layout: "landscape",
+            renderHtml: function() {
+                return `
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Select Class</label>
+                            <select class="form-select" id="rep_info_class" onchange="generateLivePreview()">
+                                <option value="All">All Classes</option>
+                                <option value="Class 6">Class 6</option>
+                                <option value="Class 7">Class 7</option>
+                                <option value="Class 8">Class 8</option>
+                                <option value="Class 9">Class 9</option>
+                                <option value="Class 10">Class 10</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Status Filter</label>
+                            <select class="form-select" id="rep_info_status" onchange="generateLivePreview()">
+                                <option value="All">All Statuses</option>
+                                <option value="Approved">Approved Only</option>
+                                <option value="Pending">Pending Only</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+            }
+        },
+        parent_info: {
+            title: "Parents Info Report",
+            layout: "landscape",
+            renderHtml: function() {
+                return `
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Select Class</label>
+                            <select class="form-select" id="rep_parent_class" onchange="generateLivePreview()">
+                                <option value="All">All Classes</option>
+                                <option value="Class 6">Class 6</option>
+                                <option value="Class 7">Class 7</option>
+                                <option value="Class 8">Class 8</option>
+                                <option value="Class 9">Class 9</option>
+                                <option value="Class 10">Class 10</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Data Options</label>
+                            <div class="form-check mt-2">
+                                <input class="form-check-input" type="checkbox" id="maskData" onchange="generateLivePreview()">
+                                <label class="form-check-label" for="maskData">Mask Sensitive Phone Numbers</label>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        },
+        student_attendance: {
+            title: "Students Monthly Attendance Report",
+            layout: "landscape",
+            renderHtml: function() {
+                return `
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Select Class</label>
+                            <select class="form-select" id="rep_att_class" onchange="generateLivePreview()">
+                                <option value="Class 6">Class 6</option>
+                                <option value="Class 7">Class 7</option>
+                                <option value="Class 8">Class 8</option>
+                                <option value="Class 9">Class 9</option>
+                                <option value="Class 10">Class 10</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Select Month</label>
+                            <input type="month" class="form-control" id="rep_att_month" value="2026-07" onchange="generateLivePreview()">
+                        </div>
+                    </div>
+                `;
+            }
+        },
+        staff_attendance: {
+            title: "Staff Monthly Attendance Report",
+            layout: "landscape",
+            renderHtml: function() {
+                return `
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Select Month</label>
+                            <input type="month" class="form-control" value="2026-07" onchange="generateLivePreview()">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Department</label>
+                            <select class="form-select" onchange="generateLivePreview()"><option>All Departments</option><option>Teaching Staff</option><option>Administration</option></select>
+                        </div>
+                    </div>
+                `;
+            }
+        },
+        fee_collection: {
+            title: "Fee Collection Report",
+            layout: "portrait",
+            renderHtml: function() {
+                return `
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">From Date</label>
+                            <input type="date" class="form-control" value="2026-07-01" onchange="generateLivePreview()">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">To Date</label>
+                            <input type="date" class="form-control" value="2026-07-31" onchange="generateLivePreview()">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Payment Status</label>
+                            <select class="form-select" onchange="generateLivePreview()"><option>All</option><option>PAID</option><option>UNPAID</option></select>
+                        </div>
+                    </div>
+                `;
+            }
+        },
+        student_progress: {
+            title: "Student Progress & Merit Report",
+            layout: "portrait",
+            renderHtml: function() {
+                const students = getReportStudents();
+                let studentOpts = '<option value="All">Class-wise Progress Report (All Students)</option>';
+                students.forEach(st => {
+                    studentOpts += `<option value="${st.id}">${st.name_en || st.name_bn || st.name} (Roll: ${st.roll} - ${st.cls || 'Class 6'})</option>`;
+                });
+                return `
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Select Class</label>
+                            <select class="form-select" id="rep_prog_class" onchange="updateProgressStudentDropdown(); generateLivePreview();">
+                                <option value="All">All Classes</option>
+                                <option value="Class 6">Class 6</option>
+                                <option value="Class 7">Class 7</option>
+                                <option value="Class 8">Class 8</option>
+                                <option value="Class 9">Class 9</option>
+                                <option value="Class 10">Class 10</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Select Student</label>
+                            <select class="form-select" id="rep_prog_student" onchange="generateLivePreview()">
+                                ${studentOpts}
+                            </select>
+                        </div>
+                    </div>
+                `;
+            }
+        },
+        accounts_ledger: {
+            title: "Accounts Report",
+            layout: "portrait",
+            renderHtml: function() {
+                return `
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Fiscal Year</label>
+                            <select class="form-select"><option>2026-2027</option><option>2025-2026</option></select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Account Head</label>
+                            <select class="form-select"><option>All Accounts</option><option>Tuition Fees</option><option>Admission Fees</option></select>
+                        </div>
+                    </div>
+                `;
+            }
+        },
+        customised: {
+            title: "Customised Reports",
+            layout: "landscape",
+            renderHtml: function() {
+                return `
+                    <div class="alert alert-info border-0 shadow-sm"><i class="bi bi-info-circle me-2"></i> Custom query engine for student records.</div>
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label class="form-label fw-semibold">Select Columns to Export</label>
+                            <select class="form-select" multiple style="height: 100px;">
+                                <option selected>Roll No</option>
+                                <option selected>Student Name</option>
+                                <option selected>Class</option>
+                                <option selected>Father Name</option>
+                                <option selected>Contact Phone</option>
+                                <option>Date of Birth</option>
+                                <option>Address</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+    };
+
+    function updateReportStudentDropdown() {
+        const classVal = document.getElementById('rep_class')?.value || 'All';
+        let students = getReportStudents();
+        if (classVal !== 'All') {
+            students = students.filter(s => (s.cls || s.desired_class) === classVal);
+        }
+        const select = document.getElementById('rep_student');
+        if (!select) return;
+        select.innerHTML = '<option value="All">All Students in Selected Class</option>';
+        students.forEach(st => {
+            select.insertAdjacentHTML('beforeend', `<option value="${st.id}">${st.name_en || st.name_bn || st.name} (Roll: ${st.roll} - ${st.cls || 'Class 6'})</option>`);
+        });
+    }
+
+    function updateProgressStudentDropdown() {
+        const classVal = document.getElementById('rep_prog_class')?.value || 'All';
+        let students = getReportStudents();
+        if (classVal !== 'All') {
+            students = students.filter(s => (s.cls || s.desired_class) === classVal);
+        }
+        const select = document.getElementById('rep_prog_student');
+        if (!select) return;
+        select.innerHTML = '<option value="All">Class-wise Progress Report (All Students)</option>';
+        students.forEach(st => {
+            select.insertAdjacentHTML('beforeend', `<option value="${st.id}">${st.name_en || st.name_bn || st.name} (Roll: ${st.roll} - ${st.cls || 'Class 6'})</option>`);
+        });
+    }
+
+    function generateLivePreview() {
+        const printArea = document.getElementById('printArea');
+        if (printArea) {
+            printArea.style.display = 'block';
+        }
+        const placeholder = document.getElementById('previewPlaceholder');
+        if (placeholder) {
+            placeholder.style.display = 'none';
+        }
+        generateReportData(currentReport);
+    }
+
+    function switchReport(reportId, element) {
+        currentReport = reportId;
+        document.querySelectorAll('.report-menu-item').forEach(el => el.classList.remove('active'));
+        element.classList.add('active');
+
+        const config = reportConfigs[reportId];
+        document.getElementById('activeReportTitle').innerText = config.title;
+        document.getElementById('configPanel').innerHTML = config.renderHtml();
+        
+        generateLivePreview();
+    }
+
+    window.onload = () => {
+        document.getElementById('configPanel').innerHTML = reportConfigs['student_report_card'].renderHtml();
+        const now = new Date();
+        const sysTime = document.getElementById('systemTimestamp');
+        if (sysTime) sysTime.innerText = now.toLocaleString('en-GB', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+        generateLivePreview();
+    };
+
+    function generateAndPrint() {
+        const config = reportConfigs[currentReport];
+        
+        try {
+            const v = localStorage.getItem('gs_institute_profile');
+            if(v) {
+                const profile = JSON.parse(v);
+                const schoolName = profile.nameEn || profile.nameBn || "GAZI MAHMUD JUNIOR HIGH SCHOOL";
+                if(schoolName) document.getElementById('printSchoolName').innerText = schoolName.toUpperCase();
+                let addr = profile.address || '';
+                if(profile.eiin) addr += ' | EIIN: ' + profile.eiin;
+                if(addr) document.getElementById('printSchoolAddress').innerText = addr;
+            }
+        } catch(e) {}
+        
+        const printArea = document.getElementById('printArea');
+        if (config.layout === 'landscape') {
+            printArea.classList.add('landscape');
+            injectPageRule('landscape');
+        } else {
+            printArea.classList.remove('landscape');
+            injectPageRule('portrait');
+        }
+
+        document.getElementById('printReportTitle').innerText = config.title.toUpperCase();
+        generateReportData(currentReport);
+
+        const hash = "REP-" + Math.floor(100000 + Math.random() * 900000);
+        try {
+            JsBarcode("#headerBarcode", hash, {
+                format: "CODE128", width: 1.2, height: 25, displayValue: true, fontSize: 10, margin: 0
+            });
+        } catch (e) {}
+
+        const qrContainer = document.getElementById('headerQRCode');
+        qrContainer.innerHTML = '';
+        try {
+            qrCodeInstance = new QRCode(qrContainer, {
+                text: "https://yourschool.edu.bd/verify?report_id=" + hash,
+                width: 80, height: 80, colorDark : "#1E293B", colorLight : "#ffffff"
+            });
+        } catch (e) {}
+
+        document.getElementById('previewPlaceholder').style.display = 'none';
+        printArea.style.display = 'block';
+
+        setTimeout(() => {
+            window.print();
+        }, 400);
+    }
+
+    function injectPageRule(orientation) {
+        let style = document.getElementById('printPageStyle');
+        if (!style) {
+            style = document.createElement('style');
+            style.id = 'printPageStyle';
+            document.head.appendChild(style);
+        }
+        style.innerHTML = `@media print { @page { size: A4 ${orientation}; margin: 0; } }`;
+    }
+
+    function generateReportData(reportType) {
+        const contentDiv = document.getElementById('printReportContent');
+        let students = getReportStudents();
+
+        if (reportType === 'student_report_card') {
+            const classVal = document.getElementById('rep_class')?.value || 'All';
+            const studentVal = document.getElementById('rep_student')?.value || 'All';
+            
+            let filtered = students;
+            if (classVal !== 'All') filtered = filtered.filter(s => (s.cls || s.desired_class) === classVal);
+            if (studentVal !== 'All') filtered = filtered.filter(s => s.id == studentVal || s.db_id == studentVal);
+
+            if (filtered.length === 0) {
+                contentDiv.innerHTML = '<div class="alert alert-warning text-center">No student record found for Report Card generation.</div>';
+                return;
+            }
+
+            let html = '';
+            filtered.forEach((st, index) => {
+                const photoSrc = st.photo || st.photo_url || st.picture || st.image || st.avatar || '';
+                const initial = (st.name_en || st.name_bn || st.name || 'S').trim().charAt(0).toUpperCase();
+                const photoMarkup = photoSrc
+                    ? `<img src="${photoSrc}" style="width:90px; height:90px; object-fit:cover; border-radius:10px; border:2px solid #1E293B;" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';"><div style="width:90px; height:90px; border-radius:10px; border:2px solid #1E293B; background:linear-gradient(135deg, #0284c7, #0369a1); display:none; align-items:center; justify-content:center; color:#ffffff; font-size:2.2rem; font-weight:bold;">${initial}</div>`
+                    : `<div style="width:90px; height:90px; border-radius:10px; border:2px solid #1E293B; background:linear-gradient(135deg, #0284c7, #0369a1); display:flex; align-items:center; justify-content:center; color:#ffffff; font-size:2.2rem; font-weight:bold;">${initial}</div>`;
+
+                html += `
+                    <div class="${index > 0 ? 'page-break mt-5' : ''}">
+                        <div class="row mb-3 align-items-center">
+                            <div class="col-3 text-center">
+                                ${photoMarkup}
+                            </div>
+                            <div class="col-9">
+                                <table class="table table-sm table-bordered small mb-0">
+                                    <tr><th>Student Name</th><td class="fw-bold">${st.name_en || st.name_bn || st.name}</td><th>Roll No</th><td><strong class="text-primary">${st.roll}</strong></td></tr>
+                                    <tr><th>Class & Section</th><td>${st.cls || 'Class 6'} (Sec A)</td><th>Admission No</th><td>${st.admNum || st.id}</td></tr>
+                                    <tr><th>Father / Guardian</th><td>${st.father || st.guardian || 'N/A'}</td><th>Mother</th><td>${st.mother || 'N/A'}</td></tr>
+                                </table>
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold mb-2 text-uppercase text-dark border-bottom pb-1"><i class="bi bi-journal-check me-1"></i> Academic Performance Evaluation (Exams & Class Tests)</h6>
+                        <table class="table table-bordered text-center align-middle small" id="exportTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Subject Name</th>
+                                    <th>Written / CQ</th>
+                                    <th>MCQ</th>
+                                    <th>Class Test Avg</th>
+                                    <th>Total Marks</th>
+                                    <th>Letter Grade</th>
+                                    <th>Grade Point (GP)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td class="text-start ps-3">Bengali / বাংলা</td><td>52</td><td>26</td><td>18</td><td>96</td><td class="status-green">A+</td><td>5.00</td></tr>
+                                <tr><td class="text-start ps-3">English / ইংরেজি</td><td>58</td><td>22</td><td>17</td><td>97</td><td class="status-green">A+</td><td>5.00</td></tr>
+                                <tr><td class="text-start ps-3">Mathematics / গণিত</td><td>68</td><td>25</td><td>19</td><td>112</td><td class="status-green">A+</td><td>5.00</td></tr>
+                                <tr><td class="text-start ps-3">Science / বিজ্ঞান</td><td>45</td><td>22</td><td>18</td><td>85</td><td class="status-green">A+</td><td>5.00</td></tr>
+                                <tr><td class="text-start ps-3">Social Science / সমাজ বিজ্ঞান</td><td>50</td><td>24</td><td>16</td><td>90</td><td class="status-green">A+</td><td>5.00</td></tr>
+                                <tr><td class="text-start ps-3">Religion & Ethics / ধর্ম ও শিক্ষা</td><td>55</td><td>25</td><td>19</td><td>99</td><td class="status-green">A+</td><td>5.00</td></tr>
+                            </tbody>
+                            <tfoot class="fw-bold table-light">
+                                <tr>
+                                    <td colspan="4" class="text-end">Total Aggregate Marks:</td>
+                                    <td>579</td>
+                                    <td>GPA:</td>
+                                    <td class="text-success fs-6">5.00 (Golden A+)</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                        <div class="row g-2 mt-2">
+                            <div class="col-6">
+                                <div class="p-2 border rounded small bg-light">
+                                    <strong>Attendance & Discipline Summary:</strong><br>
+                                    Total Working Days: 120 | Present Days: 116 | Attendance: <strong>96.6%</strong>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="p-2 border rounded small bg-light">
+                                    <strong>Final Result Status:</strong><br>
+                                    Result: <span class="badge bg-success">PASSED & PROMOTED</span> | Rank: <strong>1st Position</strong>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3 p-2 border rounded small">
+                            <strong>Class Teacher Comments:</strong> Outstanding academic excellence across all exams and class tests. Exemplary behaviour and active participation.
+                        </div>
+                    </div>
+                `;
+            });
+            contentDiv.innerHTML = html;
+
+        } else if (reportType === 'student_info') {
+            const classVal = document.getElementById('rep_info_class')?.value || 'All';
+            const statusVal = document.getElementById('rep_info_status')?.value || 'All';
+
+            let filtered = students;
+            if (classVal !== 'All') filtered = filtered.filter(s => (s.cls || s.desired_class) === classVal);
+            if (statusVal !== 'All') filtered = filtered.filter(s => (s.status || 'Approved') === statusVal);
+
+            let tbody = '';
+            filtered.forEach((st, idx) => {
+                const isApproved = (st.status === 'Approved' || st.active === true);
+                tbody += `
+                    <tr>
+                        <td>${idx + 1}</td>
+                        <td>${st.admNum || st.id}</td>
+                        <td><strong>${st.roll}</strong></td>
+                        <td class="text-start ps-3"><strong>${st.name_en || st.name_bn || st.name}</strong><br><small class="text-muted">${st.name_bn || ''}</small></td>
+                        <td>${st.cls || 'Class 6'}</td>
+                        <td>${st.guardian || st.father || 'N/A'}</td>
+                        <td>${st.phone || st.mobile || 'N/A'}</td>
+                        <td><span class="badge ${isApproved ? 'bg-success' : 'bg-warning text-dark'}">${isApproved ? 'Approved' : 'Pending'}</span></td>
+                    </tr>
+                `;
+            });
+
+            contentDiv.innerHTML = `
+                <table class="table table-bordered table-sm text-center align-middle small" id="exportTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>SL No</th>
+                            <th>Student ID</th>
+                            <th>Roll No</th>
+                            <th>Student Name</th>
+                            <th>Class</th>
+                            <th>Guardian Name</th>
+                            <th>Contact Phone</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>${tbody.length ? tbody : '<tr><td colspan="8" class="p-3 text-muted">No student records found.</td></tr>'}</tbody>
+                </table>
+            `;
+
+        } else if (reportType === 'parent_info') {
+            const classVal = document.getElementById('rep_parent_class')?.value || 'All';
+            const isMasked = document.getElementById('maskData')?.checked;
+
+            let filtered = students;
+            if (classVal !== 'All') filtered = filtered.filter(s => (s.cls || s.desired_class) === classVal);
+
+            let tbody = '';
+            filtered.forEach((st, idx) => {
+                let phone = st.phone || st.mobile || 'N/A';
+                if (isMasked && phone.length >= 8) {
+                    phone = phone.substring(0, 3) + '****' + phone.substring(phone.length - 3);
+                }
+                tbody += `
+                    <tr>
+                        <td>${idx + 1}</td>
+                        <td><strong>${st.roll}</strong></td>
+                        <td class="text-start ps-3"><strong>${st.name_en || st.name_bn || st.name}</strong></td>
+                        <td>${st.cls || 'Class 6'}</td>
+                        <td>${st.father || st.guardian || 'N/A'}</td>
+                        <td>${st.mother || 'N/A'}</td>
+                        <td><code>${phone}</code></td>
+                        <td>${st.address || 'N/A'}</td>
+                    </tr>
+                `;
+            });
+
+            contentDiv.innerHTML = `
+                <table class="table table-bordered table-sm text-center align-middle small" id="exportTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>SL No</th>
+                            <th>Roll No</th>
+                            <th>Student Name</th>
+                            <th>Class</th>
+                            <th>Father / Guardian Name</th>
+                            <th>Mother Name</th>
+                            <th>Primary Contact Phone</th>
+                            <th>Present Address</th>
+                        </tr>
+                    </thead>
+                    <tbody>${tbody.length ? tbody : '<tr><td colspan="8" class="p-3 text-muted">No parent records found.</td></tr>'}</tbody>
+                </table>
+            `;
+
+        } else if (reportType === 'student_attendance') {
+            const classVal = document.getElementById('rep_att_class')?.value || 'Class 6';
+            const monthVal = document.getElementById('rep_att_month')?.value || '2026-07';
+
+            let year = 2026;
+            let month = 7;
+            if (monthVal && monthVal.includes('-')) {
+                const parts = monthVal.split('-');
+                year = parseInt(parts[0]);
+                month = parseInt(parts[1]);
+            }
+
+            const totalDaysInMonth = new Date(year, month, 0).getDate();
+            const monthName = new Date(year, month - 1, 1).toLocaleString('en-US', { month: 'long', year: 'numeric' });
+
+            let dayCols = '';
+            let isHolidayMap = [];
+
+            for (let d = 1; d <= totalDaysInMonth; d++) {
+                const dateObj = new Date(year, month - 1, d);
+                const dayOfWeek = dateObj.getDay(); // 0 = Sun, 1 = Mon, ..., 5 = Fri, 6 = Sat
+                const isWeekend = (dayOfWeek === 5 || dayOfWeek === 6); // Friday or Saturday
+                isHolidayMap[d] = isWeekend;
+
+                const bgHeader = isWeekend ? 'background-color: #ffe4e6; color: #e11d48; font-weight: bold;' : '';
+                dayCols += `<th style="width: 22px; font-size: 8px; ${bgHeader}" title="${dateObj.toLocaleDateString('en-US', { weekday: 'short' })}">${d}</th>`;
+            }
+
+            let filtered = students.filter(s => (s.cls || s.desired_class) === classVal);
+            if (filtered.length === 0) filtered = students;
+
+            let tbody = '';
+            filtered.forEach(st => {
+                let dayCells = '';
+                let presentCount = 0;
+                let absentCount = 0;
+                let workingDaysCount = 0;
+
+                for (let d = 1; d <= totalDaysInMonth; d++) {
+                    const isWeekend = isHolidayMap[d];
+                    if (isWeekend) {
+                        dayCells += `<td style="font-size: 8px; font-weight: bold; background-color: #ffe4e6; color: #e11d48;" title="Friday/Saturday - Official Holiday">OFF</td>`;
+                    } else {
+                        workingDaysCount++;
+                        const isPresent = ((st.roll + d) % 9 !== 0);
+                        if (isPresent) {
+                            presentCount++;
+                            dayCells += `<td style="font-size: 9px; font-weight: bold; color: #16a34a;">P</td>`;
+                        } else {
+                            absentCount++;
+                            dayCells += `<td style="font-size: 9px; font-weight: bold; color: #dc2626; background-color: #fef2f2;">A</td>`;
+                        }
+                    }
+                }
+                const pct = workingDaysCount > 0 ? ((presentCount / workingDaysCount) * 100).toFixed(0) : '0';
+
+                tbody += `
+                    <tr>
+                        <td><strong>${st.roll}</strong></td>
+                        <td class="text-start ps-2" style="white-space: nowrap; font-weight: 600;">${st.name_en || st.name_bn || st.name}</td>
+                        ${dayCells}
+                        <td class="fw-bold text-success">${presentCount}</td>
+                        <td class="fw-bold text-danger">${absentCount}</td>
+                        <td class="fw-bold text-primary">${pct}%</td>
+                    </tr>
+                `;
+            });
+
+            contentDiv.innerHTML = `
+                <div class="text-center mb-3">
+                    <h6 class="fw-bold mb-1">Monthly Class Attendance Grid — ${classVal} (${monthName})</h6>
+                    <div class="d-flex justify-content-center gap-3 small">
+                        <span><strong class="text-success">P</strong> = Present (উপস্থিত)</span>
+                        <span><strong class="text-danger">A</strong> = Absent (অনুপস্থিত)</span>
+                        <span><strong style="color:#e11d48;">OFF</strong> = Friday & Saturday (শুক্রবার ও শনিবার সরকারি ছুটি)</span>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm text-center align-middle" id="exportTable" style="font-size: 10px;">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Roll</th>
+                                <th>Student Name</th>
+                                ${dayCols}
+                                <th>P</th>
+                                <th>A</th>
+                                <th>%</th>
+                            </tr>
+                        </thead>
+                        <tbody>${tbody}</tbody>
+                    </table>
+                </div>
+            `;
+
+        } else if (reportType === 'student_progress') {
+            const classVal = document.getElementById('rep_prog_class')?.value || 'All';
+            const studentVal = document.getElementById('rep_prog_student')?.value || 'All';
+
+            let filtered = students;
+            if (classVal !== 'All') filtered = filtered.filter(s => (s.cls || s.desired_class) === classVal);
+            if (studentVal !== 'All') filtered = filtered.filter(s => s.id == studentVal || s.db_id == studentVal);
+
+            let html = '';
+            filtered.forEach((st, idx) => {
+                html += `
+                    <div class="${idx > 0 ? 'page-break mt-4' : ''}">
+                        <div class="border rounded p-3 mb-3 bg-light">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="fw-bold mb-1 text-dark">${st.name_en || st.name_bn || st.name}</h5>
+                                    <span class="badge bg-primary me-2">${st.cls || 'Class 6'}</span>
+                                    <span class="badge bg-dark">Roll: ${st.roll}</span>
+                                    <span class="badge bg-secondary ms-2">Guardian: ${st.guardian || st.father || 'N/A'}</span>
+                                </div>
+                                <div class="text-end">
+                                    <span class="fs-5 fw-bold text-success">Academic Grade: A+ (5.00)</span><br>
+                                    <span class="badge bg-success-subtle text-success border">PASSED & RECOMMENDED FOR PROMOTION</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6 class="fw-bold text-dark border-bottom pb-1 mb-3"><i class="bi bi-star-fill text-warning me-1"></i> Student Behaviour & Merits Evaluation (শ্রেণীভিত্তিক আচরণ ও মেধা রেটিং)</h6>
+                        
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-3">
+                                <div class="p-3 border rounded text-center bg-white shadow-sm">
+                                    <small class="text-muted d-block mb-1">Discipline Rating</small>
+                                    <div class="fs-5 text-warning">⭐⭐⭐⭐⭐</div>
+                                    <span class="fw-bold text-success small">5.0 / 5.0 (Outstanding)</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3 border rounded text-center bg-white shadow-sm">
+                                    <small class="text-muted d-block mb-1">Punctuality & Habit</small>
+                                    <div class="fs-5 text-warning">⭐⭐⭐⭐⭐</div>
+                                    <span class="fw-bold text-success small">5.0 / 5.0 (Exemplary)</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3 border rounded text-center bg-white shadow-sm">
+                                    <small class="text-muted d-block mb-1">Class Attendance</small>
+                                    <div class="fs-5 text-primary fw-bold">96.5%</div>
+                                    <span class="fw-bold text-primary small">Regular & Attentive</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="p-3 border rounded text-center bg-white shadow-sm">
+                                    <small class="text-muted d-block mb-1">Co-Curricular Rank</small>
+                                    <div class="fs-5 text-purple fw-bold">1st Rank</div>
+                                    <span class="fw-bold text-dark small">Debate & Science Club</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <table class="table table-bordered table-sm text-center align-middle small" id="exportTable">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Evaluation Parameter</th>
+                                    <th>Teacher Rating</th>
+                                    <th>Grade Assessment</th>
+                                    <th>Remarks</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Classroom Behaviour & Respect</td><td>5 / 5 ⭐</td><td><span class="badge bg-success">Excellent</span></td><td>Polite, respectful to teachers and classmates.</td></tr>
+                                <tr><td>Homework & Class Tests Consistency</td><td>5 / 5 ⭐</td><td><span class="badge bg-success">Outstanding</span></td><td>Submits all assignments and class tests on time.</td></tr>
+                                <tr><td>Leadership & Teamwork</td><td>4.8 / 5 ⭐</td><td><span class="badge bg-primary">Very Good</span></td><td>Leads group projects effectively.</td></tr>
+                                <tr><td>Sports & Cultural Activity Participation</td><td>5 / 5 ⭐</td><td><span class="badge bg-success">Outstanding</span></td><td>Active champion in Annual Sports Competition.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            });
+
+            contentDiv.innerHTML = html;
+
+        } else if (reportType === 'staff_attendance') {
+            contentDiv.innerHTML = `
+                <table class="table table-bordered table-sm text-center align-middle small" id="exportTable">
+                    <thead class="table-light">
+                        <tr><th>Staff ID</th><th>Staff Name</th><th>Designation</th><th>Department</th><th>Working Days</th><th>Present</th><th>Absent</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>TCH-001</td><td>Md. Nazmul Huda</td><td>Senior Teacher</td><td>Mathematics</td><td>24</td><td>24</td><td>0</td><td><span class="badge bg-success">100% Present</span></td></tr>
+                        <tr><td>TCH-002</td><td>Sharmin Sultana</td><td>Assistant Teacher</td><td>English</td><td>24</td><td>23</td><td>1</td><td><span class="badge bg-success">95.8% Present</span></td></tr>
+                    </tbody>
+                </table>
+            `;
+        } else if (reportType === 'fee_collection') {
+            contentDiv.innerHTML = `
+                <table class="table table-bordered table-sm text-center align-middle small" id="exportTable">
+                    <thead class="table-light">
+                        <tr><th>Invoice No</th><th>Date</th><th>Student Name</th><th>Class</th><th>Fee Description</th><th>Amount Paid</th><th>Payment Mode</th><th>Status</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>INV-2026-101</td><td>02-Jul-2026</td><td>Abrar Ahad Sahil</td><td>Class 6</td><td>Monthly Tuition Fee</td><td>৳1,500</td><td>bKash Online</td><td><span class="badge bg-success">PAID</span></td></tr>
+                        <tr><td>INV-2026-102</td><td>05-Jul-2026</td><td>Tanvir Hossain</td><td>Class 6</td><td>Monthly Tuition Fee</td><td>৳1,500</td><td>Cash Deposit</td><td><span class="badge bg-success">PAID</span></td></tr>
+                    </tbody>
+                </table>
+            `;
+        } else if (reportType === 'accounts_ledger') {
+            // Read transactions & fee collection data
+            const txStored = localStorage.getItem('school_tx');
+            let txs = [];
+            if (txStored) {
+                try { txs = JSON.parse(txStored); } catch(e){}
+            }
+            if (!txs || txs.length === 0) {
+                txs = [
+                    { id: 1, date: "2026-07-18", desc: "Admission Fee Collection - Class 6", cat: "Student Fees Collection", type: "Income", amount: 45000 },
+                    { id: 2, date: "2026-07-19", desc: "Electricity & Utility Bill July", cat: "Electricity & Utilities", type: "Expense", amount: 12500 },
+                    { id: 3, date: "2026-07-20", desc: "Monthly Tuition Fees Collection", cat: "Student Fees Collection", type: "Income", amount: 85000 },
+                    { id: 4, date: "2026-07-21", desc: "Teacher & Staff Salary Allowance", cat: "Salary Allowance", type: "Expense", amount: 32000 },
+                    { id: 5, date: "2026-07-22", desc: "Library Books & Stationery Purchase", cat: "Office Stationery", type: "Expense", amount: 4400 }
+                ];
+            }
+
+            const invStored = localStorage.getItem('school_invoices');
+            let invoices = [];
+            if (invStored) {
+                try { invoices = JSON.parse(invStored); } catch(e){}
+            }
+            if (!invoices || invoices.length === 0) {
+                invoices = [
+                    { id: "INV-9201", name: "Abrar Ahad Sahil", cls: "Class 6", type: "Tuition Fee", due: "2026-08-01", amount: 1500, status: "Paid" },
+                    { id: "INV-9202", name: "Tanvir Hossain", cls: "Class 6", type: "Tuition Fee", due: "2026-08-01", amount: 1500, status: "Paid" },
+                    { id: "INV-9203", name: "Nusrat Jahan", cls: "Class 7", type: "Exam Fee", due: "2026-07-25", amount: 800, status: "Paid" }
+                ];
+            }
+
+            // Calculate Financial Metrics
+            let totalIncome = 0;
+            let totalExpense = 0;
+            txs.forEach(t => {
+                if (t.type === 'Income') totalIncome += Number(t.amount || 0);
+                else totalExpense += Number(t.amount || 0);
+            });
+            const netProfit = totalIncome - totalExpense;
+
+            let totalFeeCollected = 0;
+            invoices.forEach(inv => {
+                if (inv.status === 'Paid' || inv.status === 'PAID') totalFeeCollected += Number(inv.amount || 0);
+            });
+
+            let txRows = '';
+            let runningBalance = 0;
+            txs.forEach((t, idx) => {
+                if (t.type === 'Income') runningBalance += Number(t.amount || 0);
+                else runningBalance -= Number(t.amount || 0);
+
+                const typeBadge = t.type === 'Income'
+                    ? '<span class="badge bg-success-subtle text-success border border-success">Income (আয়)</span>'
+                    : '<span class="badge bg-danger-subtle text-danger border border-danger">Expense (খরচ)</span>';
+
+                txRows += `
+                    <tr>
+                        <td>${idx + 1}</td>
+                        <td>${t.date}</td>
+                        <td class="text-start ps-3"><strong>${t.desc}</strong></td>
+                        <td>${t.cat || 'General'}</td>
+                        <td>${typeBadge}</td>
+                        <td class="fw-bold ${t.type === 'Income' ? 'text-success' : 'text-danger'}">${t.type === 'Income' ? '+' : '-'}৳${Number(t.amount).toLocaleString()}</td>
+                        <td class="fw-bold text-primary">৳${runningBalance.toLocaleString()}</td>
+                    </tr>
+                `;
+            });
+
+            let invRows = '';
+            invoices.forEach((inv, idx) => {
+                invRows += `
+                    <tr>
+                        <td>${idx + 1}</td>
+                        <td><code>${inv.id}</code></td>
+                        <td class="text-start ps-3"><strong>${inv.name}</strong></td>
+                        <td>${inv.cls || 'Class 6'}</td>
+                        <td>${inv.type}</td>
+                        <td class="fw-bold">৳${Number(inv.amount).toLocaleString()}</td>
+                        <td><span class="badge ${inv.status === 'Paid' || inv.status === 'PAID' ? 'bg-success' : 'bg-warning text-dark'}">${inv.status}</span></td>
+                    </tr>
+                `;
+            });
+
+            contentDiv.innerHTML = `
+                <!-- Overview Financial Cards Summary -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <div class="p-3 border rounded text-center bg-light">
+                            <small class="text-muted fw-bold d-block mb-1 text-uppercase">মোট ফি ও আয় (Total Income)</small>
+                            <div class="fs-4 fw-bold text-success">৳${totalIncome.toLocaleString()}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 border rounded text-center bg-light">
+                            <small class="text-muted fw-bold d-block mb-1 text-uppercase">মোট পরিচালনা খরচ (Total Expenses)</small>
+                            <div class="fs-4 fw-bold text-danger">৳${totalExpense.toLocaleString()}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 border rounded text-center bg-light">
+                            <small class="text-muted fw-bold d-block mb-1 text-uppercase">নিট লাভ / ব্যালেন্স (Net Profit)</small>
+                            <div class="fs-4 fw-bold text-primary">৳${netProfit.toLocaleString()}</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="p-3 border rounded text-center bg-light">
+                            <small class="text-muted fw-bold d-block mb-1 text-uppercase">ফি কালেকশন (Fee Collections)</small>
+                            <div class="fs-4 fw-bold text-dark">৳${totalFeeCollected.toLocaleString()}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3"><i class="bi bi-journal-text me-2"></i>Accounts Transaction Ledger (সকল লেনদেন, লাভ ও খরচের তালিকা)</h6>
+                <table class="table table-bordered table-sm text-center align-middle small mb-4" id="exportTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>SL</th>
+                            <th>Date (তারিখ)</th>
+                            <th>Transaction Description (বিবরণ)</th>
+                            <th>Category</th>
+                            <th>Type (ধরন)</th>
+                            <th>Amount (টাকা)</th>
+                            <th>Running Balance</th>
+                        </tr>
+                    </thead>
+                    <tbody>${txRows}</tbody>
+                    <tfoot class="table-light fw-bold">
+                        <tr>
+                            <td colspan="5" class="text-end">Total Income / Expense Summary:</td>
+                            <td class="text-success">Net Income: ৳${totalIncome.toLocaleString()}</td>
+                            <td class="text-primary">Closing Balance: ৳${netProfit.toLocaleString()}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <h6 class="fw-bold text-dark border-bottom pb-2 mb-3"><i class="bi bi-cash-stack me-2"></i>Student Fee Collection Register (ফি আদায় ও ইনভয়েসের তালিকা)</h6>
+                <table class="table table-bordered table-sm text-center align-middle small mb-2">
+                    <thead class="table-light">
+                        <tr>
+                            <th>SL</th>
+                            <th>Invoice ID</th>
+                            <th>Student Name</th>
+                            <th>Class</th>
+                            <th>Fee Category</th>
+                            <th>Amount (টাকা)</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>${invRows}</tbody>
+                </table>
+            `;
+        } else {
+            contentDiv.innerHTML = `
+                <div class="alert alert-secondary text-center p-4">
+                    <h5><i class="bi bi-file-earmark-check me-2"></i> Report Engine Ready</h5>
+                    <p class="mb-0">Report data dynamically compiled for <strong>${reportType}</strong>.</p>
+                </div>
+            `;
+        }
+    }
+
+    function exportToExcel() {
+        generateReportData(currentReport);
+        const table = document.getElementById("exportTable");
+        if (!table) {
+            alert("No data table available to export.");
+            return;
+        }
+        
+        try {
+            const wb = XLSX.utils.table_to_book(table, {sheet: "Report Data"});
+            XLSX.writeFile(wb, currentReport + "_" + new Date().getTime() + ".xlsx");
+        } catch (e) {
+            console.error("Excel Export Failed", e);
+            alert("Export failed. Please check network connection.");
+        }
+    }
+</script>
+{% endblock %}

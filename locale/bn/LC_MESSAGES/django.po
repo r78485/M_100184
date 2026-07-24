@@ -1,0 +1,607 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: EduManage ERP
+"
+"Report-Msgid-Bugs-To: 
+"
+"POT-Creation-Date: 2026-07-20 00:00+0000
+"
+"PO-Revision-Date: 2026-07-20 00:00+0000
+"
+"Language: bn
+"
+"MIME-Version: 1.0
+"
+"Content-Type: text/plain; charset=UTF-8
+"
+"Content-Transfer-Encoding: 8bit
+"
+
+msgid "General Settings — EduManage ERP"
+msgstr "সাধারণ সেটিংস — এডুম্যানেজ ইআরপি"
+
+msgid "Interface Language"
+msgstr "ইন্টারফেস ভাষা"
+
+msgid "Save Preferences"
+msgstr "সেটিংস সেভ করুন"
+
+msgid "Core Administration"
+msgstr "কোর এডমিনিস্ট্রেশন"
+
+msgid "Dashboard"
+msgstr "ড্যাশবোর্ড"
+
+msgid "General Settings"
+msgstr "সাধারণ সেটিংস"
+
+msgid "Academic & Students"
+msgstr "একাডেমিক এবং শিক্ষার্থী"
+
+msgid "Admissions"
+msgstr "ভর্তি"
+
+msgid "Classes & Sections"
+msgstr "ক্লাস ও সেকশন"
+
+msgid "Subjects"
+msgstr "বিষয়সমূহ"
+
+msgid "Students"
+msgstr "শিক্ষার্থীবৃন্দ"
+
+msgid "Employees"
+msgstr "কর্মচারীবৃন্দ"
+
+msgid "Financials & ERP"
+msgstr "অর্থনীতি ও ইআরপি"
+
+msgid "Accounts"
+msgstr "অ্যাকাউন্টস"
+
+msgid "Fees"
+msgstr "ফি"
+
+msgid "Salary"
+msgstr "বেতন"
+
+msgid "Online Store & POS"
+msgstr "অনলাইন স্টোর ও পস"
+
+msgid "Account Settings"
+msgstr "অ্যাকাউন্ট সেটিংস"
+
+msgid "Log Out"
+msgstr "লগ আউট"
+
+msgid "Daily Operations"
+msgstr "দৈনন্দিন কার্যক্রম"
+
+msgid "Attendance"
+msgstr "উপস্থিতি"
+
+msgid "Timetable"
+msgstr "রুটিন"
+
+msgid "Homework"
+msgstr "বাড়ির কাজ"
+
+msgid "Behaviour & Skills"
+msgstr "আচরণ ও দক্ষতা"
+
+msgid "Communication"
+msgstr "যোগাযোগ"
+
+msgid "WhatsApp"
+msgstr "হোয়াটসঅ্যাপ"
+
+msgid "Messaging"
+msgstr "ম্যাসেজিং"
+
+msgid "SMS Services"
+msgstr "এসএমএস সার্ভিস"
+
+msgid "Live Class"
+msgstr "লাইভ ক্লাস"
+
+msgid "Assessments"
+msgstr "মূল্যায়ন"
+
+msgid "Exams"
+msgstr "পরীক্ষা"
+
+msgid "Class Tests"
+msgstr "ক্লাস টেস্ট"
+
+msgid "Question Paper"
+msgstr "প্রশ্নপত্র"
+
+msgid "Certificates"
+msgstr "সার্টিফিকেট"
+
+msgid "Reports"
+msgstr "রিপোর্টস"
+
+msgid "My Profile"
+msgstr "আমার প্রোফাইল"
+
+msgid "Core Setup"
+msgstr "কোর সেটআপ"
+
+msgid "Institute Profile"
+msgstr "প্রতিষ্ঠানের প্রোফাইল"
+
+msgid "Fees Particulars"
+msgstr "ফি বিবরণী"
+
+msgid "Fees Structure"
+msgstr "ফি কাঠামো"
+
+msgid "Financial"
+msgstr "আর্থিক"
+
+msgid "Discount Types"
+msgstr "ছাড়ের ধরন"
+
+msgid "Invoice Accounts"
+msgstr "ইনভয়েস অ্যাকাউন্টস"
+
+msgid "Academic"
+msgstr "একাডেমিক"
+
+msgid "Rules & Policies"
+msgstr "নিয়ম ও নীতি"
+
+msgid "Marks Grading"
+msgstr "মার্কস গ্রেডিং"
+
+msgid "Theme & Language"
+msgstr "থিম ও ভাষা"
+
+msgid "School identity — prints on all official documents and certificates"
+msgstr "বিদ্যালয়ের পরিচিতি — সব অফিসিয়াল ডকুমেন্টস ও সার্টিফিকেটে প্রিন্ট হবে"
+
+msgid "School Monogram / Logo"
+msgstr "স্কুলের লোগো / মনোগ্রাম"
+
+msgid "Drag & Drop or click to upload"
+msgstr "আপলোড করতে ড্র্যাগ ও ড্রপ করুন বা ক্লিক করুন"
+
+msgid "PNG with transparent bg recommended · Max 2MB"
+msgstr "ট্রান্সপারেন্ট ব্যাকগ্রাউন্ড সহ PNG প্রস্তাবিত · সর্বোচ্চ 2MB"
+
+msgid "Principal's Digital Signature"
+msgstr "অধ্যক্ষের ডিজিটাল স্বাক্ষর"
+
+msgid "Upload Signature Scan"
+msgstr "স্বাক্ষরের স্ক্যান আপলোড করুন"
+
+msgid "School Name (English)"
+msgstr "স্কুলের নাম (ইংরেজি)"
+
+msgid "School Name (Bengali)"
+msgstr "বিদ্যালয়ের নাম (বাংলা)"
+
+msgid "EIIN Code"
+msgstr "ইআইআইএন কোড"
+
+msgid "Established Year"
+msgstr "প্রতিষ্ঠার বছর"
+
+msgid "Currency"
+msgstr "মুদ্রা"
+
+msgid "Primary Phone"
+msgstr "প্রাথমিক ফোন নম্বর"
+
+msgid "Official Email"
+msgstr "অফিসিয়াল ইমেইল"
+
+msgid "Website URL"
+msgstr "ওয়েবসাইট ইউআরএল"
+
+msgid "District"
+msgstr "জেলা"
+
+msgid "Full Address"
+msgstr "সম্পূর্ণ ঠিকানা"
+
+msgid "Institute Profile saved!"
+msgstr "প্রতিষ্ঠানের প্রোফাইল সেভ হয়েছে!"
+
+msgid "Save Profile"
+msgstr "প্রোফাইল সেভ করুন"
+
+msgid "Fees Particulars (Ledger)"
+msgstr "ফি বিবরণী (লেজার)"
+
+msgid "Define all fee categories collected from students"
+msgstr "শিক্ষার্থীদের থেকে সংগৃহীত সকল ফি এর ধরন নির্ধারণ করুন"
+
+msgid "Add Ledger"
+msgstr "লেজার যোগ করুন"
+
+msgid "Fee Code"
+msgstr "ফি কোড"
+
+msgid "Particular Name"
+msgstr "বিবরণীর নাম"
+
+msgid "Description"
+msgstr "বিবরণ"
+
+msgid "Status"
+msgstr "অবস্থা"
+
+msgid "Action"
+msgstr "অ্যাকশন"
+
+msgid "Fees Structure Mapping"
+msgstr "ফি কাঠামো ম্যাপিং"
+
+msgid "Build class-wise fee packages with dynamic particulars"
+msgstr "ডাইনামিক বিবরণীর সাথে ক্লাস অনুযায়ী ফি প্যাকেজ তৈরি করুন"
+
+msgid "Structure Name"
+msgstr "কাঠামোর নাম"
+
+msgid "e.g., Class 6 Annual Fees 2026"
+msgstr "যেমন, ক্লাস ৬ বার্ষিক ফি ২০২৬"
+
+msgid "Class"
+msgstr "শ্রেণী"
+
+msgid "Section"
+msgstr "শাখা"
+
+msgid "All"
+msgstr "সব"
+
+msgid "Due Day"
+msgstr "শেষ দিন"
+
+msgid "th"
+msgstr "তম"
+
+msgid "Particular → Amount Mapping"
+msgstr "বিবরণী → পরিমাণ ম্যাপিং"
+
+msgid "Add Row"
+msgstr "সারি যোগ করুন"
+
+msgid "Total Package:"
+msgstr "সর্বমোট প্যাকেজ:"
+
+msgid "Save Fee Structure"
+msgstr "ফি কাঠামো সেভ করুন"
+
+msgid "Discount & Waiver Types"
+msgstr "ছাড় ও মওকুফের ধরন"
+
+msgid "Configure scholarships, aid, and concession categories"
+msgstr "বৃত্তি, সহায়তা এবং ছাড়ের ক্যাটাগরি কনফিগার করুন"
+
+msgid "Add Discount"
+msgstr "ছাড় যোগ করুন"
+
+msgid "Fees Invoice Accounts"
+msgstr "ফি ইনভয়েস অ্যাকাউন্টস"
+
+msgid "Configure invoice numbering, gateways, and bank routing"
+msgstr "ইনভয়েস নম্বর, গেটওয়ে এবং ব্যাংক রাউটিং কনফিগার করুন"
+
+msgid "Invoice Number Prefix"
+msgstr "ইনভয়েস নম্বর প্রিফিক্স"
+
+msgid "Preview:"
+msgstr "প্রিভিউ:"
+
+msgid "Starting Number"
+msgstr "শুরুর নম্বর"
+
+msgid "Auto-Increment"
+msgstr "অটো-ইনক্রিমেন্ট"
+
+msgid "Enabled"
+msgstr "সক্রিয়"
+
+msgid "Online Payment Gateways"
+msgstr "অনলাইন পেমেন্ট গেটওয়ে"
+
+msgid "Merchant Integration"
+msgstr "মার্চেন্ট ইন্টিগ্রেশন"
+
+msgid "Sandbox / Live"
+msgstr "স্যান্ডবক্স / লাইভ"
+
+msgid "Bank Account Routing"
+msgstr "ব্যাংক অ্যাকাউন্ট রাউটিং"
+
+msgid "Cash Counter Ledger"
+msgstr "ক্যাশ কাউন্টার লেজার"
+
+msgid "Primary Bank Account"
+msgstr "প্রাথমিক ব্যাংক অ্যাকাউন্ট"
+
+msgid "Save Configuration"
+msgstr "কনফিগারেশন সেভ করুন"
+
+msgid "Invoice Accounts saved!"
+msgstr "ইনভয়েস অ্যাকাউন্টস সেভ হয়েছে!"
+
+msgid "Rules & Regulation Policies"
+msgstr "নিয়ম ও নীতি"
+
+msgid "Attendance logic, late-fee penalties, and pass/fail global criteria"
+msgstr "উপস্থিতি লজিক, বিলম্ব ফি জরিমানা এবং পাস/ফেল গ্লোবাল ক্রাইটেরিয়া"
+
+msgid "Late Fee"
+msgstr "বিলম্ব ফি"
+
+msgid "Pass / Fail"
+msgstr "পাস / ফেল"
+
+msgid "Late Entry Cut-off"
+msgstr "বিলম্বে প্রবেশের শেষ সময়"
+
+msgid "Lates = 1 Absent"
+msgstr "বিলম্ব = ১ অনুপস্থিত"
+
+msgid "entries"
+msgstr "বার"
+
+msgid "Min. Monthly Attendance"
+msgstr "ন্যূনতম মাসিক উপস্থিতি"
+
+msgid "Monthly Due Day"
+msgstr "মাসিক নির্ধারিত দিন"
+
+msgid "Grace Period (days)"
+msgstr "গ্রেস পিরিয়ড (দিন)"
+
+msgid "Daily Fine Rate (৳)"
+msgstr "দৈনিক জরিমানার হার (৳)"
+
+msgid "Max Fine Cap / Month (৳)"
+msgstr "মাসিক সর্বোচ্চ জরিমানা (৳)"
+
+msgid "Min. Passing Mark (%)"
+msgstr "ন্যূনতম পাস মার্ক (%)"
+
+msgid "Practical Pass Mark (%)"
+msgstr "ব্যবহারিক পাস মার্ক (%)"
+
+msgid "Pass Criteria"
+msgstr "পাসের মানদণ্ড"
+
+msgid "Cumulative (Overall)"
+msgstr "কিউমুলেটিভ (সর্বমোট)"
+
+msgid "Separate per Subject"
+msgstr "প্রতিটি বিষয়ে আলাদা"
+
+msgid "Save Rules"
+msgstr "নিয়ম সেভ করুন"
+
+msgid "Rules & Policies saved!"
+msgstr "নিয়ম ও নীতি সেভ হয়েছে!"
+
+msgid "Marks Grading System"
+msgstr "মার্কস গ্রেডিং সিস্টেম"
+
+msgid "GPA / Letter grade ranges with colour-coded classification"
+msgstr "রঙ-কোডেড শ্রেণিবিন্যাস সহ জিপিএ / লেটার গ্রেড রেঞ্জ"
+
+msgid "Add Grade"
+msgstr "গ্রেড যোগ করুন"
+
+msgid "Grade"
+msgstr "গ্রেড"
+
+msgid "Mark Range (%)"
+msgstr "মার্কের রেঞ্জ (%)"
+
+msgid "GPA Point"
+msgstr "জিপিএ পয়েন্ট"
+
+msgid "Remarks"
+msgstr "মন্তব্য"
+
+msgid "Theme & Language Preferences"
+msgstr "থিম ও ভাষার পছন্দসমূহ"
+
+msgid "Personalise the interface look, colours, and system language"
+msgstr "ইন্টারফেসের চেহারা, রং এবং সিস্টেমের ভাষা কাস্টমাইজ করুন"
+
+msgid "Appearance Mode"
+msgstr "অ্যাপিয়ারেন্স মোড"
+
+msgid "Light Mode"
+msgstr "লাইট মোড"
+
+msgid "Dark Mode"
+msgstr "ডার্ক মোড"
+
+msgid "System Default"
+msgstr "সিস্টেম ডিফল্ট"
+
+msgid "Primary Brand Colour"
+msgstr "প্রাথমিক ব্র্যান্ড রং"
+
+msgid "Navy & Purple"
+msgstr "নেভি ও বেগুনি"
+
+msgid "Teal & Emerald"
+msgstr "টিল ও পান্না"
+
+msgid "Royal Blue"
+msgstr "রয়েল ব্লু"
+
+msgid "Crimson Red"
+msgstr "ক্রিমসন লাল"
+
+msgid "Theme preferences saved!"
+msgstr "থিমের পছন্দসমূহ সেভ হয়েছে!"
+
+msgid "Admin Profile"
+msgstr "অ্যাডমিন প্রোফাইল"
+
+msgid "Update your personal login details"
+msgstr "আপনার ব্যক্তিগত লগইন বিবরণ আপডেট করুন"
+
+msgid "Username"
+msgstr "ইউজারনেম"
+
+msgid "Display Name"
+msgstr "প্রদর্শিত নাম"
+
+msgid "Contact Email"
+msgstr "যোগাযোগের ইমেইল"
+
+msgid "Update Profile"
+msgstr "প্রোফাইল আপডেট করুন"
+
+msgid "Profile updated!"
+msgstr "প্রোফাইল আপডেট হয়েছে!"
+
+msgid "Change Password"
+msgstr "পাসওয়ার্ড পরিবর্তন"
+
+msgid "Use a strong, unique password"
+msgstr "একটি শক্তিশালী, অনন্য পাসওয়ার্ড ব্যবহার করুন"
+
+msgid "Current Password"
+msgstr "বর্তমান পাসওয়ার্ড"
+
+msgid "New Password"
+msgstr "নতুন পাসওয়ার্ড"
+
+msgid "Enter new password"
+msgstr "নতুন পাসওয়ার্ড লিখুন"
+
+msgid "Confirm Password"
+msgstr "পাসওয়ার্ড নিশ্চিত করুন"
+
+msgid "Password changed!"
+msgstr "পাসওয়ার্ড পরিবর্তন করা হয়েছে!"
+
+msgid "Security & Authentication"
+msgstr "নিরাপত্তা ও প্রমাণীকরণ"
+
+msgid "Two-Factor Authentication (2FA)"
+msgstr "টু-ফ্যাক্টর অথেনটিকেশন (2FA)"
+
+msgid "Google Authenticator / OTP verification"
+msgstr "গুগল অথেনটিকেটর / ওটিপি ভেরিফিকেশন"
+
+msgid "Login Activity Logging"
+msgstr "লগইন অ্যাক্টিভিটি লগিং"
+
+msgid "Log all admin logins with timestamps"
+msgstr "টাইমস্ট্যাম্প সহ সকল অ্যাডমিন লগইন লগ করুন"
+
+msgid "Online Store & POS - EduManage ERP"
+msgstr "অনলাইন স্টোর ও পস - এডুম্যানেজ ইআরপি"
+
+msgid "Sell uniforms, books, and stationery; manage student dues."
+msgstr "ইউনিফর্ম, বইখাতা ও শিক্ষা সামগ্রী বিক্রয়, শিক্ষার্থী নির্বাচন ও বাকি ট্র্যাকিং"
+
+msgid "Add Product"
+msgstr "প্রোডাক্ট যোগ করুন"
+
+msgid "POS Register"
+msgstr "স্টোর ও পিওএস বিক্রয়"
+
+msgid "Student Ledger & Dues"
+msgstr "শিক্ষার্থীর বাকি ও হিসাব সার্চ"
+
+msgid "Store Inventory"
+msgstr "প্রোডাক্ট ইনভেন্টরি"
+
+msgid "Uniform"
+msgstr "ইউনিফর্ম"
+
+msgid "Books"
+msgstr "বই-খাতা"
+
+msgid "Stationery"
+msgstr "স্টেশনারি"
+
+msgid "Others"
+msgstr "অন্যান্য"
+
+msgid "Search product by name..."
+msgstr "প্রোডাক্টের নাম দিয়ে খুঁজুন..."
+
+msgid "Select Student"
+msgstr "শিক্ষার্থী নির্বাচন করুন"
+
+msgid "Student name / Admission no..."
+msgstr "শিক্ষার্থীর নাম / এডমিশন নং..."
+
+msgid "Selected"
+msgstr "নির্বাচিত"
+
+msgid "Cart is empty. Select products from the left."
+msgstr "কার্ট খালি। বাম পাশ থেকে প্রোডাক্ট সিলেক্ট করুন।"
+
+msgid "Subtotal:"
+msgstr "মোট সাবটোটাল:"
+
+msgid "Paid Amount:"
+msgstr "পরিশোধিত টাকা:"
+
+msgid "Due Amount:"
+msgstr "বাকি টাকা:"
+
+msgid "Complete Sale & Print Receipt"
+msgstr "বিক্রয় সম্পন্ন ও রসিদ প্রিন্ট করুন"
+
+msgid "POS Sales Cash Register"
+msgstr "পিওএস বিক্রয় ক্যাশ রেজিস্টার"
+
+msgid "Exam creation, mark input, result publication, routine and mark sheet management"
+msgstr "পরীক্ষা তৈরি, নম্বর ইনপুট, ফলাফল প্রকাশ, রুটিন ও নম্বরপত্র ব্যবস্থাপনা"
+
+msgid "Create Academic Year Exam — Set Name, Weightage & Status"
+msgstr "শিক্ষাবর্ষের পরীক্ষা তৈরি করুন — নাম, Weightage ও স্ট্যাটাস সেট করুন"
+
+msgid "New Exam"
+msgstr "নতুন পরীক্ষা"
+
+msgid "e.g. First Term Exam"
+msgstr "যেমন: প্রথম সাময়িক পরীক্ষা"
+
+msgid "Spreadsheet-style fast mark input — Navigate with Enter or Arrow keys"
+msgstr "স্প্রেডশিট-স্টাইলে দ্রুত নম্বর ইনপুট — Enter বা Arrow কী দিয়ে নেভিগেট করুন"
+
+msgid "Student's academic progress card — with grades, GPA and performance graph"
+msgstr "শিক্ষার্থীর একাডেমিক প্রোগ্রেস কার্ড — গ্রেড, জিপিএ ও পারফরম্যান্স গ্রাফ সহ"
+
+msgid "Result Card Popup Print Engine"
+msgstr "রেজাল্ট কার্ড পপআপ প্রিন্ট ইঞ্জিন"
+
+msgid "Open and print the result card with complete design, 3D GPA badge, offline QR code, and barcode in a popup window."
+msgstr "পপআপ উইন্ডোতে সম্পূর্ণ ডিজাইন, থ্রিডি জিপিএ ব্যাজ, অফলাইন কিউআর কোড ও বারকোড সহ রেজাল্ট কার্ডটি ওপেন ও প্রিন্ট করুন।"
+
+msgid "Open Popup Print Preview"
+msgstr "পপআপ প্রিন্ট প্রিভিউ ওপেন করুন"
+
+msgid "Class-wide overall results — with Merit List & Publish option"
+msgstr "ক্লাসভিত্তিক সামগ্রিক ফলাফল — মেধা তালিকা ও Publish অপশন সহ"
+
+msgid "Select filter and click Generate button"
+msgstr "ফিল্টার সিলেক্ট করে Generate বাটনে ক্লিক করুন"
+
+msgid "Set Exam Date, Time, Room & Invigilator"
+msgstr "পরীক্ষার তারিখ, সময়, রুম ও পরীক্ষক (Invigilator) নির্ধারণ করুন"
+
+msgid "Select Exam or Add New Schedule"
+msgstr "পরীক্ষা সিলেক্ট করুন বা নতুন শিডিউল যুক্ত করুন"
+
+msgid "Routine"
+msgstr "রুটিন"
+
+msgid "Clean Exam Routine for Students & Parents — Download & Print"
+msgstr "শিক্ষার্থী ও অভিভাবকদের জন্য পরিচ্ছন্ন পরীক্ষার রুটিন — ডাউনলোড ও প্রিন্ট করুন"
+

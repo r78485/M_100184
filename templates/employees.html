@@ -1,0 +1,985 @@
+{% extends 'base.html' %}
+
+{% block title %}Employees HR - EduManage ERP{% endblock %}
+
+{% block extra_css %}
+<style>
+    .emp-id-card {
+        width: 320px;
+        background: linear-gradient(135deg, var(--secondary-purple) 0%, #4c1d7a 100%);
+        color: white;
+        border-radius: 15px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+    .emp-id-card-header {
+        background-color: rgba(0,0,0,0.15);
+        padding: 15px;
+        text-align: center;
+        border-bottom: 2px solid var(--primary-blue);
+    }
+    .emp-avatar {
+        width: 90px;
+        height: 90px;
+        object-fit: cover;
+        border: 3px solid white;
+        border-radius: 50%;
+    }
+    
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #printArea, #printArea * {
+            visibility: visible;
+        }
+        #printArea {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+        .no-print {
+            display: none !important;
+        }
+    }
+
+    /* Multi-step form wizard styles */
+    .dashed-upload {
+        border: 2px dashed rgba(50, 98, 168, 0.25);
+        border-radius: 12px;
+        padding: 30px;
+        text-align: center;
+        background-color: rgba(50, 98, 168, 0.02);
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+    }
+    .dashed-upload:hover {
+        background-color: rgba(50, 98, 168, 0.05);
+        border-color: var(--primary-blue);
+    }
+    body.dark-theme .dashed-upload {
+        border-color: rgba(255, 255, 255, 0.15);
+        background-color: rgba(255, 255, 255, 0.02);
+    }
+    body.dark-theme .dashed-upload:hover {
+        background-color: rgba(255, 255, 255, 0.04);
+        border-color: var(--secondary-purple);
+    }
+    .border-purple {
+        border-left-color: var(--secondary-purple) !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="mb-4 no-print">
+        <h2 class="fw-bold mb-1" style="color: var(--primary-blue);">Employee & HR Command Center</h2>
+        <p class="text-muted">Manage academic faculty, administrative staff register, generate job letters, and issue staff ID cards.</p>
+    </div>
+
+    <!-- HR Navigation Tabs -->
+    <ul class="nav nav-pills mb-4 no-print gap-2 bg-white p-2 rounded shadow-sm" id="employeeTabs" role="tablist" style="border: 1px solid rgba(0,0,0,0.05);">
+        <li class="nav-item">
+            <button class="nav-link active fw-semibold" id="all-emp-tab" data-bs-toggle="tab" data-bs-target="#all-emp-panel"><i class="bi bi-people me-1"></i> All Employees</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link fw-semibold" id="add-emp-tab" data-bs-toggle="tab" data-bs-target="#add-emp-panel"><i class="bi bi-person-plus me-1"></i> Add New</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link fw-semibold" id="empid-tab" data-bs-toggle="tab" data-bs-target="#empid-panel" onclick="loadEmpIdCardSelector()"><i class="bi bi-card-image me-1"></i> Staff ID Cards</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link fw-semibold" id="job-letter-tab" data-bs-toggle="tab" data-bs-target="#job-letter-panel" onclick="loadJobLetterSelector()"><i class="bi bi-file-earmark-text me-1"></i> Job Letter</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link fw-semibold" id="emp-login-tab" data-bs-toggle="tab" data-bs-target="#emp-login-panel" onclick="loadEmpLogins()"><i class="bi bi-key me-1"></i> Manage Login</button>
+        </li>
+    </ul>
+
+    <!-- Tabs Content -->
+    <div class="tab-content" id="employeeTabsContent">
+        
+        <!-- 1. All Employees -->
+        <div class="tab-pane fade show active" id="all-emp-panel" role="tabpanel">
+            <div class="card custom-card p-4 no-print">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Designation</th>
+                                <th>Department</th>
+                                <th>Joining Date</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allEmployeesTable">
+                            <!-- Loaded via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Add New (Multi-Step Form Wizard) -->
+        <div class="tab-pane fade" id="add-emp-panel" role="tabpanel">
+            <div class="card custom-card p-4 no-print">
+                <h4 class="fw-bold mb-4" style="color: var(--primary-blue);"><i class="bi bi-person-plus-fill me-2"></i>Register Employee Profile</h4>
+                
+                <!-- Wizard Progress Indicator -->
+                <ul class="nav nav-pills mb-4 gap-2 bg-light p-2 rounded" id="wizardSteps" style="font-size: 0.85rem;">
+                    <li class="nav-item flex-grow-1 text-center">
+                        <button class="nav-link active w-100 fw-semibold" id="step1-btn" disabled>1. Personal</button>
+                    </li>
+                    <li class="nav-item flex-grow-1 text-center">
+                        <button class="nav-link w-100 fw-semibold" id="step2-btn" disabled>2. Contact</button>
+                    </li>
+                    <li class="nav-item flex-grow-1 text-center">
+                        <button class="nav-link w-100 fw-semibold" id="step3-btn" disabled>3. Academic</button>
+                    </li>
+                    <li class="nav-item flex-grow-1 text-center">
+                        <button class="nav-link w-100 fw-semibold" id="step4-btn" disabled>4. Financial</button>
+                    </li>
+                    <li class="nav-item flex-grow-1 text-center">
+                        <button class="nav-link w-100 fw-semibold" id="step5-btn" disabled>5. System Access</button>
+                    </li>
+                    <li class="nav-item flex-grow-1 text-center">
+                        <button class="nav-link w-100 fw-semibold" id="step6-btn" disabled>6. Documents</button>
+                    </li>
+                </ul>
+
+                <form id="addEmployeeForm" novalidate onsubmit="saveEmployeeProfile(event)">
+                    
+                    <!-- STEP 1: Personal Information -->
+                    <div class="wizard-step" id="step-1">
+                        <h5 class="fw-bold mb-3 text-secondary border-start border-3 border-purple ps-2">1. Personal Information</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Full Name</label>
+                                <input type="text" class="form-control" id="empFullName" placeholder="Employee Full Name" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Father's / Husband's Name</label>
+                                <input type="text" class="form-control" id="empFatherName" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Mother's Name</label>
+                                <input type="text" class="form-control" id="empMotherName" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Date of Birth (DOB)</label>
+                                <input type="date" class="form-control" id="empDOB" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Gender</label>
+                                <select class="form-select" id="empGender" required>
+                                    <option>Male</option>
+                                    <option>Female</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Blood Group</label>
+                                <select class="form-select" id="empBlood">
+                                    <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                                    <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Marital Status</label>
+                                <select class="form-select" id="empMarital">
+                                    <option>Single</option>
+                                    <option>Married</option>
+                                    <option>Divorced</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Nationality & Religion</label>
+                                <input type="text" class="form-control" id="empNationReligion" placeholder="e.g., Bangladeshi, Islam" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">National ID (NID) / Passport</label>
+                                <input type="text" class="form-control" id="empNID" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Profile Photo</label>
+                                <div class="dashed-upload" onclick="document.getElementById('empPhotoFile').click()">
+                                    <img id="photoPreview" class="d-none rounded-circle mb-2" style="width: 80px; height: 80px; object-fit: cover;">
+                                    <div id="uploadPrompt">
+                                        <i class="bi bi-cloud-arrow-up fs-2 text-muted"></i>
+                                        <span class="d-block mt-2 small text-muted">Drag & Drop profile picture, or click to upload</span>
+                                    </div>
+                                    <input type="file" id="empPhotoFile" class="d-none" onchange="previewPhoto(event)">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn text-white px-4" style="background-color: var(--primary-blue);" onclick="goToStep(2)">Next Step <i class="bi bi-arrow-right ms-1"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2: Contact Information -->
+                    <div class="wizard-step d-none" id="step-2">
+                        <h5 class="fw-bold mb-3 text-secondary border-start border-3 border-purple ps-2">2. Contact Information</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Primary Phone</label>
+                                <input type="tel" class="form-control" id="empPrimaryPhone" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Alternative Phone</label>
+                                <input type="tel" class="form-control" id="empAltPhone">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Email Address</label>
+                                <input type="email" class="form-control" id="empEmailInput" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Present Address</label>
+                                <textarea class="form-control" rows="2" id="empPresentAddr" required></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="form-label fw-semibold mb-0">Permanent Address</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="sameAddressCheck" onclick="copyAddress()">
+                                        <label class="form-check-label small" for="sameAddressCheck">Same as Present</label>
+                                    </div>
+                                </div>
+                                <textarea class="form-control" rows="2" id="empPermAddr" required></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Emergency Contact Person</label>
+                                <input type="text" class="form-control" id="empEmergName" placeholder="Full Name" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Relationship</label>
+                                <input type="text" class="form-control" id="empEmergRelation" placeholder="e.g., Spouse, Brother" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Emergency Phone</label>
+                                <input type="tel" class="form-control" id="empEmergPhone" required>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-light px-4" onclick="goToStep(1)"><i class="bi bi-arrow-left me-1"></i> Back</button>
+                            <button type="button" class="btn text-white px-4" style="background-color: var(--primary-blue);" onclick="goToStep(3)">Next Step <i class="bi bi-arrow-right ms-1"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3: Professional & Academic Details -->
+                    <div class="wizard-step d-none" id="step-3">
+                        <h5 class="fw-bold mb-3 text-secondary border-start border-3 border-purple ps-2">3. Institutional & Academic Details</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Employee ID (System Generated)</label>
+                                <input type="text" class="form-control" id="empIdInput" value="EMP-103" readonly>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Designation</label>
+                                <input type="text" class="form-control" id="empDesignationInput" placeholder="e.g., Senior Teacher, Accountant" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Department</label>
+                                <select class="form-select" id="empDeptInput" required>
+                                    <option>Science</option>
+                                    <option>Arts</option>
+                                    <option>Commerce</option>
+                                    <option>Administration</option>
+                                    <option>Accounts</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Date of Joining (DOJ)</label>
+                                <input type="date" class="form-control" id="empJoinDateInput" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Job Type / Status</label>
+                                <select class="form-select" id="empJobType">
+                                    <option>Full-time</option>
+                                    <option>Part-time</option>
+                                    <option>Contractual</option>
+                                    <option>Probationary</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Highest Educational Qualification</label>
+                                <input type="text" class="form-control" id="empEdu" placeholder="e.g., M.Sc in Mathematics, DU" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Previous Work Experience (Years / Details)</label>
+                                <textarea class="form-control" rows="2" id="empExp" placeholder="e.g., 5 years at City Secondary School"></textarea>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-light px-4" onclick="goToStep(2)"><i class="bi bi-arrow-left me-1"></i> Back</button>
+                            <button type="button" class="btn text-white px-4" style="background-color: var(--primary-blue);" onclick="goToStep(4)">Next Step <i class="bi bi-arrow-right ms-1"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 4: Statutory & Financial Details -->
+                    <div class="wizard-step d-none" id="step-4">
+                        <h5 class="fw-bold mb-3 text-secondary border-start border-3 border-purple ps-2">4. Salary & Financial Details</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Basic Salary ($ / BDT)</label>
+                                <input type="number" class="form-control" id="empBasicSalary" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Tax Identification Number (TIN)</label>
+                                <input type="text" class="form-control" id="empTIN">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Provident Fund (PF) Status</label>
+                                <select class="form-select" id="empPF">
+                                    <option>Yes</option>
+                                    <option>No</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Bank Name</label>
+                                <input type="text" class="form-control" id="empBankName" placeholder="e.g., Sonali Bank">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Bank Account Number</label>
+                                <input type="text" class="form-control" id="empBankAcc">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Branch Name</label>
+                                <input type="text" class="form-control" id="empBankBranch">
+                            </div>
+                            <div class="col-md-12">
+                                <label class="form-label fw-semibold">Mobile Banking Account (Alternative)</label>
+                                <input type="text" class="form-control" id="empMobileBank" placeholder="bKash / Nagad / Rocket Number">
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-light px-4" onclick="goToStep(3)"><i class="bi bi-arrow-left me-1"></i> Back</button>
+                            <button type="button" class="btn text-white px-4" style="background-color: var(--primary-blue);" onclick="goToStep(5)">Next Step <i class="bi bi-arrow-right ms-1"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 5: System Access & Security -->
+                    <div class="wizard-step d-none" id="step-5">
+                        <h5 class="fw-bold mb-3 text-secondary border-start border-3 border-purple ps-2">5. System Access Credentials</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Username / Login ID</label>
+                                <input type="text" class="form-control" id="empUsernameInput" placeholder="Auto-generated if blank">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Password / Temporary Password</label>
+                                <input type="password" class="form-control" id="empPass" value="12345" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Role-Based Access (RBAC)</label>
+                                <select class="form-select" id="empRBAC" required>
+                                    <option value="Admin">Admin (Full Control)</option>
+                                    <option value="Teacher" selected>Teacher (Classroom clearance)</option>
+                                    <option value="Staff">Staff (Non-academic registers)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Account Status</label>
+                                <select class="form-select" id="empStatus">
+                                    <option>Active</option>
+                                    <option>Inactive</option>
+                                    <option>Suspended</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-light px-4" onclick="goToStep(4)"><i class="bi bi-arrow-left me-1"></i> Back</button>
+                            <button type="button" class="btn text-white px-4" style="background-color: var(--primary-blue);" onclick="goToStep(6)">Next Step <i class="bi bi-arrow-right ms-1"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 6: Document Attachments -->
+                    <div class="wizard-step d-none" id="step-6">
+                        <h5 class="fw-bold mb-3 text-secondary border-start border-3 border-purple ps-2">6. Document Attachments (PDF/Zip)</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">CV / Resume (PDF)</label>
+                                <input type="file" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Educational Certificates (Zip/PDF)</label>
+                                <input type="file" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">NID / Passport Scan copy</label>
+                                <input type="file" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Experience & Release Letter</label>
+                                <input type="file" class="form-control">
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-light px-4" onclick="goToStep(5)"><i class="bi bi-arrow-left me-1"></i> Back</button>
+                            <button type="submit" class="btn text-white px-5" style="background-color: var(--secondary-purple); border: none;">SUBMIT EMPLOYEE PROFILE</button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+        <!-- 3. Staff ID Cards -->
+        <div class="tab-pane fade" id="empid-panel" role="tabpanel">
+            <div class="card custom-card p-4 no-print">
+                <h5 class="fw-bold mb-3">Select Employee to Generate Staff ID Card</h5>
+                <div class="col-md-6 mb-4">
+                    <select class="form-select" id="empIdCardSelector" onchange="generateEmpIdCard()"></select>
+                </div>
+                <div id="empIdCardResultArea" class="d-none">
+                    <div class="emp-id-card mx-auto mb-4">
+                        <div class="emp-id-card-header">
+                            <h6 class="mb-0 fw-bold">EDUMANAGE STAFF</h6>
+                            <small style="font-size: 0.65rem;">EMPLOYEE ID CARD</small>
+                        </div>
+                        <div class="p-4 text-center">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&h=120" alt="avatar" class="emp-avatar mb-3" id="empIdCardPhoto">
+                            <h5 class="fw-bold mb-1" id="empIdCardName">Jane Doe</h5>
+                            <p class="small text-white-50 mb-3" id="empIdCardDesignation">Teacher</p>
+                            
+                            <div class="bg-white text-dark rounded p-2 mx-auto small text-start" style="width: 220px;">
+                                <div><strong>Dept:</strong> <span id="empIdCardDept">Administration</span></div>
+                                <div><strong>ID Code:</strong> <span id="empIdCardCode">EMP-102</span></div>
+                                <div><strong>Join Date:</strong> <span id="empIdCardJoin">Jan 2021</span></div>
+                            </div>
+                        </div>
+                        <div style="background-color: var(--primary-blue); height: 10px;"></div>
+                    </div>
+                    <div class="text-center">
+                        <button class="btn btn-outline-primary" onclick="triggerPrint()"><i class="bi bi-printer me-2"></i>Print Staff ID Card</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Job Letter -->
+        <div class="tab-pane fade" id="job-letter-panel" role="tabpanel">
+            <div class="card custom-card p-4 no-print">
+                <h5 class="fw-bold mb-3">Generate Job Appointment Letter</h5>
+                <div class="col-md-6 mb-4">
+                    <select class="form-select" id="jobLetterSelector" onchange="generateJobLetter()"></select>
+                </div>
+                
+                <div id="jobLetterPreview" class="border p-4 bg-white d-none" style="max-width: 700px; margin: 0 auto; border-radius: 8px;">
+                    <div class="text-center mb-4 pb-3 border-bottom">
+                        <h3 class="fw-bold mb-1" style="color: var(--primary-blue);">EDUMANAGE INTERNATIONAL SCHOOL</h3>
+                        <p class="text-muted small mb-0">123 Academy Lane | Phone: +1 555-019-923</p>
+                    </div>
+                    <div class="mb-4">
+                        <p><strong>Date:</strong> July 19, 2026</p>
+                        <p><strong>To,</strong><br><span id="jobTargetName">Employee Name</span><br>Designation: <span id="jobTargetDesignation">Designation</span></p>
+                    </div>
+                    <h5 class="fw-bold text-center mb-4" style="color: var(--secondary-purple);">APPOINTMENT & JOB OFFER LETTER</h5>
+                    <p>Dear <span id="jobTargetSalutation">Employee</span>,</p>
+                    <p>We are pleased to appoint you to the position of <strong><span id="jobTargetRole">Role</span></strong> in the <strong><span id="jobTargetDept">Dept</span></strong> Department at EduManage International School.</p>
+                    <p>Your joining date is officially recorded as <strong><span id="jobTargetJoin">Join Date</span></strong>. You will report directly to the Principal's administration office for onboarding instructions.</p>
+                    
+                    <div class="row mt-5">
+                        <div class="col-6 text-center">
+                            <div class="border-top mx-auto mt-4" style="width: 150px;"></div>
+                            <small class="text-muted">Principal Signature</small>
+                        </div>
+                        <div class="col-6 text-center">
+                            <div class="border-top mx-auto mt-4" style="width: 150px;"></div>
+                            <small class="text-muted">HR Seal</small>
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <button class="btn btn-outline-primary" onclick="triggerPrint()"><i class="bi bi-printer me-2"></i>Print Job Letter</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Manage Login -->
+        <div class="tab-pane fade" id="emp-login-panel" role="tabpanel">
+            <div class="card custom-card p-4 no-print">
+                <h5 class="fw-bold mb-4">Set Employee Login Access</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Employee</th>
+                                <th>Designation</th>
+                                <th>Username</th>
+                                <th>Access Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="empLoginTableBody">
+                            <!-- Loaded via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- HIDDEN PRINT AREA FOR A4 PRINTS -->
+<div id="printArea" class="d-none"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const defaultEmployees = [
+        { id: 1, name: "David Henderson", role: "Senior Teacher", dept: "Mathematics", email: "david.h@school.com", joinDate: "2021-01-12", active: true, username: "david.h", pass: "12345" },
+        { id: 2, name: "Sarah Vance", role: "Teacher", dept: "English", email: "sarah.v@school.com", joinDate: "2022-08-10", active: true, username: "sarah.v", pass: "12345" }
+    ];
+
+    function getEmployees() {
+        const stored = localStorage.getItem('school_employees');
+        if (!stored) {
+            localStorage.setItem('school_employees', JSON.stringify(defaultEmployees));
+            return defaultEmployees;
+        }
+        return JSON.parse(stored);
+    }
+
+    function renderEmployees() {
+        const employees = getEmployees();
+        const tbody = document.getElementById('allEmployeesTable');
+        tbody.innerHTML = '';
+
+        employees.forEach(emp => {
+            const statusBadge = emp.active ? 
+                `<span class="badge bg-success-subtle text-success px-2.5 rounded-pill" style="cursor:pointer;" onclick="toggleEmpStatus(${emp.id})">Active</span>` :
+                `<span class="badge bg-danger-subtle text-danger px-2.5 rounded-pill" style="cursor:pointer;" onclick="toggleEmpStatus(${emp.id})">Inactive</span>`;
+
+            const row = `
+                <tr>
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            ${emp.photo ? 
+                                `<img src="${emp.photo}" class="rounded-circle" style="width:36px; height:36px; object-fit:cover;">` :
+                                `<div class="bg-secondary-subtle rounded-circle d-flex align-items-center justify-content-center fw-semibold text-dark" style="width:36px; height:36px; font-size:0.85rem;">
+                                    ${emp.name.charAt(0)}
+                                </div>`
+                            }
+                            <div>
+                                <span class="fw-semibold d-block">${emp.name}</span>
+                                <small class="text-muted">${emp.email}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>${emp.role}</td>
+                    <td><span class="badge bg-light text-dark">${emp.dept}</span></td>
+                    <td>${emp.joinDate}</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary me-1" onclick="editEmployee(${emp.id})"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteEmployee(${emp.id})"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+            `;
+            tbody.insertAdjacentHTML('beforeend', row);
+        });
+    }
+
+    // Multi-Step Form Navigation
+    window.goToStep = function(step) {
+        // Hide all steps
+        document.querySelectorAll('.wizard-step').forEach(el => el.classList.add('d-none'));
+        // Show active step
+        document.getElementById('step-' + step).classList.remove('d-none');
+
+        // Update pills
+        document.querySelectorAll('#wizardSteps .nav-link').forEach((btn, idx) => {
+            if (idx + 1 === step) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+
+    window.copyAddress = function() {
+        const check = document.getElementById('sameAddressCheck');
+        if (check.checked) {
+            document.getElementById('empPermAddr').value = document.getElementById('empPresentAddr').value;
+        } else {
+            document.getElementById('empPermAddr').value = '';
+        }
+    }
+
+    let editingEmpId = null;
+
+    window.previewPhoto = function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('photoPreview');
+                const prompt = document.getElementById('uploadPrompt');
+                preview.src = e.target.result;
+                preview.classList.remove('d-none');
+                prompt.classList.add('d-none');
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    window.editEmployee = function(id) {
+        const employees = getEmployees();
+        const emp = employees.find(e => e.id === id);
+        if (emp) {
+            editingEmpId = id;
+            
+            // Populate all form fields
+            document.getElementById('empFullName').value = emp.name || '';
+            document.getElementById('empFatherName').value = emp.fatherName || '';
+            document.getElementById('empMotherName').value = emp.motherName || '';
+            document.getElementById('empDOB').value = emp.dob || '';
+            document.getElementById('empGender').value = emp.gender || 'Male';
+            document.getElementById('empBlood').value = emp.blood || 'A+';
+            document.getElementById('empMarital').value = emp.marital || 'Single';
+            document.getElementById('empNationReligion').value = emp.nationReligion || '';
+            document.getElementById('empNID').value = emp.nid || '';
+            
+            document.getElementById('empPrimaryPhone').value = emp.primaryPhone || '';
+            document.getElementById('empAltPhone').value = emp.altPhone || '';
+            document.getElementById('empEmailInput').value = emp.email || '';
+            document.getElementById('empPresentAddr').value = emp.presentAddr || '';
+            document.getElementById('empPermAddr').value = emp.permAddr || '';
+            document.getElementById('empEmergName').value = emp.emergName || '';
+            document.getElementById('empEmergRelation').value = emp.emergRelation || '';
+            document.getElementById('empEmergPhone').value = emp.emergPhone || '';
+
+            document.getElementById('empDesignationInput').value = emp.role || '';
+            document.getElementById('empDeptInput').value = emp.dept || 'Science';
+            document.getElementById('empJoinDateInput').value = emp.joinDate || '';
+            document.getElementById('empJobType').value = emp.jobType || 'Full-time';
+            document.getElementById('empEdu').value = emp.edu || '';
+            document.getElementById('empExp').value = emp.exp || '';
+
+            document.getElementById('empBasicSalary').value = emp.basicSalary || '';
+            document.getElementById('empTIN').value = emp.tin || '';
+            document.getElementById('empPF').value = emp.pf || 'Yes';
+            document.getElementById('empBankName').value = emp.bankName || '';
+            document.getElementById('empBankAcc').value = emp.bankAcc || '';
+            document.getElementById('empBankBranch').value = emp.bankBranch || '';
+            document.getElementById('empMobileBank').value = emp.mobileBank || '';
+
+            document.getElementById('empUsernameInput').value = emp.username || '';
+            document.getElementById('empPass').value = emp.pass || '12345';
+            document.getElementById('empRBAC').value = emp.rbac || 'Teacher';
+            document.getElementById('empStatus').value = emp.status || 'Active';
+
+            // Show Photo Preview
+            const preview = document.getElementById('photoPreview');
+            const prompt = document.getElementById('uploadPrompt');
+            if (emp.photo) {
+                preview.src = emp.photo;
+                preview.classList.remove('d-none');
+                prompt.classList.add('d-none');
+            } else {
+                preview.classList.add('d-none');
+                prompt.classList.remove('d-none');
+            }
+
+            // Change title
+            document.querySelector('#add-emp-panel h4').innerHTML = `<i class="bi bi-pencil-square me-2"></i>Edit Employee Profile`;
+            
+            // Switch to form tab
+            const trigger = document.getElementById('add-emp-tab');
+            bootstrap.Tab.getInstance(trigger).show();
+
+            // Go to Step 1
+            goToStep(1);
+        }
+    }
+
+    function saveEmployeeProfile(event) {
+        event.preventDefault();
+        
+        const nameInput = document.getElementById('empFullName');
+        const name = nameInput ? nameInput.value.trim() : '';
+        if (!name) {
+            alert('Employee Full Name is required.');
+            goToStep(1);
+            if (nameInput) nameInput.focus();
+            return;
+        }
+
+        const roleInput = document.getElementById('empDesignationInput');
+        const role = (roleInput && roleInput.value.trim()) ? roleInput.value.trim() : 'Teacher';
+        const deptInput = document.getElementById('empDeptInput');
+        const dept = (deptInput && deptInput.value) ? deptInput.value : 'General';
+        const joinDateInput = document.getElementById('empJoinDateInput');
+        const joinDate = (joinDateInput && joinDateInput.value) ? joinDateInput.value : new Date().toISOString().split('T')[0];
+        const emailInput = document.getElementById('empEmailInput');
+        const email = (emailInput && emailInput.value) ? emailInput.value : (name.split(' ')[0].toLowerCase() + '@school.com');
+
+        // Pull photo directly from preview element (synchronous & bulletproof)
+        const previewEl = document.getElementById('photoPreview');
+        const photoBase64 = (previewEl && !previewEl.classList.contains('d-none')) ? previewEl.src : null;
+        const defaultPhoto = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%233262a8'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/></svg>";
+
+        let employees = getEmployees();
+        
+        if (editingEmpId !== null) {
+            // Edit Mode
+            employees = employees.map(emp => {
+                if (emp.id === editingEmpId) {
+                    emp.name = name;
+                    emp.role = role;
+                    emp.dept = dept;
+                    emp.joinDate = joinDate;
+                    emp.email = email;
+                    
+                    emp.fatherName = document.getElementById('empFatherName') ? document.getElementById('empFatherName').value : '';
+                    emp.motherName = document.getElementById('empMotherName') ? document.getElementById('empMotherName').value : '';
+                    emp.dob = document.getElementById('empDOB') ? document.getElementById('empDOB').value : '';
+                    emp.gender = document.getElementById('empGender') ? document.getElementById('empGender').value : 'Male';
+                    emp.blood = document.getElementById('empBlood') ? document.getElementById('empBlood').value : 'A+';
+                    emp.marital = document.getElementById('empMarital') ? document.getElementById('empMarital').value : 'Single';
+                    emp.nationReligion = document.getElementById('empNationReligion') ? document.getElementById('empNationReligion').value : '';
+                    emp.nid = document.getElementById('empNID') ? document.getElementById('empNID').value : '';
+                    
+                    emp.primaryPhone = document.getElementById('empPrimaryPhone') ? document.getElementById('empPrimaryPhone').value : '';
+                    emp.altPhone = document.getElementById('empAltPhone') ? document.getElementById('empAltPhone').value : '';
+                    emp.presentAddr = document.getElementById('empPresentAddr') ? document.getElementById('empPresentAddr').value : '';
+                    emp.permAddr = document.getElementById('empPermAddr') ? document.getElementById('empPermAddr').value : '';
+                    emp.emergName = document.getElementById('empEmergName') ? document.getElementById('empEmergName').value : '';
+                    emp.emergRelation = document.getElementById('empEmergRelation') ? document.getElementById('empEmergRelation').value : '';
+                    emp.emergPhone = document.getElementById('empEmergPhone') ? document.getElementById('empEmergPhone').value : '';
+
+                    emp.jobType = document.getElementById('empJobType') ? document.getElementById('empJobType').value : 'Full-time';
+                    emp.edu = document.getElementById('empEdu') ? document.getElementById('empEdu').value : '';
+                    emp.exp = document.getElementById('empExp') ? document.getElementById('empExp').value : '';
+
+                    emp.basicSalary = document.getElementById('empBasicSalary') ? document.getElementById('empBasicSalary').value : '';
+                    emp.tin = document.getElementById('empTIN') ? document.getElementById('empTIN').value : '';
+                    emp.pf = document.getElementById('empPF') ? document.getElementById('empPF').value : 'Yes';
+                    emp.bankName = document.getElementById('empBankName') ? document.getElementById('empBankName').value : '';
+                    emp.bankAcc = document.getElementById('empBankAcc') ? document.getElementById('empBankAcc').value : '';
+                    emp.bankBranch = document.getElementById('empBankBranch') ? document.getElementById('empBankBranch').value : '';
+                    emp.mobileBank = document.getElementById('empMobileBank') ? document.getElementById('empMobileBank').value : '';
+
+                    emp.username = (document.getElementById('empUsernameInput') && document.getElementById('empUsernameInput').value) || emp.username;
+                    emp.pass = (document.getElementById('empPass') && document.getElementById('empPass').value) || emp.pass;
+                    emp.rbac = document.getElementById('empRBAC') ? document.getElementById('empRBAC').value : 'Teacher';
+                    emp.status = document.getElementById('empStatus') ? document.getElementById('empStatus').value : 'Active';
+
+                    if (photoBase64) {
+                        emp.photo = photoBase64;
+                    }
+                }
+                return emp;
+            });
+            editingEmpId = null;
+            const heading = document.querySelector('#add-emp-panel h4');
+            if (heading) heading.innerHTML = `<i class="bi bi-person-plus-fill me-2"></i>Register Employee Profile`;
+        } else {
+            // Add Mode
+            const userIn = document.getElementById('empUsernameInput');
+            const passIn = document.getElementById('empPass');
+            const newEmp = {
+                id: Date.now(),
+                name: name,
+                role: role,
+                dept: dept,
+                email: email,
+                joinDate: joinDate,
+                active: true,
+                username: (userIn && userIn.value) ? userIn.value : name.split(' ')[0].toLowerCase() + Math.floor(Math.random() * 99),
+                pass: (passIn && passIn.value) ? passIn.value : "12345",
+                
+                fatherName: document.getElementById('empFatherName') ? document.getElementById('empFatherName').value : '',
+                motherName: document.getElementById('empMotherName') ? document.getElementById('empMotherName').value : '',
+                dob: document.getElementById('empDOB') ? document.getElementById('empDOB').value : '',
+                gender: document.getElementById('empGender') ? document.getElementById('empGender').value : 'Male',
+                blood: document.getElementById('empBlood') ? document.getElementById('empBlood').value : 'A+',
+                marital: document.getElementById('empMarital') ? document.getElementById('empMarital').value : 'Single',
+                nationReligion: document.getElementById('empNationReligion') ? document.getElementById('empNationReligion').value : '',
+                nid: document.getElementById('empNID') ? document.getElementById('empNID').value : '',
+                
+                primaryPhone: document.getElementById('empPrimaryPhone') ? document.getElementById('empPrimaryPhone').value : '',
+                altPhone: document.getElementById('empAltPhone') ? document.getElementById('empAltPhone').value : '',
+                presentAddr: document.getElementById('empPresentAddr') ? document.getElementById('empPresentAddr').value : '',
+                permAddr: document.getElementById('empPermAddr') ? document.getElementById('empPermAddr').value : '',
+                emergName: document.getElementById('empEmergName') ? document.getElementById('empEmergName').value : '',
+                emergRelation: document.getElementById('empEmergRelation') ? document.getElementById('empEmergRelation').value : '',
+                emergPhone: document.getElementById('empEmergPhone') ? document.getElementById('empEmergPhone').value : '',
+
+                jobType: document.getElementById('empJobType') ? document.getElementById('empJobType').value : 'Full-time',
+                edu: document.getElementById('empEdu') ? document.getElementById('empEdu').value : '',
+                exp: document.getElementById('empExp') ? document.getElementById('empExp').value : '',
+
+                basicSalary: document.getElementById('empBasicSalary') ? document.getElementById('empBasicSalary').value : '',
+                tin: document.getElementById('empTIN') ? document.getElementById('empTIN').value : '',
+                pf: document.getElementById('empPF') ? document.getElementById('empPF').value : 'Yes',
+                bankName: document.getElementById('empBankName') ? document.getElementById('empBankName').value : '',
+                bankAcc: document.getElementById('empBankAcc') ? document.getElementById('empBankAcc').value : '',
+                bankBranch: document.getElementById('empBankBranch') ? document.getElementById('empBankBranch').value : '',
+                mobileBank: document.getElementById('empMobileBank') ? document.getElementById('empMobileBank').value : '',
+                
+                rbac: document.getElementById('empRBAC') ? document.getElementById('empRBAC').value : 'Teacher',
+                status: document.getElementById('empStatus') ? document.getElementById('empStatus').value : 'Active',
+                photo: photoBase64 || defaultPhoto
+            };
+            employees.push(newEmp);
+        }
+
+        localStorage.setItem('school_employees', JSON.stringify(employees));
+        
+        // Reset Photo Preview
+        if (previewEl) {
+            previewEl.src = '';
+            previewEl.classList.add('d-none');
+        }
+        const promptEl = document.getElementById('uploadPrompt');
+        if (promptEl) promptEl.classList.remove('d-none');
+
+        // Reset and go to Step 1
+        const form = document.getElementById('addEmployeeForm');
+        if (form) form.reset();
+        goToStep(1);
+
+        renderEmployees();
+        if (typeof loadEmpLogins === 'function') loadEmpLogins();
+        if (typeof loadEmpIdCardSelector === 'function') loadEmpIdCardSelector();
+        if (typeof loadJobLetterSelector === 'function') loadJobLetterSelector();
+
+        // Return to all panel cleanly
+        const trigger = document.getElementById('all-emp-tab');
+        if (trigger) {
+            try {
+                var tabInstance = bootstrap.Tab.getOrCreateInstance(trigger);
+                tabInstance.show();
+            } catch(e) {
+                document.querySelectorAll('#employeeTabs button').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('#employeeTabsContent .tab-pane').forEach(p => p.classList.remove('show', 'active'));
+                trigger.classList.add('active');
+                const panel = document.getElementById('all-emp-panel');
+                if (panel) panel.classList.add('show', 'active');
+            }
+        }
+        
+        alert('Employee profile saved successfully!');
+    }
+
+    function toggleEmpStatus(id) {
+        let employees = getEmployees();
+        employees = employees.map(emp => {
+            if (emp.id === id) emp.active = !emp.active;
+            return emp;
+        });
+        localStorage.setItem('school_employees', JSON.stringify(employees));
+        renderEmployees();
+    }
+
+    function deleteEmployee(id) {
+        if (confirm("Delete this employee profile?")) {
+            let employees = getEmployees();
+            employees = employees.filter(emp => emp.id !== id);
+            localStorage.setItem('school_employees', JSON.stringify(employees));
+            renderEmployees();
+        }
+    }
+
+    // Staff ID Cards Tab
+    function loadEmpIdCardSelector() {
+        const employees = getEmployees();
+        const select = document.getElementById('empIdCardSelector');
+        select.innerHTML = '<option value="" disabled selected>Select Employee...</option>';
+        employees.forEach(emp => {
+            select.insertAdjacentHTML('beforeend', `<option value="${emp.id}">${emp.name}</option>`);
+        });
+    }
+
+    function generateEmpIdCard() {
+        const id = document.getElementById('empIdCardSelector').value;
+        const employees = getEmployees();
+        const emp = employees.find(e => e.id == id);
+        if (emp) {
+            document.getElementById('empIdCardName').innerText = emp.name;
+            document.getElementById('empIdCardDesignation').innerText = emp.role;
+            document.getElementById('empIdCardDept').innerText = emp.dept;
+            document.getElementById('empIdCardCode').innerText = 'EMP-' + emp.id.toString().substring(0, 4);
+            document.getElementById('empIdCardJoin').innerText = emp.joinDate;
+            document.getElementById('empIdCardPhoto').src = emp.photo || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&h=120";
+
+            // Load into global Print Area
+            const printArea = document.getElementById('printArea');
+            printArea.innerHTML = document.querySelector('.emp-id-card').outerHTML;
+
+            document.getElementById('empIdCardResultArea').classList.remove('d-none');
+        }
+    }
+
+    // Job Letter Tab
+    function loadJobLetterSelector() {
+        const employees = getEmployees();
+        const select = document.getElementById('jobLetterSelector');
+        select.innerHTML = '<option value="" disabled selected>Select Employee...</option>';
+        employees.forEach(emp => {
+            select.insertAdjacentHTML('beforeend', `<option value="${emp.id}">${emp.name}</option>`);
+        });
+    }
+
+    function generateJobLetter() {
+        const id = document.getElementById('jobLetterSelector').value;
+        const employees = getEmployees();
+        const emp = employees.find(e => e.id == id);
+        if (emp) {
+            document.getElementById('jobTargetName').innerText = emp.name;
+            document.getElementById('jobTargetDesignation').innerText = emp.role;
+            document.getElementById('jobTargetSalutation').innerText = emp.name;
+            document.getElementById('jobTargetRole').innerText = emp.role;
+            document.getElementById('jobTargetDept').innerText = emp.dept;
+            document.getElementById('jobTargetJoin').innerText = emp.joinDate;
+
+            // Load into Print Area
+            const printArea = document.getElementById('printArea');
+            printArea.innerHTML = document.getElementById('jobLetterPreview').innerHTML;
+
+            document.getElementById('jobLetterPreview').classList.remove('d-none');
+        }
+    }
+
+    // Manage Logins Tab
+    function loadEmpLogins() {
+        const employees = getEmployees();
+        const tbody = document.getElementById('empLoginTableBody');
+        tbody.innerHTML = '';
+        employees.forEach(emp => {
+            tbody.insertAdjacentHTML('beforeend', `
+                <tr>
+                    <td>${emp.name}</td>
+                    <td>${emp.role}</td>
+                    <td><code>${emp.username}</code></td>
+                    <td><span class="badge bg-success-subtle text-success">Login Granted</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="alert('Password reset for ${emp.username} to: 12345')">Reset Password</button>
+                    </td>
+                </tr>
+            `);
+        });
+    }
+
+    function triggerPrint() {
+        window.print();
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        renderEmployees();
+        // Initialize bootstrap tabs
+        const tabTriggerList = [].slice.call(document.querySelectorAll('#employeeTabs button'));
+        tabTriggerList.forEach(function (tabTriggerEl) {
+            new bootstrap.Tab(tabTriggerEl);
+        });
+    });
+</script>
+{% endblock %}

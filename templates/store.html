@@ -1,0 +1,1103 @@
+{% extends 'base.html' %}
+{% load i18n static %}
+
+{% block title %}{% trans "Online Store & POS - EduManage ERP" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .store-tab-btn {
+        border-radius: 8px;
+        padding: 10px 20px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+    .store-tab-btn.active {
+        background-color: var(--primary-blue, #0284c7) !important;
+        color: white !important;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);
+    }
+    .product-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        transition: all 0.2s ease;
+        background: #ffffff;
+    }
+    .product-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+        border-color: #cbd5e1;
+    }
+    .product-badge {
+        font-size: 11px;
+        padding: 4px 8px;
+        border-radius: 6px;
+    }
+    .badge-uniform { background: #e0f2fe; color: #0369a1; }
+    .badge-books { background: #fef3c7; color: #92400e; }
+    .badge-stationery { background: #f3e8ff; color: #6b21a8; }
+    .badge-accessories { background: #ecfdf5; color: #047857; }
+
+    .student-search-results {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        z-index: 1050;
+        background: white;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        max-height: 250px;
+        overflow-y: auto;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    }
+    .student-search-item {
+        padding: 10px 14px;
+        border-bottom: 1px solid #f1f5f9;
+        cursor: pointer;
+    }
+    .student-search-item:hover {
+        background-color: #f8fafc;
+    }
+
+    .due-pill {
+        background-color: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 20px;
+    }
+    .paid-pill {
+        background-color: #f0fdf4;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <!-- Header with Title & Add Product Button -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <h2 class="fw-bold mb-1" style="color: var(--primary-blue, #0284c7);">
+                <i class="bi bi-cart3 me-2"></i>{% trans "Online Store & POS" %}
+            </h2>
+            <p class="text-muted mb-0">{% trans "Sell uniforms, books, and stationery; manage student dues." %}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-success fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                <i class="bi bi-plus-circle-fill me-2"></i>{% trans "Add Product" %}
+            </button>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="card custom-card mb-4 p-2 bg-light border-0">
+        <ul class="nav nav-pills gap-2" id="storeTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link store-tab-btn active" id="pos-tab" data-bs-toggle="tab" data-bs-target="#posSection" type="button" role="tab">
+                    <i class="bi bi-shop me-2"></i>{% trans "POS Register" %}
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link store-tab-btn" id="ledger-tab" data-bs-toggle="tab" data-bs-target="#ledgerSection" type="button" role="tab">
+                    <i class="bi bi-person-lines-fill me-2"></i>{% trans "Student Ledger & Dues" %}
+                </button>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Tab Contents -->
+    <div class="tab-content" id="storeTabsContent">
+        <!-- ==================== TAB 1: POS REGISTER ==================== -->
+        <div class="tab-pane fade show active" id="posSection" role="tabpanel">
+            <div class="row g-4">
+                <!-- Products Grid -->
+                <div class="col-lg-8">
+                    <div class="card custom-card p-4">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                            <h5 class="fw-bold mb-0">{% trans "Store Inventory" %}</h5>
+                            <!-- Category Filter Pills -->
+                            <div class="btn-group btn-group-sm" role="group">
+                                <button type="button" class="btn btn-outline-primary active" onclick="filterCategory('All', this)">{% trans "All" %}</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="filterCategory('Uniform', this)">{% trans "Uniform" %}</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="filterCategory('Books', this)">{% trans "Books" %}</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="filterCategory('Stationery', this)">{% trans "Stationery" %}</button>
+                                <button type="button" class="btn btn-outline-primary" onclick="filterCategory('Accessories', this)">{% trans "Others" %}</button>
+                            </div>
+                        </div>
+
+                        <!-- Product Search Bar -->
+                        <div class="mb-3">
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                                <input type="text" id="productSearchInput" class="form-control" placeholder="{% trans 'Search product by name...' %}" onkeyup="searchProducts()">
+                            </div>
+                        </div>
+
+                        <!-- Grid -->
+                        <div class="row g-3" id="productsGrid">
+                            <!-- Dynamic Products injected by JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- POS Register Cart -->
+                <div class="col-lg-4">
+                    <div class="card custom-card p-4 sticky-top" style="top: 20px;">
+                        <h5 class="fw-bold mb-3 d-flex align-items-center">
+                            <i class="bi bi-receipt me-2 text-primary"></i>{% trans "POS Sales Cash Register" %}
+                        </h5>
+
+                        <!-- Student Auto-Search Selector -->
+                        <div class="mb-3 position-relative">
+                            <label class="form-label fw-bold small text-secondary">
+                                <i class="bi bi-person-badge me-1"></i>{% trans "Select Student" %}
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                                <input type="text" id="posStudentSearch" class="form-control" placeholder="{% trans 'Student name / Admission no...' %}" oninput="onPOSStudentSearchInput()" autocomplete="off">
+                                <button class="btn btn-outline-secondary" type="button" onclick="clearPOSStudent()"><i class="bi bi-x-circle"></i></button>
+                            </div>
+                            <!-- Live Suggestions -->
+                            <div id="posStudentSuggestions" class="student-search-results d-none"></div>
+
+                            <!-- Selected Student Info Badge -->
+                            <div id="selectedStudentBadge" class="mt-2 p-2 bg-primary bg-opacity-10 border border-primary border-opacity-25 rounded d-none">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <strong id="selStudName" class="d-block text-primary small"></strong>
+                                        <small id="selStudMeta" class="text-muted"></small>
+                                    </div>
+                                    <span class="badge bg-primary">{% trans "Selected" %}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-2">
+
+                        <!-- Cart Items -->
+                        <div id="cartItems" class="mb-3" style="min-height: 120px; max-height: 250px; overflow-y: auto;">
+                            <p class="text-center text-muted small py-4">{% trans "Cart is empty. Select products from the left." %}</p>
+                        </div>
+
+                        <hr class="my-2">
+
+                        <!-- Price Calculations -->
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted small">{% trans "Subtotal:" %}</span>
+                            <strong id="cartSubtotal">৳0.00</strong>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label small fw-semibold text-secondary mb-1">{% trans "Paid Amount:" %}</label>
+                            <div class="input-group input-group-sm">
+                                <span class="input-group-text">৳</span>
+                                <input type="number" id="cartPaidInput" class="form-control fw-bold text-success" placeholder="0" min="0" oninput="calculatePOSDue()">
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3 p-2 bg-light rounded border">
+                            <span class="fw-bold text-secondary">{% trans "Due Amount:" %}</span>
+                            <span id="cartDueBadge" class="fs-6 fw-bold text-success">৳0.00</span>
+                        </div>
+
+                        <button class="btn text-white w-100 py-2 fw-semibold shadow-sm" style="background-color: var(--secondary-purple, #6b21a8); border: none;" onclick="checkoutStore()">
+                            <i class="bi bi-printer-fill me-2"></i>{% trans "Complete Sale & Print Receipt" %}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== TAB 2: STUDENT DUE & LEDGER SEARCH ==================== -->
+        <div class="tab-pane fade" id="ledgerSection" role="tabpanel">
+            <div class="card custom-card p-4">
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+                    <div>
+                        <h5 class="fw-bold mb-1"><i class="bi bi-journal-text me-2 text-primary"></i>শিক্ষার্থী ক্রয়ের ইতিহাস ও বাকি হিসাব সার্চ</h5>
+                        <p class="text-muted small mb-0">যে কোন শিক্ষার্থীর নাম বা এডমিশন আইডি দিয়ে তাদের কেনাকাটা ও বকেয়া টাকার হিসাব চেক করুন</p>
+                    </div>
+                    <!-- Quick Filters -->
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-outline-secondary active" onclick="filterLedger('all', this)">সকল শিক্ষার্থী</button>
+                        <button class="btn btn-outline-danger" onclick="filterLedger('due_only', this)">শুধু বাকি আছে যাদের</button>
+                    </div>
+                </div>
+
+                <!-- Main Student Search Bar -->
+                <div class="row mb-4">
+                    <div class="col-md-8 mx-auto">
+                        <div class="input-group input-group-lg shadow-sm">
+                            <span class="input-group-text bg-primary text-white"><i class="bi bi-search"></i></span>
+                            <input type="text" id="ledgerSearchInput" class="form-control" placeholder="শিক্ষার্থীর নাম, এডমিশন নং, রোল বা মোবাইল দিয়ে সার্চ করুন..." onkeyup="searchStudentLedger()">
+                            <button class="btn btn-primary" type="button" onclick="searchStudentLedger()">সার্চ করুন</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selected Student Overview Card (If selected) -->
+                <div id="studentSummaryCard" class="card border border-primary border-opacity-25 bg-primary bg-opacity-10 mb-4 p-3 d-none">
+                    <div class="row align-items-center g-3">
+                        <div class="col-md-5">
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-circle bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px; font-size: 20px; font-weight: bold;" id="studAvatar">S</div>
+                                <div>
+                                    <h5 class="fw-bold mb-1 text-primary" id="studSummaryName"></h5>
+                                    <small class="text-muted" id="studSummaryDetails"></small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="row text-center g-2">
+                                <div class="col-4">
+                                    <div class="bg-white p-2 rounded border">
+                                        <small class="text-muted d-block">মোট কেনাকাটা</small>
+                                        <strong id="studTotalPurchases" class="fs-6 text-dark">৳0.00</strong>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="bg-white p-2 rounded border">
+                                        <small class="text-muted d-block">পরিশোধিত</small>
+                                        <strong id="studTotalPaid" class="fs-6 text-success">৳0.00</strong>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="bg-white p-2 rounded border">
+                                        <small class="text-muted d-block">মোট বাকি (Due)</small>
+                                        <strong id="studTotalDue" class="fs-6 text-danger">৳0.00</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Transactions & Purchases Table -->
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle border">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ইনভয়েস নং</th>
+                                <th>তারিখ ও সময়</th>
+                                <th>শিক্ষার্থীর নাম</th>
+                                <th>শ্রেনী ও আইডি</th>
+                                <th>ক্রয়কৃত আইটেম</th>
+                                <th class="text-end">মোট মূল্য</th>
+                                <th class="text-end">পরিশোধিত</th>
+                                <th class="text-end">বাকি (Due)</th>
+                                <th class="text-center">স্ট্যাটাস</th>
+                                <th class="text-center">অ্যাকশন</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ledgerTableBody">
+                            <!-- Injected dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== MODAL 1: ADD NEW PRODUCT ==================== -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold"><i class="bi bi-plus-square me-2"></i>নতুন প্রোডাক্ট যোগ করুন</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="addProductForm" onsubmit="handleSaveProduct(event)">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">প্রোডাক্টের নাম (Product Name) <span class="text-danger">*</span></label>
+                        <input type="text" id="newProdTitle" class="form-control" placeholder="যেমন: স্কুল শার্ট / বাংলা বই" required>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">ক্যাটাগরি</label>
+                            <select id="newProdCategory" class="form-select">
+                                <option value="Uniform">ইউনিফর্ম (Uniform)</option>
+                                <option value="Books">বই ও খাতা (Books)</option>
+                                <option value="Stationery">স্টেশনারি (Stationery)</option>
+                                <option value="Accessories">অন্যান্য (Accessories)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">মূল্য (Price in ৳) <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <span class="input-group-text">৳</span>
+                                <input type="number" id="newProdPrice" class="form-control" placeholder="0" min="1" step="0.01" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">স্টক পরিমাণ (Initial Stock) <span class="text-danger">*</span></label>
+                            <input type="number" id="newProdStock" class="form-control" placeholder="10" min="1" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">প্রোডাক্ট কোড / SKU</label>
+                            <input type="text" id="newProdCode" class="form-control" placeholder="PROD-105">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">বাতিল</button>
+                    <button type="submit" class="btn btn-success fw-semibold"><i class="bi bi-check-circle me-1"></i>প্রোডাক্ট সেভ করুন</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== MODAL 2: PAY DUE AMOUNT ==================== -->
+<div class="modal fade" id="payDueModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold"><i class="bi bi-cash-stack me-2"></i>বাকি টাকা পরিশোধ করুন</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="payDueForm" onsubmit="handlePayDue(event)">
+                <div class="modal-body p-4">
+                    <input type="hidden" id="payDueTxId">
+                    <div class="mb-3 p-3 bg-light rounded border">
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted small">ইনভয়েস নং:</span>
+                            <strong id="payDueInvoiceNo"></strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-1">
+                            <span class="text-muted small">শিক্ষার্থীর নাম:</span>
+                            <strong id="payDueStudentName"></strong>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted small">বর্তমান বাকি টাকা:</span>
+                            <strong id="payDueCurrentAmount" class="text-danger fs-6"></strong>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">পরিশোধের পরিমাণ (৳) <span class="text-danger">*</span></label>
+                        <input type="number" id="payDueAmountInput" class="form-control fw-bold text-success" min="1" step="0.01" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">পেমেন্ট মেথড</label>
+                        <select id="payDueMethod" class="form-select">
+                            <option value="Cash">নগদ ক্যাশ (Cash)</option>
+                            <option value="bKash">বিকাশ (bKash)</option>
+                            <option value="Nagad">নগদ (Nagad)</option>
+                            <option value="Bank">ব্যাংক ট্রান্সফার (Bank)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">বাতিল</button>
+                    <button type="submit" class="btn btn-danger fw-semibold"><i class="bi bi-check-lg me-1"></i>পেমেন্ট নিশ্চিত করুন</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== MODAL 3: RECEIPT / INVOICE PRINT ==================== -->
+<div class="modal fade" id="receiptModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title"><i class="bi bi-printer me-2"></i>POS ইনভয়েস ও বিক্রয় রসিদ</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4" id="printablePOS">
+                <div class="text-center mb-3">
+                    <h4 class="fw-bold mb-0" style="color: #1e3a8a;">{{ request.session.school_name|default:"গাজীমাহমুদ নিম্ন-মাধ্যমিক বিদ্যালয়" }}</h4>
+                    <p class="small text-muted mb-0">অনলাইন স্টোর ও পিওএস বিক্রয় রসিদ</p>
+                    <hr class="my-2">
+                </div>
+                <div class="row small mb-2">
+                    <div class="col-6">
+                        <strong>ইনভয়েস:</strong> <span id="rcptInvoiceNo"></span><br>
+                        <strong>তারিখ:</strong> <span id="rcptDate"></span>
+                    </div>
+                    <div class="col-6 text-end">
+                        <strong>শিক্ষার্থী:</strong> <span id="rcptStudentName"></span><br>
+                        <strong>আইডি/শ্রেণী:</strong> <span id="rcptStudentMeta"></span>
+                    </div>
+                </div>
+                <table class="table table-sm table-bordered small mb-3">
+                    <thead class="table-light">
+                        <tr>
+                            <th>আইটেম</th>
+                            <th class="text-center">সংখ্যা</th>
+                            <th class="text-end">একক মূল্য</th>
+                            <th class="text-end">মোট</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rcptTableItems"></tbody>
+                </table>
+                <div class="border-top pt-2 small">
+                    <div class="d-flex justify-content-between">
+                        <span>মোট সাবটোটাল:</span>
+                        <strong id="rcptTotal"></strong>
+                    </div>
+                    <div class="d-flex justify-content-between text-success">
+                        <span>পরিশোধিত:</span>
+                        <strong id="rcptPaid"></strong>
+                    </div>
+                    <div class="d-flex justify-content-between text-danger fw-bold fs-6">
+                        <span>বাকি টাকা (Due):</span>
+                        <span id="rcptDue"></span>
+                    </div>
+                </div>
+                <div class="text-center mt-3 d-flex justify-content-center align-items-center gap-4">
+                    <div id="rcptQrCode"></div>
+                    <div>
+                        <svg id="rcptBarcode"></svg>
+                    </div>
+                </div>
+                <div class="text-center mt-4 pt-3 border-top small text-muted">
+                    <p class="mb-0">ধন্যবাদ!</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">বন্ধ করুন</button>
+                <button type="button" class="btn btn-primary" onclick="printReceiptAction()"><i class="bi bi-printer me-1"></i>প্রিন্ট রসিদ</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Barcode and QRCode Libraries -->
+<script src="{% static 'vendor/jsbarcode/JsBarcode.all.min.js' %}" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js';"></script>
+<script src="{% static 'vendor/qrcodejs/qrcode.min.js' %}" onerror="this.onerror=null;this.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';"></script>
+<script>
+    // --- Initial Store Products ---
+    let defaultProducts = [
+        { id: 101, title: "স্কুল ব্লেজার (Class 6-10)", category: "Uniform", price: 1200, stock: 15, code: "UN-01" },
+        { id: 102, title: "স্কুল শার্ট ও প্যান্ট সেট", category: "Uniform", price: 850, stock: 25, code: "UN-02" },
+        { id: 103, title: "ইংলিশ গ্রামার টেক্সট বই", category: "Books", price: 350, stock: 40, code: "BK-01" },
+        { id: 104, title: "EduManage বার্ষিক ডায়েরি ২০২৬", category: "Books", price: 150, stock: 100, code: "BK-02" },
+        { id: 105, title: "স্কুল ব্যাকপ্যাক (ব্লু)", category: "Accessories", price: 750, stock: 22, code: "AC-01" },
+        { id: 106, title: "হাইকোয়ালিটি নোটবুক সেট (৫টি)", category: "Stationery", price: 200, stock: 60, code: "ST-01" },
+        { id: 107, title: "জ্যামিতি বক্স ও স্কেল সেট", category: "Stationery", price: 120, stock: 45, code: "ST-02" }
+    ];
+
+    // Load persisted products or fallback
+    let storeProducts = JSON.parse(localStorage.getItem('edu_store_products')) || defaultProducts;
+
+    // Load persisted transactions or fallback sample transactions
+    let defaultTransactions = [
+        {
+            id: "INV-1001",
+            date: "2026-07-20 10:30 AM",
+            student_id: 1,
+            student_name: "মোঃ সাব্বির আহমেদ",
+            student_meta: "Class 8 (Sec A) | Adm: ADM-2026-08",
+            items: [
+                { id: 101, title: "স্কুল ব্লেজার (Class 6-10)", price: 1200, qty: 1 },
+                { id: 104, title: "EduManage বার্ষিক ডায়েরি ২০২৬", price: 150, qty: 1 }
+            ],
+            subtotal: 1350,
+            paid: 1000,
+            due: 350,
+            status: "due"
+        },
+        {
+            id: "INV-1002",
+            date: "2026-07-21 11:15 AM",
+            student_id: 2,
+            student_name: "সুমাইয়া জান্নাত",
+            student_meta: "Class 6 (Sec B) | Adm: ADM-2026-12",
+            items: [
+                { id: 103, title: "ইংলিশ গ্রামার টেক্সট বই", price: 350, qty: 1 },
+                { id: 106, title: "হাইকোয়ালিটি নোটবুক সেট (৫টি)", price: 200, qty: 1 }
+            ],
+            subtotal: 550,
+            paid: 550,
+            due: 0,
+            status: "paid"
+        }
+    ];
+
+    let storeTransactions = JSON.parse(localStorage.getItem('edu_store_transactions')) || defaultTransactions;
+
+    // System Students List (Loaded via API or Default)
+    let systemStudents = [
+        { id: 1, admission_no: "ADM-2026-08", name: "মোঃ সাব্বির আহমেদ", class: "Class 8", section: "A", roll: 12, phone: "01711000001" },
+        { id: 2, admission_no: "ADM-2026-12", name: "সুমাইয়া জান্নাত", class: "Class 6", section: "B", roll: 5, phone: "01811000002" },
+        { id: 3, admission_no: "ADM-2026-15", name: "মোঃ রাহাত হোসেন", class: "Class 10", section: "A", roll: 1, phone: "01911000003" },
+        { id: 4, admission_no: "ADM-2026-22", name: "ফাতিমা তুজ জোহরা", class: "Class 7", section: "C", roll: 8, phone: "01511000004" }
+    ];
+
+    let cart = [];
+    let selectedPOSStudent = null;
+    let currentCategoryFilter = 'All';
+
+    // Fetch live students from backend API
+    async function loadSystemStudents() {
+        try {
+            const resp = await fetch('/api/students/');
+            const data = await resp.json();
+            if (data.status === 'success' && data.students && data.students.length > 0) {
+                systemStudents = data.students;
+            }
+        } catch (e) {
+            console.log("Using local system student fallback");
+        }
+    }
+
+    // --- RENDER PRODUCTS GRID ---
+    function renderProducts(category = 'All', searchKeyword = '') {
+        const grid = document.getElementById('productsGrid');
+        grid.innerHTML = '';
+
+        let filtered = storeProducts;
+        if (category !== 'All') {
+            filtered = filtered.filter(p => p.category === category);
+        }
+        if (searchKeyword.trim() !== '') {
+            const kw = searchKeyword.toLowerCase();
+            filtered = filtered.filter(p => p.title.toLowerCase().includes(kw) || (p.code && p.code.toLowerCase().includes(kw)));
+        }
+
+        if (filtered.length === 0) {
+            grid.innerHTML = `<div class="col-12 text-center text-muted py-4"><i class="bi bi-box-seam fs-2 d-block mb-2"></i>কোন প্রোডাক্ট পাওয়া যায়নি।</div>`;
+            return;
+        }
+
+        filtered.forEach(p => {
+            let catBadgeClass = 'badge-uniform';
+            if (p.category === 'Books') catBadgeClass = 'badge-books';
+            if (p.category === 'Stationery') catBadgeClass = 'badge-stationery';
+            if (p.category === 'Accessories') catBadgeClass = 'badge-accessories';
+
+            grid.insertAdjacentHTML('beforeend', `
+                <div class="col-md-6">
+                    <div class="product-card p-3 d-flex justify-content-between align-items-center" style="cursor:pointer;" onclick="addToCart(${p.id})">
+                        <div>
+                            <span class="product-badge ${catBadgeClass} mb-1 d-inline-block">${p.category}</span>
+                            <strong class="d-block text-dark mb-1" style="font-size: 14px;">${p.title}</strong>
+                            <small class="text-muted">স্টক: ${p.stock} পিস ${p.code ? '| Code: ' + p.code : ''}</small>
+                            <h6 class="fw-bold mt-1 text-primary mb-0">৳${p.price.toFixed(2)}</h6>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-outline-primary rounded-circle" style="width: 36px; height: 36px;">
+                            <i class="bi bi-cart-plus-fill"></i>
+                        </button>
+                    </div>
+                </div>
+            `);
+        });
+    }
+
+    function filterCategory(cat, btn) {
+        currentCategoryFilter = cat;
+        document.querySelectorAll('#posSection .btn-group .btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const searchKw = document.getElementById('productSearchInput').value;
+        renderProducts(currentCategoryFilter, searchKw);
+    }
+
+    function searchProducts() {
+        const searchKw = document.getElementById('productSearchInput').value;
+        renderProducts(currentCategoryFilter, searchKw);
+    }
+
+    // --- POS CART MANAGEMNET ---
+    function addToCart(id) {
+        const prod = storeProducts.find(p => p.id === id);
+        if (!prod) return;
+
+        if (prod.stock <= 0) {
+            alert("দুঃখিত, এই প্রোডাক্টটির স্টক শেষ!");
+            return;
+        }
+
+        const cartItem = cart.find(c => c.id === id);
+        if (cartItem) {
+            if (cartItem.qty + 1 > prod.stock) {
+                alert("স্টক সীমার বেশি আইটেম যোগ করা যাবে না!");
+                return;
+            }
+            cartItem.qty++;
+        } else {
+            cart.push({ ...prod, qty: 1 });
+        }
+        renderCart();
+    }
+
+    function updateCartQty(id, delta) {
+        const item = cart.find(c => c.id === id);
+        if (!item) return;
+
+        item.qty += delta;
+        if (item.qty <= 0) {
+            removeFromCart(id);
+        } else {
+            renderCart();
+        }
+    }
+
+    function removeFromCart(id) {
+        cart = cart.filter(c => c.id !== id);
+        renderCart();
+    }
+
+    function renderCart() {
+        const container = document.getElementById('cartItems');
+        const subtotalEl = document.getElementById('cartSubtotal');
+        container.innerHTML = '';
+
+        if (cart.length === 0) {
+            container.innerHTML = `<p class="text-center text-muted small py-4">কার্ট খালি। বাম পাশ থেকে প্রোডাক্ট সিলেক্ট করুন।</p>`;
+            subtotalEl.innerText = '৳0.00';
+            calculatePOSDue();
+            return;
+        }
+
+        let total = 0;
+        cart.forEach(item => {
+            const itemTotal = item.price * item.qty;
+            total += itemTotal;
+            container.insertAdjacentHTML('beforeend', `
+                <div class="d-flex justify-content-between align-items-center mb-2 p-2 border-bottom small">
+                    <div style="max-width: 60%;">
+                        <strong class="d-block text-truncate">${item.title}</strong>
+                        <small class="text-muted">৳${item.price} × ${item.qty} = ৳${itemTotal.toFixed(2)}</small>
+                    </div>
+                    <div class="d-flex align-items-center gap-1">
+                        <button class="btn btn-sm btn-light border px-2 py-0" onclick="updateCartQty(${item.id}, -1)">-</button>
+                        <span class="fw-bold px-1">${item.qty}</span>
+                        <button class="btn btn-sm btn-light border px-2 py-0" onclick="updateCartQty(${item.id}, 1)">+</button>
+                        <button class="btn btn-sm text-danger p-0 ms-2" onclick="removeFromCart(${item.id})"><i class="bi bi-trash"></i></button>
+                    </div>
+                </div>
+            `);
+        });
+
+        subtotalEl.innerText = '৳' + total.toFixed(2);
+        calculatePOSDue();
+    }
+
+    function calculatePOSDue() {
+        const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+        const paidInput = parseFloat(document.getElementById('cartPaidInput').value) || 0;
+        const due = Math.max(0, subtotal - paidInput);
+
+        const dueBadge = document.getElementById('cartDueBadge');
+        dueBadge.innerText = '৳' + due.toFixed(2);
+        if (due > 0) {
+            dueBadge.className = 'fs-6 fw-bold text-danger';
+        } else {
+            dueBadge.className = 'fs-6 fw-bold text-success';
+        }
+    }
+
+    // --- POS STUDENT AUTO-COMPLETE ---
+    function onPOSStudentSearchInput() {
+        const input = document.getElementById('posStudentSearch').value.trim().toLowerCase();
+        const suggestionsBox = document.getElementById('posStudentSuggestions');
+
+        if (input.length === 0) {
+            suggestionsBox.classList.add('d-none');
+            return;
+        }
+
+        const matches = systemStudents.filter(s => 
+            (s.name && s.name.toLowerCase().includes(input)) || 
+            (s.admission_no && s.admission_no.toLowerCase().includes(input)) ||
+            (s.phone && s.phone.includes(input))
+        );
+
+        if (matches.length === 0) {
+            suggestionsBox.innerHTML = `<div class="p-2 text-muted small text-center">কোন শিক্ষার্থী পাওয়া যায়নি</div>`;
+        } else {
+            suggestionsBox.innerHTML = '';
+            matches.forEach(s => {
+                suggestionsBox.insertAdjacentHTML('beforeend', `
+                    <div class="student-search-item" onclick="selectPOSStudent(${s.id})">
+                        <strong class="d-block text-dark small">${s.name}</strong>
+                        <small class="text-muted">ID: ${s.admission_no} | ${s.class} (${s.section}) | Roll: ${s.roll || 'N/A'}</small>
+                    </div>
+                `);
+            });
+        }
+        suggestionsBox.classList.remove('d-none');
+    }
+
+    function selectPOSStudent(studId) {
+        const s = systemStudents.find(st => st.id === studId);
+        if (!s) return;
+
+        selectedPOSStudent = s;
+        document.getElementById('posStudentSearch').value = s.name;
+        document.getElementById('posStudentSuggestions').classList.add('d-none');
+
+        document.getElementById('selStudName').innerText = s.name;
+        document.getElementById('selStudMeta').innerText = `ID: ${s.admission_no} | Class: ${s.class} (${s.section}) | Phone: ${s.phone || 'N/A'}`;
+        document.getElementById('selectedStudentBadge').classList.remove('d-none');
+    }
+
+    function clearPOSStudent() {
+        selectedPOSStudent = null;
+        document.getElementById('posStudentSearch').value = '';
+        document.getElementById('selectedStudentBadge').classList.add('d-none');
+        document.getElementById('posStudentSuggestions').classList.add('d-none');
+    }
+
+    // --- CHECKOUT & POS SALE COMPLETION ---
+    function checkoutStore() {
+        if (cart.length === 0) {
+            alert("কার্ট খালি! প্রথমে আইটেম যোগ করুন।");
+            return;
+        }
+        if (!selectedPOSStudent) {
+            alert("অনুগ্রহ করে যে শিক্ষার্থী কিনছে তার নাম সিলেক্ট করুন!");
+            return;
+        }
+
+        const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+        const paid = parseFloat(document.getElementById('cartPaidInput').value) || 0;
+        const due = Math.max(0, subtotal - paid);
+
+        const txId = "INV-" + Math.floor(1000 + Math.random() * 9000);
+        const now = new Date();
+        const dateStr = now.toLocaleDateString() + " " + now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        const transaction = {
+            id: txId,
+            date: dateStr,
+            student_id: selectedPOSStudent.id,
+            student_name: selectedPOSStudent.name,
+            student_meta: `Class: ${selectedPOSStudent.class} (${selectedPOSStudent.section}) | Adm: ${selectedPOSStudent.admission_no}`,
+            items: [...cart],
+            subtotal: subtotal,
+            paid: paid,
+            due: due,
+            status: due > 0 ? "due" : "paid"
+        };
+
+        // Deduct product stock
+        cart.forEach(cItem => {
+            const p = storeProducts.find(prod => prod.id === cItem.id);
+            if (p) p.stock = Math.max(0, p.stock - cItem.qty);
+        });
+        localStorage.setItem('edu_store_products', JSON.stringify(storeProducts));
+
+        // Save Transaction
+        storeTransactions.unshift(transaction);
+        localStorage.setItem('edu_store_transactions', JSON.stringify(storeTransactions));
+
+        // Display Receipt Modal
+        showReceipt(transaction);
+
+        // Reset Cart
+        cart = [];
+        document.getElementById('cartPaidInput').value = '';
+        renderCart();
+        renderProducts(currentCategoryFilter, '');
+        renderStudentLedger();
+    }
+
+    function showReceipt(tx) {
+        document.getElementById('rcptInvoiceNo').innerText = tx.id;
+        document.getElementById('rcptDate').innerText = tx.date;
+        document.getElementById('rcptStudentName').innerText = tx.student_name;
+        document.getElementById('rcptStudentMeta').innerText = tx.student_meta;
+
+        const tableBody = document.getElementById('rcptTableItems');
+        tableBody.innerHTML = '';
+        tx.items.forEach(item => {
+            tableBody.insertAdjacentHTML('beforeend', `
+                <tr>
+                    <td>${item.title}</td>
+                    <td class="text-center">${item.qty}</td>
+                    <td class="text-end">৳${item.price.toFixed(2)}</td>
+                    <td class="text-end">৳${(item.price * item.qty).toFixed(2)}</td>
+                </tr>
+            `);
+        });
+
+        document.getElementById('rcptTotal').innerText = '৳' + tx.subtotal.toFixed(2);
+        document.getElementById('rcptPaid').innerText = '৳' + tx.paid.toFixed(2);
+        document.getElementById('rcptDue').innerText = '৳' + tx.due.toFixed(2);
+
+        // Generate Barcode
+        try {
+            if (typeof JsBarcode !== 'undefined') {
+                JsBarcode("#rcptBarcode", tx.id, {
+                    format: "CODE128",
+                    lineColor: "#000",
+                    width: 1.5,
+                    height: 40,
+                    displayValue: true
+                });
+            } else {
+                console.warn("JsBarcode library not loaded.");
+            }
+        } catch (e) {
+            console.error("Barcode generation error:", e);
+        }
+
+        // Generate QR Code
+        try {
+            const qrContainer = document.getElementById('rcptQrCode');
+            qrContainer.innerHTML = '';
+            if (typeof QRCode !== 'undefined') {
+                new QRCode(qrContainer, {
+                    text: `Invoice: ${tx.id} | Name: ${tx.student_name} | Total: ৳${tx.subtotal} | Paid: ৳${tx.paid} | Due: ৳${tx.due}`,
+                    width: 70,
+                    height: 70,
+                    colorDark : "#000000",
+                    colorLight : "#ffffff",
+                    correctLevel : QRCode.CorrectLevel.L
+                });
+            } else {
+                console.warn("QRCode library not loaded.");
+            }
+        } catch (e) {
+            console.error("QR Code generation error:", e);
+        }
+
+        const modal = new bootstrap.Modal(document.getElementById('receiptModal'));
+        modal.show();
+    }
+
+    function printReceiptAction() {
+        const printArea = document.getElementById('printablePOS');
+        const clone = printArea.cloneNode(true);
+        clone.id = 'printClone';
+        
+        // Fix canvas cloning for QR Code
+        const originalCanvases = printArea.getElementsByTagName('canvas');
+        const clonedCanvases = clone.getElementsByTagName('canvas');
+        for (let i = 0; i < originalCanvases.length; i++) {
+            const dataUrl = originalCanvases[i].toDataURL();
+            const img = document.createElement('img');
+            img.src = dataUrl;
+            img.style.width = originalCanvases[i].style.width;
+            img.style.height = originalCanvases[i].style.height;
+            if(clonedCanvases[i] && clonedCanvases[i].parentNode) {
+                clonedCanvases[i].parentNode.replaceChild(img, clonedCanvases[i]);
+            }
+        }
+
+        // Hide all body children
+        const bodyChildren = document.body.children;
+        const hiddenElements = [];
+        for (let i = 0; i < bodyChildren.length; i++) {
+            if (bodyChildren[i].tagName !== 'SCRIPT' && bodyChildren[i].tagName !== 'STYLE') {
+                hiddenElements.push({
+                    el: bodyChildren[i],
+                    display: bodyChildren[i].style.display
+                });
+                bodyChildren[i].style.display = 'none';
+            }
+        }
+
+        // Apply styles for printing
+        clone.style.display = 'block';
+        clone.style.position = 'static';
+        clone.style.padding = '20px';
+        clone.style.width = '100%';
+        clone.style.backgroundColor = 'white';
+        document.body.appendChild(clone);
+
+        window.print();
+
+        // Cleanup and restore
+        document.body.removeChild(clone);
+        hiddenElements.forEach(item => {
+            item.el.style.display = item.display;
+        });
+    }
+
+    // --- TAB 2: STUDENT LEDGER & DUE SEARCH ---
+    let ledgerFilterMode = 'all';
+
+    function renderStudentLedger(searchQuery = '') {
+        const tbody = document.getElementById('ledgerTableBody');
+        tbody.innerHTML = '';
+
+        let filtered = storeTransactions;
+
+        if (ledgerFilterMode === 'due_only') {
+            filtered = filtered.filter(t => t.due > 0);
+        }
+
+        if (searchQuery.trim() !== '') {
+            const q = searchQuery.toLowerCase();
+            filtered = filtered.filter(t => 
+                t.student_name.toLowerCase().includes(q) ||
+                t.id.toLowerCase().includes(q) ||
+                t.student_meta.toLowerCase().includes(q)
+            );
+        }
+
+        // Update student summary card if exact match or search query entered
+        updateStudentSummaryCard(searchQuery, filtered);
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="10" class="text-center text-muted py-4">কোন বিক্রয় রেকর্ড বা বাকি হিসাব পাওয়া যায়নি।</td></tr>`;
+            return;
+        }
+
+        filtered.forEach(t => {
+            const itemsText = t.items.map(i => `${i.title} (${i.qty} পিস)`).join(', ');
+            const statusBadge = t.due > 0 ? 
+                `<span class="due-pill">বাকি ৳${t.due.toFixed(2)}</span>` : 
+                `<span class="paid-pill">পরিশোধিত</span>`;
+
+            const payDueBtn = t.due > 0 ? 
+                `<button class="btn btn-sm btn-danger me-1" onclick="openPayDueModal('${t.id}')"><i class="bi bi-cash-coin me-1"></i>বাকি পরিশোধ</button>` : '';
+
+            tbody.insertAdjacentHTML('beforeend', `
+                <tr>
+                    <td><strong>${t.id}</strong></td>
+                    <td class="small text-muted">${t.date}</td>
+                    <td><strong>${t.student_name}</strong></td>
+                    <td class="small text-muted">${t.student_meta}</td>
+                    <td class="small" style="max-width: 220px;" title="${itemsText}">${itemsText}</td>
+                    <td class="text-end fw-bold">৳${t.subtotal.toFixed(2)}</td>
+                    <td class="text-end text-success">৳${t.paid.toFixed(2)}</td>
+                    <td class="text-end text-danger fw-bold">৳${t.due.toFixed(2)}</td>
+                    <td class="text-center">${statusBadge}</td>
+                    <td class="text-center">
+                        ${payDueBtn}
+                        <button class="btn btn-sm btn-outline-secondary" onclick='showReceipt(${JSON.stringify(t)})'><i class="bi bi-printer"></i></button>
+                    </td>
+                </tr>
+            `);
+        });
+    }
+
+    function updateStudentSummaryCard(query, transactions) {
+        const card = document.getElementById('studentSummaryCard');
+        if (query.trim() === '' || transactions.length === 0) {
+            card.classList.add('d-none');
+            return;
+        }
+
+        const sample = transactions[0];
+        const studentTxs = storeTransactions.filter(t => t.student_name.toLowerCase().includes(query.toLowerCase()));
+
+        const totalPur = studentTxs.reduce((sum, t) => sum + t.subtotal, 0);
+        const totalPaid = studentTxs.reduce((sum, t) => sum + t.paid, 0);
+        const totalDue = studentTxs.reduce((sum, t) => sum + t.due, 0);
+
+        document.getElementById('studAvatar').innerText = sample.student_name.charAt(0);
+        document.getElementById('studSummaryName').innerText = sample.student_name;
+        document.getElementById('studSummaryDetails').innerText = sample.student_meta;
+        document.getElementById('studTotalPurchases').innerText = '৳' + totalPur.toFixed(2);
+        document.getElementById('studTotalPaid').innerText = '৳' + totalPaid.toFixed(2);
+        document.getElementById('studTotalDue').innerText = '৳' + totalDue.toFixed(2);
+
+        card.classList.remove('d-none');
+    }
+
+    function searchStudentLedger() {
+        const q = document.getElementById('ledgerSearchInput').value;
+        renderStudentLedger(q);
+    }
+
+    function filterLedger(mode, btn) {
+        ledgerFilterMode = mode;
+        document.querySelectorAll('#ledgerSection .btn-group .btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const q = document.getElementById('ledgerSearchInput').value;
+        renderStudentLedger(q);
+    }
+
+    // --- MODAL: PAY DUE ---
+    function openPayDueModal(txId) {
+        const tx = storeTransactions.find(t => t.id === txId);
+        if (!tx) return;
+
+        document.getElementById('payDueTxId').value = tx.id;
+        document.getElementById('payDueInvoiceNo').innerText = tx.id;
+        document.getElementById('payDueStudentName').innerText = tx.student_name;
+        document.getElementById('payDueCurrentAmount').innerText = '৳' + tx.due.toFixed(2);
+        document.getElementById('payDueAmountInput').value = tx.due;
+        document.getElementById('payDueAmountInput').max = tx.due;
+
+        const modal = new bootstrap.Modal(document.getElementById('payDueModal'));
+        modal.show();
+    }
+
+    function handlePayDue(e) {
+        e.preventDefault();
+        const txId = document.getElementById('payDueTxId').value;
+        const amountToPay = parseFloat(document.getElementById('payDueAmountInput').value) || 0;
+
+        const tx = storeTransactions.find(t => t.id === txId);
+        if (!tx) return;
+
+        if (amountToPay <= 0 || amountToPay > tx.due) {
+            alert("সঠিক পরিশোধিত টাকার পরিমাণ দিন!");
+            return;
+        }
+
+        tx.paid += amountToPay;
+        tx.due = Math.max(0, tx.due - amountToPay);
+        if (tx.due === 0) tx.status = "paid";
+
+        localStorage.setItem('edu_store_transactions', JSON.stringify(storeTransactions));
+
+        // Close modal
+        const modalEl = document.getElementById('payDueModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        modal.hide();
+
+        renderStudentLedger(document.getElementById('ledgerSearchInput').value);
+        alert(`সাফল্যের সাথে ৳${amountToPay} টাকা বাকি পরিশোধ হিসেবে গ্রহণ করা হলো!`);
+    }
+
+    // --- MODAL: ADD PRODUCT ---
+    function handleSaveProduct(e) {
+        e.preventDefault();
+        const title = document.getElementById('newProdTitle').value.trim();
+        const category = document.getElementById('newProdCategory').value;
+        const price = parseFloat(document.getElementById('newProdPrice').value) || 0;
+        const stock = parseInt(document.getElementById('newProdStock').value) || 0;
+        const code = document.getElementById('newProdCode').value.trim() || ("PROD-" + Math.floor(100 + Math.random() * 900));
+
+        if (!title || price <= 0 || stock < 0) {
+            alert("অনুগ্রহ করে সকল সঠিক তথ্য পূরণ করুন!");
+            return;
+        }
+
+        const newProduct = {
+            id: Date.now(),
+            title: title,
+            category: category,
+            price: price,
+            stock: stock,
+            code: code
+        };
+
+        storeProducts.unshift(newProduct);
+        localStorage.setItem('edu_store_products', JSON.stringify(storeProducts));
+
+        // Reset & Close Modal
+        document.getElementById('addProductForm').reset();
+        const modalEl = document.getElementById('addProductModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        modal.hide();
+
+        renderProducts(currentCategoryFilter, '');
+        alert("নতুন প্রোডাক্ট সফলভাবে যুক্ত করা হয়েছে!");
+    }
+
+    // Initialize Page
+    document.addEventListener("DOMContentLoaded", async () => {
+        await loadSystemStudents();
+        renderProducts();
+        renderCart();
+        renderStudentLedger();
+    });
+</script>
+{% endblock %}
+

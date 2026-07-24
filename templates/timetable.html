@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}Class Timetable - EduManage ERP{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold mb-1" style="color: var(--primary-blue);">Academic Class Timetable</h2>
+            <p class="text-muted">Monitor period times, teacher schedules, and student routines.</p>
+        </div>
+        <button class="btn btn-outline-secondary" onclick="window.print()"><i class="bi bi-printer me-2"></i>Print Schedule Grid</button>
+    </div>
+
+    <!-- Timetable Grid -->
+    <div class="card custom-card p-4">
+        <h5 class="fw-bold mb-3">Weekly Schedule Overview</h5>
+        <div class="table-responsive">
+            <table class="table table-bordered align-middle text-center small">
+                <thead>
+                    <tr class="table-light">
+                        <th>Day</th>
+                        <th>09:00 - 09:45 AM</th>
+                        <th>10:00 - 10:45 AM</th>
+                        <th>11:00 - 11:45 AM</th>
+                        <th>12:00 - 12:45 PM</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="fw-bold text-start">Sunday</td>
+                        <td><strong class="d-block">Maths</strong>Class 9</td>
+                        <td><strong class="d-block">English</strong>Class 8</td>
+                        <td class="bg-light text-muted">Interval Break</td>
+                        <td><strong class="d-block">Science</strong>Class 7</td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold text-start">Monday</td>
+                        <td><strong class="d-block">English</strong>Class 8</td>
+                        <td><strong class="d-block">Science</strong>Class 9</td>
+                        <td class="bg-light text-muted">Interval Break</td>
+                        <td><strong class="d-block">Maths</strong>Class 6</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

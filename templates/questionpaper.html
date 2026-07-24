@@ -1,0 +1,1290 @@
+{% extends 'base.html' %}
+
+{% block title %}Question Paper — Chapters, Bank & Generator — EduManage ERP{% endblock %}
+
+{% block extra_css %}
+<style>
+/* =========================================================
+   QUESTION PAPER MODULE — PREMIUM DESIGN SYSTEM
+   (Indigo / Sapphire Theme)
+   ========================================================= */
+
+/* --- Header Banner --- */
+.qp-header {
+    background: linear-gradient(135deg, #1e1b4b 0%, #3730a3 50%, #1e1b4b 100%);
+    border-radius: 20px;
+    padding: 28px 32px;
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+}
+.qp-header::before {
+    content: '';
+    position: absolute;
+    top: -50%; right: -10%;
+    width: 350px; height: 350px;
+    background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
+    pointer-events: none;
+}
+.qp-header::after {
+    content: '';
+    position: absolute;
+    bottom: -40%; left: -8%;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 70%);
+    pointer-events: none;
+}
+.qp-header h2 { color: #fff; font-weight: 800; font-size: 1.6rem; margin: 0; }
+.qp-header p  { color: rgba(255,255,255,0.65); margin: 6px 0 0; font-size: 0.9rem; }
+.qp-header .qp-icon-badge {
+    width: 56px; height: 56px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; color: #fff;
+    backdrop-filter: blur(8px);
+}
+
+/* --- Sidebar Navigation --- */
+.qp-sidebar-nav {
+    background: var(--card-bg);
+    border-radius: 18px;
+    padding: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    border: 1px solid rgba(0,0,0,0.06);
+    position: sticky;
+    top: 90px;
+}
+.qp-sidebar-nav .nav-label {
+    font-size: 0.65rem; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: #94a3b8; padding: 8px 12px 4px;
+}
+.qp-nav-btn {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; padding: 11px 14px;
+    border: none; background: transparent;
+    border-radius: 12px; text-align: left;
+    font-size: 0.875rem; font-weight: 600;
+    color: #475569; transition: all 0.22s ease; cursor: pointer;
+}
+.qp-nav-btn:hover { background: rgba(99,102,241,0.08); color: #6366f1; }
+.qp-nav-btn.active {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(99,102,241,0.35);
+}
+.qp-nav-btn .nav-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    background: rgba(99,102,241,0.1);
+    color: #6366f1;
+    transition: all 0.22s ease;
+}
+.qp-nav-btn.active .nav-icon { background: rgba(255,255,255,0.2); color: #fff; }
+.qp-nav-btn .nav-chevron { margin-left: auto; font-size: 0.7rem; opacity: 0; transition: opacity 0.2s; }
+.qp-nav-btn.active .nav-chevron { opacity: 1; }
+
+/* --- Panel --- */
+.qp-panel { display: none; animation: qpFade 0.4s ease; }
+.qp-panel.active { display: block; }
+@keyframes qpFade {
+    from { opacity: 0; transform: translateX(20px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* --- Section Card --- */
+.qp-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+    padding: 28px;
+    margin-bottom: 20px;
+}
+.qp-card h5 { font-weight: 700; font-size: 1rem; margin-bottom: 4px; }
+.qp-card .section-desc { font-size: 0.82rem; color: #94a3b8; margin-bottom: 20px; }
+
+/* --- Buttons --- */
+.btn-qp-primary {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: #fff; border: none; border-radius: 10px;
+    padding: 10px 22px; font-weight: 600; font-size: 0.88rem;
+    transition: all 0.2s;
+}
+.btn-qp-primary:hover {
+    background: linear-gradient(135deg, #4f46e5, #4338ca);
+    color: #fff; transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(99,102,241,0.3);
+}
+.btn-qp-outline {
+    background: transparent;
+    border: 1.5px solid #6366f1; color: #6366f1;
+    border-radius: 10px; padding: 9px 20px;
+    font-weight: 600; font-size: 0.88rem;
+    transition: all 0.2s;
+}
+.btn-qp-outline:hover { background: rgba(99,102,241,0.08); color: #4f46e5; }
+
+/* ==================================================
+   PANEL 1: SUBJECT CHAPTERS — ACCORDION
+   ================================================== */
+.chapter-accordion { list-style: none; padding: 0; margin: 0; }
+.chapter-item {
+    background: var(--card-bg);
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 14px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: box-shadow 0.2s;
+}
+.chapter-item:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.06); }
+.chapter-head {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 20px; cursor: pointer;
+    transition: background 0.2s;
+}
+.chapter-head:hover { background: rgba(99,102,241,0.04); }
+.chapter-head .ch-num {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 0.9rem; color: #fff;
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    flex-shrink: 0;
+}
+.chapter-head .ch-title { font-weight: 700; font-size: 0.95rem; flex: 1; }
+.chapter-head .ch-progress-mini {
+    width: 80px; height: 6px; border-radius: 6px;
+    background: #e2e8f0; overflow: hidden;
+}
+.chapter-head .ch-progress-mini .bar {
+    height: 100%; border-radius: 6px;
+    transition: width 0.6s ease;
+}
+.chapter-head .ch-chevron {
+    font-size: 0.85rem; color: #94a3b8;
+    transition: transform 0.3s;
+}
+.chapter-item.open .ch-chevron { transform: rotate(180deg); }
+.chapter-body {
+    max-height: 0; overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.3s ease;
+    padding: 0 20px;
+}
+.chapter-item.open .chapter-body {
+    max-height: 600px;
+    padding: 0 20px 16px;
+}
+.topic-tag {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 5px 12px; border-radius: 20px;
+    font-size: 0.78rem; font-weight: 600;
+    background: #eef2ff; color: #4f46e5;
+    margin: 3px 3px 3px 0;
+}
+.topic-tag .remove-topic {
+    cursor: pointer; color: #a5b4fc; font-size: 0.7rem;
+    transition: color 0.2s;
+}
+.topic-tag .remove-topic:hover { color: #dc2626; }
+
+/* Progress colors */
+.prog-green  { background: #16a34a; }
+.prog-yellow { background: #d97706; }
+.prog-red    { background: #dc2626; }
+.prog-blue   { background: #2563eb; }
+
+/* ==================================================
+   PANEL 2: QUESTION BANK — CARD GRID
+   ================================================== */
+.qb-filters {
+    background: var(--card-bg);
+    border-radius: 14px;
+    padding: 16px 20px;
+    border: 1px solid rgba(0,0,0,0.06);
+    margin-bottom: 20px;
+}
+.qb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 16px; }
+.qb-question-card {
+    background: var(--card-bg);
+    border-radius: 14px;
+    border: 1px solid rgba(0,0,0,0.06);
+    padding: 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    position: relative;
+}
+.qb-question-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+.qb-question-card .q-type-badge {
+    display: inline-flex; padding: 4px 12px;
+    border-radius: 20px; font-size: 0.72rem;
+    font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.badge-mcq      { background: #dbeafe; color: #2563eb; }
+.badge-creative { background: #fef3c7; color: #d97706; }
+.badge-short    { background: #e0f2fe; color: #0284c7; }
+.badge-fill     { background: #ede9fe; color: #7c3aed; }
+
+.qb-question-card .q-diff-badge {
+    display: inline-flex; padding: 3px 10px;
+    border-radius: 20px; font-size: 0.7rem;
+    font-weight: 700;
+}
+.diff-easy   { background: #dcfce7; color: #16a34a; }
+.diff-medium { background: #fef3c7; color: #d97706; }
+.diff-hard   { background: #fee2e2; color: #dc2626; }
+
+.qb-question-card .q-text {
+    font-size: 0.9rem; font-weight: 500;
+    line-height: 1.5; margin: 12px 0;
+    max-height: 72px; overflow: hidden;
+}
+.qb-question-card .q-chapter-tag {
+    font-size: 0.75rem; color: #94a3b8; font-weight: 600;
+}
+.qb-question-card .q-select-check {
+    position: absolute; top: 12px; right: 12px;
+    width: 24px; height: 24px; border-radius: 6px;
+    border: 2px solid #e2e8f0; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+}
+.qb-question-card .q-select-check.selected {
+    background: #6366f1; border-color: #6366f1; color: #fff;
+}
+
+/* ==================================================
+   PANEL 3: CREATE QUESTION PAPER — SPLIT SCREEN
+   ================================================== */
+.paper-builder { display: flex; gap: 20px; min-height: 600px; }
+.paper-left { flex: 1; min-width: 0; }
+.paper-right {
+    width: 380px; flex-shrink: 0;
+    background: #fff;
+    border: 2px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    position: sticky;
+    top: 90px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+}
+.paper-preview-header {
+    background: linear-gradient(135deg, #1e1b4b, #3730a3);
+    padding: 20px; color: #fff; text-align: center;
+}
+.paper-preview-header h6 { font-weight: 800; margin: 0; font-size: 0.95rem; }
+.paper-preview-header p { color: rgba(255,255,255,0.65); font-size: 0.78rem; margin: 4px 0 0; }
+.paper-preview-body { padding: 20px; }
+.preview-q-item {
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    margin-bottom: 8px;
+    font-size: 0.82rem;
+    cursor: grab;
+    transition: background 0.2s, box-shadow 0.2s;
+    display: flex; align-items: flex-start; gap: 8px;
+}
+.preview-q-item:hover { background: #f8fafc; }
+.preview-q-item.dragging {
+    opacity: 0.5;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+.preview-q-num {
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    background: #6366f1; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 0.72rem;
+    flex-shrink: 0;
+}
+.preview-q-text { flex: 1; line-height: 1.4; }
+.preview-q-marks {
+    font-weight: 700; font-size: 0.75rem;
+    color: #6366f1; white-space: nowrap;
+}
+.preview-q-remove {
+    cursor: pointer; color: #cbd5e1; font-size: 0.85rem;
+    transition: color 0.2s;
+}
+.preview-q-remove:hover { color: #dc2626; }
+
+/* Gen Mode Toggle */
+.gen-mode-toggle {
+    display: inline-flex; border-radius: 12px;
+    overflow: hidden; border: 2px solid #e2e8f0;
+}
+.gen-mode-toggle button {
+    padding: 8px 20px; border: none;
+    background: transparent; font-weight: 600;
+    font-size: 0.82rem; cursor: pointer;
+    transition: all 0.2s;
+}
+.gen-mode-toggle button.active {
+    background: linear-gradient(135deg, #6366f1, #4f46e5);
+    color: #fff;
+}
+
+/* --- Dark Theme --- */
+body.dark-theme .qp-sidebar-nav,
+body.dark-theme .qp-card,
+body.dark-theme .chapter-item,
+body.dark-theme .qb-filters,
+body.dark-theme .qb-question-card {
+    background: var(--card-bg);
+    border-color: rgba(255,255,255,0.08);
+}
+body.dark-theme .qp-nav-btn { color: #94a3b8; }
+body.dark-theme .qp-nav-btn:hover { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+body.dark-theme .chapter-head:hover { background: rgba(99,102,241,0.08); }
+body.dark-theme .topic-tag { background: rgba(99,102,241,0.15); color: #a5b4fc; }
+body.dark-theme .paper-right { background: #1e293b; border-color: rgba(255,255,255,0.08); }
+body.dark-theme .preview-q-item { border-color: rgba(255,255,255,0.08); }
+body.dark-theme .preview-q-item:hover { background: rgba(255,255,255,0.04); }
+body.dark-theme .gen-mode-toggle { border-color: rgba(255,255,255,0.1); }
+body.dark-theme .gen-mode-toggle button { color: #94a3b8; }
+
+/* --- Print --- */
+@media print {
+    .qp-sidebar-nav, .qp-header, .no-print, .btn, .qb-filters,
+    .paper-left { display: none !important; }
+    .qp-panel { display: block !important; animation: none !important; opacity: 1 !important; visibility: visible !important; transform: none !important; }
+    .paper-right {
+        width: 100% !important; position: static !important;
+        max-height: none !important; border: none !important;
+    }
+    body, html { background: #fff !important; height: auto !important; }
+    * { animation: none !important; transition: none !important; }
+}
+
+@media (max-width: 991px) {
+    .qp-sidebar-nav { position: static; margin-bottom: 20px; }
+    .paper-builder { flex-direction: column; }
+    .paper-right { width: 100%; position: static; max-height: none; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+
+    <!-- ====== Header Banner ====== -->
+    <div class="qp-header">
+        <div class="d-flex align-items-center gap-3">
+            <div class="qp-icon-badge">
+                <i class="bi bi-file-earmark-pdf"></i>
+            </div>
+            <div>
+                <h2>Question Paper Module</h2>
+                <p>পাঠ্যক্রম ম্যাপিং, প্রশ্ন ব্যাংক এবং স্বয়ংক্রিয় প্রশ্নপত্র জেনারেশন</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== Layout ====== -->
+    <div class="row g-4">
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <div class="qp-sidebar-nav">
+                <div class="nav-label">Curriculum</div>
+                <button class="qp-nav-btn active" onclick="qpSwitch('chapters', this)">
+                    <span class="nav-icon"><i class="bi bi-list-ol"></i></span>
+                    Subject Chapters
+                    <span class="nav-chevron"><i class="bi bi-chevron-right"></i></span>
+                </button>
+
+                <div class="nav-label mt-2">Question Management</div>
+                <button class="qp-nav-btn" onclick="qpSwitch('bank', this)">
+                    <span class="nav-icon"><i class="bi bi-database"></i></span>
+                    Question Bank
+                    <span class="nav-chevron"><i class="bi bi-chevron-right"></i></span>
+                </button>
+                <button class="qp-nav-btn" onclick="qpSwitch('create', this)">
+                    <span class="nav-icon"><i class="bi bi-file-earmark-plus"></i></span>
+                    Create Question Paper
+                    <span class="nav-chevron"><i class="bi bi-chevron-right"></i></span>
+                </button>
+
+                <div class="nav-label mt-2">Dynamic Question Builder</div>
+                <a href="{% url 'create_subject_question' 'bangla' %}" class="qp-nav-btn text-decoration-none">
+                    <span class="nav-icon"><i class="bi bi-pencil-square"></i></span>
+                    Bangla Question
+                </a>
+                <a href="{% url 'create_subject_question' 'english' %}" class="qp-nav-btn text-decoration-none">
+                    <span class="nav-icon"><i class="bi bi-pencil-square"></i></span>
+                    English Question
+                </a>
+                <a href="{% url 'create_subject_question' 'math' %}" class="qp-nav-btn text-decoration-none">
+                    <span class="nav-icon"><i class="bi bi-pencil-square"></i></span>
+                    Math Question
+                </a>
+                <a href="{% url 'create_subject_question' 'science' %}" class="qp-nav-btn text-decoration-none">
+                    <span class="nav-icon"><i class="bi bi-pencil-square"></i></span>
+                    Science Question
+                </a>
+            </div>
+        </div>
+
+        <!-- Panels -->
+        <div class="col-lg-9">
+
+            <!-- ============================================
+                 PANEL 1: SUBJECT CHAPTERS
+                 ============================================ -->
+            <div class="qp-panel active" id="panel-chapters">
+                <div class="qp-card">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                        <div>
+                            <h5><i class="bi bi-list-ol me-2" style="color:#6366f1"></i>Subject Chapters</h5>
+                            <div class="section-desc">বিষয়ভিত্তিক অধ্যায় ও টপিক ম্যাপিং — Completion Tracking সহ</div>
+                        </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="row g-3 mb-4 no-print">
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Class</label>
+                            <select class="form-select" id="chClassSelect" onchange="renderChapters()">
+                                <option>৬ষ্ঠ</option><option>৭ম</option><option>৮ম</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Subject</label>
+                            <select class="form-select" id="chSubjectSelect" onchange="renderChapters()">
+                                <option>বাংলা</option><option>English</option><option>গণিত</option>
+                                <option>বিজ্ঞান</option><option>সামাজিক বিজ্ঞান</option>
+                                <option>ধর্ম ও নৈতিক শিক্ষা</option><option>ICT</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button class="btn-qp-primary" data-bs-toggle="modal" data-bs-target="#addChapterModal">
+                                <i class="bi bi-plus-lg me-1"></i> Add Chapter
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Accordion List -->
+                    <div id="chapterAccordion" class="chapter-accordion"></div>
+
+                    <div id="chEmptyState" class="text-center py-5" style="display:none;">
+                        <i class="bi bi-journal-bookmark" style="font-size:3rem; color:#cbd5e1;"></i>
+                        <p class="text-muted mt-3">কোনো অধ্যায় যোগ হয়নি — Add Chapter বাটনে ক্লিক করুন</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================
+                 PANEL 2: QUESTION BANK
+                 ============================================ -->
+            <div class="qp-panel" id="panel-bank">
+                <div class="qp-card">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                        <div>
+                            <h5><i class="bi bi-database me-2" style="color:#6366f1"></i>Question Bank</h5>
+                            <div class="section-desc">সেন্ট্রাল প্রশ্ন ভল্ট — অধ্যায়, ধরন ও কঠিনতা অনুযায়ী ফিল্টার করুন</div>
+                        </div>
+                        <button class="btn-qp-primary no-print" data-bs-toggle="modal" data-bs-target="#addQuestionModal">
+                            <i class="bi bi-plus-lg me-1"></i> Add Question
+                        </button>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="qb-filters no-print">
+                        <div class="row g-3">
+                            <div class="col-md-2">
+                                <select class="form-select form-select-sm" id="qbClassFilter" onchange="renderQuestionBank()">
+                                    <option>৬ষ্ঠ</option><option>৭ম</option><option>৮ম</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select form-select-sm" id="qbSubjectFilter" onchange="renderQuestionBank()">
+                                    <option value="">All Subjects</option>
+                                    <option>বাংলা</option><option>English</option><option>গণিত</option>
+                                    <option>বিজ্ঞান</option><option>সামাজিক বিজ্ঞান</option>
+                                    <option>ধর্ম ও নৈতিক শিক্ষা</option><option>ICT</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select form-select-sm" id="qbTypeFilter" onchange="renderQuestionBank()">
+                                    <option value="">All Types</option>
+                                    <option>MCQ</option><option>Creative</option><option>Short</option><option>Fill-in</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select form-select-sm" id="qbDiffFilter" onchange="renderQuestionBank()">
+                                    <option value="">All Levels</option>
+                                    <option>Easy</option><option>Medium</option><option>Hard</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select form-select-sm" id="qbChapterFilter" onchange="renderQuestionBank()">
+                                    <option value="">All Chapters</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="input-group input-group-sm">
+                                    <input type="text" class="form-control" id="qbSearch" placeholder="Search..." oninput="renderQuestionBank()">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats Bar -->
+                    <div class="d-flex gap-3 mb-3 flex-wrap" id="qbStats">
+                        <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-2" id="qbTotalCount">Total: 0</span>
+                        <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2" id="qbEasyCount">Easy: 0</span>
+                        <span class="badge bg-warning-subtle text-warning rounded-pill px-3 py-2" id="qbMediumCount">Medium: 0</span>
+                        <span class="badge bg-danger-subtle text-danger rounded-pill px-3 py-2" id="qbHardCount">Hard: 0</span>
+                    </div>
+
+                    <!-- Question Card Grid -->
+                    <div class="qb-grid" id="qbGrid"></div>
+
+                    <div id="qbEmptyState" class="text-center py-5" style="display:none;">
+                        <i class="bi bi-question-circle" style="font-size:3rem; color:#cbd5e1;"></i>
+                        <p class="text-muted mt-3">কোনো প্রশ্ন নেই — Add Question বাটনে ক্লিক করুন</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================
+                 PANEL 3: CREATE QUESTION PAPER
+                 ============================================ -->
+            <div class="qp-panel" id="panel-create">
+                <div class="qp-card" style="padding:20px;">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                        <div>
+                            <h5><i class="bi bi-file-earmark-plus me-2" style="color:#6366f1"></i>Create Question Paper</h5>
+                            <div class="section-desc">প্রশ্ন ব্যাংক থেকে সিলেক্ট করুন বা Auto-Generate করুন — লাইভ প্রিভিউ সহ</div>
+                        </div>
+                        <div class="gen-mode-toggle no-print">
+                            <button class="active" id="modeManual" onclick="setGenMode('manual')">
+                                <i class="bi bi-hand-index me-1"></i> Manual
+                            </button>
+                            <button id="modeAuto" onclick="setGenMode('auto')">
+                                <i class="bi bi-cpu me-1"></i> Auto Generate
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="paper-builder">
+                        <!-- LEFT: Config / Selection Panel -->
+                        <div class="paper-left">
+                            <!-- Header Config -->
+                            <div class="qp-card" style="padding:18px; margin-bottom:16px;">
+                                <h6 class="fw-bold mb-3" style="font-size:0.88rem; color:#475569;">
+                                    <i class="bi bi-card-heading me-1"></i> Paper Header
+                                </h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold" style="font-size:0.82rem;">Institution Name</label>
+                                        <input type="text" class="form-control form-control-sm" id="ppInstName" value="গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label fw-semibold" style="font-size:0.82rem;">Exam Name</label>
+                                        <input type="text" class="form-control form-control-sm" id="ppExamName" value="প্রথম সাময়িক পরীক্ষা — ২০২৬">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-semibold" style="font-size:0.82rem;">Subject</label>
+                                        <select class="form-select form-select-sm" id="ppSubject">
+                                            <option>বাংলা</option><option>English</option><option>গণিত</option>
+                                            <option>বিজ্ঞান</option><option>সামাজিক বিজ্ঞান</option>
+                                            <option>ধর্ম ও নৈতিক শিক্ষা</option><option>ICT</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-semibold" style="font-size:0.82rem;">Class</label>
+                                        <select class="form-select form-select-sm" id="ppClass">
+                                            <option>৬ষ্ঠ</option><option>৭ম</option><option>৮ম</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-semibold" style="font-size:0.82rem;">Duration</label>
+                                        <input type="text" class="form-control form-control-sm" id="ppDuration" value="২ ঘণ্টা ৩০ মিনিট">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="form-label fw-semibold" style="font-size:0.82rem;">Full Marks</label>
+                                        <input type="number" class="form-control form-control-sm" id="ppFullMarks" value="100">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- MANUAL MODE: Select from Bank -->
+                            <div id="manualModePanel">
+                                <div class="qp-card" style="padding:18px; margin-bottom:16px;">
+                                    <h6 class="fw-bold mb-3" style="font-size:0.88rem; color:#475569;">
+                                        <i class="bi bi-hand-index me-1"></i> Select Questions from Bank
+                                    </h6>
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-md-4">
+                                            <select class="form-select form-select-sm" id="ppFilterType" onchange="loadPaperQuestions()">
+                                                <option value="">All Types</option>
+                                                <option>MCQ</option><option>Creative</option><option>Short</option><option>Fill-in</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <select class="form-select form-select-sm" id="ppFilterDiff" onchange="loadPaperQuestions()">
+                                                <option value="">All Levels</option>
+                                                <option>Easy</option><option>Medium</option><option>Hard</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <select class="form-select form-select-sm" id="ppFilterChapter" onchange="loadPaperQuestions()">
+                                                <option value="">All Chapters</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div id="ppQuestionList" style="max-height:400px; overflow-y:auto;"></div>
+                                </div>
+                            </div>
+
+                            <!-- AUTO MODE: Config -->
+                            <div id="autoModePanel" style="display:none;">
+                                <div class="qp-card" style="padding:18px; margin-bottom:16px;">
+                                    <h6 class="fw-bold mb-3" style="font-size:0.88rem; color:#475569;">
+                                        <i class="bi bi-cpu me-1"></i> Auto-Generate Configuration
+                                    </h6>
+                                    <div class="row g-3">
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-semibold" style="font-size:0.82rem;">MCQ Questions</label>
+                                            <input type="number" class="form-control form-control-sm" id="autoMCQ" value="10" min="0">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-semibold" style="font-size:0.82rem;">Short Questions</label>
+                                            <input type="number" class="form-control form-control-sm" id="autoShort" value="5" min="0">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label fw-semibold" style="font-size:0.82rem;">Creative Questions</label>
+                                            <input type="number" class="form-control form-control-sm" id="autoCreative" value="5" min="0">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-semibold" style="font-size:0.82rem;">Difficulty Mix</label>
+                                            <select class="form-select form-select-sm" id="autoDiffMix">
+                                                <option>Balanced (Easy 30% + Medium 40% + Hard 30%)</option>
+                                                <option>Easy-Heavy (50% + 30% + 20%)</option>
+                                                <option>Hard-Heavy (20% + 30% + 50%)</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 d-flex align-items-end">
+                                            <button class="btn-qp-primary w-100" onclick="autoGeneratePaper()">
+                                                <i class="bi bi-stars me-1"></i> Generate Paper
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Export -->
+                            <div class="d-flex gap-3 no-print">
+                                <button class="btn-qp-primary" onclick="window.print()">
+                                    <i class="bi bi-printer me-1"></i> Print Paper
+                                </button>
+                                <button class="btn-qp-outline" onclick="exportPaperPDF()">
+                                    <i class="bi bi-file-earmark-pdf me-1"></i> Download PDF
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- RIGHT: Live Paper Preview -->
+                        <div class="paper-right" id="paperPreview">
+                            <div class="paper-preview-header">
+                                <h6 id="pvInstName">গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়</h6>
+                                <p id="pvExamName">প্রথম সাময়িক পরীক্ষা — ২০২৬</p>
+                                <div class="d-flex justify-content-center gap-4 mt-2" style="font-size:0.72rem; color:rgba(255,255,255,0.6);">
+                                    <span id="pvSubject">বিষয়: —</span>
+                                    <span id="pvClass">শ্রেণি: —</span>
+                                    <span id="pvDuration">সময়: —</span>
+                                    <span id="pvFullMarks">পূর্ণমান: —</span>
+                                </div>
+                            </div>
+                            <div class="paper-preview-body" id="pvBody">
+                                <div class="text-center py-4 text-muted" style="font-size:0.82rem;">
+                                    <i class="bi bi-file-earmark-text" style="font-size:2rem; color:#cbd5e1;"></i>
+                                    <p class="mt-2">প্রশ্ন সিলেক্ট করলে এখানে লাইভ প্রিভিউ দেখা যাবে</p>
+                                </div>
+                            </div>
+                            <div class="text-center p-3 border-top" style="font-size:0.75rem; color:#94a3b8;">
+                                Total Questions: <strong id="pvQCount">0</strong> &nbsp;|&nbsp;
+                                Total Marks: <strong id="pvTotalMarks">0</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ====== ADD CHAPTER MODAL ====== -->
+<div class="modal fade" id="addChapterModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow" style="border-radius:16px;">
+            <div class="modal-header border-0 pb-0" style="background:linear-gradient(135deg,#6366f1,#4f46e5); border-radius:16px 16px 0 0; padding:20px 24px;">
+                <h5 class="modal-title fw-bold text-white"><i class="bi bi-journal-plus me-2"></i>Add Chapter</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="addChapterForm" onsubmit="saveChapter(event)">
+                <div class="modal-body py-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Chapter Number</label>
+                        <input type="number" class="form-control" id="chNum" min="1" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Chapter Title</label>
+                        <input type="text" class="form-control" id="chTitle" placeholder="যেমন: সংখ্যা পদ্ধতি" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Short Description</label>
+                        <textarea class="form-control" rows="2" id="chDesc" placeholder="অধ্যায়ের সংক্ষিপ্ত বিবরণ..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Topics (comma-separated)</label>
+                        <input type="text" class="form-control" id="chTopics" placeholder="প্রাকৃতিক সংখ্যা, মৌলিক সংখ্যা, ল.সা.গু">
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn-qp-primary rounded-pill px-4"><i class="bi bi-check2 me-1"></i> Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ====== ADD QUESTION MODAL ====== -->
+<div class="modal fade" id="addQuestionModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content border-0 shadow" style="border-radius:16px;">
+            <div class="modal-header border-0 pb-0" style="background:linear-gradient(135deg,#6366f1,#4f46e5); border-radius:16px 16px 0 0; padding:20px 24px;">
+                <h5 class="modal-title fw-bold text-white"><i class="bi bi-patch-question me-2"></i>Add Question to Bank</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="addQuestionForm" onsubmit="saveQuestion(event)">
+                <div class="modal-body py-4">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Class</label>
+                            <select class="form-select" id="aqClass">
+                                <option>৬ষ্ঠ</option><option>৭ম</option><option>৮ম</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Subject</label>
+                            <select class="form-select" id="aqSubject">
+                                <option>বাংলা</option><option>English</option><option>গণিত</option>
+                                <option>বিজ্ঞান</option><option>সামাজিক বিজ্ঞান</option>
+                                <option>ধর্ম ও নৈতিক শিক্ষা</option><option>ICT</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Chapter</label>
+                            <select class="form-select" id="aqChapter"><option value="">— Select —</option></select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Question Type</label>
+                            <select class="form-select" id="aqType">
+                                <option>MCQ</option><option>Creative</option><option>Short</option><option>Fill-in</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Difficulty</label>
+                            <select class="form-select" id="aqDiff">
+                                <option>Easy</option><option>Medium</option><option>Hard</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">Marks</label>
+                            <input type="number" class="form-control" id="aqMarks" value="1" min="1">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Question Text</label>
+                            <textarea class="form-control" rows="3" id="aqText" placeholder="প্রশ্নটি এখানে লিখুন..." required></textarea>
+                        </div>
+                        <div class="col-12" id="mcqOptionsWrap">
+                            <label class="form-label fw-semibold">MCQ Options (one per line)</label>
+                            <textarea class="form-control" rows="4" id="aqOptions" placeholder="ক) অপশন ১&#10;খ) অপশন ২&#10;গ) অপশন ৩&#10;ঘ) অপশন ৪"></textarea>
+                        </div>
+                        <div class="col-md-6" id="mcqAnswerWrap">
+                            <label class="form-label fw-semibold">Correct Answer</label>
+                            <input type="text" class="form-control" id="aqAnswer" placeholder="ক">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn-qp-primary rounded-pill px-4"><i class="bi bi-check2 me-1"></i> Save Question</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/* =========================================================
+   QUESTION PAPER MODULE — JAVASCRIPT ENGINE
+   ========================================================= */
+
+const QP_KEYS = { chapters: 'qp_chapters', questions: 'qp_questions', paper: 'qp_paper' };
+const QP_SUBJECTS = ['বাংলা','English','গণিত','বিজ্ঞান','সামাজিক বিজ্ঞান','ধর্ম ও নৈতিক শিক্ষা','ICT'];
+
+function qpGet(key, fb) { try { return JSON.parse(localStorage.getItem(key)) || fb; } catch { return fb; } }
+function qpSet(key, v) { localStorage.setItem(key, JSON.stringify(v)); }
+
+// ---- Tab Switch ----
+function qpSwitch(id, btn) {
+    document.querySelectorAll('.qp-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.qp-nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + id).classList.add('active');
+    btn.classList.add('active');
+    if (id === 'bank') renderQuestionBank();
+    if (id === 'create') { loadPaperQuestions(); updatePreviewHeader(); }
+}
+
+// ================================================================
+//  PANEL 1: SUBJECT CHAPTERS
+// ================================================================
+function getChapterKey() {
+    return `${document.getElementById('chClassSelect').value}_${document.getElementById('chSubjectSelect').value}`;
+}
+
+function saveChapter(e) {
+    e.preventDefault();
+    const key = getChapterKey();
+    const chapters = qpGet(QP_KEYS.chapters, {});
+    if (!chapters[key]) chapters[key] = [];
+
+    chapters[key].push({
+        id: Date.now(),
+        num: parseInt(document.getElementById('chNum').value),
+        title: document.getElementById('chTitle').value,
+        desc: document.getElementById('chDesc').value,
+        topics: document.getElementById('chTopics').value.split(',').map(t => t.trim()).filter(Boolean),
+        progress: 0,
+    });
+
+    // Sort by chapter number
+    chapters[key].sort((a, b) => a.num - b.num);
+    qpSet(QP_KEYS.chapters, chapters);
+
+    bootstrap.Modal.getInstance(document.getElementById('addChapterModal')).hide();
+    document.getElementById('addChapterForm').reset();
+    renderChapters();
+}
+
+function renderChapters() {
+    const key = getChapterKey();
+    const chapters = qpGet(QP_KEYS.chapters, {})[key] || [];
+    const container = document.getElementById('chapterAccordion');
+    const empty = document.getElementById('chEmptyState');
+
+    if (!chapters.length) {
+        container.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+    }
+    empty.style.display = 'none';
+
+    const progColors = ['prog-blue','prog-green','prog-yellow','prog-red'];
+
+    container.innerHTML = chapters.map(ch => {
+        const pCol = ch.progress >= 75 ? 'prog-green' : ch.progress >= 40 ? 'prog-yellow' : ch.progress > 0 ? 'prog-blue' : 'prog-red';
+        const topicHtml = ch.topics.map(t =>
+            `<span class="topic-tag">${t}<span class="remove-topic" onclick="removeTopic(${ch.id},'${t.replace(/'/g, "\\'")}')">×</span></span>`
+        ).join('');
+
+        return `
+        <div class="chapter-item" id="ch-${ch.id}">
+            <div class="chapter-head" onclick="toggleChapter(${ch.id})">
+                <div class="ch-num">${ch.num}</div>
+                <div class="ch-title">${ch.title}</div>
+                <div class="d-flex align-items-center gap-2">
+                    <span style="font-size:0.75rem; font-weight:700; color:${ch.progress>=75?'#16a34a':ch.progress>=40?'#d97706':'#94a3b8'};">${ch.progress}%</span>
+                    <div class="ch-progress-mini"><div class="bar ${pCol}" style="width:${ch.progress}%"></div></div>
+                </div>
+                <i class="bi bi-chevron-down ch-chevron"></i>
+            </div>
+            <div class="chapter-body">
+                ${ch.desc ? `<p style="font-size:0.85rem; color:#64748b; margin-bottom:12px;">${ch.desc}</p>` : ''}
+                <div class="mb-3">
+                    <strong style="font-size:0.8rem; color:#475569;">Topics:</strong>
+                    <div class="mt-1">${topicHtml || '<span class="text-muted" style="font-size:0.82rem;">No topics added</span>'}</div>
+                </div>
+                <div class="d-flex gap-2 align-items-center mb-2">
+                    <input type="text" class="form-control form-control-sm" placeholder="নতুন টপিক..." id="newTopic-${ch.id}" style="max-width:200px;">
+                    <button class="btn btn-sm btn-qp-outline" onclick="addTopic(${ch.id})"><i class="bi bi-plus"></i></button>
+                </div>
+                <div class="d-flex gap-2 align-items-center">
+                    <label style="font-size:0.8rem; font-weight:600; color:#475569;">Completion:</label>
+                    <input type="range" min="0" max="100" value="${ch.progress}" style="flex:1; accent-color:#6366f1;" onchange="updateProgress(${ch.id}, this.value)">
+                    <span style="font-size:0.8rem; font-weight:700; min-width:35px;">${ch.progress}%</span>
+                </div>
+                <div class="d-flex gap-2 mt-3">
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteChapter(${ch.id})"><i class="bi bi-trash me-1"></i>Delete</button>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function toggleChapter(id) {
+    const el = document.getElementById('ch-' + id);
+    el.classList.toggle('open');
+}
+
+function addTopic(chId) {
+    const inp = document.getElementById('newTopic-' + chId);
+    if (!inp.value.trim()) return;
+    const key = getChapterKey();
+    const chapters = qpGet(QP_KEYS.chapters, {});
+    const ch = chapters[key]?.find(c => c.id === chId);
+    if (ch) { ch.topics.push(inp.value.trim()); qpSet(QP_KEYS.chapters, chapters); renderChapters(); }
+}
+
+function removeTopic(chId, topic) {
+    const key = getChapterKey();
+    const chapters = qpGet(QP_KEYS.chapters, {});
+    const ch = chapters[key]?.find(c => c.id === chId);
+    if (ch) { ch.topics = ch.topics.filter(t => t !== topic); qpSet(QP_KEYS.chapters, chapters); renderChapters(); }
+}
+
+function updateProgress(chId, val) {
+    const key = getChapterKey();
+    const chapters = qpGet(QP_KEYS.chapters, {});
+    const ch = chapters[key]?.find(c => c.id === chId);
+    if (ch) { ch.progress = parseInt(val); qpSet(QP_KEYS.chapters, chapters); renderChapters(); }
+}
+
+function deleteChapter(id) {
+    if (!confirm('এই অধ্যায়টি মুছে ফেলতে চান?')) return;
+    const key = getChapterKey();
+    const chapters = qpGet(QP_KEYS.chapters, {});
+    if (chapters[key]) { chapters[key] = chapters[key].filter(c => c.id !== id); qpSet(QP_KEYS.chapters, chapters); renderChapters(); }
+}
+
+// ================================================================
+//  PANEL 2: QUESTION BANK
+// ================================================================
+// Toggle MCQ options visibility
+document.getElementById('aqType')?.addEventListener('change', function() {
+    const isMCQ = this.value === 'MCQ';
+    document.getElementById('mcqOptionsWrap').style.display = isMCQ ? '' : 'none';
+    document.getElementById('mcqAnswerWrap').style.display = isMCQ ? '' : 'none';
+    document.getElementById('aqMarks').value = isMCQ ? 1 : (this.value === 'Creative' ? 10 : 5);
+});
+
+function saveQuestion(e) {
+    e.preventDefault();
+    const questions = qpGet(QP_KEYS.questions, []);
+    questions.push({
+        id: Date.now(),
+        cls: document.getElementById('aqClass').value,
+        subject: document.getElementById('aqSubject').value,
+        chapter: document.getElementById('aqChapter').value,
+        type: document.getElementById('aqType').value,
+        difficulty: document.getElementById('aqDiff').value,
+        marks: parseInt(document.getElementById('aqMarks').value) || 1,
+        text: document.getElementById('aqText').value,
+        options: document.getElementById('aqOptions').value,
+        answer: document.getElementById('aqAnswer').value,
+    });
+    qpSet(QP_KEYS.questions, questions);
+
+    bootstrap.Modal.getInstance(document.getElementById('addQuestionModal')).hide();
+    document.getElementById('addQuestionForm').reset();
+    renderQuestionBank();
+    qpToast('✅ প্রশ্ন সফলভাবে যোগ হয়েছে!');
+}
+
+function renderQuestionBank() {
+    const allQ = qpGet(QP_KEYS.questions, []);
+    const cls = document.getElementById('qbClassFilter').value;
+    const subj = document.getElementById('qbSubjectFilter').value;
+    const type = document.getElementById('qbTypeFilter').value;
+    const diff = document.getElementById('qbDiffFilter').value;
+    const search = document.getElementById('qbSearch').value.toLowerCase();
+
+    let filtered = allQ.filter(q => q.cls === cls);
+    if (subj) filtered = filtered.filter(q => q.subject === subj);
+    if (type) filtered = filtered.filter(q => q.type === type);
+    if (diff) filtered = filtered.filter(q => q.difficulty === diff);
+    if (search) filtered = filtered.filter(q => q.text.toLowerCase().includes(search));
+
+    // Stats
+    const easy = filtered.filter(q => q.difficulty === 'Easy').length;
+    const med = filtered.filter(q => q.difficulty === 'Medium').length;
+    const hard = filtered.filter(q => q.difficulty === 'Hard').length;
+    document.getElementById('qbTotalCount').textContent = `Total: ${filtered.length}`;
+    document.getElementById('qbEasyCount').textContent = `Easy: ${easy}`;
+    document.getElementById('qbMediumCount').textContent = `Medium: ${med}`;
+    document.getElementById('qbHardCount').textContent = `Hard: ${hard}`;
+
+    const grid = document.getElementById('qbGrid');
+    const empty = document.getElementById('qbEmptyState');
+
+    if (!filtered.length) { grid.innerHTML = ''; empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+
+    const typeBadge = { MCQ: 'badge-mcq', Creative: 'badge-creative', Short: 'badge-short', 'Fill-in': 'badge-fill' };
+    const diffBadge = { Easy: 'diff-easy', Medium: 'diff-medium', Hard: 'diff-hard' };
+
+    grid.innerHTML = filtered.map(q => `
+        <div class="qb-question-card">
+            <div class="q-select-check" data-qid="${q.id}" onclick="toggleQSelect(this)" title="Select for paper">
+                <i class="bi bi-check" style="display:none;"></i>
+            </div>
+            <div class="d-flex gap-2 mb-2 flex-wrap">
+                <span class="q-type-badge ${typeBadge[q.type] || 'badge-mcq'}">${q.type}</span>
+                <span class="q-diff-badge ${diffBadge[q.difficulty] || 'diff-easy'}">${q.difficulty}</span>
+                <span class="badge bg-light text-dark rounded-pill" style="font-size:0.72rem;">${q.marks} marks</span>
+            </div>
+            <div class="q-text">${q.text}</div>
+            ${q.type === 'MCQ' && q.options ? `<div style="font-size:0.78rem; color:#64748b; margin-top:4px; white-space:pre-line;">${q.options}</div>` : ''}
+            <div class="d-flex justify-content-between align-items-center mt-2">
+                <span class="q-chapter-tag"><i class="bi bi-bookmark me-1"></i>${q.chapter || q.subject}</span>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteQuestion(${q.id})" style="font-size:0.72rem;"><i class="bi bi-trash"></i></button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function deleteQuestion(id) {
+    if (!confirm('এই প্রশ্নটি মুছে ফেলতে চান?')) return;
+    let questions = qpGet(QP_KEYS.questions, []);
+    questions = questions.filter(q => q.id !== id);
+    qpSet(QP_KEYS.questions, questions);
+    renderQuestionBank();
+}
+
+function toggleQSelect(el) {
+    el.classList.toggle('selected');
+    const icon = el.querySelector('i');
+    icon.style.display = el.classList.contains('selected') ? '' : 'none';
+}
+
+// ================================================================
+//  PANEL 3: CREATE QUESTION PAPER
+// ================================================================
+let paperQuestions = []; // selected questions for the paper
+
+function setGenMode(mode) {
+    document.getElementById('modeManual').classList.toggle('active', mode === 'manual');
+    document.getElementById('modeAuto').classList.toggle('active', mode === 'auto');
+    document.getElementById('manualModePanel').style.display = mode === 'manual' ? '' : 'none';
+    document.getElementById('autoModePanel').style.display = mode === 'auto' ? '' : 'none';
+}
+
+function updatePreviewHeader() {
+    document.getElementById('pvInstName').textContent = document.getElementById('ppInstName').value;
+    document.getElementById('pvExamName').textContent = document.getElementById('ppExamName').value;
+    document.getElementById('pvSubject').textContent = 'বিষয়: ' + document.getElementById('ppSubject').value;
+    document.getElementById('pvClass').textContent = 'শ্রেণি: ' + document.getElementById('ppClass').value;
+    document.getElementById('pvDuration').textContent = 'সময়: ' + document.getElementById('ppDuration').value;
+    document.getElementById('pvFullMarks').textContent = 'পূর্ণমান: ' + document.getElementById('ppFullMarks').value;
+}
+
+// Bind header inputs
+['ppInstName','ppExamName','ppSubject','ppClass','ppDuration','ppFullMarks'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', updatePreviewHeader);
+    document.getElementById(id)?.addEventListener('change', updatePreviewHeader);
+});
+
+function loadPaperQuestions() {
+    const cls = document.getElementById('ppClass').value;
+    const subj = document.getElementById('ppSubject').value;
+    const type = document.getElementById('ppFilterType').value;
+    const diff = document.getElementById('ppFilterDiff').value;
+    const allQ = qpGet(QP_KEYS.questions, []);
+
+    let filtered = allQ.filter(q => q.cls === cls && q.subject === subj);
+    if (type) filtered = filtered.filter(q => q.type === type);
+    if (diff) filtered = filtered.filter(q => q.difficulty === diff);
+
+    const container = document.getElementById('ppQuestionList');
+    if (!filtered.length) {
+        container.innerHTML = '<div class="text-center py-3 text-muted" style="font-size:0.85rem;">কোনো প্রশ্ন পাওয়া যায়নি — প্রথমে Question Bank এ প্রশ্ন যোগ করুন</div>';
+        return;
+    }
+
+    const selectedIds = paperQuestions.map(q => q.id);
+    const typeBadge = { MCQ: 'badge-mcq', Creative: 'badge-creative', Short: 'badge-short', 'Fill-in': 'badge-fill' };
+    const diffBadge = { Easy: 'diff-easy', Medium: 'diff-medium', Hard: 'diff-hard' };
+
+    container.innerHTML = filtered.map(q => {
+        const isSelected = selectedIds.includes(q.id);
+        return `
+        <div style="display:flex; gap:10px; align-items:flex-start; padding:10px 12px; border:1px solid ${isSelected ? '#6366f1' : 'rgba(0,0,0,0.06)'}; border-radius:10px; margin-bottom:8px; background:${isSelected ? 'rgba(99,102,241,0.05)' : 'transparent'}; cursor:pointer; transition:all 0.2s;" onclick="togglePaperQuestion(${q.id})">
+            <div style="width:22px; height:22px; border-radius:6px; border:2px solid ${isSelected ? '#6366f1' : '#e2e8f0'}; background:${isSelected ? '#6366f1' : 'transparent'}; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px;">
+                ${isSelected ? '<i class="bi bi-check" style="color:#fff; font-size:0.7rem;"></i>' : ''}
+            </div>
+            <div style="flex:1; min-width:0;">
+                <div class="d-flex gap-2 mb-1">
+                    <span class="q-type-badge ${typeBadge[q.type]}" style="font-size:0.68rem;">${q.type}</span>
+                    <span class="q-diff-badge ${diffBadge[q.difficulty]}" style="font-size:0.68rem;">${q.difficulty}</span>
+                    <span style="font-size:0.68rem; font-weight:700; color:#6366f1;">${q.marks}m</span>
+                </div>
+                <div style="font-size:0.82rem; line-height:1.4;">${q.text.substring(0, 120)}${q.text.length > 120 ? '...' : ''}</div>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function togglePaperQuestion(id) {
+    const idx = paperQuestions.findIndex(q => q.id === id);
+    if (idx >= 0) {
+        paperQuestions.splice(idx, 1);
+    } else {
+        const allQ = qpGet(QP_KEYS.questions, []);
+        const q = allQ.find(qq => qq.id === id);
+        if (q) paperQuestions.push(q);
+    }
+    loadPaperQuestions();
+    renderPaperPreview();
+}
+
+function autoGeneratePaper() {
+    const cls = document.getElementById('ppClass').value;
+    const subj = document.getElementById('ppSubject').value;
+    const allQ = qpGet(QP_KEYS.questions, []).filter(q => q.cls === cls && q.subject === subj);
+
+    const mcqN = parseInt(document.getElementById('autoMCQ').value) || 0;
+    const shortN = parseInt(document.getElementById('autoShort').value) || 0;
+    const creatN = parseInt(document.getElementById('autoCreative').value) || 0;
+
+    paperQuestions = [];
+    function pick(type, count) {
+        const pool = allQ.filter(q => q.type === type);
+        const shuffled = pool.sort(() => Math.random() - 0.5);
+        return shuffled.slice(0, count);
+    }
+
+    paperQuestions.push(...pick('MCQ', mcqN));
+    paperQuestions.push(...pick('Short', shortN));
+    paperQuestions.push(...pick('Creative', creatN));
+    paperQuestions.push(...pick('Fill-in', Math.max(0, mcqN + shortN + creatN - paperQuestions.length)));
+
+    renderPaperPreview();
+    qpToast(`📝 ${paperQuestions.length}টি প্রশ্ন স্বয়ংক্রিয়ভাবে সিলেক্ট হয়েছে!`);
+}
+
+function renderPaperPreview() {
+    const body = document.getElementById('pvBody');
+    if (!paperQuestions.length) {
+        body.innerHTML = `<div class="text-center py-4 text-muted" style="font-size:0.82rem;">
+            <i class="bi bi-file-earmark-text" style="font-size:2rem; color:#cbd5e1;"></i>
+            <p class="mt-2">প্রশ্ন সিলেক্ট করলে এখানে লাইভ প্রিভিউ দেখা যাবে</p></div>`;
+        document.getElementById('pvQCount').textContent = '0';
+        document.getElementById('pvTotalMarks').textContent = '0';
+        return;
+    }
+
+    let totalMarks = 0;
+    body.innerHTML = paperQuestions.map((q, i) => {
+        totalMarks += q.marks;
+        return `
+        <div class="preview-q-item" draggable="true"
+            ondragstart="dragStart(event, ${i})"
+            ondragover="dragOver(event)"
+            ondrop="dropItem(event, ${i})"
+            data-idx="${i}">
+            <span class="preview-q-num">${i + 1}</span>
+            <span class="preview-q-text">${q.text.substring(0, 100)}${q.text.length > 100 ? '...' : ''}</span>
+            <span class="preview-q-marks">${q.marks}m</span>
+            <span class="preview-q-remove" onclick="removePaperQ(${i})"><i class="bi bi-x"></i></span>
+        </div>`;
+    }).join('');
+
+    document.getElementById('pvQCount').textContent = paperQuestions.length;
+    document.getElementById('pvTotalMarks').textContent = totalMarks;
+}
+
+function removePaperQ(idx) {
+    paperQuestions.splice(idx, 1);
+    renderPaperPreview();
+    loadPaperQuestions();
+}
+
+// Drag & Drop Reordering
+let dragIdx = null;
+function dragStart(e, idx) {
+    dragIdx = idx;
+    e.target.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+}
+function dragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+function dropItem(e, targetIdx) {
+    e.preventDefault();
+    if (dragIdx === null || dragIdx === targetIdx) return;
+    const item = paperQuestions.splice(dragIdx, 1)[0];
+    paperQuestions.splice(targetIdx, 0, item);
+    dragIdx = null;
+    renderPaperPreview();
+}
+
+function exportPaperPDF() {
+    alert('PDF ডাউনলোড করতে Print ডায়ালগ খুলবে — "Save as PDF" সিলেক্ট করুন');
+    window.print();
+}
+
+// ================================================================
+//  SHARED: Toast
+// ================================================================
+function qpToast(msg) {
+    const t = document.createElement('div');
+    t.style.cssText = `position:fixed;bottom:30px;right:30px;z-index:9999;background:#1e1b4b;color:#fff;padding:14px 24px;border-radius:12px;font-size:0.9rem;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,0.25);animation:qpFade 0.3s ease;`;
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 300); }, 2500);
+}
+
+// ================================================================
+//  INIT
+// ================================================================
+document.addEventListener('DOMContentLoaded', function() {
+    // Seed sample chapters
+    const chapters = qpGet(QP_KEYS.chapters, {});
+    if (!Object.keys(chapters).length) {
+        chapters['৬ষ্ঠ_গণিত'] = [
+            { id: 1, num: 1, title: 'সংখ্যা পদ্ধতি', desc: 'প্রাকৃতিক সংখ্যা, পূর্ণসংখ্যা ও মৌলিক সংখ্যা সম্পর্কে ধারণা', topics: ['প্রাকৃতিক সংখ্যা','মৌলিক সংখ্যা','যৌগিক সংখ্যা','ল.সা.গু ও গ.সা.গু'], progress: 80 },
+            { id: 2, num: 2, title: 'ভগ্নাংশ ও দশমিক', desc: 'সাধারণ ভগ্নাংশ ও দশমিক ভগ্নাংশের যোগ, বিয়োগ, গুণ ও ভাগ', topics: ['সাধারণ ভগ্নাংশ','দশমিক ভগ্নাংশ','ভগ্নাংশের যোগ-বিয়োগ'], progress: 55 },
+            { id: 3, num: 3, title: 'বীজগণিতীয় রাশি', desc: 'চলক, ধ্রুবক এবং বীজগণিতীয় রাশি', topics: ['চলক ও ধ্রুবক','পদ ও সহগ','যোগ ও বিয়োগ'], progress: 20 },
+            { id: 4, num: 4, title: 'জ্যামিতিক ধারণা', desc: 'বিন্দু, রেখা, কোণ ও ত্রিভুজ', topics: ['বিন্দু ও রেখা','কোণ পরিমাপ','ত্রিভুজের শ্রেণিবিভাগ'], progress: 0 },
+        ];
+        qpSet(QP_KEYS.chapters, chapters);
+    }
+
+    // Seed sample questions
+    const questions = qpGet(QP_KEYS.questions, []);
+    if (!questions.length) {
+        const sampleQ = [
+            { id: 101, cls: '৬ষ্ঠ', subject: 'গণিত', chapter: 'সংখ্যা পদ্ধতি', type: 'MCQ', difficulty: 'Easy', marks: 1, text: '১০০ এর মধ্যে মৌলিক সংখ্যা কতটি?', options: 'ক) ২০\nখ) ২৫\nগ) ৩০\nঘ) ১৫', answer: 'খ' },
+            { id: 102, cls: '৬ষ্ঠ', subject: 'গণিত', chapter: 'সংখ্যা পদ্ধতি', type: 'MCQ', difficulty: 'Easy', marks: 1, text: 'ক্ষুদ্রতম মৌলিক সংখ্যা কত?', options: 'ক) ১\nখ) ২\nগ) ৩\nঘ) ০', answer: 'খ' },
+            { id: 103, cls: '৬ষ্ঠ', subject: 'গণিত', chapter: 'সংখ্যা পদ্ধতি', type: 'Short', difficulty: 'Medium', marks: 5, text: '২৪ ও ৩৬ এর গ.সা.গু ও ল.সা.গু নির্ণয় কর।', options: '', answer: '' },
+            { id: 104, cls: '৬ষ্ঠ', subject: 'গণিত', chapter: 'ভগ্নাংশ ও দশমিক', type: 'Creative', difficulty: 'Hard', marks: 10, text: 'একটি আয়তাকার বাগানের দৈর্ঘ্য ১২.৫ মিটার এবং প্রস্থ ৮.৭৫ মিটার। বাগানের পরিসীমা ও ক্ষেত্রফল নির্ণয় কর এবং প্রতি বর্গমিটার ২৫ টাকা দরে ঘাস লাগানোর খরচ কত হবে তা নির্ণয় কর।', options: '', answer: '' },
+            { id: 105, cls: '৬ষ্ঠ', subject: 'গণিত', chapter: 'বীজগণিতীয় রাশি', type: 'Short', difficulty: 'Medium', marks: 5, text: 'x = 3 এবং y = 2 হলে, 2x² + 3xy - y² এর মান নির্ণয় কর।', options: '', answer: '' },
+            { id: 106, cls: '৬ষ্ঠ', subject: 'গণিত', chapter: 'জ্যামিতিক ধারণা', type: 'MCQ', difficulty: 'Easy', marks: 1, text: 'একটি সমকোণী ত্রিভুজের সমকোণের পরিমাণ কত?', options: 'ক) ৬০°\nখ) ৪৫°\nগ) ৯০°\nঘ) ১৮০°', answer: 'গ' },
+            { id: 107, cls: '৬ষ্ঠ', subject: 'গণিত', chapter: 'সংখ্যা পদ্ধতি', type: 'Fill-in', difficulty: 'Easy', marks: 1, text: '১ থেকে ১০ পর্যন্ত মৌলিক সংখ্যাগুলো হলো ___, ___, ___, ___।', options: '', answer: '২, ৩, ৫, ৭' },
+            { id: 108, cls: '৬ষ্ঠ', subject: 'গণিত', chapter: 'ভগ্নাংশ ও দশমিক', type: 'MCQ', difficulty: 'Medium', marks: 1, text: '৩/৪ + ২/৫ এর মান কত?', options: 'ক) ৫/৯\nখ) ২৩/২০\nগ) ১/৪\nঘ) ৭/১০', answer: 'খ' },
+            { id: 109, cls: '৬ষ্ঠ', subject: 'গণিত', chapter: 'বীজগণিতীয় রাশি', type: 'Creative', difficulty: 'Hard', marks: 10, text: 'একটি আয়তক্ষেত্রের দৈর্ঘ্য (x+5) একক এবং প্রস্থ (x+3) একক হলে, (ক) ক্ষেত্রফল নির্ণয় কর, (খ) x=4 হলে ক্ষেত্রফলের সংখ্যাগত মান নির্ণয় কর, (গ) পরিসীমা ও ক্ষেত্রফলের মধ্যে সম্পর্ক স্থাপন কর।', options: '', answer: '' },
+            { id: 110, cls: '৬ষ্ঠ', subject: 'গণিত', chapter: 'জ্যামিতিক ধারণা', type: 'Short', difficulty: 'Medium', marks: 5, text: 'একটি ত্রিভুজের দুইটি কোণ ৫০° ও ৭০° হলে, তৃতীয় কোণ নির্ণয় কর এবং ত্রিভুজটি কোন ধরনের তা ব্যাখ্যা কর।', options: '', answer: '' },
+        ];
+        qpSet(QP_KEYS.questions, sampleQ);
+    }
+
+    renderChapters();
+    renderQuestionBank();
+});
+</script>
+{% endblock %}

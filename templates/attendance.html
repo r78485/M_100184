@@ -1,0 +1,542 @@
+{% extends 'base.html' %}
+
+{% block title %}Digital Attendance - EduManage ERP{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold mb-1" style="color: var(--primary-blue);"><i class="bi bi-fingerprint me-2"></i>Digital Attendance System</h2>
+            <p class="text-muted">Smart Biometric/RFID simulation with automatic holiday filtering logic.</p>
+        </div>
+        <div>
+            <button class="btn btn-outline-primary me-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#biometricConfigModal"><i class="bi bi-gear me-1"></i> Biometric Config</button>
+            <button class="btn btn-outline-info me-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#faceIdModal"><i class="bi bi-person-bounding-box me-1"></i> Face ID Scan</button>
+            <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#punchCardModal"><i class="bi bi-card-heading me-1"></i> Generate Punch Card</button>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <!-- Scanner Terminal Simulation -->
+        <div class="col-lg-4">
+            <div class="card custom-card p-4 h-100" style="border-top: 4px solid var(--primary-blue);">
+                <h5 class="fw-bold mb-4 text-center"><i class="bi bi-upc-scan me-2"></i>Device Terminal Simulator</h5>
+                
+                <div class="mb-3">
+                    <label class="form-label fw-semibold text-secondary">Select User (Simulated ID)</label>
+                    <select class="form-select" id="simUser">
+                        <option value="S-501">S-501 - Arif Rahman (Student)</option>
+                        <option value="T-101">T-101 - Dr. Rafiqul Islam (Teacher)</option>
+                        <option value="ST-201">ST-201 - Kamal De (Staff)</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold text-secondary">Auth Method</label>
+                    <select class="form-select" id="simMethod">
+                        <option value="Biometric">Biometric (Fingerprint)</option>
+                        <option value="Face_Recognition">Face Recognition</option>
+                        <option value="Punch_Card">Punch Card (RFID)</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold text-secondary">Simulated Timestamp</label>
+                    <input type="datetime-local" class="form-control" id="simTime" value="2026-07-22T08:45">
+                    <small class="text-muted d-block mt-1">Change date to a Friday or 2026-02-21 to test Holiday logic.</small>
+                </div>
+
+                <button class="btn btn-primary w-100 fw-bold py-2 shadow-sm" onclick="handleScan()">
+                    <i class="bi bi-person-bounding-box me-2"></i> SCAN & VERIFY
+                </button>
+            </div>
+        </div>
+
+        <!-- Attendance Logs & Reports -->
+        <div class="col-lg-8">
+            <div class="card custom-card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">Live Attendance Logs</h5>
+                    <div>
+                        <button class="btn btn-sm btn-outline-secondary me-2" onclick="system.attendanceLogs = []; renderLogs();"><i class="bi bi-trash"></i> Clear</button>
+                        <button class="btn btn-sm btn-dark" onclick="window.print()"><i class="bi bi-printer"></i> Print Report</button>
+                    </div>
+                </div>
+
+                <!-- Filters -->
+                <ul class="nav nav-pills mb-3" id="roleFilters">
+                    <li class="nav-item">
+                        <button class="nav-link active py-1 px-3" data-role="All" onclick="setFilter('All', this)">All Records</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link py-1 px-3" data-role="Student" onclick="setFilter('Student', this)">Students</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link py-1 px-3" data-role="Teacher" onclick="setFilter('Teacher', this)">Teachers</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link py-1 px-3" data-role="Staff" onclick="setFilter('Staff', this)">Staff</button>
+                    </li>
+                </ul>
+
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light sticky-top">
+                            <tr>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>Method</th>
+                                <th>Status</th>
+                                <th>Note</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsBody">
+                            <tr><td colspan="8" class="text-center text-muted py-4">No attendance records yet.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Biometric Config Modal -->
+<div class="modal fade" id="biometricConfigModal" tabindex="-1" aria-labelledby="biometricConfigModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title fw-bold text-primary" id="biometricConfigModalLabel"><i class="bi bi-gear me-2"></i>Biometric Configuration</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="biometricConfigForm">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary">Device IP Address / COM Port</label>
+                        <input type="text" class="form-control" value="192.168.1.201">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary">Port / Baud Rate</label>
+                        <input type="text" class="form-control" value="4370">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary">Device Model</label>
+                        <select class="form-select">
+                            <option>Generic Biometric Device (USB/Network)</option>
+                            <option>ZKTeco K40 / uFace</option>
+                            <option>Hikvision DS-K1T804</option>
+                            <option>Suprema BioStation</option>
+                            <option>Virdi AC-2100</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold text-secondary">Connection Status</label>
+                        <div class="d-flex align-items-center mt-1">
+                            <span class="badge bg-success me-2">Connected</span>
+                            <small class="text-muted">Last sync: Just now</small>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer border-top-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="saveBiometricConfig()">Save Configuration</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Punch Card Modal -->
+<div class="modal fade" id="punchCardModal" tabindex="-1" aria-labelledby="punchCardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title fw-bold text-primary" id="punchCardModalLabel"><i class="bi bi-card-heading me-2"></i>Generate Punch Card</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold text-secondary">Select User</label>
+                    <select class="form-select" id="punchCardUser">
+                        <option value="S-501">S-501 - Arif Rahman (Student)</option>
+                        <option value="T-101">T-101 - Dr. Rafiqul Islam (Teacher)</option>
+                        <option value="ST-201">ST-201 - Kamal De (Staff)</option>
+                    </select>
+                </div>
+                
+                <div class="text-center mt-4 mb-2" id="punchCardPreview" style="display: none;">
+                    <div class="card p-3 border-dark d-inline-block shadow-sm" style="width: 250px; background-color: #f8f9fa;">
+                        <h6 class="fw-bold mb-1">EduManage ERP</h6>
+                        <small class="text-muted d-block mb-3">Digital Punch Card</small>
+                        <img src="" id="punchCardQr" alt="QR Code" class="mb-3">
+                        <h5 class="fw-bold mb-0 text-primary" id="punchCardName">Name</h5>
+                        <p class="mb-0 text-muted" id="punchCardId">ID</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top-0">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="generatePunchCard()"><i class="bi bi-magic me-1"></i> Generate Card</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Face ID Modal -->
+<div class="modal fade" id="faceIdModal" tabindex="-1" aria-labelledby="faceIdModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title fw-bold text-primary" id="faceIdModalLabel"><i class="bi bi-person-bounding-box me-2"></i>Face ID Verification</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <div class="position-relative d-inline-block mb-3 mt-2">
+                    <div class="border border-primary border-4 rounded-circle overflow-hidden p-1" style="width: 180px; height: 180px; position: relative; margin: 0 auto;">
+                        <!-- Simulated Camera Feed -->
+                        <div style="width: 100%; height: 100%; border-radius: 50%; background: url('https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png') center/cover; opacity: 0.8;" id="faceFeed"></div>
+                        <!-- Scanning line animation -->
+                        <div id="scanLine" style="position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: rgba(0, 255, 0, 0.7); box-shadow: 0 0 10px rgba(0, 255, 0, 0.8); display: none;"></div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold text-secondary">Select User for Face Auth</label>
+                    <select class="form-select mx-auto" id="faceUser" style="max-width: 250px;">
+                        <option value="S-501">S-501 - Arif Rahman (Student)</option>
+                        <option value="T-101">T-101 - Dr. Rafiqul Islam (Teacher)</option>
+                        <option value="ST-201">ST-201 - Kamal De (Staff)</option>
+                    </select>
+                </div>
+                <h6 id="faceStatus" class="text-muted mt-2">Ready to scan...</h6>
+            </div>
+            <div class="modal-footer border-top-0 justify-content-center">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary px-4" id="btnStartFaceScan" onclick="startFaceScan()"><i class="bi bi-camera me-2"></i> Start Scan</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Print Styles -->
+<style>
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        .col-lg-8, .col-lg-8 * {
+            visibility: visible;
+        }
+        .col-lg-8 {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+        .nav-pills, .btn {
+            display: none !important;
+        }
+        .table-responsive {
+            max-height: none !important;
+            overflow: visible !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    // --- Python Logic Translated to JS ---
+    class DigitalAttendanceSystem {
+        constructor(instituteName) {
+            this.instituteName = instituteName;
+            this.users = {};
+            this.publicHolidays = [
+                "2026-02-21", // শহীদ দিবস
+                "2026-03-26", // স্বাধীনতা দিবস
+                "2026-12-16"  // বিজয় দিবস
+            ];
+            this.attendanceLogs = [];
+        }
+
+        registerUser(userId, name, role, deviceId) {
+            this.users[userId] = {
+                name: name,
+                role: role,
+                deviceId: deviceId || `BIO_${userId}`
+            };
+        }
+
+        isHoliday(checkDateObj, role) {
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const dayName = days[checkDateObj.getDay()];
+            
+            // Format YYYY-MM-DD safely handling timezones
+            const tzOffset = checkDateObj.getTimezoneOffset() * 60000; // offset in milliseconds
+            const localISOTime = (new Date(checkDateObj.getTime() - tzOffset)).toISOString().slice(0, -1);
+            const dateStr = localISOTime.split('T')[0];
+
+            // Student: Fri & Sat
+            if (role === 'Student' && (dayName === 'Friday' || dayName === 'Saturday')) {
+                return { onHoliday: true, reason: `সাপ্তাহিক ছুটি (${dayName})` };
+            }
+
+            // Teacher/Staff: Only Fri
+            if (['Teacher', 'Staff'].includes(role) && dayName === 'Friday') {
+                return { onHoliday: true, reason: `সাপ্তাহিক ছুটি (${dayName})` };
+            }
+
+            // Public Holidays
+            if (this.publicHolidays.includes(dateStr)) {
+                return { onHoliday: true, reason: "সরকারী ছুটি" };
+            }
+
+            return { onHoliday: false, reason: null };
+        }
+
+        markAttendance(userId, authMethod, timestampStr) {
+            if (!this.users[userId]) {
+                console.error(`Error: User ${userId} not registered!`);
+                return false;
+            }
+
+            const user = this.users[userId];
+            const currentDateTime = new Date(timestampStr);
+            const { onHoliday, reason } = this.isHoliday(currentDateTime, user.role);
+
+            let status = "Present";
+            let note = `Verified via ${authMethod.replace('_', ' ')}`;
+
+            if (onHoliday) {
+                status = "Holiday";
+                note = `ছুটি: ${reason}`;
+            }
+
+            // Formatting
+            const tzOffset = currentDateTime.getTimezoneOffset() * 60000;
+            const localISOTime = (new Date(currentDateTime.getTime() - tzOffset)).toISOString().slice(0, -1);
+            const dateStr = localISOTime.split('T')[0];
+
+            let hours = currentDateTime.getHours();
+            const mins = currentDateTime.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; 
+            const timeStr = `${hours}:${mins} ${ampm}`;
+
+            this.attendanceLogs.push({
+                date: dateStr,
+                time: timeStr,
+                id: userId,
+                name: user.name,
+                role: user.role,
+                method: authMethod,
+                status: status,
+                note: note
+            });
+            
+            return true;
+        }
+    }
+
+    // --- UI Integration ---
+    const system = new DigitalAttendanceSystem("আইডিয়াল স্কুল অ্যান্ড কলেজ");
+    
+    // Register Default Users
+    system.registerUser("T-101", "ড. রফিকুল ইসলাম", "Teacher", "FACE_001");
+    system.registerUser("S-501", "আরিফ রহমান", "Student", "CARD_8821");
+    system.registerUser("ST-201", "কমল দে", "Staff", "BIO_FINGER_01");
+
+    let currentFilter = 'All';
+
+    function setFilter(role, btnElement) {
+        currentFilter = role;
+        
+        // Update nav-pills active state
+        document.querySelectorAll('#roleFilters .nav-link').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        btnElement.classList.add('active');
+
+        renderLogs();
+    }
+
+    function renderLogs() {
+        const tbody = document.getElementById('logsBody');
+        
+        // Filter logic
+        const filteredLogs = currentFilter === 'All' 
+            ? system.attendanceLogs 
+            : system.attendanceLogs.filter(log => log.role === currentFilter);
+
+        if (filteredLogs.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">No records found for ${currentFilter}.</td></tr>`;
+            return;
+        }
+
+        let html = '';
+        filteredLogs.forEach(log => {
+            const badgeClass = log.status === 'Present' ? 'bg-success' : 'bg-warning text-dark';
+            const roleBadge = log.role === 'Teacher' ? 'primary' : (log.role === 'Student' ? 'info' : 'secondary');
+
+            html += `
+                <tr>
+                    <td class="fw-semibold">${log.date}</td>
+                    <td>${log.time}</td>
+                    <td class="fw-bold">${log.id}</td>
+                    <td>${log.name}</td>
+                    <td><span class="badge bg-${roleBadge} bg-opacity-10 text-${roleBadge}">${log.role}</span></td>
+                    <td><small class="text-muted"><i class="bi bi-shield-check me-1"></i>${log.method.replace('_', ' ')}</small></td>
+                    <td><span class="badge ${badgeClass}">${log.status}</span></td>
+                    <td><small>${log.note}</small></td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    function handleScan() {
+        const userId = document.getElementById('simUser').value;
+        const method = document.getElementById('simMethod').value;
+        const timestampStr = document.getElementById('simTime').value;
+
+        if (!timestampStr) {
+            Swal.fire("Error", "Please select a valid date and time.", "error");
+            return;
+        }
+
+        // Mark Attendance
+        const success = system.markAttendance(userId, method, timestampStr);
+
+        if (success) {
+            const logEntry = system.attendanceLogs[system.attendanceLogs.length - 1];
+            
+            // Show Success Notification
+            if (logEntry.status === 'Holiday') {
+                Swal.fire({
+                    icon: 'info',
+                    title: 'Holiday Detected!',
+                    text: `${logEntry.name} - ${logEntry.note}`,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            } else {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Scan Successful',
+                    text: `${logEntry.name} verified via ${method.replace('_', ' ')}`,
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }
+
+            renderLogs();
+        }
+    }
+
+    // Run test scenario automatically on load
+    document.addEventListener('DOMContentLoaded', () => {
+        // Run some test cases from the Python file
+        const normal_day = "2026-07-22T08:45"; // Wednesday
+        system.markAttendance("T-101", "Face_Recognition", normal_day);
+        system.markAttendance("S-501", "Punch_Card", normal_day);
+        system.markAttendance("ST-201", "Biometric", normal_day);
+
+        const saturday = "2026-07-25T09:00"; // Saturday
+        system.markAttendance("S-501", "Punch_Card", saturday);
+        system.markAttendance("T-101", "Face_Recognition", saturday);
+
+        const govt_holiday = "2026-02-21T09:15"; // Public Holiday
+        system.markAttendance("S-501", "Punch_Card", govt_holiday);
+
+        renderLogs();
+    });
+
+    // New features logic
+    function saveBiometricConfig() {
+        Swal.fire({
+            icon: 'success',
+            title: 'Configuration Saved',
+            text: 'Biometric device settings have been updated and pinged successfully.',
+            timer: 2000,
+            showConfirmButton: false
+        });
+        // Assuming bootstrap is available in base.html
+        const modalEl = document.getElementById('biometricConfigModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+    }
+
+    function generatePunchCard() {
+        const userSelect = document.getElementById('punchCardUser');
+        const userName = userSelect.options[userSelect.selectedIndex].text.split(' - ')[1].split(' (')[0];
+        const userId = userSelect.value;
+        
+        document.getElementById('punchCardName').textContent = userName;
+        document.getElementById('punchCardId').textContent = userId;
+        document.getElementById('punchCardQr').src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=PUNCH_${userId}`;
+        
+        document.getElementById('punchCardPreview').style.display = 'block';
+    }
+
+    function startFaceScan() {
+        const scanLine = document.getElementById('scanLine');
+        const faceStatus = document.getElementById('faceStatus');
+        const btn = document.getElementById('btnStartFaceScan');
+        const userId = document.getElementById('faceUser').value;
+        const currentDateTime = new Date();
+        const tzOffset = currentDateTime.getTimezoneOffset() * 60000;
+        const localISOTime = (new Date(currentDateTime.getTime() - tzOffset)).toISOString().slice(0, 16);
+
+        btn.disabled = true;
+        scanLine.style.display = 'block';
+        faceStatus.textContent = 'Scanning face geometry...';
+        faceStatus.className = 'text-primary mt-2 fw-bold';
+        
+        let position = 0;
+        let direction = 1;
+        
+        const scanAnim = setInterval(() => {
+            position += 5 * direction;
+            if (position > 170) direction = -1;
+            if (position < 0) direction = 1;
+            scanLine.style.top = position + 'px';
+        }, 30);
+
+        setTimeout(() => {
+            clearInterval(scanAnim);
+            scanLine.style.display = 'none';
+            faceStatus.textContent = 'Face Verified Successfully!';
+            faceStatus.className = 'text-success mt-2 fw-bold';
+            
+            // Mark attendance using Face Recognition
+            system.markAttendance(userId, 'Face_Recognition', localISOTime);
+            renderLogs();
+
+            setTimeout(() => {
+                const modalEl = document.getElementById('faceIdModal');
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+                
+                // Reset UI
+                btn.disabled = false;
+                faceStatus.textContent = 'Ready to scan...';
+                faceStatus.className = 'text-muted mt-2';
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Face Verified',
+                    text: 'Attendance logged via Face ID.',
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            }, 1000);
+            
+        }, 2500);
+    }
+
+</script>
+{% endblock %}

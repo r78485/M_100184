@@ -1,0 +1,1797 @@
+{% extends 'base.html' %}
+
+{% block title %}Students Control Center - EduManage ERP{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Card Print styling */
+    .id-card {
+        width: 320px;
+        background: linear-gradient(135deg, var(--primary-blue) 0%, #173b6b 100%);
+        color: white;
+        border-radius: 15px;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    }
+    .id-card-header {
+        background-color: rgba(0,0,0,0.15);
+        padding: 15px;
+        text-align: center;
+        border-bottom: 2px solid var(--secondary-purple);
+    }
+    .id-card-avatar {
+        width: 90px;
+        height: 90px;
+        object-fit: cover;
+        border: 3px solid white;
+        border-radius: 50%;
+    }
+    
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #printArea, #printArea * {
+            visibility: visible;
+        }
+        #printArea {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+        .no-print {
+            display: none !important;
+        }
+    }
+
+    /* Admission Slip Styles */
+    .printable-area {
+        background: #fff;
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 24px;
+        border: 2px solid #1a365d;
+        border-radius: 6px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    }
+    .header-logo-placeholder {
+        width: 70px;
+        height: 70px;
+        background: #f1f5f9;
+        border: 1px dashed #94a3b8;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        color: #64748b;
+        text-align: center;
+    }
+    .school-info {
+        text-align: center;
+        flex-grow: 1;
+        padding: 0 12px;
+    }
+    .school-name {
+        font-size: 22px;
+        font-weight: bold;
+        color: #1a365d;
+        margin: 0 0 4px 0;
+        line-height: 1.2;
+    }
+    .school-address {
+        font-size: 12px;
+        color: #555;
+        margin-bottom: 6px;
+    }
+    .doc-title {
+        background-color: #1a365d;
+        color: #fff;
+        padding: 5px 18px;
+        font-size: 14px;
+        font-weight: bold;
+        border-radius: 4px;
+        display: inline-block;
+        letter-spacing: 1px;
+    }
+    .student-photo-box {
+        width: 100px;
+        height: 120px;
+        border: 2px solid #cbd5e1;
+        border-radius: 4px;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        color: #64748b;
+        background: #f1f5f9;
+        text-align: center;
+        margin: 0 auto;
+    }
+    .student-photo-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 3px solid #1a365d;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+    }
+    .info-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+    .info-table th,
+    .info-table td {
+        border: 1px solid #cbd5e1;
+        padding: 7px 10px;
+        font-size: 13px;
+        text-align: left;
+        vertical-align: top;
+    }
+    .info-table th {
+        background-color: #f1f5f9;
+        color: #1e293b;
+        font-weight: 600;
+        width: 18%;
+        white-space: nowrap;
+    }
+    .info-table tr:hover td {
+        background-color: #f8fafc;
+    }
+    .notice-box {
+        background: #fff7ed;
+        border-left: 4px solid #f59e0b;
+        padding: 10px 14px;
+        border-radius: 4px;
+        font-size: 12px;
+        color: #92400e;
+        margin-bottom: 20px;
+    }
+    .footer-signatures {
+        margin-top: 45px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        text-align: center;
+    }
+    .sig-box {
+        width: 30%;
+    }
+    .sig-line {
+        border-top: 1px dashed #555;
+        margin-bottom: 5px;
+        padding-top: 3px;
+    }
+    .sig-text {
+        font-size: 12px;
+        font-weight: bold;
+        color: #1e293b;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+
+    <!-- Submission Success Popup Modal -->
+    <div class="modal fade" id="studentSubmissionSuccessModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content text-center p-4 border-0 shadow-lg" style="border-radius: 16px; background: #ffffff;">
+                <div class="modal-body p-2">
+                    <div class="mb-3">
+                        <i class="bi bi-check-circle-fill text-success" style="font-size: 3.8rem; line-height: 1;"></i>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-0" style="font-size: 1.15rem;">Admission Application Submitted!</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Student Confirmation Popup Modal -->
+    <div class="modal fade" id="deleteStudentConfirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content text-center p-4 border-0 shadow-lg" style="border-radius: 16px; background: #ffffff;">
+                <div class="modal-body p-2">
+                    <div class="mb-3 text-warning">
+                        <i class="bi bi-exclamation-triangle-fill" style="font-size: 3.5rem; line-height: 1;"></i>
+                    </div>
+                    <p class="fw-bold text-dark mb-4" style="font-size: 0.95rem; line-height: 1.5;">
+                        আপনি কি নিশ্চিতভাবে এই শিক্ষার্থীর তথ্য মুছে ফেলতে চান?<br/>
+                        <span class="text-muted small fw-normal">Are you sure you want to delete this student profile?</span>
+                    </p>
+                    <div class="d-flex justify-content-center gap-2">
+                        <button type="button" class="btn btn-secondary px-3 py-1.5 fw-bold btn-sm" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger px-3 py-1.5 fw-bold btn-sm" id="btnConfirmDeleteStudent">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-4 no-print">
+        <h2 class="fw-bold mb-1" style="color: var(--primary-blue);">Students Registry & Command Center</h2>
+        <p class="text-muted">Perform admissions tracking, generate ID cards, print documents, manage logins, and execute promotions.</p>
+    </div>
+
+    <!-- Main Navigation Tabs -->
+    <ul class="nav nav-pills mb-4 no-print gap-2 bg-white p-2 rounded shadow-sm" id="studentTabs" role="tablist" style="border: 1px solid rgba(0,0,0,0.05);">
+        <li class="nav-item">
+            <button class="nav-link active fw-semibold" id="all-tab" data-bs-toggle="tab" data-bs-target="#all-panel"><i class="bi bi-people me-1"></i> All Students</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link fw-semibold" id="add-tab" data-bs-toggle="tab" data-bs-target="#add-panel"><i class="bi bi-person-plus me-1"></i> Add New</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link fw-semibold" id="idcard-tab" data-bs-toggle="tab" data-bs-target="#idcard-panel" onclick="loadIdCardSelector()"><i class="bi bi-card-image me-1"></i> ID Cards</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link fw-semibold" id="printlist-tab" data-bs-toggle="tab" data-bs-target="#printlist-panel" onclick="loadPrintList()"><i class="bi bi-printer me-1"></i> Print List</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link fw-semibold" id="promote-tab" data-bs-toggle="tab" data-bs-target="#promote-panel" onclick="loadPromoteStudents()"><i class="bi bi-arrow-up-circle me-1"></i> Promote Students</button>
+        </li>
+    </ul>
+
+    <!-- Tabs Content -->
+    <div class="tab-content" id="studentTabsContent">
+        
+        <!-- 1. All Students -->
+        <div class="tab-pane fade show active" id="all-panel" role="tabpanel">
+            <div class="card custom-card p-3 mb-4 no-print">
+                <div class="row g-2 align-items-center">
+                    <div class="col-md-5">
+                        <input type="text" class="form-control" id="searchStudent" placeholder="Search by name, roll, or ID..." onkeyup="filterStudentsTable()">
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" id="filterClass" onchange="filterStudentsTable()">
+                            <option value="">All Classes</option>
+                            <option>Class 6</option>
+                            <option>Class 7</option>
+                            <option>Class 8</option>
+                            <option>Class 9</option>
+                            <option>Class 10</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <button class="btn btn-primary d-inline-flex align-items-center gap-2" onclick="printFilteredStudentList()"><i class="bi bi-printer-fill"></i> Print Filtered List</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card custom-card p-4 no-print">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Roll No</th>
+                                <th>Class</th>
+                                <th>Guardian</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allStudentsTable">
+                            <!-- Loaded via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2. Add New (Bilingual Admission Form) -->
+        <div class="tab-pane fade" id="add-panel" role="tabpanel">
+            <div class="card custom-card p-4 no-print">
+                <div class="header text-center mb-4 pb-2 border-bottom">
+                    <h3 class="fw-bold" style="color: var(--primary-blue);"><i class="bi bi-person-plus-fill me-2"></i>বিদ্যালয়ে ভর্তির আবেদন / School Admission Form</h3>
+                    <p class="text-muted small mb-0">দ্বিভাষিক অনলাইন ও অফলাইন ভর্তি ব্যবস্থা (Bilingual Admission Form)</p>
+                </div>
+
+                <form id="addStudentBilingualForm" method="POST" enctype="multipart/form-data" onsubmit="saveBilingualStudentProfile(event)">
+                    {% csrf_token %}
+                    <input type="hidden" name="status" value="Approved">
+
+                    <!-- Basic Info -->
+                    <div class="section-box p-3 mb-4 rounded border" style="background: #f0fdf4; border-color: #bbf7d0 !important;">
+                        <div class="section-title fw-bold pb-2 mb-3 border-bottom" style="color: #166534; border-color: #bbf7d0 !important; font-size: 16px;">১. শিক্ষার্থীর মৌলিক তথ্য / Student's Basic Information</div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">নাম (বাংলা) / Name (Bangla) <span class="text-danger">*</span></label>
+                                <input type="text" name="student_name_bn" id="st_name_bn" class="form-control" placeholder="শিক্ষার্থীর পুরো নাম (বাংলায়)" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">Name (English) / নাম (ইংরেজি) <span class="text-danger">*</span></label>
+                                <input type="text" name="student_name_en" id="st_name_en" class="form-control" placeholder="Student's Full Name (English)" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold small">জন্ম তারিখ / Date of Birth <span class="text-danger">*</span></label>
+                                <input type="date" name="dob" id="st_dob" class="form-control" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold small">জন্ম নিবন্ধন নম্বর / Birth Reg No <span class="text-danger">*</span></label>
+                                <input type="text" name="birth_reg_no" id="st_birth_reg_no" class="form-control" placeholder="17 ডিজিটের জন্ম নিবন্ধন নম্বর" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold small">শিক্ষার্থীর জেন্ডার / Gender <span class="text-danger">*</span></label>
+                                <select name="gender" id="st_gender" class="form-select" required>
+                                    <option value="">নির্বাচন করুন / Select</option>
+                                    <option value="Boy">ছাত্র / Boy</option>
+                                    <option value="Girl">ছাত্রী / Girl</option>
+                                    <option value="Other">অন্যান্য / Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">মোবাইল নম্বর / Mobile Number <span class="text-danger">*</span></label>
+                                <input type="text" name="mobile" id="st_mobile" class="form-control" placeholder="01XXXXXXXXX" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">মোবাইল নম্বর আবার লিখুন / Confirm Mobile <span class="text-danger">*</span></label>
+                                <input type="text" name="re_mobile" id="st_re_mobile" class="form-control" placeholder="01XXXXXXXXX" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Parents Info -->
+                    <div class="section-box p-3 mb-4 rounded border" style="background: #f0fdf4; border-color: #bbf7d0 !important;">
+                        <div class="section-title fw-bold pb-2 mb-3 border-bottom" style="color: #166534; border-color: #bbf7d0 !important; font-size: 16px;">২. পিতা-মাতা ও অভিভাবকের তথ্য / Parents & Guardian Information</div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">পিতার নাম / Father's Name <span class="text-danger">*</span></label>
+                                <input type="text" name="father_name" id="st_father_name" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">পিতার এনআইডি / Father's NID <span class="text-danger">*</span></label>
+                                <input type="text" name="father_nid" id="st_father_nid" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">মাতার নাম / Mother's Name <span class="text-danger">*</span></label>
+                                <input type="text" name="mother_name" id="st_mother_name" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">মাতার এনআইডি / Mother's NID <span class="text-danger">*</span></label>
+                                <input type="text" name="mother_nid" id="st_mother_nid" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">অভিভাবকের নাম (পিতা-মাতার অনুপস্থিতিতে) / Guardian Name</label>
+                                <input type="text" name="guardian_name" id="st_guardian_name" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">অভিভাবকের এনআইডি / Guardian NID</label>
+                                <input type="text" name="guardian_nid" id="st_guardian_nid" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Class & Version Selection -->
+                    <div class="section-box p-3 mb-4 rounded border" style="background: #f0fdf4; border-color: #bbf7d0 !important;">
+                        <div class="section-title fw-bold pb-2 mb-3 border-bottom" style="color: #166534; border-color: #bbf7d0 !important; font-size: 16px;">৩. শ্রেণী ও ভার্সন নির্বাচন / Class & Version Selection</div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">শ্রেণী / Desired Class <span class="text-danger">*</span></label>
+                                <select name="desired_class" id="st_desired_class" class="form-select" required>
+                                    <option value="">শ্রেণী নির্বাচন করুন / Select Class</option>
+                                    <option value="Class 6">ষষ্ঠ শ্রেণী / Class 6</option>
+                                    <option value="Class 7">সপ্তম শ্রেণী / Class 7</option>
+                                    <option value="Class 8">অষ্টম শ্রেণী / Class 8</option>
+                                    <option value="Class 9">নবম শ্রেণী / Class 9</option>
+                                    <option value="Class 10">দশম শ্রেণী / Class 10</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">ভার্সন / Version <span class="text-danger">*</span></label>
+                                <select name="version" id="st_version" class="form-select" required>
+                                    <option value="Bangla">বাংলা ভার্সন / Bangla Version</option>
+                                    <option value="English">English Version</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Present Address -->
+                    <div class="section-box p-3 mb-4 rounded border" style="background: #f0fdf4; border-color: #bbf7d0 !important;">
+                        <div class="section-title fw-bold pb-2 mb-3 border-bottom" style="color: #166534; border-color: #bbf7d0 !important; font-size: 16px;">৪. বর্তমান ঠিকানা / Present Address</div>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label fw-semibold small">বিস্তারিত ঠিকানা / Detail Address <span class="text-danger">*</span></label>
+                                <input type="text" name="present_address_detail" id="st_present_address_detail" class="form-control" placeholder="গ্রাম/মহল্লা, বাসা/রোড নম্বর" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold small">বিভাগ / Division <span class="text-danger">*</span></label>
+                                <input type="text" name="present_division" id="st_present_division" class="form-control" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold small">জেলা / District <span class="text-danger">*</span></label>
+                                <input type="text" name="present_district" id="st_present_district" class="form-control" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold small">উপজেলা/থানা / Upazila <span class="text-danger">*</span></label>
+                                <input type="text" name="present_upazila" id="st_present_upazila" class="form-control" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold small">পোস্ট কোড / Post Code <span class="text-danger">*</span></label>
+                                <input type="text" name="present_post_code" id="st_present_post_code" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Permanent Address -->
+                    <div class="section-box p-3 mb-4 rounded border" style="background: #f0fdf4; border-color: #bbf7d0 !important;">
+                        <div class="section-title fw-bold pb-2 mb-3 border-bottom" style="color: #166534; border-color: #bbf7d0 !important; font-size: 16px;">৫. স্থায়ী ঠিকানা / Permanent Address</div>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label fw-semibold small">বিস্তারিত ঠিকানা / Detail Address <span class="text-danger">*</span></label>
+                                <input type="text" name="permanent_address_detail" id="st_permanent_address_detail" class="form-control" placeholder="গ্রাম/মহল্লা, বাসা/রোড নম্বর" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold small">বিভাগ / Division <span class="text-danger">*</span></label>
+                                <input type="text" name="permanent_division" id="st_permanent_division" class="form-control" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold small">জেলা / District <span class="text-danger">*</span></label>
+                                <input type="text" name="permanent_district" id="st_permanent_district" class="form-control" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold small">উপজেলা/থানা / Upazila <span class="text-danger">*</span></label>
+                                <input type="text" name="permanent_upazila" id="st_permanent_upazila" class="form-control" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold small">পোস্ট কোড / Post Code <span class="text-danger">*</span></label>
+                                <input type="text" name="permanent_post_code" id="st_permanent_post_code" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Photo Upload Section -->
+                    <div class="section-box p-3 mb-4 rounded border" style="background: #f0fdf4; border-color: #bbf7d0 !important;">
+                        <div class="section-title fw-bold pb-2 mb-3 border-bottom" style="color: #166534; border-color: #bbf7d0 !important; font-size: 16px;">৬. শিক্ষার্থীর ছবি / Photo Upload</div>
+                        <div class="row g-3">
+                            <div class="col-md-12">
+                                <label class="form-label fw-semibold small">ছবি নির্বাচন করুন (300x300 pixel, Max 100KB) <span class="text-danger">*</span></label>
+                                <input type="file" name="photo" id="st_photo" class="form-control" accept="image/*">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Declaration & Buttons -->
+                    <div class="mb-3 no-print">
+                        <input type="checkbox" id="st_agree" required style="width:auto;">
+                        <label for="st_agree" style="display:inline;" class="small ms-1">আমি অঙ্গীকার করছি যে উপরে প্রদত্ত সকল তথ্য সঠিক। (I declare that all provided information is correct)</label>
+                    </div>
+
+                    <div class="text-center no-print mt-4">
+                        <button type="submit" class="btn text-white px-4 py-2 fw-bold me-2" style="background-color: #0f766e;"><i class="bi bi-send-check me-1"></i> Submit Application / জমা দিন</button>
+                        <button type="button" onclick="openStudentAdmissionSlip()" class="btn btn-primary px-4 py-2 fw-bold"><i class="bi bi-printer me-1"></i> Print Form / প্রিন্ট করুন</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 3. ID Cards (Class-wise ID Cards) -->
+        <div class="tab-pane fade" id="idcard-panel" role="tabpanel">
+            <div class="card custom-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3 no-print">
+                    <div>
+                        <h5 class="fw-bold mb-1" style="color: var(--primary-blue);"><i class="bi bi-card-image me-2"></i>Generate Class ID Cards</h5>
+                        <p class="text-muted small mb-0">Select a class level to view and print student identity cards in bulk.</p>
+                    </div>
+                    <button class="btn btn-primary fw-bold" onclick="printGeneratedIdCards()"><i class="bi bi-printer me-2"></i>Print ID Cards</button>
+                </div>
+                
+                <div class="row g-3 mb-4 no-print border-bottom pb-3">
+                    <div class="col-md-5">
+                        <label class="form-label fw-semibold small">Select Class</label>
+                        <select class="form-select" id="idCardClassSelect" onchange="renderClassIdCards()">
+                            <option value="All">All Classes</option>
+                            <option value="Class 6">Class 6</option>
+                            <option value="Class 7">Class 7</option>
+                            <option value="Class 8">Class 8</option>
+                            <option value="Class 9">Class 9</option>
+                            <option value="Class 10">Class 10</option>
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label fw-semibold small">Specific Student</label>
+                        <select class="form-select" id="idCardStudentSelect" onchange="renderClassIdCards()">
+                            <option value="All">All Students</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="idCardsContainer" class="row g-4 justify-content-center p-2">
+                    <!-- Loaded dynamically via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 4. Print Serial List -->
+        <div class="tab-pane fade" id="printlist-panel" role="tabpanel">
+            <div class="card custom-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3 no-print">
+                    <div>
+                        <h5 class="fw-bold mb-1" style="color: var(--primary-blue);"><i class="bi bi-printer me-2"></i>Student Registry Serial List</h5>
+                        <p class="text-muted small mb-0">View and print official student list ordered serially by Roll number.</p>
+                    </div>
+                    <button class="btn btn-primary fw-bold" onclick="triggerPrint()"><i class="bi bi-printer me-2"></i>Print List</button>
+                </div>
+                
+                <div class="row g-3 mb-3 no-print">
+                    <div class="col-md-4">
+                        <select class="form-select" id="printListClassFilter" onchange="loadPrintList()">
+                            <option value="All">All Classes</option>
+                            <option value="Class 6">Class 6</option>
+                            <option value="Class 7">Class 7</option>
+                            <option value="Class 8">Class 8</option>
+                            <option value="Class 9">Class 9</option>
+                            <option value="Class 10">Class 10</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="printListArea" class="bg-white p-3 border rounded">
+                    <div class="text-center mb-4">
+                        <img src="/static/logo.png" alt="School Logo" style="width: 75px; height: 75px; object-fit: contain; margin-bottom: 8px;" class="d-block mx-auto">
+                        <h3 class="fw-bold mb-1" style="color: #0f766e;">গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়</h3>
+                        <p class="mb-0 text-muted small fw-semibold">GAZI MAHMUD JUNIOR HIGH SCHOOL - Official Student Serial Registry</p>
+                        <small class="text-secondary">Date of Printing: {% now 'd F Y' %}</small>
+                    </div>
+                    <table class="table table-bordered align-middle small text-center">
+                        <thead class="table-light">
+                            <tr>
+                                <th>SL No</th>
+                                <th>Roll No</th>
+                                <th>Student Name</th>
+                                <th>Class</th>
+                                <th>Guardian & Mobile</th>
+                                <th>Admission Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="printListTableBody">
+                            <!-- Loaded via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. Promote Students (Bulk & Individual Class Promotion) -->
+        <div class="tab-pane fade" id="promote-panel" role="tabpanel">
+            <div class="card custom-card p-4">
+                <h5 class="fw-bold mb-3" style="color: var(--primary-blue);"><i class="bi bi-arrow-up-circle me-2"></i>Class Promotion System</h5>
+                
+                <!-- Bulk Promotion Form -->
+                <div class="p-3 mb-4 rounded border" style="background: #f8fafc; border-color: #e2e8f0 !important;">
+                    <h6 class="fw-bold text-dark mb-2"><i class="bi bi-layers-fill me-1 text-primary"></i>1. Bulk Promotion by Class Level</h6>
+                    <p class="text-muted small mb-3">Promote all students of a selected class level into the next academic grade at once.</p>
+                    <form id="promoteForm" onsubmit="executeBulkPromotion(event)">
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-5">
+                                <label class="form-label fw-semibold small">Current Class</label>
+                                <select class="form-select" id="promoteCurrentClass" required>
+                                    <option value="Class 6">Class 6</option>
+                                    <option value="Class 7">Class 7</option>
+                                    <option value="Class 8">Class 8</option>
+                                    <option value="Class 9">Class 9</option>
+                                    <option value="Class 10">Class 10</option>
+                                </select>
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label fw-semibold small">Target Class</label>
+                                <select class="form-select" id="promoteTargetClass" required>
+                                    <option value="Class 7">Class 7</option>
+                                    <option value="Class 8">Class 8</option>
+                                    <option value="Class 9">Class 9</option>
+                                    <option value="Class 10">Class 10</option>
+                                    <option value="Graduated">Graduated</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="submit" class="btn text-white w-100 fw-bold" style="background-color: var(--secondary-purple);"><i class="bi bi-arrow-up-circle-fill me-1"></i>Promote Class</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Individual Student Promotion Section -->
+                <div class="p-3 rounded border" style="background: #ffffff;">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold text-dark mb-0"><i class="bi bi-person-up me-1 text-success"></i>2. Individual Student Promotion</h6>
+                        <select class="form-select form-select-sm w-auto" id="promoteClassFilter" onchange="loadPromoteStudents()">
+                            <option value="All">All Classes</option>
+                            <option value="Class 6">Class 6</option>
+                            <option value="Class 7">Class 7</option>
+                            <option value="Class 8">Class 8</option>
+                            <option value="Class 9">Class 9</option>
+                            <option value="Class 10">Class 10</option>
+                        </select>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle small mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Roll No</th>
+                                    <th>Student Name</th>
+                                    <th>Current Class</th>
+                                    <th>Target Class</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="individualPromoteTableBody">
+                                <!-- Loaded via JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Student Details Modal with Dynamic Tabs -->
+<div class="modal fade" id="studentDetailsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0" style="border-radius: 16px;">
+            <div class="modal-header border-0 bg-light" style="border-top-left-radius: 16px; border-top-right-radius: 16px;">
+                <h5 class="fw-bold mb-0 text-dark"><i class="bi bi-person-badge-fill me-2"></i>Student Academic Profile Tracker</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 bg-light">
+                <div class="row g-4">
+                    <!-- Left Sidebar Profile Card -->
+                    <div class="col-lg-4">
+                        <div class="card border-0 shadow-sm p-4 text-center h-100" style="border-radius: 16px; background-color: var(--card-bg);">
+                            <img id="detailStPhoto" src="" class="rounded-circle mb-3 border border-3 border-light shadow-sm" style="width: 120px; height: 120px; object-fit: cover; margin: 0 auto;">
+                            <h4 class="fw-bold mb-1 text-dark" id="detailStName">Jane Doe</h4>
+                            <p class="text-muted small mb-3" id="detailStRollClass">Roll: 10432 | Class 9</p>
+                            <span class="badge bg-success-subtle text-success rounded-pill px-3 py-1.5 align-self-center mb-3" id="detailStStatus">Active</span>
+                            
+                            <hr class="w-100 my-3">
+                            
+                            <div class="w-100 text-start small">
+                                <div class="mb-2"><strong>Admission No:</strong> <span class="float-end text-muted" id="detailStAdmNum">ADM-2026-081</span></div>
+                                <div class="mb-2"><strong>Admission Date:</strong> <span class="float-end text-muted" id="detailStAdmDate">12-Jan-2026</span></div>
+                                <div class="mb-2"><strong>Section:</strong> <span class="float-end text-muted" id="detailStSection">Section A</span></div>
+                                <div class="mb-2"><strong>Shift:</strong> <span class="float-end text-muted" id="detailStShift">Morning</span></div>
+                                <div class="mb-2"><strong>Group:</strong> <span class="float-end text-muted" id="detailStGroup">General</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Tabbed Details Container -->
+                    <div class="col-lg-8">
+                        <div class="card border-0 shadow-sm p-4 h-100" style="border-radius: 16px; background-color: var(--card-bg);">
+                            
+                            <!-- Sub navigation tabs -->
+                            <ul class="nav nav-tabs border-bottom mb-4 gap-2" id="detailModalTabs" role="tablist">
+                                <li class="nav-item">
+                                    <button class="nav-link active fw-bold small text-uppercase" id="modal-profile-tab" data-bs-toggle="tab" data-bs-target="#modal-profile-pane" type="button"><i class="bi bi-file-person me-1"></i> Full Profile</button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link fw-bold small text-uppercase" id="modal-attendance-tab" data-bs-toggle="tab" data-bs-target="#modal-attendance-pane" type="button"><i class="bi bi-calendar-check me-1"></i> Attendance</button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link fw-bold small text-uppercase" id="modal-exams-tab" data-bs-toggle="tab" data-bs-target="#modal-exams-pane" type="button"><i class="bi bi-journal-check me-1"></i> Exams & Results</button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link fw-bold small text-uppercase" id="modal-behavior-tab" data-bs-toggle="tab" data-bs-target="#modal-behavior-pane" type="button"><i class="bi bi-emoji-smile me-1"></i> Achievements</button>
+                                </li>
+                            </ul>
+
+                            <div class="tab-content" id="detailModalTabsContent">
+                                
+                                <!-- Pane 1: Full Profile -->
+                                <div class="tab-pane fade show active" id="modal-profile-pane" role="tabpanel">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <h6 class="fw-bold text-dark border-bottom pb-1">Personal Details</h6>
+                                            <div class="mb-1"><strong>DOB:</strong> <span class="text-muted" id="detailStDOB">12-Mar-2012</span></div>
+                                            <div class="mb-1"><strong>Birth Reg:</strong> <span class="text-muted" id="detailStBirthReg">1920392019302919</span></div>
+                                            <div class="mb-1"><strong>Blood Group:</strong> <span class="text-muted" id="detailStBlood">B+</span></div>
+                                            <div class="mb-1"><strong>Nationality:</strong> <span class="text-muted" id="detailStNation">Bangladeshi</span></div>
+                                            <div class="mb-1"><strong>Mother Tongue:</strong> <span class="text-muted" id="detailStLang">Bengali</span></div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6 class="fw-bold text-dark border-bottom pb-1">Parental Contacts</h6>
+                                            <div class="mb-1"><strong>Father:</strong> <span class="text-muted" id="detailStFather">John Doe</span></div>
+                                            <div class="mb-1"><strong>Mother:</strong> <span class="text-muted" id="detailStMother">Mary Doe</span></div>
+                                            <div class="mb-1"><strong>Emergency Contact:</strong> <span class="text-muted" id="detailStEmerg">Mary Doe (+1555-001)</span></div>
+                                            <div class="mb-1"><strong>Parent Login:</strong> <span class="text-muted" id="detailStParentLogin">parent.login@mail.com</span></div>
+                                        </div>
+                                        <div class="col-12 mt-3">
+                                            <h6 class="fw-bold text-dark border-bottom pb-1">Address Details</h6>
+                                            <div class="mb-1"><strong>Present Address:</strong> <span class="text-muted" id="detailStPresentAddr">Present area</span></div>
+                                            <div class="mb-1"><strong>Permanent Address:</strong> <span class="text-muted" id="detailStPermAddr">Permanent area</span></div>
+                                        </div>
+                                        <div class="col-md-6 mt-3">
+                                            <h6 class="fw-bold text-dark border-bottom pb-1">Academic Background</h6>
+                                            <div class="mb-1"><strong>Prev School:</strong> <span class="text-muted" id="detailStPrevSchool">ABC School</span></div>
+                                            <div class="mb-1"><strong>Prev GPA:</strong> <span class="text-muted" id="detailStPrevGPA">GPA 5.00</span></div>
+                                        </div>
+                                        <div class="col-md-6 mt-3">
+                                            <h6 class="fw-bold text-dark border-bottom pb-1">Statutory Fees Class</h6>
+                                            <div class="mb-1"><strong>Fees Category:</strong> <span class="text-muted" id="detailStFeeCategory">Regular</span></div>
+                                            <div class="mb-1"><strong>Scholarship Waiver:</strong> <span class="text-muted" id="detailStDiscount">0%</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Pane 2: Attendance Analytics -->
+                                <div class="tab-pane fade" id="modal-attendance-pane" role="tabpanel">
+                                    <div class="d-flex align-items-center justify-content-between mb-3 bg-light p-3 rounded">
+                                        <div>
+                                            <h6 class="fw-bold text-dark mb-1">Attendance Percentage Index</h6>
+                                            <small class="text-muted">Target minimum attendance: 90%</small>
+                                        </div>
+                                        <h2 class="fw-bold text-success mb-0">94.8%</h2>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped small">
+                                            <thead>
+                                                <tr>
+                                                    <th>Month</th>
+                                                    <th>Total Classes</th>
+                                                    <th>Present</th>
+                                                    <th>Absent</th>
+                                                    <th>Status Rate</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>January 2026</td>
+                                                    <td>22</td>
+                                                    <td>21</td>
+                                                    <td>1</td>
+                                                    <td><span class="badge bg-success">95.4%</span></td>
+                                                </tr>
+                                                <tr>
+                                                    <td>February 2026</td>
+                                                    <td>20</td>
+                                                    <td>19</td>
+                                                    <td>1</td>
+                                                    <td><span class="badge bg-success">95.0%</span></td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Pane 3: Exam & Result Progress -->
+                                <div class="tab-pane fade" id="modal-exams-pane" role="tabpanel">
+                                    <div class="d-flex align-items-center justify-content-between mb-3 bg-light p-3 rounded">
+                                        <div>
+                                            <h6 class="fw-bold text-dark mb-1">Term Exam Assessment GPA</h6>
+                                            <small class="text-muted">Term-I general evaluation result</small>
+                                        </div>
+                                        <h2 class="fw-bold text-primary mb-0">4.85</h2>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table class="table table-striped align-middle small">
+                                            <thead>
+                                                <tr>
+                                                    <th>Subject Code / Book</th>
+                                                    <th>Marks Obtained</th>
+                                                    <th>Grade</th>
+                                                    <th>Evaluation Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>Mathematics</td>
+                                                    <td>92 / 100</td>
+                                                    <td class="fw-bold text-success">A+</td>
+                                                    <td>Passed</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>English literature</td>
+                                                    <td>84 / 100</td>
+                                                    <td class="fw-bold text-success">A</td>
+                                                    <td>Passed</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>General Science</td>
+                                                    <td>88 / 100</td>
+                                                    <td class="fw-bold text-success">A+</td>
+                                                    <td>Passed</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- Pane 4: Behavior & Achievements -->
+                                <div class="tab-pane fade" id="modal-behavior-pane" role="tabpanel">
+                                    <h6 class="fw-bold text-dark mb-2">Discipline & Achievements Log</h6>
+                                    <div class="list-group list-group-flush small">
+                                        <div class="list-group-item d-flex gap-3 align-items-start border-0 px-0 py-2">
+                                            <div class="bg-success-subtle text-success rounded p-1"><i class="bi bi-trophy-fill"></i></div>
+                                            <div>
+                                                <strong class="text-dark d-block">1st Place in School Math Olympiad</strong>
+                                                <small class="text-muted">Awarded Certificate of Honor in July 2026</small>
+                                            </div>
+                                        </div>
+                                        <div class="list-group-item d-flex gap-3 align-items-start border-0 px-0 py-2">
+                                            <div class="bg-success-subtle text-success rounded p-1"><i class="bi bi-heart-fill"></i></div>
+                                            <div>
+                                                <strong class="text-dark d-block">100% Class Attendance Honor</strong>
+                                                <small class="text-muted">Awarded certificate in February 2026</small>
+                                            </div>
+                                        </div>
+                                        <div class="list-group-item d-flex gap-3 align-items-start border-0 px-0 py-2">
+                                            <div class="bg-primary-subtle text-primary rounded p-1"><i class="bi bi-chat-heart-fill"></i></div>
+                                            <div>
+                                                <strong class="text-dark d-block">Co-Curricular: School Football Club</strong>
+                                                <small class="text-muted">Active participant in school matches</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- HIDDEN PRINT AREA FOR A4 PRINTS -->
+<div id="printArea" class="d-none"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Student Multi-Step Form Navigation
+    window.goToStStep = function(step) {
+        document.querySelectorAll('.st-wizard-step').forEach(el => el.classList.add('d-none'));
+        document.getElementById('st-step-' + step).classList.remove('d-none');
+
+        document.querySelectorAll('#stWizardSteps .nav-link').forEach((btn, idx) => {
+            if (idx + 1 === step) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+
+    window.previewStPhoto = function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('stPhotoPreview');
+                const prompt = document.getElementById('stUploadPrompt');
+                preview.src = e.target.result;
+                preview.classList.remove('d-none');
+                prompt.classList.add('d-none');
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    window.copyStAddress = function() {
+        const check = document.getElementById('stSameAddressCheck');
+        if (check.checked) {
+            document.getElementById('stPermAddr').value = document.getElementById('stPresentAddr').value;
+        } else {
+            document.getElementById('stPermAddr').value = '';
+        }
+    }
+
+    const defaultStudents = [
+        { 
+            id: 1, 
+            name: "David Vance", 
+            roll: 10432, 
+            cls: "Class 8", 
+            guardian: "Robert Vance", 
+            phone: "+1 555-019-923", 
+            active: true, 
+            username: "david.vance", 
+            pass: "12345",
+            photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120",
+            admNum: "ADM-2026-001",
+            admDate: "2026-01-15",
+            section: "Section A",
+            shift: "Morning",
+            group: "General",
+            dob: "2013-05-12",
+            birthReg: "2013920193029193",
+            gender: "Male",
+            blood: "O+",
+            religionNation: "Islam, Bangladeshi",
+            lang: "Bengali",
+            father: "Robert Vance",
+            fatherJob: "Engineer",
+            fatherPhone: "+1 555-019-923",
+            mother: "Claire Vance",
+            motherJob: "Doctor",
+            motherPhone: "+1 555-019-924",
+            emergPhone: "+1 555-019-923",
+            parentEmail: "robert.vance@mail.com",
+            presentAddr: "12 Academy Lane, Dhaka",
+            permAddr: "12 Academy Lane, Dhaka",
+            feeCategory: "Regular",
+            discount: "0"
+        }
+    ];
+
+    function getStudents() {
+        const stored = localStorage.getItem('school_students');
+        if (!stored) {
+            localStorage.setItem('school_students', JSON.stringify(defaultStudents));
+            return defaultStudents;
+        }
+        return JSON.parse(stored);
+    }
+
+    function renderStudents() {
+        const localStudents = getStudents();
+        const tbody = document.getElementById('allStudentsTable');
+        if (!tbody) return;
+
+        fetch('/api/students/')
+        .then(res => res.json())
+        .then(data => {
+            let apiStudents = data.students || [];
+            
+            let studentMap = new Map();
+            localStudents.forEach(s => {
+                let key = String(s.db_id || s.id);
+                studentMap.set(key, s);
+            });
+
+            apiStudents.forEach(s => {
+                let key = String(s.id);
+                let existing = studentMap.get(key);
+                if (existing) {
+                    Object.assign(existing, s);
+                } else {
+                    studentMap.set(key, s);
+                }
+            });
+
+            let combined = Array.from(studentMap.values());
+            let rollCounter = 1;
+            combined = combined.map(st => {
+                if (st.status === 'Approved' || st.active === true) {
+                    st.roll = rollCounter++;
+                } else {
+                    st.roll = 'Pending';
+                }
+                return st;
+            });
+            localStorage.setItem('school_students', JSON.stringify(combined));
+
+            tbody.innerHTML = '';
+
+            combined.forEach(st => {
+                const isApproved = (st.status === 'Approved' || st.active === true);
+                const statusBadge = isApproved ? 
+                    `<span class="badge bg-success-subtle text-success px-2.5 rounded-pill"><i class="bi bi-check-circle me-1"></i>Approved / অনুমোদিত</span>` :
+                    `<span class="badge bg-warning-subtle text-warning px-2.5 rounded-pill"><i class="bi bi-hourglass-split me-1"></i>Pending / অপেক্ষমাণ</span>`;
+
+                const approveBtn = (!isApproved || st.status === 'Pending') ?
+                    `<button class="btn btn-sm btn-success me-1 fw-bold" onclick="approveStudent(${st.id})" title="Approve Student Admission"><i class="bi bi-check-circle-fill me-1"></i>Approve</button>` : '';
+
+                const avatarHtml = st.photo_url || st.photo ? 
+                    `<img src="${st.photo_url || st.photo}" class="rounded-circle" style="width:34px; height:34px; object-fit:cover; cursor:pointer;" onclick="viewStudentDetails(${st.id})">` :
+                    `<div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width:34px; height:34px; font-size:0.85rem; cursor:pointer;" onclick="viewStudentDetails(${st.id})">
+                        ${(st.name || st.name_bn || st.name_en || 'S').charAt(0).toUpperCase()}
+                    </div>`;
+
+                const nameDisplay = `<div>
+                    <span class="fw-semibold text-primary d-block" style="cursor:pointer;" onclick="viewStudentDetails(${st.id})">${st.name || st.name_en || st.name_bn || 'Student'}</span>
+                    ${st.name_bn && st.name_en ? `<small class="text-muted">${st.name_bn}</small>` : ''}
+                </div>`;
+
+                const row = `
+                    <tr class="student-row" data-name="${(st.name || '').toLowerCase()} ${(st.name_bn || '').toLowerCase()}" data-class="${st.cls || st.desired_class || ''}" data-status="${st.status || (isApproved ? 'Approved' : 'Pending')}">
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                ${avatarHtml}
+                                ${nameDisplay}
+                            </div>
+                        </td>
+                        <td><strong>${st.roll}</strong></td>
+                        <td><span class="badge bg-light text-dark border">${st.cls || st.desired_class || 'Class 6'} (${st.version || 'Bangla'})</span></td>
+                        <td>${st.guardian || st.father || 'N/A'}<br><small class="text-muted">${st.phone || st.mobile || ''}</small></td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            ${approveBtn}
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick="editStudent(${st.id})" title="Edit"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-outline-secondary me-1" onclick="printSingleStudent(${st.id})" title="Print Form"><i class="bi bi-printer"></i></button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent(${st.id})" title="Delete"><i class="bi bi-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+        })
+        .catch(err => {
+            tbody.innerHTML = '';
+            localStudents.forEach(st => {
+                const isApproved = (st.status === 'Approved' || st.active === true);
+                const statusBadge = isApproved ? 
+                    `<span class="badge bg-success-subtle text-success px-2.5 rounded-pill"><i class="bi bi-check-circle me-1"></i>Approved / অনুমোদিত</span>` :
+                    `<span class="badge bg-warning-subtle text-warning px-2.5 rounded-pill"><i class="bi bi-hourglass-split me-1"></i>Pending / অপেক্ষমাণ</span>`;
+
+                const approveBtn = (!isApproved || st.status === 'Pending') ?
+                    `<button class="btn btn-sm btn-success me-1 fw-bold" onclick="approveStudent(${st.id})" title="Approve Student Admission"><i class="bi bi-check-circle-fill me-1"></i>Approve</button>` : '';
+
+                const row = `
+                    <tr class="student-row" data-name="${(st.name || '').toLowerCase()}" data-class="${st.cls || ''}">
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="fw-semibold text-primary" style="cursor:pointer;" onclick="viewStudentDetails(${st.id})">${st.name}</span>
+                            </div>
+                        </td>
+                        <td>${st.roll || st.admission_no || '-'}</td>
+                        <td><span class="badge bg-light text-dark">${st.cls || 'Class 6'}</span></td>
+                        <td>${st.guardian || 'N/A'}</td>
+                        <td>${statusBadge}</td>
+                        <td>
+                            ${approveBtn}
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick="editStudent(${st.id})" title="Edit"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-outline-secondary me-1" onclick="printSingleStudent(${st.id})" title="Print Profile"><i class="bi bi-printer"></i></button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent(${st.id})" title="Delete"><i class="bi bi-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+        });
+    }
+
+    window.approveStudent = function(id) {
+        fetch('/api/approve-student/' + id + '/', {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            let students = getStudents();
+            students = students.map(s => {
+                if (s.id == id) {
+                    s.status = 'Approved';
+                    s.active = true;
+                }
+                return s;
+            });
+            localStorage.setItem('school_students', JSON.stringify(students));
+            alert('শিক্ষার্থীর ভর্তি সফলভাবে অনুমোদিত হয়েছে! / Student admission approved successfully!');
+            renderStudents();
+        })
+        .catch(e => {
+            let students = getStudents();
+            students = students.map(s => {
+                if (s.id == id) {
+                    s.status = 'Approved';
+                    s.active = true;
+                }
+                return s;
+            });
+            localStorage.setItem('school_students', JSON.stringify(students));
+            alert('শিক্ষার্থীর ভর্তি সফলভাবে অনুমোদিত হয়েছে! / Student admission approved!');
+            renderStudents();
+        });
+    }
+
+    window.saveBilingualStudentProfile = function(event) {
+        event.preventDefault();
+        const form = document.getElementById('addStudentBilingualForm');
+        const mob = document.getElementById('st_mobile').value;
+        const reMob = document.getElementById('st_re_mobile').value;
+
+        if (mob !== reMob) {
+            alert('মোবাইল নম্বর নিশ্চিতকরণ মেলেনি! / Mobile numbers do not match!');
+            document.getElementById('st_re_mobile').focus();
+            return;
+        }
+
+        const formData = new FormData(form);
+        formData.append('status', 'Approved');
+
+        fetch('/api/save-student/', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            const nameBn = document.getElementById('st_name_bn').value;
+            const nameEn = document.getElementById('st_name_en').value;
+            const cls = document.getElementById('st_desired_class').value;
+            const father = document.getElementById('st_father_name').value;
+            const mother = document.getElementById('st_mother_name').value;
+            const dob = document.getElementById('st_dob').value;
+            const addr = document.getElementById('st_present_address_detail').value;
+
+            const newStObj = {
+                id: data.db_id || Date.now(),
+                name: nameEn || nameBn,
+                name_bn: nameBn,
+                name_en: nameEn,
+                roll: Math.floor(1000 + Math.random() * 9000),
+                cls: cls,
+                guardian: father || mother,
+                father: father,
+                mother: mother,
+                phone: mob,
+                dob: dob,
+                presentAddr: addr,
+                admNum: data.admission_no || ('ADM-' + Date.now()),
+                section: 'A',
+                active: true,
+                status: 'Approved'
+            };
+
+            let students = getStudents();
+            students.push(newStObj);
+            localStorage.setItem('school_students', JSON.stringify(students));
+
+            alert('নতুন শিক্ষার্থী সফলভাবে অন্তর্ভুক্ত করা হয়েছে! / Student registered successfully!');
+            form.reset();
+            
+            const trigger = document.getElementById('all-tab');
+            if (trigger) {
+                const tab = new bootstrap.Tab(trigger);
+                tab.show();
+            }
+            renderStudents();
+        })
+        .catch(err => {
+            alert('নতুন শিক্ষার্থী অন্তর্ভুক্ত করা হয়েছে! / Student registered!');
+            form.reset();
+            const trigger = document.getElementById('all-tab');
+            if (trigger) {
+                const tab = new bootstrap.Tab(trigger);
+                tab.show();
+            }
+            renderStudents();
+        });
+    }
+
+    let editingStId = null;
+
+    window.viewStudentDetails = function(id) {
+        const students = getStudents();
+        const st = students.find(s => s.id === id);
+        if (st) {
+            document.getElementById('detailStPhoto').src = st.photo || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120";
+            document.getElementById('detailStName').innerText = st.name;
+            document.getElementById('detailStRollClass').innerText = `Roll: ${st.roll} | ${st.cls}`;
+            document.getElementById('detailStStatus').innerText = st.active ? 'Active' : 'Inactive';
+            document.getElementById('detailStStatus').className = `badge ${st.active ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'} rounded-pill px-3 py-1.5 align-self-center mb-3`;
+            
+            document.getElementById('detailStAdmNum').innerText = st.admNum || 'N/A';
+            document.getElementById('detailStAdmDate').innerText = st.admDate || 'N/A';
+            document.getElementById('detailStSection').innerText = st.section || 'N/A';
+            document.getElementById('detailStShift').innerText = st.shift || 'N/A';
+            document.getElementById('detailStGroup').innerText = st.group || 'N/A';
+
+            document.getElementById('detailStDOB').innerText = st.dob || 'N/A';
+            document.getElementById('detailStBirthReg').innerText = st.birthReg || 'N/A';
+            document.getElementById('detailStBlood').innerText = st.blood || 'N/A';
+            document.getElementById('detailStNation').innerText = st.religionNation || 'N/A';
+            document.getElementById('detailStLang').innerText = st.lang || 'Bengali';
+
+            document.getElementById('detailStFather').innerText = st.father || 'N/A';
+            document.getElementById('detailStMother').innerText = st.mother || 'N/A';
+            document.getElementById('detailStEmerg').innerText = st.emergPhone || 'N/A';
+            document.getElementById('detailStParentLogin').innerText = st.parentEmail || 'N/A';
+
+            document.getElementById('detailStPresentAddr').innerText = st.presentAddr || 'N/A';
+            document.getElementById('detailStPermAddr').innerText = st.permAddr || 'N/A';
+            
+            document.getElementById('detailStPrevSchool').innerText = st.prevSchool || 'N/A';
+            document.getElementById('detailStPrevGPA').innerText = st.prevGPA || 'N/A';
+            
+            document.getElementById('detailStFeeCategory').innerText = st.feeCategory || 'Regular';
+            document.getElementById('detailStDiscount').innerText = (st.discount || '0') + '%';
+
+            // Show modal
+            const myModal = new bootstrap.Modal(document.getElementById('studentDetailsModal'));
+            myModal.show();
+        }
+    }
+
+    window.editStudent = function(id) {
+        const students = getStudents();
+        const st = students.find(s => s.id == id || s.db_id == id);
+        if (st) {
+            editingStId = id;
+            
+            const setVal = (fieldId, val) => {
+                const el = document.getElementById(fieldId);
+                if (el) el.value = val || '';
+            };
+
+            setVal('st_name_bn', st.name_bn || st.name || '');
+            setVal('st_name_en', st.name_en || st.name || '');
+            setVal('st_dob', st.dob || '');
+            setVal('st_birth_reg_no', st.birth_reg_no || st.birthReg || '');
+            setVal('st_gender', st.gender || 'Boy');
+            setVal('st_mobile', st.phone || st.mobile || '');
+            setVal('st_re_mobile', st.phone || st.mobile || '');
+            setVal('st_father_name', st.father || st.father_name || st.guardian || '');
+            setVal('st_father_nid', st.father_nid || '');
+            setVal('st_mother_name', st.mother || st.mother_name || '');
+            setVal('st_mother_nid', st.mother_nid || '');
+            setVal('st_guardian_name', st.guardian || st.guardian_name || '');
+            setVal('st_guardian_nid', st.guardian_nid || '');
+            setVal('st_desired_class', st.cls || st.desired_class || 'Class 6');
+            setVal('st_version', st.version || 'Bangla');
+            setVal('st_present_address_detail', st.presentAddr || st.present_address_detail || '');
+            setVal('st_present_division', st.present_division || '');
+            setVal('st_present_district', st.present_district || '');
+            setVal('st_present_upazila', st.present_upazila || '');
+            setVal('st_present_post_code', st.present_post_code || '');
+            setVal('st_permanent_address_detail', st.permAddr || st.permanent_address_detail || '');
+            setVal('st_permanent_division', st.permanent_division || '');
+            setVal('st_permanent_district', st.permanent_district || '');
+            setVal('st_permanent_upazila', st.permanent_upazila || '');
+            setVal('st_permanent_post_code', st.permanent_post_code || '');
+
+            // Title Change
+            const headerTitle = document.querySelector('#add-panel h3');
+            if (headerTitle) {
+                headerTitle.innerHTML = `<i class="bi bi-pencil-square me-2"></i>শিক্ষার্থীর তথ্য সম্পাদন / Edit Student Profile`;
+            }
+
+            // Switch to add tab
+            const trigger = document.getElementById('add-tab');
+            if (trigger) {
+                const tab = bootstrap.Tab.getOrCreateInstance(trigger);
+                tab.show();
+            }
+        } else {
+            alert('শিক্ষার্থীর তথ্য পাওয়া যায়নি! / Student record not found!');
+        }
+    }
+
+    function saveStudentProfile(event) {
+        event.preventDefault();
+        
+        const first = document.getElementById('stFirstName').value;
+        const last = document.getElementById('stLastName').value;
+        const roll = document.getElementById('stRollInput').value || Math.floor(1000 + Math.random() * 9000);
+        const cls = document.getElementById('stClassInput').value;
+
+        // Pull Photo Preview
+        const previewEl = document.getElementById('stPhotoPreview');
+        const photoBase64 = previewEl.classList.contains('d-none') ? null : previewEl.src;
+
+        let students = getStudents();
+
+        if (editingStId !== null) {
+            // Edit
+            students = students.map(st => {
+                if (st.id === editingStId) {
+                    st.name = first + ' ' + last;
+                    st.roll = parseInt(roll);
+                    st.cls = cls;
+                    st.guardian = document.getElementById('stFatherName')?.value || '';
+                    st.phone = document.getElementById('stFatherPhone')?.value || '';
+                    st.active = document.getElementById('stStatus')?.value === 'Active' || true;
+
+                    st.admNum = document.getElementById('stAdmissionNum')?.value || '';
+                    st.admDate = document.getElementById('stAdmissionDate')?.value || '';
+                    st.section = document.getElementById('stSection')?.value || '';
+                    st.shift = document.getElementById('stShift')?.value || '';
+                    st.group = document.getElementById('stGroup')?.value || '';
+
+                    st.dob = document.getElementById('stDOB')?.value || '';
+                    st.birthReg = document.getElementById('stBirthReg')?.value || '';
+                    st.gender = document.getElementById('stGender')?.value || '';
+                    st.blood = document.getElementById('stBlood')?.value || '';
+                    st.religionNation = document.getElementById('stReligionNation')?.value || '';
+                    st.lang = document.getElementById('stLang')?.value || '';
+
+                    st.father = document.getElementById('stFatherName')?.value || '';
+                    st.fatherPhone = document.getElementById('stFatherPhone')?.value || '';
+                    
+                    st.mother = document.getElementById('stMotherName')?.value || '';
+                    st.motherPhone = document.getElementById('stMotherPhone')?.value || '';
+
+                    st.emergPhone = document.getElementById('stEmergencyPhone')?.value || '';
+                    st.parentEmail = document.getElementById('stParentEmail')?.value || '';
+
+                    st.presentAddr = document.getElementById('stPresentAddr')?.value || '';
+                    st.permAddr = document.getElementById('stPermAddr')?.value || '';
+
+                    st.prevSchool = document.getElementById('stPrevSchool')?.value || '';
+
+                    if (photoBase64) {
+                        st.photo = photoBase64;
+                    }
+                }
+                return st;
+            });
+            editingStId = null;
+            document.querySelector('#add-panel h4').innerHTML = `<i class="bi bi-person-plus-fill me-2"></i>Register Student Profile`;
+        } else {
+            // Add
+            const newSt = {
+                id: Date.now(),
+                name: first + ' ' + last,
+                roll: parseInt(roll),
+                cls: cls,
+                guardian: document.getElementById('stFatherName')?.value || '',
+                phone: document.getElementById('stFatherPhone')?.value || '',
+                active: document.getElementById('stStatus')?.value === 'Active' || true,
+                username: (first + '.' + last).toLowerCase().replace(/\s/g, ''),
+                pass: "12345",
+                
+                admNum: document.getElementById('stAdmissionNum')?.value || '',
+                admDate: document.getElementById('stAdmissionDate')?.value || '',
+                section: document.getElementById('stSection')?.value || '',
+                shift: document.getElementById('stShift')?.value || '',
+                group: document.getElementById('stGroup')?.value || '',
+
+                dob: document.getElementById('stDOB')?.value || '',
+                birthReg: document.getElementById('stBirthReg')?.value || '',
+                gender: document.getElementById('stGender')?.value || '',
+                blood: document.getElementById('stBlood')?.value || '',
+                religionNation: document.getElementById('stReligionNation')?.value || '',
+                lang: document.getElementById('stLang')?.value || '',
+
+                father: document.getElementById('stFatherName')?.value || '',
+                fatherPhone: document.getElementById('stFatherPhone')?.value || '',
+                
+                mother: document.getElementById('stMotherName')?.value || '',
+                motherPhone: document.getElementById('stMotherPhone')?.value || '',
+
+                emergPhone: document.getElementById('stEmergencyPhone')?.value || '',
+                parentEmail: document.getElementById('stParentEmail')?.value || '',
+
+                presentAddr: document.getElementById('stPresentAddr')?.value || '',
+                permAddr: document.getElementById('stPermAddr')?.value || '',
+
+                prevSchool: document.getElementById('stPrevSchool')?.value || '',
+
+                photo: photoBase64 || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120"
+            };
+            
+            // Post to backend API silently so we have a StudentAdmission record in the DB for the Admission Letter
+            fetch('/api/save-student/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(newSt)
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    newSt.db_id = data.db_id; // Store db_id for Admission Letter
+                    localStorage.setItem('school_students', JSON.stringify(students));
+                }
+            })
+            .catch(e => console.log('Error saving to DB:', e));
+
+            students.push(newSt);
+        }
+
+        localStorage.setItem('school_students', JSON.stringify(students));
+        
+        // Reset Photo Preview
+        previewEl.src = '';
+        previewEl.classList.add('d-none');
+        document.getElementById('stUploadPrompt').classList.remove('d-none');
+
+        document.getElementById('addStudentForm').reset();
+        goToStStep(1);
+        
+        // Return to all panel
+        const trigger = document.getElementById('all-tab');
+        bootstrap.Tab.getInstance(trigger).show();
+        
+        renderStudents();
+    }
+
+    function toggleStatus(id) {
+        let students = getStudents();
+        students = students.map(st => {
+            if (st.id === id) st.active = !st.active;
+            return st;
+        });
+        localStorage.setItem('school_students', JSON.stringify(students));
+        renderStudents();
+    }
+
+    let studentIdToDelete = null;
+
+    window.deleteStudent = function(id) {
+        studentIdToDelete = id;
+        const modalEl = document.getElementById('deleteStudentConfirmModal');
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+    };
+
+    function filterStudentsTable() {
+        const search = document.getElementById('searchStudent').value.toLowerCase();
+        const classFilter = document.getElementById('filterClass').value;
+        const rows = document.querySelectorAll('.student-row');
+
+        rows.forEach(row => {
+            const name = row.dataset.name;
+            const cls = row.dataset.class;
+            const matchesSearch = name.includes(search);
+            const matchesClass = !classFilter || cls === classFilter;
+
+            if (matchesSearch && matchesClass) {
+                row.classList.remove('d-none');
+            } else {
+                row.classList.add('d-none');
+            }
+        });
+    }
+
+    // ID Cards Tab
+    function loadIdCardSelector() {
+        const students = getStudents();
+        const select = document.getElementById('idCardSelector');
+        select.innerHTML = '<option value="" disabled selected>Select Student...</option>';
+        students.forEach(st => {
+            select.insertAdjacentHTML('beforeend', `<option value="${st.id}">${st.name} (${st.cls})</option>`);
+        });
+    }
+
+    function getApprovedOrderedStudents() {
+        let students = getStudents();
+        let rollCounter = 1;
+        students = students.map(st => {
+            if (st.status === 'Approved' || st.active === true) {
+                st.roll = rollCounter++;
+            } else {
+                st.roll = 'Pending';
+            }
+            return st;
+        });
+        localStorage.setItem('school_students', JSON.stringify(students));
+        return students;
+    }
+
+    // --- 1. ID Cards (Class-wise & Individual ID Cards) ---
+    function loadIdCardSelector() {
+        const students = getApprovedOrderedStudents();
+        const studentSelect = document.getElementById('idCardStudentSelect');
+        if (studentSelect) {
+            studentSelect.innerHTML = '<option value="All">All Students</option>';
+            students.forEach(st => {
+                studentSelect.insertAdjacentHTML('beforeend', `<option value="${st.id}">${st.name_en || st.name_bn || st.name} (Roll: ${st.roll} - ${st.cls || 'Class 6'})</option>`);
+            });
+        }
+        renderClassIdCards();
+    }
+
+    function renderClassIdCards() {
+        const classVal = document.getElementById('idCardClassSelect')?.value || 'All';
+        const studentVal = document.getElementById('idCardStudentSelect')?.value || 'All';
+        let students = getApprovedOrderedStudents().filter(st => st.status === 'Approved' || st.active === true);
+
+        if (classVal !== 'All') {
+            students = students.filter(st => (st.cls || st.desired_class) === classVal);
+        }
+        if (studentVal !== 'All') {
+            students = students.filter(st => st.id == studentVal || st.db_id == studentVal);
+        }
+
+        const container = document.getElementById('idCardsContainer');
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (students.length === 0) {
+            container.innerHTML = '<div class="text-center p-5 text-muted fw-bold">No student ID cards found for the selected filter.</div>';
+            return;
+        }
+
+        students.forEach(st => {
+            const cardHtml = `
+                <div class="col-md-4 col-sm-6">
+                    <div class="id-card mx-auto shadow border mb-3" style="width: 280px; border-radius: 14px; background: linear-gradient(135deg, #0f766e 0%, #115e59 100%); color: white; overflow: hidden;">
+                        <div class="p-2 text-center" style="background: rgba(0,0,0,0.18); border-bottom: 2px solid #0284c7;">
+                            <h6 class="mb-0 fw-bold" style="font-size: 13px;">GAZI MAHMUD JUNIOR HIGH SCHOOL</h6>
+                            <small style="font-size: 8px; letter-spacing: 1px;">STUDENT IDENTITY CARD</small>
+                        </div>
+                        <div class="p-3 text-center">
+                            <img src="${st.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120'}" alt="avatar" class="id-card-avatar mb-2" style="width:70px; height:70px; border-radius:50%; object-fit:cover; border:2px solid white;">
+                            <h6 class="fw-bold mb-1">${st.name_en || st.name_bn || st.name}</h6>
+                            <p class="small text-white-50 mb-2" style="font-size: 10px;">${st.cls || st.desired_class || 'Class 6'} | Roll: <strong class="text-white">${st.roll}</strong></p>
+                            
+                            <div class="bg-white text-dark rounded p-2 text-start small" style="font-size: 9.5px; line-height: 1.4;">
+                                <div><strong>Guardian:</strong> ${st.guardian || st.father || 'N/A'}</div>
+                                <div><strong>Mobile:</strong> ${st.phone || st.mobile || 'N/A'}</div>
+                                <div><strong>DOB:</strong> ${st.dob || 'N/A'}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', cardHtml);
+        });
+    }
+
+    function printGeneratedIdCards() {
+        const container = document.getElementById('idCardsContainer');
+        const printArea = document.getElementById('printArea');
+        if (container && printArea) {
+            printArea.innerHTML = `<div class="row g-3 justify-content-center p-3">${container.innerHTML}</div>`;
+            window.print();
+        }
+    }
+
+    // --- 2. Print List Tab ---
+    function loadPrintList() {
+        const classVal = document.getElementById('printListClassFilter')?.value || 'All';
+        let students = getApprovedOrderedStudents();
+
+        if (classVal !== 'All') {
+            students = students.filter(st => (st.cls || st.desired_class) === classVal);
+        }
+
+        const tbody = document.getElementById('printListTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        if (students.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-muted">No student records found.</td></tr>';
+            return;
+        }
+
+        students.forEach((st, idx) => {
+            const isApproved = (st.status === 'Approved' || st.active === true);
+            const row = `
+                <tr>
+                    <td><strong>${idx + 1}</strong></td>
+                    <td><span class="badge bg-dark text-white px-2 py-1">${st.roll}</span></td>
+                    <td class="fw-bold text-start ps-3">${st.name_en || st.name_bn || st.name}</td>
+                    <td>${st.cls || st.desired_class || 'Class 6'}</td>
+                    <td>${st.guardian || st.father || 'N/A'}<br/><small class="text-muted">${st.phone || st.mobile || ''}</small></td>
+                    <td><span class="badge ${isApproved ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'} px-2 py-1">${isApproved ? 'Approved' : 'Pending'}</span></td>
+                </tr>
+            `;
+            tbody.insertAdjacentHTML('beforeend', row);
+        });
+
+        const printArea = document.getElementById('printArea');
+        if (printArea) {
+            printArea.innerHTML = document.getElementById('printListArea').innerHTML;
+        }
+    }
+
+    // --- 3. Promote Students Tab (Class-wise, Bulk & Individual Promotion) ---
+    function loadPromoteStudents() {
+        const classVal = document.getElementById('promoteClassFilter')?.value || 'All';
+        let students = getApprovedOrderedStudents();
+
+        if (classVal !== 'All') {
+            students = students.filter(st => (st.cls || st.desired_class) === classVal);
+        }
+
+        const tbody = document.getElementById('individualPromoteTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        if (students.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" class="p-4 text-muted text-center">No students found for promotion.</td></tr>';
+            return;
+        }
+
+        students.forEach(st => {
+            const currentClass = st.cls || st.desired_class || 'Class 6';
+            const row = `
+                <tr>
+                    <td><strong>${st.roll}</strong></td>
+                    <td class="fw-bold text-start ps-3">${st.name_en || st.name_bn || st.name}</td>
+                    <td><span class="badge bg-primary-subtle text-primary border">${currentClass}</span></td>
+                    <td>
+                        <select class="form-select form-select-sm w-75 mx-auto" id="singlePromoteTarget_${st.id}">
+                            <option value="Class 6" ${currentClass === 'Class 6' ? 'selected' : ''}>Class 6</option>
+                            <option value="Class 7" ${currentClass === 'Class 7' ? 'selected' : ''}>Class 7</option>
+                            <option value="Class 8" ${currentClass === 'Class 8' ? 'selected' : ''}>Class 8</option>
+                            <option value="Class 9" ${currentClass === 'Class 9' ? 'selected' : ''}>Class 9</option>
+                            <option value="Class 10" ${currentClass === 'Class 10' ? 'selected' : ''}>Class 10</option>
+                            <option value="Graduated" ${currentClass === 'Graduated' ? 'selected' : ''}>Graduated</option>
+                        </select>
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-success fw-bold px-3" onclick="promoteSingleStudent(${st.id})"><i class="bi bi-arrow-up-circle me-1"></i>Promote Student</button>
+                    </td>
+                </tr>
+            `;
+            tbody.insertAdjacentHTML('beforeend', row);
+        });
+    }
+
+    function executeBulkPromotion(e) {
+        e.preventDefault();
+        const current = document.getElementById('promoteCurrentClass').value;
+        const target = document.getElementById('promoteTargetClass').value;
+
+        let students = getStudents();
+        let count = 0;
+        students = students.map(st => {
+            if ((st.cls || st.desired_class) === current) {
+                st.cls = target;
+                st.desired_class = target;
+                count++;
+            }
+            return st;
+        });
+
+        localStorage.setItem('school_students', JSON.stringify(students));
+        alert(`Successfully promoted ${count} students from ${current} to ${target}!`);
+        renderStudents();
+        loadPromoteStudents();
+    }
+
+    function promoteSingleStudent(id) {
+        const targetClass = document.getElementById('singlePromoteTarget_' + id).value;
+        let students = getStudents();
+        let st = students.find(s => s.id == id || s.db_id == id);
+        if (st) {
+            st.cls = targetClass;
+            st.desired_class = targetClass;
+            localStorage.setItem('school_students', JSON.stringify(students));
+            alert(`Promoted ${st.name_en || st.name_bn || st.name} to ${targetClass}!`);
+            renderStudents();
+            loadPromoteStudents();
+        }
+    }
+
+    window.printSingleStudent = function(id) {
+        const students = getStudents();
+        const stIndex = students.findIndex(s => s.id == id || s.db_id == id);
+        if (stIndex === -1) return;
+        const st = students[stIndex];
+
+        const targetId = st.db_id || st.id;
+        window.open('/admission-slip/' + targetId + '/', '_blank');
+    }
+
+    window.printFilteredStudentList = function() {
+        loadPrintList();
+        triggerPrint();
+    }
+
+    let lastStudentSubmittedDbId = null;
+
+    function openStudentAdmissionSlip() {
+        if (lastStudentSubmittedDbId) {
+            window.open('/admission-slip/' + lastStudentSubmittedDbId + '/', '_blank');
+        } else {
+            window.print();
+        }
+    }
+
+    function saveBilingualStudentProfile(e) {
+        e.preventDefault();
+        const form = document.getElementById('addStudentBilingualForm');
+        const mob = document.getElementById('st_mobile').value;
+        const reMob = document.getElementById('st_re_mobile').value;
+
+        if (mob !== reMob) {
+            alert('মোবাইল নম্বর নিশ্চিতকরণ মেলেনি! / Mobile numbers do not match!');
+            document.getElementById('st_re_mobile').focus();
+            return;
+        }
+
+        const formData = new FormData(form);
+
+        fetch('/api/save-student/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                lastStudentSubmittedDbId = data.db_id;
+                
+                const nameBn = document.getElementById('st_name_bn').value;
+                const nameEn = document.getElementById('st_name_en').value;
+                const cls = document.getElementById('st_desired_class').value;
+                const father = document.getElementById('st_father_name').value;
+                const mother = document.getElementById('st_mother_name').value;
+                const dob = document.getElementById('st_dob').value;
+                const addr = document.getElementById('st_present_address_detail').value;
+                const randRoll = Math.floor(1000 + Math.random() * 9000);
+
+                const newStObj = {
+                    id: data.db_id || Date.now(),
+                    db_id: data.db_id,
+                    name: nameEn || nameBn,
+                    name_bn: nameBn,
+                    name_en: nameEn,
+                    roll: randRoll,
+                    cls: cls,
+                    guardian: father || mother,
+                    father: father,
+                    mother: mother,
+                    phone: mob,
+                    dob: dob,
+                    presentAddr: addr,
+                    admNum: data.admission_no || ('ADM-' + Date.now()),
+                    section: 'A',
+                    active: true,
+                    status: 'Approved'
+                };
+
+                let stList = getStudents();
+                stList.push(newStObj);
+                localStorage.setItem('school_students', JSON.stringify(stList));
+                renderStudents();
+
+                form.reset();
+                const modal = new bootstrap.Modal(document.getElementById('studentSubmissionSuccessModal'));
+                modal.show();
+            } else {
+                alert('ত্রুটি: ' + (data.message || 'সংরক্ষণ করা যায়নি।'));
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            form.reset();
+            const modal = new bootstrap.Modal(document.getElementById('studentSubmissionSuccessModal'));
+            modal.show();
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        renderStudents();
+        // Initialize bootstrap tabs
+        const tabTriggerList = [].slice.call(document.querySelectorAll('#studentTabs button'));
+        tabTriggerList.forEach(function (tabTriggerEl) {
+            new bootstrap.Tab(tabTriggerEl);
+        });
+
+        const btnConfirm = document.getElementById('btnConfirmDeleteStudent');
+        if (btnConfirm) {
+            btnConfirm.addEventListener('click', function() {
+                if (!studentIdToDelete) return;
+                const id = studentIdToDelete;
+                const modalEl = document.getElementById('deleteStudentConfirmModal');
+                const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                if (modal) modal.hide();
+
+                fetch('/api/delete-student/' + id + '/', {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                })
+                .then(res => res.json())
+                .then(data => {
+                    let students = getStudents();
+                    students = students.filter(st => st.id != id && st.db_id != id);
+                    localStorage.setItem('school_students', JSON.stringify(students));
+                    renderStudents();
+                    studentIdToDelete = null;
+                })
+                .catch(err => {
+                    let students = getStudents();
+                    students = students.filter(st => st.id != id && st.db_id != id);
+                    localStorage.setItem('school_students', JSON.stringify(students));
+                    renderStudents();
+                    studentIdToDelete = null;
+                });
+            });
+        }
+    });
+</script>
+<div id="printArea" class="d-none d-print-block w-100"></div>
+{% endblock %}

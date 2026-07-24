@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ student.name }} - রেজাল্ট কার্ড</title>
+    
+    <!-- Pure Embedded CSS (100% Offline Compatible) -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap');
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Hind Siliguri', 'Segoe UI', Tahoma, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Card Container & Entry Animation */
+        .card-container {
+            width: 100%;
+            max-width: 680px;
+            background: linear-gradient(180deg, #e0f2fe 0%, #ffffff 40%, #e0f2fe 100%);
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+            border: 1px solid #bae6fd;
+            padding: 25px;
+            position: relative;
+            animation: fadeInScale 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeInScale {
+            0% { opacity: 0; transform: scale(0.95) translateY(20px); }
+            100% { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        /* Action Buttons Area */
+        .no-print-area {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-print {
+            background: #0284c7;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-print:hover {
+            background: #0369a1;
+            transform: translateY(-2px);
+        }
+
+        /* Header Layout */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .school-info {
+            text-align: center;
+            flex: 1;
+        }
+
+        .school-name {
+            font-size: 22px;
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        .board-name {
+            font-size: 18px;
+            color: #1e40af;
+            font-weight: 700;
+        }
+
+        .badge-title {
+            background: #f97316;
+            color: white;
+            padding: 2px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 5px;
+        }
+
+        .qr-box, .logo-box {
+            width: 70px;
+            height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qr-box img {
+            width: 100%;
+            height: 100%;
+            border-radius: 6px;
+            border: 1px solid #cbd5e1;
+        }
+
+        /* Section Titles */
+        .section-badge {
+            text-align: center;
+            margin: 15px 0 10px 0;
+        }
+
+        .section-badge span {
+            background: linear-gradient(90deg, #0284c7, #06b6d4);
+            color: white;
+            padding: 4px 25px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        /* Student Info Box */
+        .student-card {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        .student-details p {
+            font-size: 15px;
+            color: #334155;
+            margin-bottom: 4px;
+            font-weight: 700;
+        }
+
+        .student-details span {
+            color: #64748b;
+            font-weight: 400;
+        }
+
+        .student-photo {
+            width: 75px;
+            height: 90px;
+            border-radius: 8px;
+            border: 2px solid #38bdf8;
+            background: #f1f5f9;
+            object-fit: cover;
+        }
+
+        /* Table Styling */
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.03);
+            margin-top: 10px;
+        }
+
+        .result-table th {
+            background: linear-gradient(90deg, #1e3a8a, #3b82f6);
+            color: white;
+            padding: 8px;
+            font-size: 13px;
+        }
+
+        .result-table th.grade-th { background: #f97316; }
+        .result-table th.point-th { background: #ea580c; }
+
+        .result-table td {
+            padding: 7px 10px;
+            text-align: center;
+            font-size: 13.5px;
+            font-weight: 600;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .result-table td.subject {
+            text-align: left;
+            font-weight: 700;
+        }
+
+        /* Bottom Results & Badges */
+        .summary-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            gap: 15px;
+        }
+
+        .summary-boxes {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .pill-box {
+            padding: 8px;
+            border-radius: 20px;
+            color: white;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .pill-gpa { background: #f97316; }
+        .pill-status { background: #1e3a8a; }
+
+        /* Glowing GPA Circle with Pulse Animation */
+        .gpa-circle {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #38bdf8, #1d4ed8);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid white;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+            animation: pulseGlow 2s infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 8px rgba(56, 189, 248, 0.4); }
+            100% { box-shadow: 0 0 20px rgba(56, 189, 248, 0.9); }
+        }
+
+        .gpa-circle .title { font-size: 10px; text-transform: uppercase; }
+        .gpa-circle .val { font-size: 22px; font-weight: 900; line-height: 1; }
+        .gpa-circle .sub { font-size: 11px; }
+
+        /* Footer & Barcode Section */
+        .footer {
+            margin-top: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding-top: 10px;
+            border-top: 1px dashed #93c5fd;
+        }
+
+        .footer-col {
+            font-size: 12px;
+            color: #475569;
+            font-weight: 600;
+        }
+
+        .signature-line {
+            border-top: 1px solid #64748b;
+            margin-top: 30px;
+            padding-top: 2px;
+            text-align: center;
+        }
+
+        .barcode-container {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .barcode-container img {
+            height: 30px;
+            width: 180px;
+        }
+
+        /* ========================================================== */
+        /* Exact PRINT VIEW Engine Configuration (@media print)      */
+        /* ========================================================== */
+        @media print {
+            body, html {
+                background: white !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                display: block !important;
+                height: auto !important;
+            }
+
+            .no-print-area {
+                display: none !important;
+            }
+
+            .card-container {
+                box-shadow: none !important;
+                border: 1px solid #cbd5e1 !important;
+                animation: none !important; /* Disable animations on print */
+                opacity: 1 !important;
+                transform: none !important;
+                visibility: visible !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                margin: 0 !important;
+            }
+
+            .gpa-circle {
+                animation: none !important;
+                box-shadow: none !important;
+            }
+
+            /* Enable exact Background Colors during printing */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Non-Printable Action Button -->
+    <div class="no-print-area">
+        <button class="btn-print" onclick="window.print()">🖨️ প্রিন্ট / PDF সেভ করুন</button>
+    </div>
+
+    <!-- Main Printable Result Card -->
+    <div class="card-container">
+        
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-box">
+                <img src="/static/logo.png" alt="School Logo" style="width: 60px; height: 60px; object-fit: contain; border-radius: 50%;">
+            </div>
+            
+            <div class="school-info">
+                <div class="school-name">{{ student.school_name }}</div>
+                <div class="board-name">{{ student.board_name }}</div>
+                <div class="badge-title">রেজাল্টকার্ড</div>
+            </div>
+            
+            <!-- Python Generated Dynamic QR Code -->
+            <div class="qr-box">
+                <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code">
+            </div>
+        </div>
+
+        <!-- Student Info -->
+        <div class="section-badge">
+            <span>শিক্ষার্থীর তথ্য</span>
+        </div>
+
+        <div class="student-card">
+            <div class="student-details">
+                <p><span>নাম:</span> {{ student.name }}</p>
+                <p><span>রোল নম্বর:</span> {{ student.roll }}</p>
+                <p><span>রেজিস্ট্রেশন নম্বর:</span> {{ student.reg }}</p>
+            </div>
+            {% if student.photo or student.photo_url %}
+            <img src="{{ student.photo|default:student.photo_url }}" class="student-photo" alt="{{ student.name }}" onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="student-photo" style="display:none; align-items:center; justify-content:center; background:linear-gradient(135deg, #0284c7, #0369a1); color:#ffffff; font-size:1.8rem; font-weight:bold;">
+                {{ student.name|slice:":1"|upper }}
+            </div>
+            {% else %}
+            <div class="student-photo" style="display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg, #0284c7, #0369a1); color:#ffffff; font-size:1.8rem; font-weight:bold;">
+                {{ student.name|slice:":1"|upper }}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Results Table -->
+        <div class="section-badge" style="margin-top: 20px;">
+            <span style="background: #f97316;">ফলাফল বিবরণী</span>
+        </div>
+
+        <table class="result-table">
+            <thead>
+                <tr>
+                    <th style="text-align: left; padding-left: 12px;">বিষয়</th>
+                    <th>পূর্ণমান</th>
+                    <th>প্রাপ্ত নম্বর</th>
+                    <th class="grade-th">গ্রেড</th>
+                    <th class="point-th">গ্রেড পয়েন্ট</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in student.results %}
+                <tr style="background-color: {{ row.bg }};">
+                    <td class="subject" style="color: {{ row.text }};">{{ row.subject }}</td>
+                    <td>{{ row.full_marks }}</td>
+                    <td style="color: #2563eb;">{{ row.obtained }}</td>
+                    <td style="color: #ea580c; font-weight: bold;">{{ row.grade }}</td>
+                    <td>{{ row.point }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <!-- Summary & GPA Circle -->
+        <div class="summary-wrapper">
+            <div class="summary-boxes">
+                <div class="pill-box pill-gpa">
+                    মোট জিপিএ (GPA): {{ student.gpa }}
+                </div>
+                <div class="pill-box pill-status">
+                    ফলাফল: {{ student.status }}
+                </div>
+            </div>
+
+            <!-- Dynamic Animated Badge -->
+            <div class="gpa-circle">
+                <span class="title">GPA</span>
+                <span class="val">{{ student.gpa }}</span>
+                <span class="sub">/ A+</span>
+            </div>
+        </div>
+
+        <!-- Dynamic Barcode Section -->
+        <div class="barcode-container">
+            <img src="data:image/png;base64,{{ barcode }}" alt="Barcode">
+        </div>
+
+        <!-- Footer Signatures -->
+        <div class="footer">
+            <div class="footer-col" style="text-align: left;">
+                <p>মুদ্রণের তারিখ: {{ student.print_date }}</p>
+                <div class="signature-line">প্রধান শিক্ষকের স্বাক্ষর</div>
+            </div>
+            <div class="footer-col" style="text-align: right;">
+                <div class="signature-line">কন্ট্রোলারের স্বাক্ষর</div>
+            </div>
+        </div>
+
+    </div>
+
+</body>
+</html>

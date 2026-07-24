@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load i18n static %}
+
+{% block title %}{{ display_name }} প্রশ্ন ম্যানুয়াল এন্ট্রি{% endblock %}
+
+{% block extra_css %}
+<!-- MathJax for rendering Math Equations -->
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h3 class="mb-0 fs-5"><i class="bi bi-journal-text me-2"></i>{{ display_name }} প্রশ্ন তৈরির ম্যানুয়াল সিস্টেম</h3>
+        </div>
+        <div class="card-body p-4">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <h5 class="text-secondary mb-3 pb-2 border-bottom">১. সাধারণ বিবরণ (General Details)</h5>
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">প্রশ্ন টাইপ</label>
+                        {{ base_form.question_type }}
+                        {% if base_form.question_type.errors %}
+                            <div class="text-danger small mt-1">{{ base_form.question_type.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">শ্রেণি</label>
+                        {{ base_form.class_level }}
+                        {% if base_form.class_level.errors %}
+                            <div class="text-danger small mt-1">{{ base_form.class_level.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold">নম্বর (Marks)</label>
+                        {{ base_form.marks }}
+                        {% if base_form.marks.errors %}
+                            <div class="text-danger small mt-1">{{ base_form.marks.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <h5 class="text-secondary mb-3 pb-2 border-bottom">২. {{ display_name }} সম্পর্কিত সুনির্দিষ্ট বিবরণ (Specific Details)</h5>
+                
+                <div class="row">
+                    {% for field in specific_form %}
+                    <div class="col-md-12 mb-3">
+                        <label class="form-label fw-bold">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <div class="form-text text-muted small">{{ field.help_text }}</div>
+                        {% endif %}
+                        {% if field.errors %}
+                            <div class="text-danger small mt-1">{{ field.errors }}</div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="d-flex justify-content-end mt-4">
+                    <button type="submit" class="btn btn-success px-4 py-2 fw-bold shadow-sm">
+                        <i class="bi bi-save me-2"></i>প্রশ্ন সংরক্ষণ করুন
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

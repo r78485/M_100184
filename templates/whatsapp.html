@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+
+{% block title %}WhatsApp Broadcast - EduManage ERP{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1" style="color: var(--primary-blue);">WhatsApp Integrations & API</h2>
+        <p class="text-muted">Broadcast automated notifications, homework alerts, or fee reminders directly using the official WhatsApp API.</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card custom-card p-4">
+                <h5 class="fw-bold mb-4">Send Alert Template</h5>
+                <form id="waForm" onsubmit="sendWhatsApp(event)">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Select Template</label>
+                        <select class="form-select" id="waTemplate" required>
+                            <option>Fee Reminders (Pending Invoices alert)</option>
+                            <option>Emergency Notice (Adverse weather closure)</option>
+                            <option>Absent Notification (Daily absence alarm)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Target Audience</label>
+                        <select class="form-select" id="waClass" required>
+                            <option>All Students</option>
+                            <option>Class 6</option>
+                            <option>Class 7</option>
+                            <option>Class 8</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Message Preview</label>
+                        <textarea class="form-control" rows="3" disabled>Dear Guardian, this is an automated alert from EduManage School informing you that student records require your urgent review. Log in to your portal for info.</textarea>
+                    </div>
+                    <button type="submit" class="btn text-white px-4" style="background-color: #25d366; border: none;"><i class="bi bi-whatsapp me-2"></i>Trigger WhatsApp API</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card custom-card p-4">
+                <h5 class="fw-bold mb-3">API Integration Logs</h5>
+                <p class="text-muted small">Status: <span class="badge bg-success-subtle text-success">Connected</span></p>
+                <div class="list-group list-group-flush small">
+                    <div class="list-group-item d-flex justify-content-between px-0">
+                        <span>API Health: OK</span>
+                        <span class="text-muted">Latency 45ms</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between px-0">
+                        <span>Monthly Broadcasts: 1420 / 5000</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function sendWhatsApp(event) {
+        event.preventDefault();
+        alert("Broadcast queued! WhatsApp API request triggered successfully.");
+        document.getElementById('waForm').reset();
+    }
+</script>
+{% endblock %}

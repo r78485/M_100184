@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unlock Your ADMIN Dashboard - EduManage Academy</title>
+    {% load static %}
+    <!-- Tailwind CSS -->
+    <script src="{% static 'vendor/tailwindcss/tailwindcss.js' %}" onerror="this.onerror=null;this.src='https://cdn.tailwindcss.com';"></script>
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.css' %}" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css';">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        /* Neumorphic Inner Shadow for inputs */
+        .neumorphic-input {
+            background: #fcfdfe;
+            box-shadow: inset 2px 2px 5px rgba(55, 84, 170, 0.05), 
+                        inset -2px -2px 5px rgba(255, 255, 255, 0.9),
+                        0px 2px 4px rgba(0, 0, 0, 0.02);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .neumorphic-input:focus {
+            box-shadow: inset 1px 1px 3px rgba(55, 84, 170, 0.1), 
+                        inset -1px -1px 3px rgba(255, 255, 255, 1),
+                        0px 0px 0px 3px rgba(13, 148, 136, 0.15);
+            outline: none;
+            border-color: #0d9488;
+        }
+        /* Neumorphic login card */
+        .neumorphic-card {
+            background: #ffffff;
+            box-shadow: 20px 20px 60px #d1d9e6, 
+                        -20px -20px 60px #ffffff;
+            border-radius: 24px;
+        }
+        /* Gradient Button */
+        .btn-gradient {
+            background: linear-gradient(135deg, #0d9488 0%, #059669 100%);
+            box-shadow: 0px 4px 10px rgba(13, 148, 136, 0.3);
+            transition: all 0.3s ease;
+        }
+        .btn-gradient:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+            box-shadow: 0px 6px 15px rgba(13, 148, 136, 0.4);
+        }
+        /* Custom Left Section Glass Effect */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.08);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 md:p-8">
+    <div class="w-full max-w-6xl flex flex-col md:flex-row gap-6 md:gap-12 items-stretch justify-center">
+        
+        <!-- Left Side: Welcome Banner / School Graphic -->
+        <div class="hidden md:flex md:w-1/2 glass-panel p-8 flex-col justify-between relative overflow-hidden border border-white/40">
+            <!-- Background circles decoration -->
+            <div class="absolute -top-12 -left-12 w-48 h-48 bg-teal-100 rounded-full blur-3xl opacity-60"></div>
+            <div class="absolute -bottom-16 -right-16 w-64 h-64 bg-emerald-100 rounded-full blur-3xl opacity-60"></div>
+            
+            <div class="relative z-10 text-center my-auto flex flex-col items-center w-full">
+                <!-- Institution Name -->
+                <h1 class="text-2xl font-black text-teal-800 mb-3 tracking-wide">গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়</h1>
+                
+                <div class="mb-4 bg-white w-20 h-20 rounded-full flex items-center justify-center border border-teal-100 shadow-md overflow-hidden">
+                    <img src="/static/logo.png" class="w-full h-full object-contain p-1">
+                </div>
+                <h2 class="text-2xl font-extrabold text-slate-800 tracking-tight">WELCOME TO <br><span class="text-teal-600">EDUMANAGE ACADEMY</span></h2>
+                <p class="text-slate-500 mt-2 max-w-md text-sm">Experience the next generation of digital school administration. Premium, secure, and intuitive.</p>
+                
+                <!-- Real School Campus Photo Banner with Centered Institution Logo Overlay -->
+                <div class="mt-5 relative w-full aspect-[4/3] max-h-[380px] flex items-center justify-center rounded-2xl overflow-hidden shadow-xl border border-slate-200 group bg-slate-900">
+                    <img src="/static/school_campus.png" alt="গাজীমাহমুদ নিম্ন-মাধ্যমিক বিদ্যালয়" class="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-700">
+                    <!-- Subtle Dark Gradient Overlay for Contrast -->
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-950/50 via-slate-900/10 to-transparent"></div>
+                    <!-- Center Institution Logo Overlay -->
+                    <div class="absolute inset-0 flex items-center justify-center bg-black/15 group-hover:bg-black/25 transition-all duration-300">
+                        <div class="relative flex flex-col items-center">
+                            <!-- Glow Ring -->
+                            <div class="absolute -inset-3 bg-gradient-to-r from-teal-500 via-emerald-400 to-teal-600 rounded-full blur-md opacity-85 group-hover:opacity-100 transition duration-500 animate-pulse"></div>
+                            <!-- Centered Logo Badge -->
+                            <img src="/static/logo.png" alt="Institution Logo" class="relative w-20 h-20 rounded-full bg-white/95 backdrop-blur p-2 shadow-2xl transition-all duration-500 transform group-hover:scale-110 object-contain border-2 border-teal-500">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="relative z-10 text-center">
+                <span class="text-xs text-slate-400">EduManage Academy ERP &copy; 2026. All rights reserved.</span>
+            </div>
+        </div>
+
+        <!-- Right Side: Neumorphic Login Card -->
+        <div class="w-full md:w-1/2 flex items-center justify-center">
+            <div class="w-full max-w-md neumorphic-card p-8 border border-slate-50 flex flex-col justify-between">
+                
+                <div>
+                    <!-- Header -->
+                    <div class="text-center mb-6">
+                        <h3 class="text-2xl font-bold text-slate-800">Unlock Your ADMIN Dashboard</h3>
+                        <p class="text-sm text-slate-500 mt-1">Sign in with your administrator privileges</p>
+                    </div>
+
+                    <!-- Django messages/alerts dynamic area -->
+                    {% if messages %}
+                        <div class="mb-4">
+                            {% for message in messages %}
+                                <div class="p-3 rounded-lg text-sm {% if message.tags == 'error' %}bg-rose-50 border border-rose-200 text-rose-600{% else %}bg-teal-50 border border-teal-200 text-teal-700{% endif %} flex items-start gap-2 shadow-sm animate-pulse">
+                                    <i class="bi {% if message.tags == 'error' %}bi-exclamation-triangle-fill{% else %}bi-check-circle-fill{% endif %} mt-0.5"></i>
+                                    <span>{{ message }}</span>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <!-- Form -->
+                    <form method="POST" id="loginForm" class="space-y-4" onsubmit="triggerLoading()">
+                        {% csrf_token %}
+                        
+                        <!-- Username / Email -->
+                        <div>
+                            <label for="username" class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">User ID / Email</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                    <i class="bi bi-person"></i>
+                                </span>
+                                <input type="text" id="username" name="username" class="w-full pl-10 pr-4 py-3 rounded-xl border border-slate-200 neumorphic-input text-slate-800 text-sm font-medium" placeholder="admin.username" required>
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div>
+                            <label for="password" class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wider">Password</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400">
+                                    <i class="bi bi-lock"></i>
+                                </span>
+                                <input type="password" id="password" name="password" class="w-full pl-10 pr-10 py-3 rounded-xl border border-slate-200 neumorphic-input text-slate-800 text-sm font-medium" placeholder="••••••••" required>
+                                <span class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 cursor-pointer hover:text-slate-600" onclick="togglePasswordVisibility()">
+                                    <i id="passwordEye" class="bi bi-eye-slash"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Remember Me & Forgot Password -->
+                        <div class="flex items-center justify-between text-xs font-medium pt-1">
+                            <label class="flex items-center gap-2 text-slate-500 cursor-pointer">
+                                <input type="checkbox" name="remember_me" class="rounded border-slate-300 text-teal-600 focus:ring-teal-500 w-4 h-4">
+                                <span>Remember Me</span>
+                            </label>
+                            <a href="#" class="text-teal-600 hover:text-teal-700 hover:underline">Forgot Password?</a>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" id="btnSubmit" class="w-full btn-gradient py-3 text-white rounded-xl font-semibold text-sm flex items-center justify-center gap-2">
+                            <span id="btnText">SIGN IN TO YOUR PROFILE</span>
+                            <span id="btnSpinner" class="hidden">
+                                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                            </span>
+                        </button>
+                    </form>
+
+                    <!-- OR Divider -->
+                    <div class="relative my-6 text-center">
+                        <hr class="border-slate-200">
+                        <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white px-3 text-xxs font-bold text-slate-400 tracking-widest uppercase">OR</span>
+                    </div>
+
+                    <!-- Social logins -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <button class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 transition text-sm font-medium text-slate-700 shadow-sm" onclick="alert('Google Auth integration coming soon!')">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24">
+                                <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v3.92h6.69c-.29 1.5-.1.85-2.28 2.28l3.59 2.78c2.1-1.93 3.3-4.77 3.3-7.91z"/>
+                                <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.59-2.78c-1 .67-2.28 1.07-4.34 1.07-3.34 0-6.17-2.25-7.18-5.28L1.13 17.15C3.15 21.18 7.28 24 12 24z"/>
+                                <path fill="#FBBC05" d="M4.82 14.1c-.26-.77-.4-1.6-.4-2.45s.14-1.68.4-2.45L1.13 6.22C.41 7.66 0 9.28 0 11s.41 3.34 1.13 4.78l3.69-2.68z"/>
+                                <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.43-3.43C17.93 1.19 15.22 0 12 0 7.28 0 3.15 2.82 1.13 6.85l3.69 2.68c1.01-3.03 3.84-5.28 7.18-5.28z"/>
+                            </svg>
+                            <span>Google</span>
+                        </button>
+                        <button class="flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 transition text-sm font-medium text-slate-700 shadow-sm" onclick="alert('Microsoft 365 integration coming soon!')">
+                            <svg class="w-4 h-4" viewBox="0 0 23 23">
+                                <rect x="0" y="0" width="11" height="11" fill="#F25022"/>
+                                <rect x="12" y="0" width="11" height="11" fill="#7FBA00"/>
+                                <rect x="0" y="12" width="11" height="11" fill="#00A4EF"/>
+                                <rect x="12" y="12" width="11" height="11" fill="#FFB900"/>
+                            </svg>
+                            <span>Microsoft 365</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mt-6 text-center block md:hidden">
+                    <span class="text-xxs text-slate-400">EduManage Academy ERP &copy; 2026.</span>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('password');
+            const eyeIcon = document.getElementById('passwordEye');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.replace('bi-eye-slash', 'bi-eye');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.replace('bi-eye', 'bi-eye-slash');
+            }
+        }
+
+        function triggerLoading() {
+            document.getElementById('btnText').innerText = 'SIGNING IN...';
+            document.getElementById('btnSpinner').classList.remove('hidden');
+            document.getElementById('btnSubmit').disabled = true;
+        }
+
+        // Register Service Worker for Offline Functionality
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(reg => console.log('PWA Service Worker registered:', reg.scope))
+                    .catch(err => console.log('Service Worker registration failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>

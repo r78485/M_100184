@@ -1,0 +1,726 @@
+{% extends 'base.html' %}
+{% load i18n static %}
+
+{% block title %}Dynamic Salary Sheet - EduManage ERP{% endblock %}
+
+{% block extra_css %}
+<!-- Barcode & QR Code Libraries -->
+<script src="{% static 'vendor/jsbarcode/JsBarcode.all.min.js' %}" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js';"></script>
+<script src="{% static 'vendor/qrcodejs/qrcode.min.js' %}" onerror="this.onerror=null;this.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';"></script>
+
+<style>
+    .salary-header {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        color: white;
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 24px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    .dynamic-table-wrapper {
+        overflow-x: auto;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+    }
+    .dynamic-table {
+        min-width: 1200px;
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+    }
+    .dynamic-table th, .dynamic-table td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #e2e8f0;
+        white-space: nowrap;
+    }
+    .dynamic-table th {
+        background-color: #f8fafc;
+        font-weight: 700;
+        color: #475569;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .dynamic-table tbody tr:hover {
+        background-color: #f1f5f9;
+    }
+    .btn-remove-row {
+        cursor: pointer;
+        color: #ef4444;
+        transition: color 0.2s;
+    }
+    .btn-remove-row:hover {
+        color: #b91c1c;
+    }
+    .extra-item {
+        background: #f8fafc;
+        border: 1px dashed #cbd5e1;
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        position: relative;
+    }
+    .extra-item .remove-extra {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #ef4444;
+        color: white;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 12px;
+        border: 2px solid white;
+    }
+    /* Printable Receipt CSS */
+    #printReceiptWrapper {
+        display: none;
+    }
+    @media print {
+        body * { visibility: hidden; }
+        #printReceiptWrapper, #printReceiptWrapper * {
+            visibility: visible;
+        }
+        #printReceiptWrapper {
+            display: block;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            margin: 0;
+            padding: 20px;
+        }
+    }
+    /* Table Print Mode */
+    @media print {
+        body.print-mode-table * { visibility: hidden; }
+        body.print-mode-table .salary-header, body.print-mode-table .salary-header *,
+        body.print-mode-table .dynamic-table-wrapper, body.print-mode-table .dynamic-table-wrapper * {
+            visibility: visible;
+        }
+        body.print-mode-table .salary-header {
+            position: absolute; left: 0; top: 0; width: 100%; box-shadow: none;
+        }
+        body.print-mode-table .dynamic-table-wrapper {
+            position: absolute; left: 0; top: 120px; width: 100%; border: none;
+        }
+        body.print-mode-table .no-print { display: none !important; }
+        body.print-mode-table td:last-child, body.print-mode-table th:last-child { display: none !important; } /* Hide Action column */
+    }
+    .column-dropdown {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="salary-header d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-wallet2 me-2 text-info"></i>Dynamic Salary Sheet</h2>
+            <p class="mb-0 text-white-50">Generate modern salary sheets with dynamic allowances, deductions, and barcodes.</p>
+        </div>
+        <div class="no-print">
+            <button class="btn btn-outline-light rounded-pill px-4 me-2" onclick="clearAllData()">
+                <i class="bi bi-trash3 me-2"></i>Clear Data
+            </button>
+            <button class="btn btn-light text-primary rounded-pill px-4 fw-bold" onclick="printFullTable()">
+                <i class="bi bi-printer me-2"></i>Print Full List
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <!-- Salary Sheet Display (Full Width) -->
+        <div class="col-lg-12">
+            <div class="card custom-card p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3 no-print">
+                    <h5 class="fw-bold mb-0">Monthly Salary Statement</h5>
+                    <div class="d-flex gap-2">
+                        <div class="dropdown">
+                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="bi bi-layout-three-columns me-1"></i>Toggle Columns
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end column-dropdown p-2" id="columnToggleMenu">
+                                <!-- Dynamic Toggles -->
+                            </ul>
+                        </div>
+                        <button class="btn btn-sm btn-primary text-white" onclick="syncFromHR()">
+                            <i class="bi bi-arrow-repeat me-1"></i>Sync from HR Command Center
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="dynamic-table-wrapper">
+                    <table class="dynamic-table" id="salaryTable">
+                        <thead>
+                            <tr id="salaryTableHead">
+                                <!-- Dynamic Headers -->
+                            </tr>
+                        </thead>
+                        <tbody id="salaryTableBody">
+                            <tr><td colspan="100%" class="text-center text-muted py-5">No employee added yet.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pay Slip Print Area (Hidden in Normal View) -->
+<div id="printReceiptWrapper">
+    <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; border: 1px solid #ddd; border-radius: 8px; padding: 30px;">
+        <!-- Header -->
+        <div style="text-align: center; border-bottom: 2px solid #333; padding-bottom: 15px; margin-bottom: 20px;">
+            <h1 style="margin: 0; color: #1e293b; font-size: 28px;">{{ request.session.school_name|default:"Tech Solutions Ltd." }}</h1>
+            <h3 style="margin: 5px 0 0; color: #64748b;">PAY SLIP / বেতন বিবরণী</h3>
+            <p style="margin: 5px 0 0; color: #94a3b8; font-size: 14px;">Date: <span id="slipDate"></span></p>
+        </div>
+
+        <!-- Employee Info & Barcode -->
+        <div style="display: flex; justify-content: space-between; margin-bottom: 30px;">
+            <div style="flex: 1;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                    <tr><td style="padding: 4px 0; font-weight: bold; width: 120px;">Employee ID:</td><td id="slipEmpId"></td></tr>
+                    <tr><td style="padding: 4px 0; font-weight: bold;">Name:</td><td id="slipEmpName"></td></tr>
+                    <tr><td style="padding: 4px 0; font-weight: bold;">Designation:</td><td id="slipEmpRole"></td></tr>
+                </table>
+            </div>
+            <div style="text-align: right;">
+                <svg id="slipBarcode" style="max-width: 200px; height: 60px;"></svg>
+            </div>
+        </div>
+
+        <!-- Salary Breakdown -->
+        <div style="display: flex; gap: 20px; margin-bottom: 30px;">
+            <!-- Earnings -->
+            <div style="flex: 1; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px;">
+                <h4 style="margin-top: 0; color: #16a34a; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">Earnings</h4>
+                <table style="width: 100%; font-size: 14px;" id="slipEarningsTable">
+                    <!-- Dynamic -->
+                </table>
+            </div>
+            
+            <!-- Deductions -->
+            <div style="flex: 1; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px;">
+                <h4 style="margin-top: 0; color: #dc2626; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">Deductions</h4>
+                <table style="width: 100%; font-size: 14px;" id="slipDeductionsTable">
+                    <!-- Dynamic -->
+                </table>
+            </div>
+        </div>
+
+        <!-- Net Salary & QR -->
+        <div style="display: flex; justify-content: space-between; align-items: center; background: #f8fafc; padding: 20px; border-radius: 8px; border: 1px solid #e2e8f0;">
+            <div>
+                <h2 style="margin: 0; color: #1e293b; font-size: 18px;">NET SALARY (নিট বেতন)</h2>
+                <h1 style="margin: 5px 0 0; color: #0284c7; font-size: 32px;" id="slipNetSalary"></h1>
+            </div>
+            <div>
+                <div id="slipQRCode"></div>
+            </div>
+        </div>
+
+        <!-- Signatures -->
+        <div style="display: flex; justify-content: space-between; margin-top: 60px; padding-top: 20px; border-top: 1px dashed #cbd5e1;">
+            <div style="text-align: center;">
+                <div style="border-bottom: 1px solid #333; width: 150px; margin-bottom: 5px;"></div>
+                <span style="font-size: 12px; color: #64748b;">Prepared By</span>
+            </div>
+            <div style="text-align: center;">
+                <div style="border-bottom: 1px solid #333; width: 150px; margin-bottom: 5px;"></div>
+                <span style="font-size: 12px; color: #64748b;">Verified By</span>
+            </div>
+            <div style="text-align: center;">
+                <div style="border-bottom: 1px solid #333; width: 150px; margin-bottom: 5px;"></div>
+                <span style="font-size: 12px; color: #64748b;">Authorized Signatory</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let employeesData = [];
+
+    // Format Currency
+    const formatTk = (amount) => `৳${parseFloat(amount).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+
+    // Add extra field input
+    function addExtraField(type) {
+        const container = document.getElementById(type === 'earnings' ? 'extraEarningsContainer' : 'extraDeductionsContainer');
+        const color = type === 'earnings' ? 'success' : 'danger';
+        const label = type === 'earnings' ? 'Earning Name' : 'Deduction Name';
+        
+        const id = Date.now();
+        const html = `
+            <div class="extra-item" id="item-${id}">
+                <div class="remove-extra" onclick="document.getElementById('item-${id}').remove()">
+                    <i class="bi bi-x"></i>
+                </div>
+                <div class="row g-2">
+                    <div class="col-7">
+                        <input type="text" class="form-control form-control-sm border-${color}" name="${type}_name" placeholder="${label}" required>
+                    </div>
+                    <div class="col-5">
+                        <input type="number" class="form-control form-control-sm border-${color}" name="${type}_amount" placeholder="Amount (৳)" min="0" required>
+                    </div>
+                </div>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', html);
+    }
+
+    // Process Python logic in JS
+    function addEmployee(e) {
+        e.preventDefault();
+        
+        const empId = document.getElementById('empId').value;
+        const name = document.getElementById('empName').value;
+        const designation = document.getElementById('empDesignation').value;
+        const basicSalary = parseFloat(document.getElementById('empBasic').value);
+
+        // Extract extra earnings
+        const extraEarnings = {};
+        let totalExtraEarnings = 0;
+        const eNames = document.getElementsByName('earnings_name');
+        const eAmounts = document.getElementsByName('earnings_amount');
+        for(let i=0; i<eNames.length; i++) {
+            let val = parseFloat(eAmounts[i].value) || 0;
+            extraEarnings[eNames[i].value] = val;
+            totalExtraEarnings += val;
+        }
+
+        // Extract extra deductions
+        const extraDeductions = {};
+        let totalExtraDeductions = 0;
+        const dNames = document.getElementsByName('deductions_name');
+        const dAmounts = document.getElementsByName('deductions_amount');
+        for(let i=0; i<dNames.length; i++) {
+            let val = parseFloat(dAmounts[i].value) || 0;
+            extraDeductions[dNames[i].value] = val;
+            totalExtraDeductions += val;
+        }
+
+        // --- Core Calculation Logic ---
+        // 1. Standard Allowances
+        const houseRent = basicSalary * 0.40; // 40%
+        const medical = basicSalary * 0.10;   // 10%
+
+        // Gross Salary
+        const grossSalary = basicSalary + houseRent + medical + totalExtraEarnings;
+
+        // 3. Standard Deductions
+        const pf = basicSalary * 0.08; // 8% PF
+        const tax = grossSalary > 40000 ? grossSalary * 0.05 : 0; // 5% Tax if > 40k
+
+        const totalDeductions = pf + tax + totalExtraDeductions;
+        const netSalary = grossSalary - totalDeductions;
+
+        // Build the Record (Ordered Keys)
+        const record = {
+            "ID": empId,
+            "Name": name,
+            "Designation": designation,
+            "Basic Salary": basicSalary,
+            "House Rent (40%)": houseRent,
+            "Medical (10%)": medical,
+            ...extraEarnings,
+            "GROSS SALARY": grossSalary,
+            "PF (8%)": pf,
+            "Tax": tax,
+            ...extraDeductions,
+            "TOTAL DEDUCTIONS": totalDeductions,
+            "NET SALARY": netSalary,
+            "_rawDetails": {
+                earnings: { "Basic Salary": basicSalary, "House Rent (40%)": houseRent, "Medical (10%)": medical, ...extraEarnings },
+                deductions: { "PF (8%)": pf, "Tax": tax, ...extraDeductions },
+                gross: grossSalary,
+                net: netSalary,
+                id: empId, name: name, role: designation
+            }
+        };
+
+        employeesData.push(record);
+        renderTable();
+        
+        // Reset dynamic fields
+        document.getElementById('extraEarningsContainer').innerHTML = '';
+        document.getElementById('extraDeductionsContainer').innerHTML = '';
+        e.target.reset();
+    }
+
+    let hiddenColumns = new Set();
+    let allAvailableColumns = [];
+
+    // Dynamic DataFrame-style Table Renderer
+    function renderTable() {
+        if(employeesData.length === 0) {
+            document.getElementById('salaryTableHead').innerHTML = '';
+            document.getElementById('salaryTableBody').innerHTML = '<tr><td colspan="100%" class="text-center text-muted py-5">No employee added yet.</td></tr>';
+            document.getElementById('columnToggleMenu').innerHTML = '';
+            return;
+        }
+
+        // Collect all unique columns across all employees
+        const allColumnsSet = new Set();
+        employeesData.forEach(emp => {
+            Object.keys(emp).forEach(key => {
+                if(key !== '_rawDetails') allColumnsSet.add(key);
+            });
+        });
+        
+        // Convert to array and define specific order for common fields
+        const columnsOrder = ["ID", "Name", "Designation", "Basic Salary", "House Rent (40%)", "Medical (10%)"];
+        const dynamicCols = Array.from(allColumnsSet).filter(c => !columnsOrder.includes(c) && !["GROSS SALARY", "PF (8%)", "Tax", "TOTAL DEDUCTIONS", "NET SALARY"].includes(c));
+        const newAvailableColumns = [...columnsOrder, ...dynamicCols, "GROSS SALARY", "PF (8%)", "Tax", "TOTAL DEDUCTIONS", "NET SALARY"];
+
+        const columnsChanged = JSON.stringify(newAvailableColumns) !== JSON.stringify(allAvailableColumns);
+        allAvailableColumns = newAvailableColumns;
+
+        // Only rebuild toggle menu if columns changed or it's empty
+        if (columnsChanged || document.getElementById('columnToggleMenu').innerHTML.trim() === '') {
+            renderDropdown();
+        }
+
+        // Filter columns by visibility
+        const finalColumns = allAvailableColumns.filter(c => !hiddenColumns.has(c));
+
+        // Render Head
+        let headHtml = '';
+        finalColumns.forEach(col => {
+            const isEditableCol = !["ID", "Name", "Designation", "GROSS SALARY", "TOTAL DEDUCTIONS", "NET SALARY"].includes(col);
+            const renameIcon = isEditableCol ? `<i class="bi bi-pencil-fill ms-2 text-muted" style="cursor:pointer; font-size:0.75rem;" onclick="renameColumnPrompt('${col}')" title="Rename Column"></i>` : '';
+            const deleteIcon = isEditableCol ? `<i class="bi bi-trash-fill ms-1 text-danger" style="cursor:pointer; font-size:0.75rem;" onclick="deleteColumnPrompt('${col}')" title="Delete Column"></i>` : '';
+            headHtml += `<th>${col} ${renameIcon} ${deleteIcon}</th>`;
+        });
+        headHtml += '<th class="no-print">Action</th>';
+        document.getElementById('salaryTableHead').innerHTML = headHtml;
+
+        // Render Body
+        let bodyHtml = '';
+        employeesData.forEach((emp, index) => {
+            bodyHtml += '<tr>';
+            finalColumns.forEach(col => {
+                let val = emp[col];
+                let displayVal = val === undefined ? '-' : (typeof val === 'number' ? val.toFixed(2) : val); // Don't add Tk symbol for editable cells to make editing easier, or handle it carefully
+                
+                const isEditable = !["ID", "Name", "Designation", "GROSS SALARY", "TOTAL DEDUCTIONS", "NET SALARY"].includes(col) && val !== '-';
+
+                // Highlight important columns
+                if(col === 'NET SALARY') {
+                    bodyHtml += `<td class="fw-bold text-success">${formatTk(val)}</td>`;
+                } else if(col === 'GROSS SALARY') {
+                    bodyHtml += `<td class="fw-bold text-primary">${formatTk(val)}</td>`;
+                } else if(col === 'TOTAL DEDUCTIONS') {
+                    bodyHtml += `<td class="fw-bold text-danger">${formatTk(val)}</td>`;
+                } else if(isEditable) {
+                    bodyHtml += `<td contenteditable="true" style="background:#fffbe6; border:1px solid #fde047; outline:none; border-radius:4px; padding:8px; cursor:text;" onblur="updateCell(${index}, '${col}', this.innerText)" onkeydown="if(event.key === 'Enter') { event.preventDefault(); this.blur(); }" title="Click to edit">${displayVal}</td>`;
+                } else {
+                    bodyHtml += `<td>${displayVal}</td>`;
+                }
+            });
+            bodyHtml += `<td class="no-print">
+                <button class="btn btn-sm btn-dark" onclick="printPaySlip(${index})"><i class="bi bi-printer"></i> Slip</button>
+            </td>`;
+            bodyHtml += '</tr>';
+        });
+        document.getElementById('salaryTableBody').innerHTML = bodyHtml;
+    }
+
+    function renderDropdown() {
+        let toggleHtml = '';
+        allAvailableColumns.forEach(col => {
+            if(["ID", "Name"].includes(col)) return;
+            const isChecked = !hiddenColumns.has(col) ? 'checked' : '';
+            toggleHtml += `
+                <li>
+                    <label class="dropdown-item d-flex align-items-center gap-2" onclick="event.stopPropagation()">
+                        <input class="form-check-input mt-0" type="checkbox" value="${col}" ${isChecked} onchange="toggleColumn(this)">
+                        ${col}
+                    </label>
+                </li>
+            `;
+        });
+        toggleHtml += `
+            <li><hr class="dropdown-divider"></li>
+            <li>
+                <button class="dropdown-item text-primary fw-bold" onclick="event.stopPropagation(); addNewColumnPrompt()"><i class="bi bi-plus-circle me-1"></i>Add Column</button>
+            </li>
+        `;
+        document.getElementById('columnToggleMenu').innerHTML = toggleHtml;
+    }
+
+    function updateCell(empIndex, colName, newValue) {
+        let parsed = parseFloat(newValue.replace(/[^\d.-]/g, ''));
+        if(isNaN(parsed)) parsed = 0;
+        
+        employeesData[empIndex][colName] = parsed;
+        recalculateAll();
+        renderTable();
+    }
+
+    function recalculateAll() {
+        employeesData.forEach(emp => {
+            let gross = 0;
+            let totalDed = 0;
+
+            // Recalculate Earnings
+            Object.keys(emp._rawDetails.earnings).forEach(k => {
+                let val = emp[k] || 0;
+                gross += val;
+                emp._rawDetails.earnings[k] = val; // update raw for payslip
+            });
+
+            // Recalculate Deductions
+            Object.keys(emp._rawDetails.deductions).forEach(k => {
+                let val = emp[k] || 0;
+                totalDed += val;
+                emp._rawDetails.deductions[k] = val; // update raw for payslip
+            });
+
+            emp['GROSS SALARY'] = gross;
+            emp['TOTAL DEDUCTIONS'] = totalDed;
+            emp['NET SALARY'] = gross - totalDed;
+            emp._rawDetails.gross = gross;
+            emp._rawDetails.net = gross - totalDed;
+        });
+    }
+
+    function addNewColumnPrompt() {
+        const colName = prompt("Enter new column name (e.g. Increment 5%):");
+        if(!colName) return;
+        if(allAvailableColumns.includes(colName)) {
+            alert("Column already exists!");
+            return;
+        }
+
+        const type = prompt("Is it an Earning or Deduction? (Enter 'e' for Earning, 'd' for Deduction)", "e");
+        if(type !== 'e' && type !== 'd') {
+            alert("Invalid type. Column not added.");
+            return;
+        }
+
+        // Add to all employees
+        employeesData.forEach(emp => {
+            emp[colName] = 0;
+            if(type === 'e') {
+                emp._rawDetails.earnings[colName] = 0;
+            } else {
+                emp._rawDetails.deductions[colName] = 0;
+            }
+        });
+
+        recalculateAll();
+        renderTable();
+    }
+
+    function renameColumnPrompt(oldColName) {
+        const newColName = prompt(`Rename column "${oldColName}" to:`, oldColName);
+        if(!newColName || newColName === oldColName) return;
+        if(allAvailableColumns.includes(newColName)) {
+            alert("A column with this name already exists!");
+            return;
+        }
+
+        employeesData.forEach(emp => {
+            // Transfer value to new key
+            emp[newColName] = emp[oldColName];
+            delete emp[oldColName];
+
+            // Update in rawDetails as well
+            if(emp._rawDetails.earnings[oldColName] !== undefined) {
+                emp._rawDetails.earnings[newColName] = emp._rawDetails.earnings[oldColName];
+                delete emp._rawDetails.earnings[oldColName];
+            }
+            if(emp._rawDetails.deductions[oldColName] !== undefined) {
+                emp._rawDetails.deductions[newColName] = emp._rawDetails.deductions[oldColName];
+                delete emp._rawDetails.deductions[oldColName];
+            }
+        });
+
+        // Update hidden columns set if it was hidden
+        if(hiddenColumns.has(oldColName)) {
+            hiddenColumns.delete(oldColName);
+            hiddenColumns.add(newColName);
+        }
+
+        renderTable();
+    }
+
+    function deleteColumnPrompt(colName) {
+        if(!confirm(`Are you sure you want to permanently delete the column "${colName}"?`)) return;
+
+        employeesData.forEach(emp => {
+            // Delete from main object
+            delete emp[colName];
+
+            // Delete from rawDetails
+            if(emp._rawDetails.earnings[colName] !== undefined) {
+                delete emp._rawDetails.earnings[colName];
+            }
+            if(emp._rawDetails.deductions[colName] !== undefined) {
+                delete emp._rawDetails.deductions[colName];
+            }
+        });
+
+        if(hiddenColumns.has(colName)) {
+            hiddenColumns.delete(colName);
+        }
+
+        // Force dropdown rebuild
+        allAvailableColumns = [];
+        
+        recalculateAll();
+        renderTable();
+    }
+
+    function toggleColumn(checkbox) {
+        if(checkbox.checked) {
+            hiddenColumns.delete(checkbox.value);
+        } else {
+            hiddenColumns.add(checkbox.value);
+        }
+        renderTable();
+    }
+
+    function printFullTable() {
+        document.body.classList.add('print-mode-table');
+        window.print();
+        setTimeout(() => {
+            document.body.classList.remove('print-mode-table');
+        }, 500);
+    }
+
+    function clearAllData() {
+        employeesData = [];
+        renderTable();
+    }
+
+    function syncFromHR() {
+        // Mocking Data from HR Command Center
+        const hrData = [
+            { id: "EMP-01", name: "Rahim Ahmed", role: "Software Engineer", basic: 45000, 
+              earnings: {"Festival Bonus": 5000, "Overtime": 3500}, 
+              deductions: {"Late Fine": 500} },
+            { id: "EMP-02", name: "Karim Hasan", role: "UI/UX Designer", basic: 35000, 
+              earnings: {"Festival Bonus": 3000, "Transport Allowance": 2000, "Performance Bonus": 1500}, 
+              deductions: {"Advance Loan": 2000} },
+            { id: "EMP-03", name: "Sadia Akter", role: "Project Manager", basic: 55000, 
+              earnings: {"Festival Bonus": 5000}, 
+              deductions: {} }
+        ];
+
+        employeesData = [];
+
+        hrData.forEach(emp => {
+            const hr = emp.basic * 0.40;
+            const med = emp.basic * 0.10;
+            const totalExtraEarnings = Object.values(emp.earnings).reduce((a, b) => a + b, 0);
+            
+            const gross = emp.basic + hr + med + totalExtraEarnings;
+            
+            const pf = emp.basic * 0.08;
+            const tax = gross > 40000 ? gross * 0.05 : 0;
+            const totalExtraDeductions = Object.values(emp.deductions).reduce((a, b) => a + b, 0);
+            
+            const totalDed = pf + tax + totalExtraDeductions;
+            const net = gross - totalDed;
+
+            const record = {
+                "ID": emp.id,
+                "Name": emp.name,
+                "Designation": emp.role,
+                "Basic Salary": emp.basic,
+                "House Rent (40%)": hr,
+                "Medical (10%)": med,
+                ...emp.earnings,
+                "GROSS SALARY": gross,
+                "PF (8%)": pf,
+                "Tax": tax,
+                ...emp.deductions,
+                "TOTAL DEDUCTIONS": totalDed,
+                "NET SALARY": net,
+                "_rawDetails": {
+                    earnings: { "Basic Salary": emp.basic, "House Rent (40%)": hr, "Medical (10%)": med, ...emp.earnings },
+                    deductions: { "PF (8%)": pf, "Tax": tax, ...emp.deductions },
+                    gross: gross,
+                    net: net,
+                    id: emp.id, name: emp.name, role: emp.role
+                }
+            };
+            employeesData.push(record);
+        });
+
+        renderTable();
+    }
+
+    // Auto-sync on page load
+    document.addEventListener("DOMContentLoaded", syncFromHR);
+
+    // Print Pay Slip Logic
+    function printPaySlip(index) {
+        const emp = employeesData[index]._rawDetails;
+        
+        document.getElementById('slipDate').innerText = new Date().toLocaleDateString();
+        document.getElementById('slipEmpId').innerText = emp.id;
+        document.getElementById('slipEmpName').innerText = emp.name;
+        document.getElementById('slipEmpRole').innerText = emp.role;
+        document.getElementById('slipNetSalary').innerText = formatTk(emp.net);
+
+        // Fill Earnings
+        let eHtml = '';
+        for(const [k, v] of Object.entries(emp.earnings)) {
+            eHtml += `<tr><td style="padding: 4px 0;">${k}</td><td style="text-align: right; font-weight: 500;">${formatTk(v)}</td></tr>`;
+        }
+        eHtml += `<tr style="border-top: 1px solid #e2e8f0;"><td style="padding: 8px 0; font-weight: bold;">Gross Salary</td><td style="text-align: right; font-weight: bold; color: #0284c7;">${formatTk(emp.gross)}</td></tr>`;
+        document.getElementById('slipEarningsTable').innerHTML = eHtml;
+
+        // Fill Deductions
+        let dHtml = '';
+        let totalD = 0;
+        for(const [k, v] of Object.entries(emp.deductions)) {
+            dHtml += `<tr><td style="padding: 4px 0;">${k}</td><td style="text-align: right; font-weight: 500;">${formatTk(v)}</td></tr>`;
+            totalD += v;
+        }
+        dHtml += `<tr style="border-top: 1px solid #e2e8f0;"><td style="padding: 8px 0; font-weight: bold;">Total Deductions</td><td style="text-align: right; font-weight: bold; color: #dc2626;">${formatTk(totalD)}</td></tr>`;
+        document.getElementById('slipDeductionsTable').innerHTML = dHtml;
+
+        // Generate Barcode (JsBarcode)
+        try {
+            JsBarcode("#slipBarcode", emp.id, {
+                format: "CODE128",
+                width: 2,
+                height: 40,
+                displayValue: true
+            });
+        } catch(e) { console.error("Barcode failed", e); }
+
+        // Generate QR Code (qrcode.js)
+        const qrContainer = document.getElementById('slipQRCode');
+        qrContainer.innerHTML = '';
+        try {
+            const qrText = `PAYSLIP\nID: ${emp.id}\nName: ${emp.name}\nNet Salary: BDT ${emp.net}`;
+            new QRCode(qrContainer, {
+                text: qrText,
+                width: 80,
+                height: 80,
+                colorDark : "#000000",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.L
+            });
+        } catch(e) { console.error("QR failed", e); }
+
+        // Execute Print
+        setTimeout(() => {
+            window.print();
+        }, 300);
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Registration Card</title>
+    <script src="{% static 'vendor/jsbarcode/JsBarcode.all.min.js' %}"></script>
+    <script src="{% static 'vendor/qrcodejs/qrcode.min.js' %}"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .doc-frame {
+            width: 100%;
+            max-width: 800px;
+            background-color: #fff;
+            position: relative;
+        }
+        .card-frame {
+            border: 2px solid #2e7d32;
+            padding: 20px;
+        }
+        .card-header {
+            text-align: center;
+            border-bottom: 2px solid #2e7d32;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+        .card-header h2 { margin: 0; color: #2e7d32; font-weight: bold; font-size: 24px; }
+        .card-header h4 { margin: 5px 0 0 0; color: #555; }
+        
+        .qrcode-container { text-align: center; margin-top: 15px; display: flex; justify-content: flex-end; }
+        
+        table { width: 100%; border-collapse: collapse; }
+        td { padding: 5px; }
+        .text-end { text-align: right; }
+        .text-center { text-align: center; }
+        .mt-4 { margin-top: 1.5rem; }
+        .mb-4 { margin-bottom: 1.5rem; }
+
+        @media print {
+            body { padding: 0; }
+            * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .card-frame { border: 2px solid #2e7d32 !important; }
+            .card-header { border-bottom: 2px solid #2e7d32 !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="doc-frame card-frame">
+    <div class="card-header">
+        <h2>EduManage Board of Education</h2>
+        <h4>STUDENT REGISTRATION CARD</h4>
+    </div>
+    <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+        <div style="width: 70%;">
+            <table>
+                <tr><td width="35%"><strong>Name of Student:</strong></td><td>{{ student.student_name_en|default:student.student_name_bn|default:"Demo Student" }}</td></tr>
+                <tr><td><strong>Father's Name:</strong></td><td>{{ student.father_name|default:"Demo Father" }}</td></tr>
+                <tr><td><strong>Mother's Name:</strong></td><td>{{ student.mother_name|default:"Demo Mother" }}</td></tr>
+                <tr><td><strong>Registration No:</strong></td><td>{{ student.admission_no|default:"REG-0001" }}</td></tr>
+                <tr><td><strong>Session/Class:</strong></td><td>{{ student.student_class|default:"Class 9" }}</td></tr>
+                <tr><td><strong>Institution:</strong></td><td>EduManage International School</td></tr>
+            </table>
+        </div>
+        <div style="width: 30%; text-align: right;">
+            <div class="qrcode-container m-0" id="regQrCode"></div>
+        </div>
+    </div>
+    <div class="text-center mt-4">
+        <svg id="regBarcode"></svg>
+    </div>
+</div>
+
+<script>
+    window.onload = function() {
+        try {
+            var qrContainer = document.getElementById("regQrCode");
+            if (qrContainer && typeof QRCode !== 'undefined') {
+                new QRCode(qrContainer, {
+                    text: "Registration|{{ student.admission_no|default:'REG-0001' }}",
+                    width: 90,
+                    height: 90
+                });
+            }
+        } catch(e) {}
+        try {
+            if (typeof JsBarcode !== 'undefined') {
+                JsBarcode("#regBarcode", "{{ student.admission_no|default:'REG-0001' }}", { format: "CODE128", height: 40, displayValue: true });
+            }
+        } catch(e) {}
+    }
+</script>
+</body>
+</html>

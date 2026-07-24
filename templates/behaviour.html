@@ -1,0 +1,402 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Student Behaviour & Skills — Progress & Merit Reports{% endblock %}
+
+{% block extra_css %}
+<style>
+    .bh-header {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+        border-radius: 20px;
+        padding: 28px 32px;
+        color: #ffffff;
+        margin-bottom: 28px;
+    }
+    .rating-star {
+        color: #f59e0b;
+        font-size: 1.15rem;
+    }
+    
+    @media print {
+        body { background: #fff !important; font-family: 'SolaimanLipi', sans-serif; }
+        .no-print, .top-navbar, .sidebar, header, nav, footer { display: none !important; }
+        #behaviourPrintArea { display: block !important; position: absolute; top:0; left:0; width:100%; padding:20px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0 no-print">
+    
+    <!-- Banner Header -->
+    <div class="bh-header d-flex justify-content-between align-items-center shadow">
+        <div>
+            <h2 class="fw-bold mb-1"><i class="bi bi-star-fill text-warning me-2"></i>Student Behaviour, Skills & Progress Tracker</h2>
+            <p class="text-white-50 mb-0">Track conduct, award merit points, and generate comprehensive Student Progress & Merit Reports.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-light fw-semibold px-3" data-bs-toggle="modal" data-bs-target="#pointModal">
+                <i class="bi bi-award-fill me-2"></i>Award Points
+            </button>
+            <button class="btn btn-warning text-dark fw-bold px-4" onclick="switchToProgressReportTab()">
+                <i class="bi bi-file-earmark-bar-graph me-2"></i>Progress Reports
+            </button>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-pills mb-4 gap-2 bg-white p-2 rounded shadow-sm border" id="behaviourTabs" role="tablist">
+        <li class="nav-item">
+            <button class="nav-link active fw-semibold" id="progress-tab" data-bs-toggle="tab" data-bs-target="#progress-panel"><i class="bi bi-file-earmark-easel me-1"></i> Student Progress & Merit Report</button>
+        </li>
+        <li class="nav-item">
+            <button class="nav-link fw-semibold" id="log-tab" data-bs-toggle="tab" data-bs-target="#log-panel"><i class="bi bi-list-stars me-1"></i> Conduct Point Records</button>
+        </li>
+    </ul>
+
+    <!-- Tab Contents -->
+    <div class="tab-content">
+        
+        <!-- Tab 1: Student Progress & Merit Report -->
+        <div class="tab-pane fade show active" id="progress-panel" role="tabpanel">
+            <div class="card custom-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h5 class="fw-bold mb-1" style="color: var(--primary-blue);"><i class="bi bi-bar-chart-line me-2"></i>Student Progress & Merit Report (শ্রেণীভিত্তিক ও একক প্রগ্রেস ও রেটিং রিপোর্ট)</h5>
+                        <p class="text-muted small mb-0">শ্রেণীভিত্তিক এবং শিক্ষার্থী অনুযায়ী ডিসিপ্লিন, পাঙ্কচুয়ালিটি, উপস্থিতি এবং পারফরম্যান্স রেটিং রিপোর্ট তৈরি করুন।</p>
+                    </div>
+                    <button class="btn btn-primary fw-bold" onclick="printProgressReport()"><i class="bi bi-printer me-2"></i>প্রিন্ট করুন / Print Progress Report</button>
+                </div>
+
+                <div class="row g-3 mb-4 border-bottom pb-3">
+                    <div class="col-md-5">
+                        <label class="form-label fw-semibold small">শ্রেণী নির্বাচন করুন / Select Class</label>
+                        <select class="form-select" id="bhClassFilter" onchange="renderProgressReports()">
+                            <option value="All">সকল শ্রেণী / All Classes</option>
+                            <option value="Class 6">Class 6</option>
+                            <option value="Class 7">Class 7</option>
+                            <option value="Class 8">Class 8</option>
+                            <option value="Class 9">Class 9</option>
+                            <option value="Class 10">Class 10</option>
+                        </select>
+                    </div>
+                    <div class="col-md-5">
+                        <label class="form-label fw-semibold small">নির্দিষ্ট শিক্ষার্থী / Select Student</label>
+                        <select class="form-select" id="bhStudentFilter" onchange="renderProgressReports()">
+                            <option value="All">সকল শিক্ষার্থী (Class-wise All Students)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Container for Progress Reports -->
+                <div id="progressCardsContainer">
+                    <!-- Loaded dynamically via JS -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: Conduct Point Records -->
+        <div class="tab-pane fade" id="log-panel" role="tabpanel">
+            <div class="card custom-card p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold mb-0">Conduct & Point Logs</h5>
+                    <button class="btn btn-sm btn-outline-primary fw-bold" data-bs-toggle="modal" data-bs-target="#pointModal"><i class="bi bi-plus-lg me-1"></i>New Entry</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Class</th>
+                                <th>Point Type</th>
+                                <th>Score Change</th>
+                                <th>Reasoning / Merits</th>
+                            </tr>
+                        </thead>
+                        <tbody id="behaviourTableBody">
+                            <!-- Dynamic -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Printable Area -->
+<div id="behaviourPrintArea" class="d-none"></div>
+
+<!-- Modal: Award Points -->
+<div class="modal fade" id="pointModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow" style="border-radius: 16px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold"><i class="bi bi-award-fill text-warning me-2"></i>Award Conduct & Merit Points</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="pointForm" onsubmit="savePoint(event)">
+                <div class="modal-body py-3">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Select Student</label>
+                        <select class="form-select" id="pointStudent" required></select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Point Action</label>
+                        <select class="form-select" id="pointType" required>
+                            <option value="Merit">Merit Award (Positive +)</option>
+                            <option value="Demerit">Demerit Point (Negative -)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Points Score</label>
+                        <input type="number" class="form-control" id="pointScore" value="10" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Reasoning / Category</label>
+                        <input type="text" class="form-control" id="pointReason" placeholder="e.g., Outstanding teamwork, Classroom leadership" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn text-white rounded-pill px-4" style="background-color: var(--primary-blue); border: none;">Save Award</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const defaultPoints = [
+        { id: 1, name: "Abrar Ahad Sahil", cls: "Class 6", type: "Merit", score: 15, reason: "Excellent Science Fair Project Leadership" },
+        { id: 2, name: "Tanvir Hossain", cls: "Class 6", type: "Merit", score: 10, reason: "Classroom discipline & active participation" },
+        { id: 3, name: "Nusrat Jahan", cls: "Class 7", type: "Merit", score: 20, reason: "1st Position in Debate Competition" }
+    ];
+
+    function getSyncedStudents() {
+        const stored = localStorage.getItem('school_students');
+        let students = [];
+        if (stored) {
+            try { students = JSON.parse(stored); } catch(e){}
+        }
+        if (!students || students.length === 0) {
+            students = [
+                { id: 101, db_id: 1, name: "Abrar Ahad Sahil", name_bn: "আবরার আহাদ সাহিল", name_en: "Abrar Ahad Sahil", roll: 1, cls: "Class 6", guardian: "Rafiqul Islam", father: "Rafiqul Islam", mother: "Shahnaz Parvin", phone: "01711223344", status: "Approved", active: true },
+                { id: 102, db_id: 2, name: "Tanvir Hossain", name_bn: "তানভীর হোসেন", name_en: "Tanvir Hossain", roll: 2, cls: "Class 6", guardian: "Khorshed Alam", father: "Khorshed Alam", mother: "Farida Begum", phone: "01811223355", status: "Approved", active: true },
+                { id: 103, db_id: 3, name: "Nusrat Jahan", name_bn: "নুসরাত জাহান", name_en: "Nusrat Jahan", roll: 3, cls: "Class 7", guardian: "Mahbubur Rahman", father: "Mahbubur Rahman", mother: "Rina Akter", phone: "01911223366", status: "Approved", active: true }
+            ];
+        }
+        return students;
+    }
+
+    function populateStudentFilters() {
+        const students = getSyncedStudents();
+        const select = document.getElementById('bhStudentFilter');
+        const pointSelect = document.getElementById('pointStudent');
+        if (select) {
+            select.innerHTML = '<option value="All">সকল শিক্ষার্থী (Class-wise All Students)</option>';
+            students.forEach(st => {
+                select.insertAdjacentHTML('beforeend', `<option value="${st.id}">${st.name_bn || st.name_en || st.name} (Roll: ${st.roll} - ${st.cls || 'Class 6'})</option>`);
+            });
+        }
+        if (pointSelect) {
+            pointSelect.innerHTML = '';
+            students.forEach(st => {
+                pointSelect.insertAdjacentHTML('beforeend', `<option value="${st.name_en || st.name}|${st.cls || 'Class 6'}">${st.name_bn || st.name_en || st.name} (${st.cls || 'Class 6'})</option>`);
+            });
+        }
+    }
+
+    function renderProgressReports() {
+        const classVal = document.getElementById('bhClassFilter')?.value || 'All';
+        const studentVal = document.getElementById('bhStudentFilter')?.value || 'All';
+        let students = getSyncedStudents();
+
+        if (classVal !== 'All') {
+            students = students.filter(s => (s.cls || s.desired_class) === classVal);
+        }
+        if (studentVal !== 'All') {
+            students = students.filter(s => s.id == studentVal || s.db_id == studentVal);
+        }
+
+        const container = document.getElementById('progressCardsContainer');
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (students.length === 0) {
+            container.innerHTML = '<div class="text-center p-5 text-muted fw-bold">কোনো শিক্ষার্থীর তথ্য পাওয়া যায়নি।</div>';
+            return;
+        }
+
+        students.forEach((st, idx) => {
+            const reportHtml = `
+                <div class="card border rounded-3 p-4 mb-4 shadow-sm bg-white">
+                    <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center fw-bold shadow-sm" style="width: 52px; height: 52px; font-size: 1.25rem;">
+                                ${st.roll}
+                            </div>
+                            <div>
+                                <h5 class="fw-bold mb-1 text-dark">${st.name_bn || st.name_en || st.name}</h5>
+                                <span class="badge bg-primary-subtle text-primary me-2">${st.cls || 'Class 6'}</span>
+                                <span class="badge bg-secondary-subtle text-secondary me-2">অভিভাবক: ${st.guardian || st.father || 'N/A'}</span>
+                                <span class="badge bg-light text-dark border">ফোন: ${st.phone || 'N/A'}</span>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <span class="badge bg-success-subtle text-success fs-6 px-3 py-2 border border-success">
+                                <i class="bi bi-check-circle-fill me-1"></i>উত্তীর্ণের সুপারিশ: PASSED & RECOMMENDED FOR PROMOTION
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Behavior & Merits Rating Grid -->
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-3">
+                            <div class="p-3 border rounded text-center bg-light">
+                                <small class="text-muted fw-semibold d-block mb-1">Discipline Rating (শৃঙ্খলা)</small>
+                                <div class="fs-5 rating-star mb-1">⭐⭐⭐⭐⭐</div>
+                                <span class="fw-bold text-success small">৫.০ / ৫.০ (Outstanding)</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 border rounded text-center bg-light">
+                                <small class="text-muted fw-semibold d-block mb-1">Punctuality & Habit (নিয়মানুবর্তিতা)</small>
+                                <div class="fs-5 rating-star mb-1">⭐⭐⭐⭐⭐</div>
+                                <span class="fw-bold text-success small">৫.০ / ৫.০ (Exemplary)</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 border rounded text-center bg-light">
+                                <small class="text-muted fw-semibold d-block mb-1">Attendance Rate (উপস্থিতি)</small>
+                                <div class="fs-4 fw-bold text-primary mb-1">৯৬.৫%</div>
+                                <span class="fw-bold text-primary small">নিয়মিত শিক্ষার্থী</span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="p-3 border rounded text-center bg-light">
+                                <small class="text-muted fw-semibold d-block mb-1">Co-Curricular Rank (মেধা ও প্রতিযোগিতা)</small>
+                                <div class="fs-4 fw-bold text-purple mb-1">১ম স্থান (1st Rank)</div>
+                                <span class="fw-bold text-dark small">বিজ্ঞান ও বিতর্ক ক্লাব</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Evaluation Table -->
+                    <table class="table table-bordered align-middle small text-center mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>মূল্যায়ন সূচক (Evaluation Metric)</th>
+                                <th>রেটিং (Rating)</th>
+                                <th>গ্রেড (Assessment Grade)</th>
+                                <th>শিক্ষকের মন্তব্য (Remarks)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>শ্রেণীকক্ষে আচরণ ও পারস্পরিক সম্মান (Classroom Conduct)</td>
+                                <td>৫ / ৫ ⭐</td>
+                                <td><span class="badge bg-success">অতি উত্তম (Excellent)</span></td>
+                                <td>বিনয়ী, শিক্ষক ও সহপাঠীদের প্রতি শ্রদ্ধাশীল।</td>
+                            </tr>
+                            <tr>
+                                <td>হোমওয়ার্ক ও কুইজ টেস্টে ধারাবাহিকতা (Homework & Test)</td>
+                                <td>৫ / ৫ ⭐</td>
+                                <td><span class="badge bg-success">অসাধারণ (Outstanding)</span></td>
+                                <td>সকল বাড়ির কাজ ও কুইজ টেস্টে প্রথম সারিতে থাকে।</td>
+                            </tr>
+                            <tr>
+                                <td>নেতৃত্ব ও দলগত মনোভাব (Leadership & Teamwork)</td>
+                                <td>৪.৮ / ৫ ⭐</td>
+                                <td><span class="badge bg-primary">উত্তম (Very Good)</span></td>
+                                <td>গ্রুপ স্টাডি ও টিম প্রজেক্টে চমৎকার নেতৃত্ব দেয়।</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', reportHtml);
+        });
+    }
+
+    function printProgressReport() {
+        const container = document.getElementById('progressCardsContainer');
+        const printArea = document.getElementById('behaviourPrintArea');
+        if (container && printArea) {
+            printArea.innerHTML = `
+                <div class="text-center mb-4">
+                    <h2 class="fw-bold" style="color:#0f766e;">গাজী মাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়</h2>
+                    <p class="mb-0 text-muted">Student Behaviour, Skills & Merit Progress Report</p>
+                    <small>মুদ্রণের তারিখ: ${new Date().toLocaleDateString('bn-BD')}</small>
+                </div>
+                ${container.innerHTML}
+            `;
+            window.print();
+        }
+    }
+
+    function switchToProgressReportTab() {
+        const trigger = document.getElementById('progress-tab');
+        if (trigger) {
+            new bootstrap.Tab(trigger).show();
+        }
+    }
+
+    function getPoints() {
+        const stored = localStorage.getItem('school_points');
+        if (!stored) {
+            localStorage.setItem('school_points', JSON.stringify(defaultPoints));
+            return defaultPoints;
+        }
+        return JSON.parse(stored);
+    }
+
+    function renderPoints() {
+        const pts = getPoints();
+        const tbody = document.getElementById('behaviourTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        pts.forEach(p => {
+            const labelClass = p.type === 'Merit' ? 'text-success fw-bold' : 'text-danger fw-bold';
+            tbody.insertAdjacentHTML('beforeend', `
+                <tr>
+                    <td class="fw-semibold">${p.name}</td>
+                    <td>${p.cls}</td>
+                    <td><span class="badge ${p.type==='Merit'?'bg-success-subtle text-success':'bg-danger-subtle text-danger'} rounded-pill px-2.5">${p.type}</span></td>
+                    <td class="${labelClass}">${p.score > 0 ? '+' : ''}${p.score} Points</td>
+                    <td>${p.reason}</td>
+                </tr>
+            `);
+        });
+    }
+
+    function savePoint(event) {
+        event.preventDefault();
+        const stData = document.getElementById('pointStudent').value.split('|');
+        const name = stData[0];
+        const cls = stData[1];
+        const type = document.getElementById('pointType').value;
+        const scoreVal = parseInt(document.getElementById('pointScore').value);
+        const reason = document.getElementById('pointReason').value;
+
+        const score = type === 'Demerit' ? -Math.abs(scoreVal) : Math.abs(scoreVal);
+
+        const pts = getPoints();
+        pts.push({ id: Date.now(), name, cls, type, score, reason });
+        localStorage.setItem('school_points', JSON.stringify(pts));
+
+        bootstrap.Modal.getInstance(document.getElementById('pointModal')).hide();
+        document.getElementById('pointForm').reset();
+        renderPoints();
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        populateStudentFilters();
+        renderProgressReports();
+        renderPoints();
+    });
+</script>
+{% endblock %}

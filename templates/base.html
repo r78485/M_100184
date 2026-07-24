@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+{% load i18n static %}
+<html lang="{{ request.LANGUAGE_CODE }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Digital School Management System{% endblock %}</title>
+    
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3262a8">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css';">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.css' %}" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css';">
+
+    <style>
+        :root {
+            --primary-blue: #3262a8;
+            --secondary-purple: #7532a8;
+            --bg-canvas: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-dark: #212529;
+            --sidebar-width: 280px;
+            --sidebar-collapsed-width: 0px;
+            --top-nav-height: 70px;
+            --transition-speed: 0.3s;
+        }
+
+        body.dark-theme {
+            --bg-canvas: #0f172a;
+            --card-bg: #1e293b;
+            --text-dark: #f8fafc;
+        }
+        body.dark-theme .top-navbar {
+            background-color: var(--card-bg) !important;
+            border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+        }
+        body.dark-theme .top-navbar .btn-light,
+        body.dark-theme .top-navbar .bg-light {
+            background-color: #334155 !important;
+            color: #ffffff !important;
+        }
+        body.dark-theme .top-navbar .btn-light i,
+        body.dark-theme .top-navbar .text-dark,
+        body.dark-theme .top-navbar input {
+            color: #ffffff !important;
+        }
+        body.dark-theme .dropdown-menu {
+            background-color: var(--card-bg) !important;
+            border: 1px solid rgba(255,255,255,0.08) !important;
+        }
+        body.dark-theme .dropdown-item {
+            color: #ffffff !important;
+        }
+        body.dark-theme .dropdown-item:hover {
+            background-color: rgba(255,255,255,0.05) !important;
+        }
+        body.dark-theme .list-group-item {
+            background-color: var(--card-bg) !important;
+            color: #ffffff !important;
+        }
+        body.dark-theme .table {
+            color: #ffffff !important;
+        }
+        body.dark-theme .table-light {
+            --bs-table-bg: #334155 !important;
+            --bs-table-color: #ffffff !important;
+        }
+        
+        body.dark-theme .text-dark,
+        body.dark-theme .card-title,
+        body.dark-theme .table th,
+        body.dark-theme .table td {
+            color: #f8fafc !important;
+        }
+
+        body.dark-theme .text-muted {
+            color: #94a3b8 !important;
+        }
+
+        body.dark-theme .card,
+        body.dark-theme .border,
+        body.dark-theme .list-group-item {
+            border-color: rgba(255, 255, 255, 0.08) !important;
+        }
+
+        body.dark-theme hr {
+            border-color: rgba(255, 255, 255, 0.1) !important;
+            opacity: 0.25;
+        }
+
+        body.dark-theme input,
+        body.dark-theme select,
+        body.dark-theme textarea {
+            background-color: #1e293b !important;
+            border-color: rgba(255, 255, 255, 0.1) !important;
+            color: #ffffff !important;
+        }
+
+        body.dark-theme input::placeholder {
+            color: #64748b !important;
+        }
+
+        body {
+            background-color: var(--bg-canvas);
+            color: var(--text-dark);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(135deg, var(--primary-blue) 0%, #1e457e 100%);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1030;
+            box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+            transition: transform var(--transition-speed) ease;
+        }
+
+        /* Scrollbar customizing */
+        .sidebar::-webkit-scrollbar {
+            width: 5px;
+        }
+        .sidebar::-webkit-scrollbar-thumb {
+            background: var(--secondary-purple);
+            border-radius: 10px;
+        }
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .sidebar-brand {
+            height: var(--top-nav-height);
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 0 16px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            background: rgba(0,0,0,0.15);
+        }
+
+        .sidebar-brand h4 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            background: linear-gradient(to right, #ffffff, #e0c3fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            flex-grow: 1;
+        }
+
+        .menu-header {
+            padding: 20px 25px 8px;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 700;
+        }
+
+        .sidebar-menu li a {
+            color: rgba(255,255,255,0.85);
+            text-decoration: none;
+            padding: 11px 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.92rem;
+            font-weight: 500;
+            transition: all var(--transition-speed) ease;
+            border-left: 4px solid transparent;
+        }
+
+        .sidebar-menu li a:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.08);
+            border-left: 4px solid var(--secondary-purple);
+        }
+
+        .sidebar-menu li a.active {
+            color: #ffffff;
+            background: linear-gradient(90deg, rgba(117, 50, 168, 0.3) 0%, rgba(117, 50, 168, 0.1) 100%);
+            border-left: 4px solid var(--secondary-purple);
+            font-weight: 600;
+        }
+
+        .sidebar-menu li a i {
+            font-size: 1.15rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Top Navigation Header */
+        .top-navbar {
+            height: var(--top-nav-height);
+            background-color: var(--card-bg);
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            position: fixed;
+            top: 0;
+            right: 0;
+            left: var(--sidebar-width);
+            z-index: 1020;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 30px;
+            transition: left var(--transition-speed) ease;
+        }
+
+        /* Main Content Wrapper */
+        .main-wrapper {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--top-nav-height);
+            padding: 30px;
+            width: calc(100% - var(--sidebar-width));
+            min-height: calc(100vh - var(--top-nav-height));
+            transition: margin-left var(--transition-speed) ease, width var(--transition-speed) ease;
+        }
+
+        /* Cards & Styling */
+        .custom-card {
+            background-color: var(--card-bg);
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+        }
+
+        .custom-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.06);
+        }
+
+        /* Responsive Toggling States */
+        body.sidebar-collapsed .sidebar {
+            transform: translateX(-100%);
+        }
+
+        body.sidebar-collapsed .top-navbar {
+            left: 0;
+        }
+
+        body.sidebar-collapsed .main-wrapper {
+            margin-left: 0;
+            width: 100%;
+        }
+
+        /* Overlay for Mobile sidebar closure */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.4);
+            z-index: 1025;
+        }
+
+        @media (max-width: 991.98px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            .top-navbar {
+                left: 0;
+            }
+            .main-wrapper {
+                margin-left: 0;
+                width: 100%;
+            }
+            body.sidebar-mobile-open .sidebar {
+                transform: translateX(0);
+            }
+            body.sidebar-mobile-open .sidebar-overlay {
+                display: block;
+            }
+        }
+
+        /* Global Print Rules */
+        @media print {
+            .sidebar, .top-navbar, .btn, .no-print, #sidebarOverlay, .modal-backdrop, .modal {
+                display: none !important;
+            }
+            .main-wrapper {
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+            }
+            .custom-card {
+                box-shadow: none !important;
+                border: 1px solid #ddd !important;
+            }
+            body, html {
+                background-color: white !important;
+                height: auto !important;
+            }
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+        /* Logged out Centering Layout */
+        body.logged-out {
+            justify-content: center;
+            align-items: center;
+        }
+        body.logged-out .main-wrapper {
+            margin-left: 0 !important;
+            margin-top: 0 !important;
+            width: 100% !important;
+            min-height: 100vh !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            padding: 20px !important;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="{% if not user.is_authenticated %}logged-out{% endif %}">
+
+    <!-- Sidebar Overlay for Mobile -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    {% if user.is_authenticated %}
+    <!-- Navigation Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <a href="{% url 'dashboard' %}" class="d-flex align-items-center gap-2 text-decoration-none text-white w-100 overflow-hidden px-1">
+                <div class="brand-logo-container flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background: rgba(255,255,255,0.12); border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);">
+                    <img id="sidebarSchoolLogo" src="/static/logo.png" style="max-width: 28px; max-height: 28px; object-fit: contain; display: none;" alt="Logo">
+                    <i id="sidebarSchoolIcon" class="bi bi-building-fill fs-5 text-warning"></i>
+                </div>
+                <div class="brand-text-container overflow-hidden text-start">
+                    <div id="sidebarSchoolName" class="fw-bold text-white text-truncate" style="font-size: 0.92rem; line-height: 1.25; letter-spacing: 0.2px;">
+                        Gazi Mahmud JHS
+                    </div>
+                    <div id="sidebarSchoolEiin" class="text-white-50 text-truncate fw-medium" style="font-size: 0.72rem; line-height: 1.2; margin-top: 2px;">
+                        EIIN: 100184
+                    </div>
+                </div>
+            </a>
+        </div>
+        <ul class="sidebar-menu pb-5">
+            <!-- GROUP 1: CORE -->
+            <li class="menu-header">{% trans "Core Administration" %}</li>
+            <li>
+                <a href="{% url 'dashboard' %}" class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+                    <i class="bi bi-grid-1x2"></i> {% trans "Dashboard" %}
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'general_settings' %}" class="{% if request.resolver_match.url_name == 'general_settings' %}active{% endif %}">
+                    <i class="bi bi-gear"></i> {% trans "General Settings" %}
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'account_settings' %}" class="{% if request.resolver_match.url_name == 'account_settings' %}active{% endif %}">
+                    <i class="bi bi-person-gear"></i> {% trans "Account Settings" %}
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'logout' %}" class="text-danger-emphasis">
+                    <i class="bi bi-box-arrow-left"></i> {% trans "Log Out" %}
+                </a>
+            </li>
+
+            <!-- GROUP 2: ACADEMIC -->
+            <li class="menu-header">{% trans "Academic & Students" %}</li>
+            <li>
+                <a href="{% url 'admissions' %}" class="{% if request.resolver_match.url_name == 'admissions' %}active{% endif %}">
+                    <i class="bi bi-person-plus"></i> {% trans "Admissions" %}
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'classes' %}" class="{% if request.resolver_match.url_name == 'classes' %}active{% endif %}">
+                    <i class="bi bi-building"></i> {% trans "Classes & Sections" %}
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'subjects' %}" class="{% if request.resolver_match.url_name == 'subjects' %}active{% endif %}">
+                    <i class="bi bi-book"></i> {% trans "Subjects" %}
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'students' %}" class="{% if request.resolver_match.url_name == 'students' %}active{% endif %}">
+                    <i class="bi bi-people"></i> {% trans "Students" %}
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'employees' %}" class="{% if request.resolver_match.url_name == 'employees' %}active{% endif %}">
+                    <i class="bi bi-person-badge"></i> {% trans "Employees" %}
+                </a>
+            </li>
+
+            <!-- GROUP 3: FINANCIALS & ERP -->
+            <li class="menu-header">{% trans "Financials & ERP" %}</li>
+            <li>
+                <a href="{% url 'accounts' %}" class="{% if request.resolver_match.url_name == 'accounts' %}active{% endif %}">
+                    <i class="bi bi-journal-text"></i> {% trans "Accounts" %}
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'fees' %}" class="{% if request.resolver_match.url_name == 'fees' %}active{% endif %}">
+                    <i class="bi bi-receipt"></i> {% trans "Fees" %}
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'salary' %}" class="{% if request.resolver_match.url_name == 'salary' %}active{% endif %}">
+                    <i class="bi bi-cash-stack"></i> {% trans "Salary" %}
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'store' %}" class="{% if request.resolver_match.url_name == 'store' %}active{% endif %}">
+                    <i class="bi bi-bag-check"></i> {% trans "Online Store & POS" %}
+                </a>
+            </li>
+
+            <!-- GROUP 4: DAILY OPERATIONS -->
+            <li class="menu-header">{% trans "Daily Operations" %}</li>
+            <li>
+                <a href="{% url 'attendance' %}" class="{% if request.resolver_match.url_name == 'attendance' %}active{% endif %}">
+                    <i class="bi bi-calendar-check"></i> {% trans "Attendance" %}
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'timetable' %}" class="{% if request.resolver_match.url_name == 'timetable' %}active{% endif %}">
+                    <i class="bi bi-calendar3"></i> {% trans "Timetable" %}
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'homework' %}" class="{% if request.resolver_match.url_name == 'homework' %}active{% endif %}">
+                    <i class="bi bi-pencil-square"></i> {% trans "Homework" %}
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'behaviour' %}" class="{% if request.resolver_match.url_name == 'behaviour' %}active{% endif %}">
+                    <i class="bi bi-award-fill"></i> {% trans "Behaviour & Skills" %}
+                </a>
+            </li>
+
+            <!-- GROUP 5: COMMUNICATION & INTEGRATIONS -->
+            <li class="menu-header">{% trans "Communication" %}</li>
+            <li>
+                <a href="{% url 'whatsapp' %}" class="{% if request.resolver_match.url_name == 'whatsapp' %}active{% endif %}">
+                    <i class="bi bi-whatsapp text-success"></i> {% trans "WhatsApp" %}
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'messaging' %}" class="{% if request.resolver_match.url_name == 'messaging' %}active{% endif %}">
+                    <i class="bi bi-envelope"></i> {% trans "Messaging" %}
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'sms' %}" class="{% if request.resolver_match.url_name == 'sms' %}active{% endif %}">
+                    <i class="bi bi-chat-left-text"></i> {% trans "SMS Services" %}
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'liveclass' %}" class="{% if request.resolver_match.url_name == 'liveclass' %}active{% endif %}">
+                    <i class="bi bi-camera-video"></i> {% trans "Live Class" %}
+                </a>
+            </li>
+
+            <!-- GROUP 6: ASSESSMENTS & CERTIFICATION -->
+            <li class="menu-header">{% trans "Assessments" %}</li>
+            <li>
+                <a href="{% url 'exams' %}" class="{% if request.resolver_match.url_name == 'exams' %}active{% endif %}">
+                    <i class="bi bi-file-earmark-ruled"></i> {% trans "Exams" %}
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'classtests' %}" class="{% if request.resolver_match.url_name == 'classtests' %}active{% endif %}">
+                    <i class="bi bi-journal-medical"></i> {% trans "Class Tests" %}
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'questionpaper' %}" class="{% if request.resolver_match.url_name == 'questionpaper' %}active{% endif %}">
+                    <i class="bi bi-file-earmark-pdf"></i> {% trans "Question Paper" %}
+                </a>
+            </li>
+            <li>
+                <a href="#docEngineMenu" data-bs-toggle="collapse" class="{% if request.resolver_match.url_name == 'certificates' %}active{% endif %}" aria-expanded="{% if request.resolver_match.url_name == 'certificates' %}true{% else %}false{% endif %}">
+                    <i class="bi bi-patch-check"></i> <span style="flex-grow: 1;">{% trans "Document Engine" %}</span> <i class="bi bi-chevron-down ms-auto"></i>
+                </a>
+                <ul class="collapse list-unstyled {% if request.resolver_match.url_name in 'certificates,testimonial_generate,admit_cards_generate_student,generate_transcript' %}show{% endif %}" id="docEngineMenu" style="background: rgba(0,0,0,0.15);">
+                    <li>
+                        <a href="{% url 'testimonial_dashboard' %}" style="padding-left: 55px; font-size: 0.85rem;">
+                            <i class="bi bi-circle" style="font-size: 0.4rem;"></i> Testimonial (প্রশংসা পত্র)
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'admit_card_dashboard' %}" style="padding-left: 55px; font-size: 0.85rem;">
+                            <i class="bi bi-circle" style="font-size: 0.4rem;"></i> Admit Card
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'transcript_dashboard' %}" style="padding-left: 55px; font-size: 0.85rem;">
+                            <i class="bi bi-circle" style="font-size: 0.4rem;"></i> Academic Transcript
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'registration_card_dashboard' %}" style="padding-left: 55px; font-size: 0.85rem;">
+                            <i class="bi bi-circle" style="font-size: 0.4rem;"></i> Registration Card
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{% url 'course_certificate_dashboard' %}" style="padding-left: 55px; font-size: 0.85rem;">
+                            <i class="bi bi-circle" style="font-size: 0.4rem;"></i> Course Certificate
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li>
+                <a href="{% url 'reports' %}" class="{% if request.resolver_match.url_name == 'reports' %}active{% endif %}">
+                    <i class="bi bi-graph-up-arrow"></i> {% trans "Reports" %}
+                </a>
+            </li>
+        </ul>
+    </aside>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+    <!-- Top Navigation Header -->
+    <header class="top-navbar">
+        <div class="d-flex align-items-center">
+            <button class="btn btn-light me-3" id="sidebarToggle" title="Toggle Navigation">
+                <i class="bi bi-list fs-4"></i>
+            </button>
+            <div class="d-none d-md-flex align-items-center bg-light rounded-pill px-3 py-1">
+                <i class="bi bi-search text-muted me-2"></i>
+                <input type="text" class="form-control border-0 bg-transparent p-0" placeholder="Search operations..." style="outline: none; box-shadow: none; font-size: 0.9rem; width: 220px;">
+            </div>
+        </div>
+
+        <div class="d-flex align-items-center gap-3">
+            <!-- Dark Mode Toggle -->
+            <button class="btn btn-light rounded-circle p-2" id="themeToggleBtn" title="Toggle Theme">
+                <i class="bi bi-moon fs-5" id="themeIcon"></i>
+            </button>
+
+            <!-- Notifications Dropdown -->
+            <div class="dropdown">
+                <button class="btn btn-light position-relative rounded-circle p-2" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-bell fs-5"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="margin-top: 5px; margin-left: -5px;" id="notifBadge">
+                        2
+                    </span>
+                </button>
+                <div class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 p-0" aria-labelledby="notificationDropdown" style="width: 320px; border-radius: 12px; max-height: 400px; z-index: 1050;">
+                    <div class="p-3 border-bottom text-white d-flex justify-content-between align-items-center" style="background-color: var(--primary-blue); border-top-left-radius: 12px; border-top-right-radius: 12px;">
+                        <h6 class="mb-0">Notifications</h6>
+                        <button class="btn btn-sm text-white p-0" style="font-size: 0.8rem; text-decoration: underline;" onclick="clearAllNotifs(event)">Clear All</button>
+                    </div>
+                    <div style="max-height: 250px; overflow-y: auto;" id="notifContainer">
+                        <div class="dropdown-item d-flex gap-3 py-2 border-bottom position-relative notif-item" href="#">
+                            <div class="bg-primary-subtle text-primary rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="bi bi-cash"></i>
+                            </div>
+                            <div style="width: 80%;">
+                                <p class="mb-0 fw-semibold text-wrap" style="font-size: 0.85rem;">Fee Payment Received</p>
+                                <small class="text-muted text-wrap">Student #1043 paid Class 9 term fees.</small>
+                            </div>
+                            <button type="button" class="btn-close position-absolute top-50 end-0 translate-middle-y me-3" style="font-size: 0.6rem;" onclick="removeNotif(this, event)"></button>
+                        </div>
+                        <div class="dropdown-item d-flex gap-3 py-2 border-bottom position-relative notif-item" href="#">
+                            <div class="bg-warning-subtle text-warning rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                <i class="bi bi-calendar-event"></i>
+                            </div>
+                            <div style="width: 80%;">
+                                <p class="mb-0 fw-semibold text-wrap" style="font-size: 0.85rem;">Exam Routine Updated</p>
+                                <small class="text-muted text-wrap">Term-II routines published.</small>
+                            </div>
+                            <button type="button" class="btn-close position-absolute top-50 end-0 translate-middle-y me-3" style="font-size: 0.6rem;" onclick="removeNotif(this, event)"></button>
+                        </div>
+                    </div>
+                    <div class="text-center py-2 border-top" id="notifViewAll">
+                        <a href="#" class="text-decoration-none fw-semibold" style="color: var(--primary-blue); font-size: 0.85rem;">View All</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Info Dropdown -->
+            <div class="dropdown">
+                <a href="#" class="d-flex align-items-center text-decoration-none gap-2" data-bs-toggle="dropdown">
+                    <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%233262a8'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/></svg>" alt="avatar" class="rounded-circle" style="width: 38px; height: 38px; object-fit: cover;">
+                    <div class="d-none d-lg-block text-start">
+                        <span class="d-block fw-semibold text-dark" style="font-size: 0.85rem; line-height: 1.2;">{{ user.username|default:"Guest Admin" }}</span>
+                        <span class="text-muted" style="font-size: 0.75rem;">
+                            {% if user.is_superuser %}Administrator{% else %}{{ user.role|default:"Administrator" }}{% endif %}
+                        </span>
+                    </div>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="border-radius: 12px;">
+                    <li><a class="dropdown-item py-2" href="#"><i class="bi bi-person me-2 text-muted"></i> {% trans "My Profile" %}</a></li>
+                    <li><a class="dropdown-item py-2" href="{% url 'account_settings' %}"><i class="bi bi-gear me-2 text-muted"></i> {% trans "Account Settings" %}</a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><a class="dropdown-item py-2 text-danger" href="{% url 'logout' %}"><i class="bi bi-box-arrow-right me-2"></i> {% trans "Log Out" %}</a></li>
+                </ul>
+            </div>
+        </div>
+    </header>
+    {% endif %}
+
+    <!-- Main Wrapper Content Area -->
+    <main class="main-wrapper" id="mainWrapper">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <!-- Logout Confirmation Modal -->
+    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 400px;">
+            <div class="modal-content border-0 shadow" style="border-radius: 14px;">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title fw-bold text-dark" id="logoutModalLabel">Confirm Log Out</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body py-4 text-center">
+                    <div class="text-danger mb-3">
+                        <i class="bi bi-exclamation-triangle-fill fs-1"></i>
+                    </div>
+                    <p class="mb-0 text-muted">Are you sure you want to log out of your session? You will need to enter your credentials to log in again.</p>
+                </div>
+                <div class="modal-footer border-0 pt-0 justify-content-center">
+                    <button type="button" class="btn btn-light px-4 rounded-pill fw-semibold" data-bs-dismiss="modal">Cancel</button>
+                    <form action="{% url 'logout' %}" method="POST" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn text-white px-4 rounded-pill fw-semibold" style="background-color: var(--secondary-purple); border: none;">Log Out</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap 5 JS Bundle -->
+    <script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js';"></script>
+
+    <!-- PWA Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then((registration) => {
+                    console.log('ServiceWorker registration successful with scope: ', registration.scope);
+                }, (err) => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    </script>
+
+    <!-- Sidebar Toggler Javascript -->
+    <script>
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const body = document.body;
+
+        // Dark Mode Logic
+        const themeToggleBtn = document.getElementById('themeToggleBtn');
+        const themeIcon = document.getElementById('themeIcon');
+
+        if (localStorage.getItem('dark_mode') === 'true') {
+            body.classList.add('dark-theme');
+            themeIcon.classList.replace('bi-moon', 'bi-sun');
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            const isDark = body.classList.toggle('dark-theme');
+            localStorage.setItem('dark_mode', isDark);
+            if (isDark) {
+                themeIcon.classList.replace('bi-moon', 'bi-sun');
+            } else {
+                themeIcon.classList.replace('bi-sun', 'bi-moon');
+            }
+        });
+
+        sidebarToggle.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (window.innerWidth < 992) {
+                body.classList.toggle('sidebar-mobile-open');
+            } else {
+                body.classList.toggle('sidebar-collapsed');
+            }
+        });
+
+        sidebarOverlay.addEventListener('click', function() {
+            body.classList.remove('sidebar-mobile-open');
+        });
+
+        // Close sidebar on small screens when window is resized larger
+        window.addEventListener('resize', function() {
+            if (window.innerWidth >= 992) {
+                body.classList.remove('sidebar-mobile-open');
+            }
+        });
+
+        // Dynamic Sidebar Brand update from Profile settings
+        window.updateSidebarBrand = function(profileData) {
+            try {
+                const stored = localStorage.getItem('gs_institute_profile');
+                const profile = profileData || (stored ? JSON.parse(stored) : null);
+                const nameEl = document.getElementById('sidebarSchoolName');
+                const eiinEl = document.getElementById('sidebarSchoolEiin');
+                const logoEl = document.getElementById('sidebarSchoolLogo');
+                const iconEl = document.getElementById('sidebarSchoolIcon');
+
+                if (profile) {
+                    const displayName = profile.shortName || profile.nameEn || profile.nameBn || "Gazi Mahmud JHS";
+                    const displayEiin = profile.eiin ? `EIIN: ${profile.eiin}` : "EIIN: 100184";
+
+                    if (nameEl) nameEl.textContent = displayName;
+                    if (eiinEl) eiinEl.textContent = displayEiin;
+
+                    if (logoEl && profile.logoSrc && (profile.logoSrc.startsWith('data:') || profile.logoSrc.startsWith('/static/'))) {
+                        logoEl.src = profile.logoSrc;
+                        logoEl.style.display = 'block';
+                        if (iconEl) iconEl.style.display = 'none';
+                    }
+                }
+            } catch(e) {
+                console.error("Error updating sidebar brand:", e);
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateSidebarBrand();
+        });
+
+        // Notifications Logic
+        window.removeNotif = function(btn, event) {
+            event.stopPropagation();
+            event.preventDefault();
+            btn.closest('.notif-item').remove();
+            updateNotifCount();
+        };
+
+        window.clearAllNotifs = function(event) {
+            event.stopPropagation();
+            event.preventDefault();
+            const container = document.getElementById('notifContainer');
+            if(container) container.innerHTML = '';
+            updateNotifCount();
+        };
+
+        function updateNotifCount() {
+            const container = document.getElementById('notifContainer');
+            const badge = document.getElementById('notifBadge');
+            const items = container ? container.querySelectorAll('.notif-item').length : 0;
+            if(badge) {
+                if (items > 0) {
+                    badge.textContent = items;
+                    badge.style.display = 'inline-block';
+                } else {
+                    badge.style.display = 'none';
+                    if (container) {
+                        container.innerHTML = '<div class="text-center py-3 text-muted" style="font-size:0.85rem;">No new notifications</div>';
+                    }
+                }
+            }
+        }
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

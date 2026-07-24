@@ -1,0 +1,1234 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Class Tests — Manage Marks & Results — EduManage ERP{% endblock %}
+
+{% block extra_css %}
+<style>
+/* =========================================================
+   CLASS TESTS MODULE — PREMIUM DESIGN SYSTEM
+   ========================================================= */
+
+/* --- Header Banner --- */
+.ct-header {
+    background: linear-gradient(135deg, #0c4a3e 0%, #14795e 50%, #0c4a3e 100%);
+    border-radius: 20px;
+    padding: 28px 32px;
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+}
+.ct-header::before {
+    content: '';
+    position: absolute;
+    top: -50%; right: -10%;
+    width: 350px; height: 350px;
+    background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
+    pointer-events: none;
+}
+.ct-header::after {
+    content: '';
+    position: absolute;
+    bottom: -40%; left: -8%;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(16,185,129,0.2) 0%, transparent 70%);
+    pointer-events: none;
+}
+.ct-header h2 { color: #fff; font-weight: 800; font-size: 1.6rem; margin: 0; }
+.ct-header p  { color: rgba(255,255,255,0.65); margin: 6px 0 0; font-size: 0.9rem; }
+.ct-header .ct-icon-badge {
+    width: 56px; height: 56px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; color: #fff;
+    backdrop-filter: blur(8px);
+}
+
+/* --- Sidebar Navigation --- */
+.ct-sidebar-nav {
+    background: var(--card-bg);
+    border-radius: 18px;
+    padding: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    border: 1px solid rgba(0,0,0,0.06);
+    position: sticky;
+    top: 90px;
+}
+.ct-sidebar-nav .nav-label {
+    font-size: 0.65rem; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+    color: #94a3b8; padding: 8px 12px 4px;
+}
+.ct-nav-btn {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%; padding: 11px 14px;
+    border: none; background: transparent;
+    border-radius: 12px; text-align: left;
+    font-size: 0.875rem; font-weight: 600;
+    color: #475569; transition: all 0.22s ease; cursor: pointer;
+}
+.ct-nav-btn:hover { background: rgba(16,185,129,0.08); color: #059669; }
+.ct-nav-btn.active {
+    background: linear-gradient(135deg, #059669, #047857);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(5,150,105,0.35);
+}
+.ct-nav-btn .nav-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1rem;
+    background: rgba(16,185,129,0.1);
+    color: #059669;
+    transition: all 0.22s ease;
+}
+.ct-nav-btn.active .nav-icon {
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+}
+.ct-nav-btn .nav-chevron {
+    margin-left: auto; font-size: 0.7rem;
+    opacity: 0; transition: opacity 0.2s;
+}
+.ct-nav-btn.active .nav-chevron { opacity: 1; }
+
+/* --- Content Panel --- */
+.ct-panel {
+    display: none;
+    animation: ctFadeSlide 0.4s ease;
+}
+.ct-panel.active { display: block; }
+@keyframes ctFadeSlide {
+    from { opacity: 0; transform: translateX(20px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* --- Section Cards --- */
+.ct-section-card {
+    background: var(--card-bg);
+    border-radius: 16px;
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.04);
+    padding: 28px;
+    margin-bottom: 20px;
+}
+.ct-section-card h5 {
+    font-weight: 700; font-size: 1rem;
+    color: var(--text-dark); margin-bottom: 4px;
+}
+.ct-section-card .section-desc {
+    font-size: 0.82rem; color: #94a3b8; margin-bottom: 20px;
+}
+
+/* --- Spreadsheet Table --- */
+.ct-marks-table {
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    border-radius: 12px; overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.08);
+}
+.ct-marks-table thead th {
+    background: linear-gradient(135deg, #059669, #047857);
+    color: #fff; font-size: 0.8rem; font-weight: 700;
+    padding: 12px 14px; text-transform: uppercase;
+    letter-spacing: 0.04em; border: none;
+}
+.ct-marks-table tbody td {
+    padding: 10px 14px; font-size: 0.88rem;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    vertical-align: middle;
+}
+.ct-marks-table tbody tr { transition: background 0.15s ease; }
+.ct-marks-table tbody tr:hover { background: rgba(16,185,129,0.04); }
+.ct-marks-table .ct-input {
+    width: 68px; text-align: center; padding: 6px;
+    border: 1.5px solid #e2e8f0; border-radius: 8px;
+    font-weight: 600; font-size: 0.88rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.ct-marks-table .ct-input:focus {
+    outline: none; border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5,150,105,0.15);
+}
+.ct-marks-table .ct-input.locked {
+    background: #f1f5f9; color: #94a3b8;
+    pointer-events: none; border-color: #e2e8f0;
+}
+
+/* --- Save Tick Animation --- */
+@keyframes tickPop {
+    0%   { transform: scale(0); opacity: 0; }
+    60%  { transform: scale(1.3); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+.save-tick {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #dcfce7; color: #16a34a;
+    font-size: 0.75rem; font-weight: 800;
+    animation: tickPop 0.35s ease forwards;
+    margin-left: 6px;
+}
+.save-tick.hidden { display: none; }
+
+/* --- Absent Toggle --- */
+.absent-toggle {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 12px; border-radius: 20px; font-size: 0.78rem;
+    font-weight: 700; cursor: pointer; transition: all 0.2s; border: none;
+}
+.absent-toggle.present { background: #dcfce7; color: #16a34a; }
+.absent-toggle.absent  { background: #fee2e2; color: #dc2626; }
+
+/* --- Lock Badge --- */
+.lock-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 12px; border-radius: 20px; font-size: 0.78rem;
+    font-weight: 700;
+}
+.lock-badge.unlocked { background: #ecfdf5; color: #059669; }
+.lock-badge.locked   { background: #fef3c7; color: #d97706; }
+
+/* --- Summary Stat Widget Cards --- */
+.stat-widget {
+    background: var(--card-bg);
+    border-radius: 16px; padding: 22px;
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    text-align: center; transition: transform 0.2s, box-shadow 0.2s;
+}
+.stat-widget:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+.stat-widget .stat-icon {
+    width: 50px; height: 50px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; margin: 0 auto 12px;
+}
+.stat-widget .stat-value {
+    font-size: 1.8rem; font-weight: 800;
+    line-height: 1; margin-bottom: 4px;
+}
+.stat-widget .stat-label {
+    font-size: 0.78rem; font-weight: 600; color: #94a3b8;
+    text-transform: uppercase; letter-spacing: 0.06em;
+}
+
+/* --- Student History Card --- */
+.history-card {
+    background: var(--card-bg);
+    border-radius: 14px; padding: 18px;
+    border: 1px solid rgba(0,0,0,0.06);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    margin-bottom: 14px;
+    transition: transform 0.2s;
+}
+.history-card:hover { transform: translateX(4px); }
+.history-card .student-avatar {
+    width: 42px; height: 42px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 0.9rem;
+    color: #fff;
+}
+.history-card .trend-arrow {
+    font-size: 1.1rem; font-weight: 800;
+}
+.trend-up   { color: #16a34a; }
+.trend-down { color: #dc2626; }
+.trend-flat { color: #d97706; }
+
+/* --- Mini Spark Line (CSS-only) --- */
+.spark-bar-container {
+    display: flex; align-items: flex-end; gap: 3px; height: 32px;
+}
+.spark-bar {
+    width: 8px; border-radius: 4px 4px 0 0;
+    transition: height 0.4s ease;
+}
+
+/* --- Action Buttons --- */
+.btn-ct-primary {
+    background: linear-gradient(135deg, #059669, #047857);
+    color: #fff; border: none; border-radius: 10px;
+    padding: 10px 22px; font-weight: 600; font-size: 0.88rem;
+    transition: all 0.2s;
+}
+.btn-ct-primary:hover {
+    background: linear-gradient(135deg, #047857, #065f46);
+    color: #fff; transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(5,150,105,0.3);
+}
+.btn-ct-outline {
+    background: transparent;
+    border: 1.5px solid #059669; color: #059669;
+    border-radius: 10px; padding: 9px 20px;
+    font-weight: 600; font-size: 0.88rem;
+    transition: all 0.2s;
+}
+.btn-ct-outline:hover {
+    background: rgba(5,150,105,0.08); color: #047857;
+}
+
+/* --- Auto-Save Indicator --- */
+.autosave-indicator {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 6px 16px; border-radius: 20px;
+    font-size: 0.78rem; font-weight: 700;
+    transition: all 0.3s;
+}
+.autosave-indicator.idle    { background: #f1f5f9; color: #94a3b8; }
+.autosave-indicator.saving  { background: #fef3c7; color: #d97706; }
+.autosave-indicator.saved   { background: #dcfce7; color: #16a34a; }
+
+/* --- Notification Send Button --- */
+.btn-notify {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff; border: none; border-radius: 10px;
+    padding: 10px 22px; font-weight: 600; font-size: 0.88rem;
+    transition: all 0.2s;
+}
+.btn-notify:hover {
+    background: linear-gradient(135deg, #1d4ed8, #1e40af);
+    color: #fff; transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(37,99,235,0.3);
+}
+
+/* --- Grade Badges --- */
+.ct-grade { display: inline-flex; align-items: center; justify-content: center;
+    padding: 4px 14px; border-radius: 20px; font-weight: 700; font-size: 0.78rem; }
+.ct-grade-a { background: #dcfce7; color: #16a34a; }
+.ct-grade-b { background: #e0f2fe; color: #0284c7; }
+.ct-grade-c { background: #fef3c7; color: #d97706; }
+.ct-grade-f { background: #fee2e2; color: #dc2626; }
+
+/* --- Dark Theme --- */
+body.dark-theme .ct-sidebar-nav,
+body.dark-theme .ct-section-card,
+body.dark-theme .stat-widget,
+body.dark-theme .history-card {
+    background: var(--card-bg);
+    border-color: rgba(255,255,255,0.08);
+}
+body.dark-theme .ct-nav-btn { color: #94a3b8; }
+body.dark-theme .ct-nav-btn:hover { background: rgba(16,185,129,0.15); color: #6ee7b7; }
+body.dark-theme .ct-marks-table thead th { background: linear-gradient(135deg, #047857, #065f46); }
+body.dark-theme .ct-marks-table tbody td { border-color: rgba(255,255,255,0.06); }
+body.dark-theme .ct-marks-table .ct-input {
+    background: #1e293b; border-color: rgba(255,255,255,0.1); color: #fff;
+}
+body.dark-theme .ct-marks-table .ct-input.locked { background: #0f172a; color: #475569; }
+
+/* --- Print --- */
+@media print {
+    .ct-sidebar-nav, .ct-header, .no-print, .btn, .autosave-indicator { display: none !important; }
+    .ct-panel { display: none !important; }
+    .ct-panel.active { display: block !important; animation: none !important; opacity: 1 !important; visibility: visible !important; transform: none !important; }
+    .ct-section-card { box-shadow: none !important; border: 1px solid #ddd !important; }
+    body, html { background: #fff !important; height: auto !important; }
+    * { animation: none !important; transition: none !important; }
+}
+
+/* --- Responsive --- */
+@media (max-width: 991px) {
+    .ct-sidebar-nav { position: static; margin-bottom: 20px; }
+}
+</style>
+<!-- Chart.js -->
+<script src="{% static 'vendor/chartjs/chart.umd.min.js' %}" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js';"></script>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+
+    <!-- ====== Page Header Banner ====== -->
+    <div class="ct-header">
+        <div class="d-flex align-items-center gap-3">
+            <div class="ct-icon-badge">
+                <i class="bi bi-journal-medical"></i>
+            </div>
+            <div>
+                <h2>Class Tests — Marks & Results</h2>
+                <p>ক্লাস টেস্ট, কুইজ ও মডেল টেস্টের নম্বর ইনপুট, ট্র্যাকিং এবং পারফরম্যান্স অ্যানালিটিক্স</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ====== Main Layout: Sidebar + Content ====== -->
+    <div class="row g-4">
+        <!-- Sidebar Navigation -->
+        <div class="col-lg-3">
+            <div class="ct-sidebar-nav">
+                <div class="nav-label">Test Management</div>
+                <button class="ct-nav-btn active" onclick="ctSwitchTab('manage-marks', this)">
+                    <span class="nav-icon"><i class="bi bi-pencil-square"></i></span>
+                    Manage Test Marks
+                    <span class="nav-chevron"><i class="bi bi-chevron-right"></i></span>
+                </button>
+                <button class="ct-nav-btn" onclick="ctSwitchTab('test-result', this)">
+                    <span class="nav-icon"><i class="bi bi-graph-up-arrow"></i></span>
+                    Test Result
+                    <span class="nav-chevron"><i class="bi bi-chevron-right"></i></span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Content Panels -->
+        <div class="col-lg-9">
+
+            <!-- ============================================
+                 PANEL 1: MANAGE TEST MARKS
+                 ============================================ -->
+            <div class="ct-panel active" id="panel-manage-marks">
+                <div class="ct-section-card">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                        <div>
+                            <h5><i class="bi bi-pencil-square me-2" style="color:#059669"></i>Manage Test Marks</h5>
+                            <div class="section-desc">ক্লাস টেস্ট, কুইজ ও মডেল টেস্টের নম্বর দ্রুত ইনপুট করুন — Auto-Save সক্রিয়</div>
+                        </div>
+                        <div class="d-flex align-items-center gap-2 no-print">
+                            <div class="autosave-indicator idle" id="autosaveStatus">
+                                <i class="bi bi-cloud-check"></i>
+                                <span id="autosaveLabel">Auto-Save Idle</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Test Selector Filters -->
+                    <div class="row g-3 mb-4 no-print">
+                        <div class="col-md-2">
+                            <label class="form-label fw-semibold">Class</label>
+                            <select class="form-select" id="tmClassSelect" onchange="loadTestMarksGrid()">
+                                <option>৬ষ্ঠ</option>
+                                <option>৭ম</option>
+                                <option>৮ম</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-semibold">Section</label>
+                            <select class="form-select" id="tmSectionSelect" onchange="loadTestMarksGrid()">
+                                <option>ক</option>
+                                <option>খ</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Subject</label>
+                            <select class="form-select" id="tmSubjectSelect" onchange="loadTestMarksGrid()">
+                                <option>বাংলা</option>
+                                <option>English</option>
+                                <option>গণিত</option>
+                                <option>বিজ্ঞান</option>
+                                <option>সামাজিক বিজ্ঞান</option>
+                                <option>ধর্ম ও নৈতিক শিক্ষা</option>
+                                <option>ICT</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Test Type</label>
+                            <select class="form-select" id="tmTestType" onchange="loadTestMarksGrid()">
+                                <option>Class Test 1</option>
+                                <option>Class Test 2</option>
+                                <option>Class Test 3</option>
+                                <option>Weekly Test 1</option>
+                                <option>Weekly Test 2</option>
+                                <option>Quiz 1</option>
+                                <option>Quiz 2</option>
+                                <option>Quiz 3</option>
+                                <option>Model Test</option>
+                                <option>Surprise Quiz</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-semibold">Full Marks</label>
+                            <input type="number" class="form-control" id="tmFullMarks" value="20" min="5" max="100">
+                        </div>
+                    </div>
+
+                    <!-- Lock/Unlock & Bulk Actions -->
+                    <div class="d-flex justify-content-between align-items-center mb-3 no-print">
+                        <div class="d-flex gap-2 align-items-center">
+                            <button class="lock-badge unlocked" id="lockToggleBtn" onclick="toggleLockMarks()">
+                                <i class="bi bi-unlock" id="lockIcon"></i>
+                                <span id="lockLabel">Unlocked — Editing Enabled</span>
+                            </button>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn-ct-outline btn-sm" onclick="markAllPresent()" title="Mark all present">
+                                <i class="bi bi-people-fill me-1"></i> All Present
+                            </button>
+                            <button class="btn-ct-primary btn-sm" onclick="manualSaveAll()" title="Force save all">
+                                <i class="bi bi-floppy me-1"></i> Save All
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Inline-Editable Marks Grid -->
+                    <div class="table-responsive">
+                        <table class="ct-marks-table" id="testMarksGrid">
+                            <thead>
+                                <tr>
+                                    <th style="width:40px">#</th>
+                                    <th style="width:60px">Roll</th>
+                                    <th>Student Name</th>
+                                    <th style="width:90px">Marks</th>
+                                    <th style="width:80px">Out Of</th>
+                                    <th style="width:80px">%</th>
+                                    <th style="width:90px">Status</th>
+                                    <th style="width:50px"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="testMarksBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ============================================
+                 PANEL 2: TEST RESULT
+                 ============================================ -->
+            <div class="ct-panel" id="panel-test-result">
+                <!-- Performance Dashboard Widgets -->
+                <div class="row g-3 mb-4" id="trDashboardWidgets">
+                    <div class="col-6 col-md-3">
+                        <div class="stat-widget">
+                            <div class="stat-icon" style="background:rgba(5,150,105,0.1); color:#059669;">
+                                <i class="bi bi-calculator"></i>
+                            </div>
+                            <div class="stat-value" style="color:#059669;" id="trClassAvg">—</div>
+                            <div class="stat-label">Class Average</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-widget">
+                            <div class="stat-icon" style="background:rgba(37,99,235,0.1); color:#2563eb;">
+                                <i class="bi bi-trophy"></i>
+                            </div>
+                            <div class="stat-value" style="color:#2563eb;" id="trHighest">—</div>
+                            <div class="stat-label">Highest Mark</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-widget">
+                            <div class="stat-icon" style="background:rgba(22,163,74,0.1); color:#16a34a;">
+                                <i class="bi bi-check-circle"></i>
+                            </div>
+                            <div class="stat-value" style="color:#16a34a;" id="trPassCount">—</div>
+                            <div class="stat-label">Passed Students</div>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stat-widget">
+                            <div class="stat-icon" style="background:rgba(220,38,38,0.1); color:#dc2626;">
+                                <i class="bi bi-x-circle"></i>
+                            </div>
+                            <div class="stat-value" style="color:#dc2626;" id="trFailCount">—</div>
+                            <div class="stat-label">Failed / Absent</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ct-section-card">
+                    <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                        <div>
+                            <h5><i class="bi bi-graph-up-arrow me-2" style="color:#059669"></i>Test Result — Performance Analytics</h5>
+                            <div class="section-desc">শিক্ষার্থীদের তাৎক্ষণিক পারফরম্যান্স ড্যাশবোর্ড — ট্রেন্ড গ্রাফ ও হিস্টোরি সহ</div>
+                        </div>
+                        <div class="d-flex gap-2 no-print">
+                            <button class="btn-notify" onclick="sendTestNotification()">
+                                <i class="bi bi-send me-1"></i> Send Notification
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="row g-3 mb-4 no-print">
+                        <div class="col-md-2">
+                            <label class="form-label fw-semibold">Class</label>
+                            <select class="form-select" id="trClassSelect" onchange="loadTestResults()">
+                                <option>৬ষ্ঠ</option><option>৭ম</option><option>৮ম</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-semibold">Section</label>
+                            <select class="form-select" id="trSectionSelect" onchange="loadTestResults()">
+                                <option>ক</option><option>খ</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Subject</label>
+                            <select class="form-select" id="trSubjectSelect" onchange="loadTestResults()">
+                                <option>বাংলা</option><option>English</option><option>গণিত</option>
+                                <option>বিজ্ঞান</option><option>সামাজিক বিজ্ঞান</option>
+                                <option>ধর্ম ও নৈতিক শিক্ষা</option><option>ICT</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">View Mode</label>
+                            <select class="form-select" id="trViewMode" onchange="loadTestResults()">
+                                <option value="combined">Combined — All Tests</option>
+                                <option value="single">Single Test Only</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2 d-flex align-items-end">
+                            <button class="btn-ct-primary w-100" onclick="loadTestResults()">
+                                <i class="bi bi-funnel me-1"></i> Load
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Performance Chart -->
+                    <div class="mb-4 no-print" id="trChartContainer">
+                        <h6 class="fw-bold mb-3" style="font-size:0.9rem; color:#475569;">
+                            <i class="bi bi-bar-chart-line me-1"></i> Class Test Performance Overview
+                        </h6>
+                        <div style="max-width:700px; margin:auto;">
+                            <canvas id="trPerformanceChart" height="280"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Student-wise Test History -->
+                    <h6 class="fw-bold mb-3" style="font-size:0.9rem; color:#475569;">
+                        <i class="bi bi-people me-1"></i> Student Test History
+                    </h6>
+                    <div id="trStudentHistory">
+                        <div class="text-center py-4 text-muted">
+                            <i class="bi bi-clipboard-data" style="font-size:2.5rem; color:#cbd5e1;"></i>
+                            <p class="mt-2">ফিল্টার সিলেক্ট করে Load করুন — ফলাফল এখানে দেখা যাবে</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Custom Confirmation Modal Dialog -->
+            <div class="modal fade" id="customSystemConfirmModal" tabindex="-1" aria-hidden="true" style="backdrop-filter: blur(6px);">
+                <div class="modal-dialog modal-dialog-centered modal-sm" style="max-width: 440px;">
+                    <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden; background: #ffffff;">
+                        <div class="modal-header border-0 pb-0 pt-4 px-4 d-flex align-items-center gap-3">
+                            <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px; background: #ecfdf5; color: #059669; font-size: 1.5rem; flex-shrink: 0;">
+                                <i class="bi bi-bell-fill" id="customModalIcon"></i>
+                            </div>
+                            <div>
+                                <h6 class="fw-bold mb-0 text-slate-900" id="customModalTitle" style="font-size: 1.05rem;">নোটিফিকেশন বার্তা</h6>
+                                <span class="text-muted small fw-semibold" style="font-size: 0.75rem;">System Dialog • EduManage ERP</span>
+                            </div>
+                            <button type="button" class="btn-close ms-auto shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body p-4">
+                            <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                                <p class="text-slate-700 fw-semibold mb-0" id="customModalMessage" style="font-size: 0.92rem; line-height: 1.5;">
+                                    <!-- Message -->
+                                </p>
+                            </div>
+                        </div>
+                        <div class="modal-footer border-0 pt-0 pb-4 px-4 gap-2">
+                            <button type="button" class="btn btn-light rounded-xl fw-bold text-slate-600 px-4 py-2 text-xs border" data-bs-dismiss="modal">বাতিল (Cancel)</button>
+                            <button type="button" class="btn btn-emerald text-white fw-bold rounded-xl px-4 py-2 text-xs shadow-sm hover:bg-emerald-700" style="background:#059669;" id="customModalConfirmBtn">
+                                <i class="bi bi-send-fill me-1"></i> হ্যাঁ, পাঠান (Confirm)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/* =========================================================
+   CLASS TESTS MODULE — JAVASCRIPT ENGINE
+   ========================================================= */
+
+// ---- Storage Keys ----
+const CT_KEYS = {
+    marks: 'ct_test_marks',
+    locks: 'ct_test_locks',
+};
+
+// ---- Demo Students ----
+const CT_STUDENTS = [
+    { roll: 1, name: 'মোঃ আরিফুল ইসলাম' },
+    { roll: 2, name: 'ফাতেমা তুজ জোহরা' },
+    { roll: 3, name: 'মোঃ সাকিব হাসান' },
+    { roll: 4, name: 'নুসরাত জাহান' },
+    { roll: 5, name: 'মোঃ তানভীর আহমেদ' },
+    { roll: 6, name: 'আয়েশা সিদ্দিকা' },
+    { roll: 7, name: 'মোঃ রাকিবুল হাসান' },
+    { roll: 8, name: 'সুমাইয়া আক্তার' },
+    { roll: 9, name: 'মোঃ ইমরান হোসেন' },
+    { roll: 10, name: 'জান্নাতুল ফেরদৌসী' },
+    { roll: 11, name: 'মোঃ মাহমুদুল হাসান' },
+    { roll: 12, name: 'তাসনিম ফাতিমা' },
+    { roll: 13, name: 'মোঃ আশিকুর রহমান' },
+    { roll: 14, name: 'রুমানা আক্তার' },
+    { roll: 15, name: 'মোঃ নাঈমুল ইসলাম' },
+];
+
+function getCtAppStudents(selectedClass) {
+    let list = [];
+    try {
+        const stored = localStorage.getItem('school_students');
+        if (stored) {
+            const parsed = JSON.parse(stored);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                list = parsed.map((s, idx) => ({
+                    id: s.id || s.db_id || (idx + 1),
+                    roll: (s.roll && s.roll !== 'Pending') ? parseInt(s.roll) : (idx + 1),
+                    name: s.name_bn || s.name_en || s.name || `Student ${idx + 1}`,
+                    cls: s.cls || s.desired_class || 'Class 6',
+                    section: s.section || 'A'
+                }));
+            }
+        }
+    } catch (e) {
+        console.error("Error reading school_students:", e);
+    }
+
+    if (selectedClass) {
+        const filtered = list.filter(s => s.cls === selectedClass || s.cls.includes(selectedClass) || selectedClass.includes(s.cls));
+        if (filtered.length > 0) return filtered;
+    }
+
+    if (!list.length) {
+        list = CT_STUDENTS.map(s => ({
+            id: s.roll,
+            roll: s.roll,
+            name: s.name,
+            cls: 'Class 6',
+            section: 'A'
+        }));
+    }
+    return list;
+}
+
+const TEST_TYPES = ['Class Test 1','Class Test 2','Class Test 3','Weekly Test 1','Weekly Test 2','Quiz 1','Quiz 2','Quiz 3','Model Test','Surprise Quiz'];
+
+// ---- Storage Helpers ----
+function ctGet(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch { return fallback; } }
+function ctSet(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
+
+// ============== TAB SWITCHING ==============
+function ctSwitchTab(panelId, btn) {
+    document.querySelectorAll('.ct-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.ct-nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('panel-' + panelId).classList.add('active');
+    btn.classList.add('active');
+
+    if (panelId === 'test-result') loadTestResults();
+}
+
+// ============== GRADING (for test marks out of N) ==============
+function ctGetGrade(marks, full) {
+    const pct = (marks / full) * 100;
+    if (pct >= 80) return { letter: 'A+', cls: 'ct-grade-a' };
+    if (pct >= 60) return { letter: 'B',  cls: 'ct-grade-b' };
+    if (pct >= 40) return { letter: 'C',  cls: 'ct-grade-c' };
+    return { letter: 'F', cls: 'ct-grade-f' };
+}
+
+// ============== GET CURRENT FILTER KEY ==============
+function tmGetKey() {
+    return `${document.getElementById('tmClassSelect').value}_${document.getElementById('tmSectionSelect').value}_${document.getElementById('tmSubjectSelect').value}_${document.getElementById('tmTestType').value}`;
+}
+
+// ============== CHECK LOCK STATE ==============
+function isCurrentLocked() {
+    const locks = ctGet(CT_KEYS.locks, {});
+    return locks[tmGetKey()] === true;
+}
+
+function updateLockUI() {
+    const locked = isCurrentLocked();
+    const btn = document.getElementById('lockToggleBtn');
+    const icon = document.getElementById('lockIcon');
+    const label = document.getElementById('lockLabel');
+    if (locked) {
+        btn.className = 'lock-badge locked';
+        icon.className = 'bi bi-lock';
+        label.textContent = 'Locked — Editing Disabled';
+    } else {
+        btn.className = 'lock-badge unlocked';
+        icon.className = 'bi bi-unlock';
+        label.textContent = 'Unlocked — Editing Enabled';
+    }
+
+    // Lock/unlock all inputs
+    document.querySelectorAll('#testMarksBody .ct-input').forEach(inp => {
+        if (locked) { inp.classList.add('locked'); inp.readOnly = true; }
+        else { inp.classList.remove('locked'); inp.readOnly = false; }
+    });
+    document.querySelectorAll('#testMarksBody .absent-toggle').forEach(btn => {
+        if (locked) btn.style.pointerEvents = 'none';
+        else btn.style.pointerEvents = 'auto';
+    });
+}
+
+function toggleLockMarks() {
+    const key = tmGetKey();
+    const locks = ctGet(CT_KEYS.locks, {});
+    locks[key] = !locks[key];
+    ctSet(CT_KEYS.locks, locks);
+    updateLockUI();
+    showCtToast(locks[key] ? '🔒 Marks Locked' : '🔓 Marks Unlocked');
+}
+
+// ============== AUTO-SAVE ENGINE ==============
+let autoSaveTimer = null;
+
+function triggerAutoSave() {
+    const status = document.getElementById('autosaveStatus');
+    const label = document.getElementById('autosaveLabel');
+    status.className = 'autosave-indicator saving';
+    label.innerHTML = '<i class="bi bi-arrow-repeat"></i> Saving...';
+
+    clearTimeout(autoSaveTimer);
+    autoSaveTimer = setTimeout(() => {
+        doSaveMarks();
+        status.className = 'autosave-indicator saved';
+        label.innerHTML = '<i class="bi bi-cloud-check"></i> Saved ✓';
+
+        setTimeout(() => {
+            status.className = 'autosave-indicator idle';
+            label.innerHTML = '<i class="bi bi-cloud-check"></i> Auto-Save Ready';
+        }, 2000);
+    }, 600);
+}
+
+function doSaveMarks() {
+    const key = tmGetKey();
+    const full = parseInt(document.getElementById('tmFullMarks').value) || 20;
+    const allMarks = ctGet(CT_KEYS.marks, {});
+    const marks = [];
+
+    document.querySelectorAll('#testMarksBody tr').forEach(row => {
+        const roll = parseInt(row.dataset.roll);
+        if (!roll) return;
+        const inp = row.querySelector('.ct-input');
+        const isAbsent = row.querySelector('.absent-toggle')?.classList.contains('absent');
+        marks.push({
+            roll,
+            marks: isAbsent ? -1 : (parseInt(inp.value) || 0),
+            full,
+            absent: isAbsent || false,
+        });
+    });
+
+    allMarks[key] = marks;
+    ctSet(CT_KEYS.marks, allMarks);
+}
+
+function manualSaveAll() {
+    doSaveMarks();
+    showCtToast('✅ সব নম্বর সফলভাবে সংরক্ষিত!');
+    // Show ticks on all rows
+    document.querySelectorAll('#testMarksBody .save-tick').forEach(t => {
+        t.classList.remove('hidden');
+        setTimeout(() => t.classList.add('hidden'), 1500);
+    });
+}
+
+// ============== LOAD MARKS GRID ==============
+function loadTestMarksGrid() {
+    const key = tmGetKey();
+    const cls = document.getElementById('tmClassSelect').value;
+    const full = parseInt(document.getElementById('tmFullMarks').value) || 20;
+    const allMarks = ctGet(CT_KEYS.marks, {});
+    const saved = allMarks[key] || [];
+    const tbody = document.getElementById('testMarksBody');
+
+    const students = getCtAppStudents(cls);
+
+    tbody.innerHTML = students.map((s, i) => {
+        const existing = saved.find(m => m.roll === s.roll);
+        const marks = existing && !existing.absent ? existing.marks : '';
+        const isAbsent = existing?.absent || false;
+        const pct = existing && !isAbsent && marks !== '' ? ((marks / (existing.full || full)) * 100).toFixed(0) : '—';
+
+        return `
+        <tr data-roll="${s.roll}">
+            <td>${i + 1}</td>
+            <td class="fw-bold">${s.roll}</td>
+            <td class="fw-bold text-slate-800">${s.name}</td>
+            <td>
+                <input type="number" class="ct-input ${isAbsent ? 'locked' : ''}"
+                    value="${isAbsent ? '' : marks}" min="0" max="${full}"
+                    ${isAbsent ? 'readonly' : ''}
+                    oninput="onMarkInput(this)" tabindex="${i + 1}">
+            </td>
+            <td style="color:#94a3b8; font-weight:600;">/ ${full}</td>
+            <td class="fw-bold ct-pct" data-roll="${s.roll}">${pct}${pct !== '—' ? '%' : ''}</td>
+            <td>
+                <button class="absent-toggle ${isAbsent ? 'absent' : 'present'}" onclick="toggleAbsent(this, ${s.roll})">
+                    <i class="bi ${isAbsent ? 'bi-x-circle' : 'bi-check-circle'}"></i>
+                    ${isAbsent ? 'Absent' : 'Present'}
+                </button>
+            </td>
+            <td>
+                <span class="save-tick hidden" id="tick-${s.roll}">✓</span>
+            </td>
+        </tr>`;
+    }).join('');
+
+    updateLockUI();
+    setupTestKeyboardNav();
+}
+
+function onMarkInput(inp) {
+    const row = inp.closest('tr');
+    const roll = parseInt(row.dataset.roll);
+    const full = parseInt(document.getElementById('tmFullMarks').value) || 20;
+    const val = parseInt(inp.value) || 0;
+    const pct = ((val / full) * 100).toFixed(0);
+    row.querySelector('.ct-pct').textContent = pct + '%';
+
+    // Show save tick briefly
+    const tick = document.getElementById('tick-' + roll);
+    triggerAutoSave();
+
+    // Delayed tick show
+    clearTimeout(inp._tickTimer);
+    inp._tickTimer = setTimeout(() => {
+        tick.classList.remove('hidden');
+        setTimeout(() => tick.classList.add('hidden'), 1200);
+    }, 700);
+}
+
+function toggleAbsent(btn, roll) {
+    const isAbsent = btn.classList.contains('present');
+    const row = btn.closest('tr');
+    const inp = row.querySelector('.ct-input');
+
+    if (isAbsent) {
+        btn.className = 'absent-toggle absent';
+        btn.innerHTML = '<i class="bi bi-x-circle"></i> Absent';
+        inp.value = ''; inp.readOnly = true; inp.classList.add('locked');
+        row.querySelector('.ct-pct').textContent = 'AB';
+    } else {
+        btn.className = 'absent-toggle present';
+        btn.innerHTML = '<i class="bi bi-check-circle"></i> Present';
+        inp.readOnly = false; inp.classList.remove('locked');
+        row.querySelector('.ct-pct').textContent = '—';
+    }
+    triggerAutoSave();
+}
+
+function markAllPresent() {
+    document.querySelectorAll('#testMarksBody .absent-toggle.absent').forEach(btn => {
+        const roll = parseInt(btn.closest('tr').dataset.roll);
+        toggleAbsent(btn, roll);
+    });
+}
+
+function setupTestKeyboardNav() {
+    const inputs = Array.from(document.querySelectorAll('#testMarksBody .ct-input'));
+    inputs.forEach((inp, idx) => {
+        inp.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (inputs[idx + 1]) inputs[idx + 1].focus();
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (inputs[idx - 1]) inputs[idx - 1].focus();
+            }
+        });
+    });
+}
+
+// ============== TEST RESULTS PANEL ==============
+let trChart = null;
+
+function loadTestResults() {
+    const cls = document.getElementById('trClassSelect').value;
+    const sec = document.getElementById('trSectionSelect').value;
+    const subj = document.getElementById('trSubjectSelect').value;
+    const viewMode = document.getElementById('trViewMode').value;
+    const allMarks = ctGet(CT_KEYS.marks, {});
+
+    // Collect all test types for this subject+class+section
+    const relevantTests = [];
+    TEST_TYPES.forEach(tt => {
+        const key = `${cls}_${sec}_${subj}_${tt}`;
+        if (allMarks[key]?.length) {
+            relevantTests.push({ testType: tt, data: allMarks[key] });
+        }
+    });
+
+    // Dashboard Widgets
+    let allScores = [];
+    relevantTests.forEach(t => {
+        t.data.forEach(m => {
+            if (!m.absent && m.marks >= 0) {
+                allScores.push({ roll: m.roll, marks: m.marks, full: m.full || 20 });
+            }
+        });
+    });
+
+    const passThreshold = 33; // percent
+    let totalPct = 0, passCount = 0, failAbsentCount = 0, highestMark = 0;
+    const studentAgg = {};
+
+    allScores.forEach(s => {
+        const pct = (s.marks / s.full) * 100;
+        totalPct += pct;
+        if (pct >= passThreshold) passCount++;
+        else failAbsentCount++;
+        if (s.marks > highestMark) highestMark = s.marks;
+
+        if (!studentAgg[s.roll]) studentAgg[s.roll] = [];
+        studentAgg[s.roll].push(pct);
+    });
+
+    // Count absent separately
+    relevantTests.forEach(t => {
+        t.data.forEach(m => { if (m.absent) failAbsentCount++; });
+    });
+
+    const avgPct = allScores.length ? (totalPct / allScores.length).toFixed(1) : '—';
+    document.getElementById('trClassAvg').textContent = avgPct !== '—' ? avgPct + '%' : '—';
+    document.getElementById('trHighest').textContent = highestMark || '—';
+    document.getElementById('trPassCount').textContent = passCount || '0';
+    document.getElementById('trFailCount').textContent = failAbsentCount || '0';
+
+    // Performance Chart
+    renderTestChart(relevantTests, subj);
+
+    // Student History Cards
+    renderStudentHistory(relevantTests, studentAgg);
+}
+
+function renderTestChart(relevantTests, subj) {
+    const ctx = document.getElementById('trPerformanceChart').getContext('2d');
+    if (trChart) trChart.destroy();
+
+    if (!relevantTests.length) {
+        document.getElementById('trChartContainer').style.display = 'none';
+        return;
+    }
+    document.getElementById('trChartContainer').style.display = 'block';
+
+    const labels = relevantTests.map(t => t.testType);
+    const avgData = relevantTests.map(t => {
+        const valid = t.data.filter(m => !m.absent && m.marks >= 0);
+        if (!valid.length) return 0;
+        const avg = valid.reduce((sum, m) => sum + ((m.marks / (m.full || 20)) * 100), 0) / valid.length;
+        return parseFloat(avg.toFixed(1));
+    });
+    const maxData = relevantTests.map(t => {
+        const valid = t.data.filter(m => !m.absent);
+        return valid.length ? Math.max(...valid.map(m => ((m.marks / (m.full || 20)) * 100))) : 0;
+    });
+
+    trChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [
+                {
+                    label: 'Class Average %',
+                    data: avgData,
+                    borderColor: '#059669',
+                    backgroundColor: 'rgba(5,150,105,0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 3,
+                    pointRadius: 5,
+                    pointBackgroundColor: '#059669',
+                },
+                {
+                    label: 'Highest %',
+                    data: maxData,
+                    borderColor: '#2563eb',
+                    backgroundColor: 'transparent',
+                    borderDash: [6, 4],
+                    tension: 0.4,
+                    borderWidth: 2,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#2563eb',
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } },
+            },
+            scales: {
+                y: { beginAtZero: true, max: 100, grid: { color: 'rgba(0,0,0,0.05)' },
+                    ticks: { callback: v => v + '%' } },
+                x: { grid: { display: false } }
+            }
+        }
+    });
+}
+
+function renderStudentHistory(relevantTests, studentAgg) {
+    const container = document.getElementById('trStudentHistory');
+    if (!relevantTests.length) {
+        container.innerHTML = `<div class="text-center py-4 text-muted">
+            <i class="bi bi-clipboard-data" style="font-size:2.5rem; color:#cbd5e1;"></i>
+            <p class="mt-2">এই বিষয়ে কোনো টেস্ট মার্ক এন্ট্রি হয়নি</p></div>`;
+        return;
+    }
+
+    const cls = document.getElementById('trClassSelect').value;
+    const students = getCtAppStudents(cls);
+    const avatarColors = ['#059669','#2563eb','#d97706','#dc2626','#7c3aed','#0284c7','#be185d','#16a34a'];
+
+    container.innerHTML = students.map(s => {
+        const testScores = [];
+        relevantTests.forEach(t => {
+            const m = t.data.find(mm => mm.roll === s.roll);
+            if (m) {
+                testScores.push({
+                    test: t.testType,
+                    marks: m.absent ? -1 : m.marks,
+                    full: m.full || 20,
+                    absent: m.absent,
+                });
+            }
+        });
+
+        if (!testScores.length) return '';
+
+        // Trend calculation
+        const validScores = testScores.filter(ts => !ts.absent).map(ts => (ts.marks / ts.full) * 100);
+        let trendIcon = '', trendClass = '';
+        if (validScores.length >= 2) {
+            const last = validScores[validScores.length - 1];
+            const prev = validScores[validScores.length - 2];
+            if (last > prev + 3)     { trendIcon = '↑'; trendClass = 'trend-up'; }
+            else if (last < prev - 3) { trendIcon = '↓'; trendClass = 'trend-down'; }
+            else                      { trendIcon = '→'; trendClass = 'trend-flat'; }
+        }
+
+        const avgPct = validScores.length ? (validScores.reduce((a,b)=>a+b,0) / validScores.length).toFixed(0) : '—';
+        const col = avatarColors[(s.roll - 1) % avatarColors.length];
+
+        // Mini spark bars
+        const sparkBars = testScores.map(ts => {
+            if (ts.absent) return `<div class="spark-bar" style="height:4px; background:#fee2e2;" title="${ts.test}: Absent"></div>`;
+            const pct = (ts.marks / ts.full) * 100;
+            const h = Math.max(4, (pct / 100) * 32);
+            const barCol = pct >= 80 ? '#16a34a' : pct >= 60 ? '#0284c7' : pct >= 40 ? '#d97706' : '#dc2626';
+            return `<div class="spark-bar" style="height:${h}px; background:${barCol};" title="${ts.test}: ${pct.toFixed(0)}%"></div>`;
+        }).join('');
+
+        // Individual test badges
+        const testBadges = testScores.map(ts => {
+            if (ts.absent) return `<span class="badge bg-danger-subtle text-danger rounded-pill px-2" style="font-size:0.72rem;">${ts.test}: AB</span>`;
+            const pct = ((ts.marks / ts.full) * 100).toFixed(0);
+            const grade = ctGetGrade(ts.marks, ts.full);
+            return `<span class="ct-grade ${grade.cls}" style="font-size:0.72rem;">${ts.test}: ${ts.marks}/${ts.full} (${pct}%)</span>`;
+        }).join(' ');
+
+        return `
+        <div class="history-card">
+            <div class="d-flex align-items-center gap-3">
+                <div class="student-avatar" style="background:${col};">
+                    ${s.name.charAt(0)}
+                </div>
+                <div class="flex-grow-1">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <div>
+                            <span class="fw-bold" style="font-size:0.92rem;">${s.name}</span>
+                            <span class="text-muted ms-2" style="font-size:0.78rem;">Roll: ${s.roll}</span>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="spark-bar-container">${sparkBars}</div>
+                            <div class="text-end">
+                                <span class="fw-bold" style="font-size:1rem; color:#059669;">${avgPct}%</span>
+                                ${trendIcon ? `<span class="trend-arrow ${trendClass} ms-1">${trendIcon}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex flex-wrap gap-1 mt-1">
+                        ${testBadges}
+                    </div>
+                </div>
+            </div>
+        </div>`;
+    }).filter(Boolean).join('');
+}
+
+// ============== CUSTOM SYSTEM DIALOG ENGINE ==============
+function showSystemConfirmDialog({ title, message, icon, confirmText, onConfirm }) {
+    const modalEl = document.getElementById('customSystemConfirmModal');
+    if (!modalEl) return;
+
+    document.getElementById('customModalTitle').textContent = title || 'নোটিফিকেশন নিশ্চিতকরণ';
+    document.getElementById('customModalMessage').textContent = message || '';
+    if (icon) {
+        document.getElementById('customModalIcon').className = icon;
+    } else {
+        document.getElementById('customModalIcon').className = 'bi bi-bell-fill';
+    }
+
+    const confirmBtn = document.getElementById('customModalConfirmBtn');
+    if (confirmText) {
+        confirmBtn.innerHTML = `<i class="bi bi-send-fill me-1"></i> ${confirmText}`;
+    } else {
+        confirmBtn.innerHTML = `<i class="bi bi-send-fill me-1"></i> হ্যাঁ, পাঠান (Confirm)`;
+    }
+
+    const modal = new bootstrap.Modal(modalEl);
+
+    const newConfirmBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+
+    newConfirmBtn.addEventListener('click', function() {
+        modal.hide();
+        if (typeof onConfirm === 'function') {
+            onConfirm();
+        }
+    });
+
+    modal.show();
+}
+
+// ============== NOTIFICATION ACTION ==============
+function sendTestNotification() {
+    const cls = document.getElementById('trClassSelect').value;
+    const subj = document.getElementById('trSubjectSelect').value;
+
+    showSystemConfirmDialog({
+        title: 'অভিভাবক নোটিফিকেশন নিশ্চিতকরণ',
+        message: `${cls} শ্রেণি — ${subj} বিষয়ের টেস্ট রেজাল্ট অভিভাবকদের কাছে পাঠাতে চান?`,
+        icon: 'bi bi-send-check-fill text-emerald-600',
+        confirmText: 'হ্যাঁ, পাঠান',
+        onConfirm: function() {
+            showCtToast(`📩 ${cls} শ্রেণি — ${subj} বিষয়ের টেস্ট রেজাল্ট অভিভাবক মোবাইলে সফলভাবে পাঠানো হয়েছে!`);
+        }
+    });
+}
+
+// ============== TOAST ==============
+function showCtToast(message) {
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position:fixed; bottom:30px; right:30px; z-index:9999;
+        background:#0f172a; color:#fff; padding:14px 24px;
+        border-radius:12px; font-size:0.9rem; font-weight:600;
+        box-shadow:0 8px 24px rgba(0,0,0,0.25);
+        animation: ctFadeSlide 0.3s ease;
+    `;
+    toast.textContent = message;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 2500);
+}
+
+// ============== INIT ==============
+document.addEventListener('DOMContentLoaded', function() {
+    loadTestMarksGrid();
+});
+</script>
+{% endblock %}

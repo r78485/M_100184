@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Official Academic Transcript - {{ student.full_name }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+        }
+
+        .serif-font {
+            font-family: 'Cinzel', serif;
+        }
+
+        /* Standard A4 Paper Setup */
+        .page-a4 {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 12mm;
+            margin: 10px auto;
+            background: #ffffff;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            position: relative;
+            box-sizing: border-box;
+        }
+
+        /* Classic Security Border Line */
+        .outer-border {
+            border: 3px solid #0f2c59;
+            padding: 4px;
+            height: 100%;
+        }
+
+        .inner-border {
+            border: 1px solid #1e3a8a;
+            padding: 15px;
+            height: 100%;
+            position: relative;
+        }
+
+        /* Institutional SVG Dynamic Watermark Graphics */
+        .watermark-bg {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-30deg);
+            font-size: 3.8rem;
+            font-weight: 900;
+            color: rgba(15, 44, 89, 0.04);
+            white-space: nowrap;
+            user-select: none;
+            pointer-events: none;
+            z-index: 0;
+            text-transform: uppercase;
+            text-align: center;
+            width: 100%;
+        }
+
+        /* Strict Print Engine Directive */
+        @media print {
+            body {
+                background: none;
+                padding: 0;
+            }
+            .page-a4 {
+                box-shadow: none;
+                margin: 0;
+                width: 100%;
+                height: 100vh;
+            }
+            .no-print {
+                display: none !important;
+            }
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+    </style>
+</head>
+<body class="p-4">
+
+    <div class="max-w-[210mm] mx-auto mb-4 text-right no-print">
+        <button onclick="window.print()" class="bg-[#0f2c59] hover:bg-blue-900 text-white font-bold py-2 px-6 rounded-lg shadow-md transition-all">
+            🖨️ Print Transcript
+        </button>
+    </div>
+
+    <div class="page-a4">
+        <div class="outer-border">
+            <div class="inner-border flex flex-col justify-between">
+                
+                <div class="watermark-bg serif-font">
+                    {{ institution.name_en }}<br>
+                    <span class="text-2xl opacity-60">OFFICIAL ACADEMIC TRANSCRIPT</span>
+                </div>
+
+                <div class="relative z-10">
+                    <div class="flex justify-between items-start border-b-2 border-[#0f2c59] pb-3">
+                        <div class="w-20 h-20 flex items-center justify-center">
+                            {% if institution.logo %}
+                                <img src="{{ institution.logo.url }}" alt="Logo" class="max-h-full object-contain">
+                            {% else %}
+                                <div class="w-16 h-16 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-xl">
+                                    EDU
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="text-center flex-1 px-2">
+                            <h1 class="serif-font text-2xl font-extrabold text-[#0f2c59] tracking-wide uppercase">
+                                {{ institution.name_en }}
+                            </h1>
+                            <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                                {{ institution.board_or_authority }}
+                            </p>
+                            <p class="text-[11px] text-gray-500">EIIN: {{ institution.eiin }}</p>
+                            <div class="inline-block bg-[#0f2c59] text-white text-sm font-bold px-4 py-1 rounded-full mt-2 uppercase tracking-widest">
+                                ACADEMIC TRANSCRIPT
+                            </div>
+                        </div>
+
+                        <div class="w-36 text-[9px] border border-gray-400 rounded p-1 bg-white/80">
+                            <div class="font-bold text-center border-b pb-0.5 mb-0.5 text-gray-800">GRADING SYSTEM</div>
+                            <table class="w-full text-center">
+                                <thead>
+                                    <tr class="border-b text-gray-600">
+                                        <th>Range</th>
+                                        <th>Grade</th>
+                                        <th>Point</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for scale in grading_scales %}
+                                    <tr>
+                                        <td>{{ scale.mark_from }}-{{ scale.mark_to }}%</td>
+                                        <td class="font-bold">{{ scale.letter_grade }}</td>
+                                        <td>{{ scale.grade_point }}</td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr><td colspan="3">80-100% | A+ | 5.00</td></tr>
+                                    <tr><td colspan="3">70-79%  | A  | 4.00</td></tr>
+                                    <tr><td colspan="3">60-69%  | A- | 3.50</td></tr>
+                                    <tr><td colspan="3">50-59%  | B  | 3.00</td></tr>
+                                    <tr><td colspan="3">40-49%  | C  | 2.00</td></tr>
+                                    <tr><td colspan="3">00-39%  | F  | 0.00</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="text-center my-3">
+                        <h2 class="text-md font-bold text-gray-800 uppercase tracking-wide">
+                            {{ student.exam_name }} - {{ student.session }}
+                        </h2>
+                        <p class="text-xs font-semibold text-gray-600">Group / Subject: {{ student.group_or_subject }}</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-x-6 gap-y-1.5 text-xs bg-gray-50/80 p-3 rounded-lg border border-gray-200 mb-4">
+                        <div><span class="font-bold text-gray-700">Student Name :</span> <span class="uppercase font-semibold">{{ student.full_name }}</span></div>
+                        <div><span class="font-bold text-gray-700">Student ID :</span> <span class="font-mono font-bold">{{ student.student_id }}</span></div>
+                        <div><span class="font-bold text-gray-700">Father's Name :</span> {{ student.father_name }}</div>
+                        <div><span class="font-bold text-gray-700">Roll No :</span> {{ student.roll_no }}</div>
+                        <div><span class="font-bold text-gray-700">Mother's Name :</span> {{ student.mother_name }}</div>
+                        <div><span class="font-bold text-gray-700">Registration No :</span> {{ student.registration_no }}</div>
+                        <div><span class="font-bold text-gray-700">Date of Birth :</span> {{ student.dob|date:"d M, Y" }}</div>
+                        <div><span class="font-bold text-gray-700">Academic Session :</span> {{ student.session }}</div>
+                    </div>
+
+                    <table class="w-full text-xs text-left border-collapse border border-gray-300">
+                        <thead>
+                            <tr class="bg-[#0f2c59] text-white text-center">
+                                <th class="border border-gray-300 py-1.5 px-2 w-12">Code</th>
+                                <th class="border border-gray-300 py-1.5 px-3 text-left">Subject Name</th>
+                                <th class="border border-gray-300 py-1.5 px-2 w-20">Marks</th>
+                                <th class="border border-gray-300 py-1.5 px-2 w-20">Letter Grade</th>
+                                <th class="border border-gray-300 py-1.5 px-2 w-20">Grade Point</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for res in results %}
+                            <tr class="text-center odd:bg-white even:bg-gray-50/50 hover:bg-blue-50/30">
+                                <td class="border border-gray-300 py-1.5 font-mono">{{ res.code }}</td>
+                                <td class="border border-gray-300 py-1.5 px-3 text-left font-medium">{{ res.name }}</td>
+                                <td class="border border-gray-300 py-1.5 font-semibold">{{ res.marks }}</td>
+                                <td class="border border-gray-300 py-1.5 font-bold text-[#0f2c59]">{{ res.grade }}</td>
+                                <td class="border border-gray-300 py-1.5 font-semibold">{{ res.point }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    <div class="mt-4 flex justify-between items-center bg-blue-50/60 p-3 rounded-lg border border-blue-200">
+                        <div class="flex items-center gap-3">
+                            <img src="data:image/png;base64,{{ barcode }}" alt="Barcode" class="h-10">
+                        </div>
+                        <div class="text-right">
+                            <span class="text-xs font-bold text-gray-600 uppercase mr-2">Grade Point Average (GPA):</span>
+                            <span class="text-xl font-extrabold text-[#0f2c59] bg-white px-3 py-1 rounded border border-blue-300 shadow-sm">
+                                {{ cgpa }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative z-10 pt-6 mt-6 border-t border-gray-200">
+                    <div class="flex justify-between items-end">
+                        
+                        <div class="text-center">
+                            <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" class="w-16 h-16 mx-auto">
+                            <p class="text-[9px] font-semibold text-gray-500 mt-1">Scan to Verify</p>
+                        </div>
+
+                        <div class="text-center w-40">
+                            {% if institution.controller_signature %}
+                                <img src="{{ institution.controller_signature.url }}" class="h-8 mx-auto mb-1 object-contain">
+                            {% else %}
+                                <div class="h-8"></div>
+                            {% endif %}
+                            <div class="border-t border-gray-800 text-[11px] font-bold text-gray-800 pt-0.5">
+                                Prepared By
+                            </div>
+                        </div>
+
+                        <div class="text-center w-24">
+                            <div class="w-16 h-16 border-2 border-dashed border-gray-300 rounded-full mx-auto flex items-center justify-center text-[8px] text-gray-400 font-bold uppercase">
+                                Official Seal
+                            </div>
+                        </div>
+
+                        <div class="text-center w-44">
+                            {% if institution.principal_signature %}
+                                <img src="{{ institution.principal_signature.url }}" class="h-8 mx-auto mb-1 object-contain">
+                            {% else %}
+                                <div class="h-8"></div>
+                            {% endif %}
+                            <div class="border-t border-gray-800 text-[11px] font-bold text-gray-800 pt-0.5">
+                                Controller of Examinations / Headmaster
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}SMS Services - EduManage ERP{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1" style="color: var(--primary-blue);">Bulk SMS Broadcasting Engine</h2>
+        <p class="text-muted">Transmit SMS notifications, emergency cancellations, or event notice alerts to parents.</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card custom-card p-4">
+                <h5 class="fw-bold mb-4">Send SMS Dispatch</h5>
+                <form id="smsForm" onsubmit="sendSMS(event)">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Target Group</label>
+                        <select class="form-select" required>
+                            <option>All Parents & Guardians</option>
+                            <option>Class 6 parents</option>
+                            <option>Class 7 parents</option>
+                            <option>Class 8 parents</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">SMS Message Body</label>
+                        <textarea class="form-control" rows="4" placeholder="Enter SMS text (max 160 characters)..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn text-white px-4" style="background-color: var(--primary-blue); border: none;"><i class="bi bi-chat-left-text me-2"></i>Send SMS Broadcast</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card custom-card p-4">
+                <h5 class="fw-bold mb-3">SMS Provider Configurations</h5>
+                <p class="text-muted small">Gateway Status: <span class="badge bg-success-subtle text-success">Connected</span></p>
+                <div class="list-group list-group-flush small">
+                    <div class="list-group-item d-flex justify-content-between px-0">
+                        <span>API Provider: Twilio API</span>
+                        <span class="text-muted">Active Node</span>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between px-0">
+                        <span>SMS Balance: 4,320 credits left</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function sendSMS(event) {
+        event.preventDefault();
+        alert("Bulk SMS queued for delivery!");
+        document.getElementById('smsForm').reset();
+    }
+</script>
+{% endblock %}

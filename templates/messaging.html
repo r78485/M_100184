@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block title %}Internal Mailbox - EduManage ERP{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="mb-4">
+        <h2 class="fw-bold mb-1" style="color: var(--primary-blue);">Internal Messaging Mailbox</h2>
+        <p class="text-muted">Communicate securely between admin officers, academic teachers, parents, and students.</p>
+    </div>
+
+    <div class="card custom-card">
+        <div class="row g-0">
+            <!-- Mail sidebar -->
+            <div class="col-md-3 border-end p-3">
+                <button class="btn text-white w-100 mb-3" style="background-color: var(--primary-blue); border: none;" data-bs-toggle="modal" data-bs-target="#mailModal">
+                    <i class="bi bi-pencil-square me-2"></i>Compose
+                </button>
+                <div class="list-group list-group-flush small">
+                    <a href="#" class="list-group-item list-group-item-action border-0 px-2 rounded active"><i class="bi bi-inbox me-2"></i> Inbox (2)</a>
+                    <a href="#" class="list-group-item list-group-item-action border-0 px-2 rounded"><i class="bi bi-send me-2"></i> Sent</a>
+                    <a href="#" class="list-group-item list-group-item-action border-0 px-2 rounded"><i class="bi bi-trash me-2"></i> Trash</a>
+                </div>
+            </div>
+
+            <!-- Mail body -->
+            <div class="col-md-9 p-4">
+                <div class="border rounded p-3 mb-3">
+                    <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                        <div>
+                            <strong class="d-block">Mr. Henderson (Senior Teacher)</strong>
+                            <small class="text-muted">To: David Vance (Student)</small>
+                        </div>
+                        <small class="text-muted">Today, 02:40 PM</small>
+                    </div>
+                    <h6 class="fw-bold text-dark">Subject: Algebra Assignment submission query</h6>
+                    <p class="text-muted small">Please submit your white-paper scans for math worksheets #4 before tomorrow's class. Let me know if you face difficulties.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="mailModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow" style="border-radius: 14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Compose Message</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form onsubmit="event.preventDefault(); alert('Message sent successfully!'); bootstrap.Modal.getInstance(document.getElementById('mailModal')).hide();">
+                <div class="modal-body py-3">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Recipient Email/Username</label>
+                        <input type="text" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Subject</label>
+                        <input type="text" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Message</label>
+                        <textarea class="form-control" rows="4" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn text-white rounded-pill px-4" style="background-color: var(--primary-blue); border: none;">Send Message</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

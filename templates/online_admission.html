@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+{% load i18n static %}
+<html lang="{{ request.LANGUAGE_CODE }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Admission - EduManage ERP</title>
+    
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3262a8">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="{% static 'vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css';">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="{% static 'vendor/bootstrap-icons/bootstrap-icons.css' %}" onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css';">
+
+    <style>
+        :root {
+            --primary-blue: #3262a8;
+            --secondary-purple: #7532a8;
+            --bg-canvas: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-dark: #212529;
+        }
+
+        body {
+            background-color: var(--bg-canvas);
+            color: var(--text-dark);
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+        }
+
+        .custom-card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        /* Print Layout Styling */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #printArea, #printArea * {
+                visibility: visible;
+            }
+            #printArea {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                background-color: white !important;
+                color: black !important;
+                padding: 30px;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+
+        .dashed-upload {
+            border: 2px dashed rgba(117, 50, 168, 0.3);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            background-color: rgba(117, 50, 168, 0.02);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .dashed-upload:hover {
+            background-color: rgba(117, 50, 168, 0.05);
+            border-color: var(--secondary-purple);
+        }
+    </style>
+</head>
+<body>
+
+<div class="container py-4">
+    
+    <!-- Header -->
+    <div class="mb-4 text-center no-print">
+        <h2 class="fw-bold mb-2" style="color: var(--primary-blue);">EduManage International School</h2>
+        <h4 class="text-secondary">Online Admission Portal</h4>
+        <p class="text-muted">Please fill in the form below to submit your application.</p>
+    </div>
+
+    <!-- Success Message Container -->
+    <div id="successAlert" class="alert alert-success d-none no-print border-0 shadow-sm mb-4" role="alert" style="border-left: 5px solid #28a745 !important;">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="alert-heading fw-bold mb-1"><i class="bi bi-check-circle-fill me-2"></i>Admission Form Submitted Successfully!</h5>
+                <span>You can now click the <strong>Print Admission Receipt</strong> button below to print the official application.</span>
+            </div>
+            <button class="btn btn-success btn-sm rounded-pill px-3" onclick="triggerPrint()"><i class="bi bi-printer-fill me-2"></i>Print Admission Receipt</button>
+        </div>
+    </div>
+
+    <div class="row g-4 no-print justify-content-center">
+        <!-- Admission Form -->
+        <div class="col-lg-10">
+            <div class="card custom-card p-4">
+                <h4 class="fw-bold mb-4" style="color: var(--primary-blue);">Student Admission Form</h4>
+                <!-- Wizard Progress Indicator -->
+                <ul class="nav nav-pills mb-4 gap-2 bg-light p-2 rounded" id="stWizardSteps" style="font-size: 0.8rem;">
+                    <li class="nav-item flex-grow-1 text-center">
+                        <button class="nav-link active w-100 fw-semibold" id="st-step1-btn" disabled>1. Personal</button>
+                    </li>
+                    <li class="nav-item flex-grow-1 text-center">
+                        <button class="nav-link w-100 fw-semibold" id="st-step2-btn" disabled>2. Academic</button>
+                    </li>
+                    <li class="nav-item flex-grow-1 text-center">
+                        <button class="nav-link w-100 fw-semibold" id="st-step3-btn" disabled>3. Guardian</button>
+                    </li>
+                    <li class="nav-item flex-grow-1 text-center">
+                        <button class="nav-link w-100 fw-semibold" id="st-step4-btn" disabled>4. Address</button>
+                    </li>
+                    <li class="nav-item flex-grow-1 text-center">
+                        <button class="nav-link w-100 fw-semibold" id="st-step5-btn" disabled>5. Documents</button>
+                    </li>
+                </ul>
+
+                <form id="admissionForm" onsubmit="handleAdmissionSubmit(event)">
+                    
+                    <!-- STEP 1: Personal Details -->
+                    <div class="st-wizard-step" id="st-step-1">
+                        <h5 class="fw-bold mb-3 text-secondary border-start border-3 border-purple ps-2">1. Personal Details</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">First Name</label>
+                                <input type="text" class="form-control" id="stFirstName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Last Name</label>
+                                <input type="text" class="form-control" id="stLastName" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Date of Birth</label>
+                                <input type="date" class="form-control" id="stDOB" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Gender</label>
+                                <select class="form-select" id="stGender" required>
+                                    <option value="" disabled selected>Select Gender</option>
+                                    <option>Male</option>
+                                    <option>Female</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Blood Group</label>
+                                <select class="form-select" id="stBlood">
+                                    <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+                                    <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Religion</label>
+                                <input type="text" class="form-control" id="stReligion" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Student Photo</label>
+                                <div class="dashed-upload" onclick="document.getElementById('stPhotoFile').click()">
+                                    <img id="stPhotoPreview" class="d-none rounded-circle mb-2" style="width: 80px; height: 80px; object-fit: cover; margin: 0 auto;">
+                                    <div id="stUploadPrompt">
+                                        <i class="bi bi-cloud-arrow-up fs-2 text-muted"></i>
+                                        <span class="d-block mt-2 small text-muted">Drag & Drop profile picture, or click to upload</span>
+                                    </div>
+                                    <input type="file" id="stPhotoFile" class="d-none" onchange="previewStPhoto(event)">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn text-white px-4" style="background-color: var(--primary-blue);" onclick="goToStStep(2)">Next Step <i class="bi bi-arrow-right ms-1"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 2: Academic Details -->
+                    <div class="st-wizard-step d-none" id="st-step-2">
+                        <h5 class="fw-bold mb-3 text-secondary border-start border-3 border-purple ps-2">2. Academic Details</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Target Class</label>
+                                <select class="form-select" id="stClassInput" required>
+                                    <option value="" disabled selected>Select Class</option>
+                                    <option>Class 9</option>
+                                    <option>Class 10</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Previous School Attended</label>
+                                <input type="text" class="form-control" id="stPrevSchool">
+                            </div>
+                            <div class="col-md-4 d-none">
+                                <label class="form-label fw-semibold">Student ID / Roll No</label>
+                                <input type="text" class="form-control" id="stRollInput" placeholder="Auto-generated if blank">
+                            </div>
+                            <div class="col-md-4 d-none">
+                                <label class="form-label fw-semibold">Admission Number</label>
+                                <input type="text" class="form-control" id="stAdmissionNum" placeholder="e.g., ADM-2026-081" >
+                            </div>
+                            <div class="col-md-4 d-none">
+                                <label class="form-label fw-semibold">Date of Admission</label>
+                                <input type="date" class="form-control" id="stAdmissionDate" >
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Group / Stream</label>
+                                <select class="form-select" id="stGroup">
+                                    <option>General</option>
+                                    <option>Science</option>
+                                    <option>Arts</option>
+                                    <option>Commerce</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-light px-4" onclick="goToStStep(1)"><i class="bi bi-arrow-left me-1"></i> Back</button>
+                            <button type="button" class="btn text-white px-4" style="background-color: var(--primary-blue);" onclick="goToStStep(3)">Next Step <i class="bi bi-arrow-right ms-1"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 3: Guardian & Family Information -->
+                    <div class="st-wizard-step d-none" id="st-step-3">
+                        <h5 class="fw-bold mb-3 text-secondary border-start border-3 border-purple ps-2">3. Guardian & Family Information</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Father's Full Name</label>
+                                <input type="text" class="form-control" id="stFatherName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Father's Contact Phone</label>
+                                <input type="tel" class="form-control" id="stFatherPhone" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Mother's Full Name</label>
+                                <input type="text" class="form-control" id="stMotherName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Mother's Contact Phone</label>
+                                <input type="tel" class="form-control" id="stMotherPhone">
+                            </div>
+                            <hr class="mt-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Emergency Contact Number</label>
+                                <input type="tel" class="form-control" id="stEmergencyPhone" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Parent Username / Email</label>
+                                <input type="email" class="form-control" id="stParentEmail" placeholder="Parent Email" required>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-light px-4" onclick="goToStStep(2)"><i class="bi bi-arrow-left me-1"></i> Back</button>
+                            <button type="button" class="btn text-white px-4" style="background-color: var(--primary-blue);" onclick="goToStStep(4)">Next Step <i class="bi bi-arrow-right ms-1"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 4: Contact Address -->
+                    <div class="st-wizard-step d-none" id="st-step-4">
+                        <h5 class="fw-bold mb-3 text-secondary border-start border-3 border-purple ps-2">4. Contact Address</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Present Address</label>
+                                <textarea class="form-control" rows="3" id="stPresentAddr" required></textarea>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <label class="form-label fw-semibold mb-0">Permanent Address</label>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="stSameAddressCheck" onclick="copyStAddress()">
+                                        <label class="form-check-label small" for="stSameAddressCheck">Same as Present</label>
+                                    </div>
+                                </div>
+                                <textarea class="form-control" rows="3" id="stPermAddr" required></textarea>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-light px-4" onclick="goToStStep(3)"><i class="bi bi-arrow-left me-1"></i> Back</button>
+                            <button type="button" class="btn text-white px-4" style="background-color: var(--primary-blue);" onclick="goToStStep(5)">Next Step <i class="bi bi-arrow-right ms-1"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- STEP 5: Legal Documents -->
+                    <div class="st-wizard-step d-none" id="st-step-5">
+                        <h5 class="fw-bold mb-3 text-secondary border-start border-3 border-purple ps-2">5. Legal Documents</h5>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Birth Certificate Copy</label>
+                                <input type="file" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Previous Report Transcript</label>
+                                <input type="file" class="form-control">
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-light px-4" onclick="goToStStep(4)"><i class="bi bi-arrow-left me-1"></i> Back</button>
+                            <button type="submit" class="btn text-white px-5" style="background-color: var(--secondary-purple); border: none;">SUBMIT ADMISSION APPLICATION</button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- HIDDEN PRINT AREA (Rendered Dynamically on submit) -->
+    <div id="printArea" class="d-none bg-white p-5 border shadow-sm" style="max-width: 800px; margin: 0 auto; border-radius: 12px;">
+        <div class="text-center mb-4 pb-3 border-bottom">
+            <h2 class="fw-bold mb-1" style="color: #3262a8;">EDUMANAGE INTERNATIONAL SCHOOL</h2>
+            <p class="text-muted mb-0">123 Academy Lane, Tech Suite 101 | Phone: +1 555-019-923</p>
+            <h4 class="fw-bold mt-3 text-uppercase text-decoration-underline text-secondary">Online Admission Application Receipt</h4>
+        </div>
+
+        <div class="row g-3 mb-4">
+            <div class="col-6"><strong>Application ID:</strong> <span id="printAppID">EMIS-2026-0043</span></div>
+            <div class="col-6 text-end"><strong>Date Filed:</strong> <span id="printDate">July 19, 2026</span></div>
+        </div>
+
+        <h5 class="fw-bold mb-2 pb-1 border-bottom" style="color: #7532a8;">1. Student Information</h5>
+        <div class="row g-2 mb-3 small">
+            <div class="col-6"><strong>Student Full Name:</strong> <span id="printName">John Doe</span></div>
+            <div class="col-6"><strong>Date of Birth:</strong> <span id="printDOB">N/A</span></div>
+            <div class="col-6"><strong>Gender:</strong> <span id="printGender">N/A</span></div>
+            <div class="col-6"><strong>Blood Group:</strong> <span id="printBlood">N/A</span></div>
+            <div class="col-6"><strong>Target Class:</strong> <span id="printClass">N/A</span></div>
+            <div class="col-6"><strong>Religion:</strong> <span id="printReligion">N/A</span></div>
+        </div>
+
+        <h5 class="fw-bold mb-2 pb-1 border-bottom" style="color: #7532a8;">2. Parent & Address Details</h5>
+        <div class="row g-2 mb-4 small">
+            <div class="col-6"><strong>Father's Name:</strong> <span id="printFather">N/A</span></div>
+            <div class="col-6"><strong>Father's Contact:</strong> <span id="printFatherPhone">N/A</span></div>
+            <div class="col-6"><strong>Mother's Name:</strong> <span id="printMother">N/A</span></div>
+            <div class="col-6"><strong>Mother's Contact:</strong> <span id="printMotherPhone">N/A</span></div>
+            <div class="col-12"><strong>Contact Address:</strong> <span id="printAddress">N/A</span></div>
+        </div>
+
+        <div class="row mt-5 pt-4">
+            <div class="col-6 text-center">
+                <div class="border-top mx-auto" style="width: 150px; margin-top: 50px;"></div>
+                <small class="text-muted">Guardian's Signature</small>
+            </div>
+            <div class="col-6 text-center">
+                <div class="border-top mx-auto" style="width: 150px; margin-top: 50px;"></div>
+                <small class="text-muted">Admissions Officer Signature</small>
+            </div>
+        </div>
+
+        <div class="text-center mt-5 no-print">
+            <button class="btn btn-primary" onclick="triggerPrint()"><i class="bi bi-printer me-2"></i>Print Letter</button>
+            <button class="btn btn-secondary" onclick="resetForm()"><i class="bi bi-arrow-left me-2"></i>Back to Form</button>
+        </div>
+    </div>
+
+</div>
+
+<!-- Bootstrap 5 JS Bundle -->
+<script src="{% static 'vendor/bootstrap/js/bootstrap.bundle.min.js' %}" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js';"></script>
+
+<!-- PWA Service Worker Registration -->
+<script>
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').then((registration) => {
+                console.log('ServiceWorker registration successful');
+            }).catch((err) => {
+                console.log('ServiceWorker registration failed: ', err);
+            });
+        });
+    }
+</script>
+
+<script>
+    function handleAdmissionSubmit(event) {
+        event.preventDefault();
+        
+        // Extract Form Data
+        const first = document.getElementById('stFirstName').value;
+        const last = document.getElementById('stLastName').value;
+        const dob = document.getElementById('stDOB').value;
+        const gender = document.getElementById('stGender').value;
+        const blood = document.getElementById('stBlood').value;
+        const religion = document.getElementById('stReligion').value;
+        const cls = document.getElementById('stClassInput').value;
+        const prevSchool = document.getElementById('stPrevSchool').value;
+        const father = document.getElementById('stFatherName').value;
+        const fatherPhone = document.getElementById('stFatherPhone').value;
+        const mother = document.getElementById('stMotherName').value;
+        const motherPhone = document.getElementById('stMotherPhone').value;
+        const address = document.getElementById('stPresentAddr').value;
+
+        // Populate Print Area
+        document.getElementById('printName').innerText = first + ' ' + last;
+        document.getElementById('printDOB').innerText = dob;
+        document.getElementById('printGender').innerText = gender;
+        document.getElementById('printBlood').innerText = blood;
+        document.getElementById('printClass').innerText = cls;
+        document.getElementById('printReligion').innerText = religion;
+        document.getElementById('printFather').innerText = father;
+        document.getElementById('printFatherPhone').innerText = fatherPhone;
+        document.getElementById('printMother').innerText = mother;
+        document.getElementById('printMotherPhone').innerText = motherPhone;
+        document.getElementById('printAddress').innerText = address;
+
+        // Generate Random Application ID and Date
+        const randId = 'EMIS-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
+        document.getElementById('printAppID').innerText = randId;
+        document.getElementById('printDate').innerText = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        // Show print layout & success banner
+        document.getElementById('successAlert').classList.remove('d-none');
+        document.getElementById('printArea').classList.remove('d-none');
+        
+        // Scroll to success banner
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function triggerPrint() {
+        window.print();
+    }
+
+    function resetForm() {
+        document.getElementById('admissionForm').reset();
+        document.getElementById('successAlert').classList.add('d-none');
+        document.getElementById('printArea').classList.add('d-none');
+        goToStStep(1);
+    }
+
+    // Student Multi-Step Form Navigation
+    window.goToStStep = function(step) {
+        document.querySelectorAll('.st-wizard-step').forEach(el => el.classList.add('d-none'));
+        document.getElementById('st-step-' + step).classList.remove('d-none');
+
+        document.querySelectorAll('#stWizardSteps .nav-link').forEach((btn, idx) => {
+            if (idx + 1 === step) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+
+    window.previewStPhoto = function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('stPhotoPreview');
+                const prompt = document.getElementById('stUploadPrompt');
+                preview.src = e.target.result;
+                preview.classList.remove('d-none');
+                prompt.classList.add('d-none');
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    window.copyStAddress = function() {
+        const check = document.getElementById('stSameAddressCheck');
+        if (check.checked) {
+            document.getElementById('stPermAddr').value = document.getElementById('stPresentAddr').value;
+        } else {
+            document.getElementById('stPermAddr').value = '';
+        }
+    }
+</script>
+</body>
+</html>

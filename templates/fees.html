@@ -1,0 +1,174 @@
+{% extends 'base.html' %}
+
+{% block title %}Fees Management - EduManage ERP{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="mb-4 d-flex justify-content-between align-items-center">
+        <div>
+            <h2 class="fw-bold mb-1" style="color: var(--primary-blue);">Fees & Invoices</h2>
+            <p class="text-muted">Generate invoices, trace student fee accounts, and review invoice payment statuses.</p>
+        </div>
+        <button class="btn text-white rounded-pill px-4" style="background-color: var(--secondary-purple); border: none;" data-bs-toggle="modal" data-bs-target="#invoiceModal">
+            <i class="bi bi-plus-lg me-2"></i>Generate Invoice
+        </button>
+    </div>
+
+    <!-- Table -->
+    <div class="card custom-card p-4">
+        <h5 class="fw-bold mb-3">Invoices Register</h5>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Invoice ID</th>
+                        <th>Student Name</th>
+                        <th>Class</th>
+                        <th>Fee Category</th>
+                        <th>Due Date</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="invoiceTableBody">
+                    <!-- Dynamic -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="invoiceModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow" style="border-radius: 14px;">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Generate Fee Invoice</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="invoiceForm" onsubmit="saveInvoice(event)">
+                <div class="modal-body py-3">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Student Name</label>
+                        <select class="form-select" id="invStudent" required></select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Fee Type</label>
+                        <select class="form-select" id="invType" required>
+                            <option>Tuition Fee</option>
+                            <option>Exam Fee</option>
+                            <option>Library Fee</option>
+                            <option>Transport Fee</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Due Date</label>
+                        <input type="date" class="form-control" id="invDue" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Amount ($)</label>
+                        <input type="number" class="form-control" id="invAmount" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn text-white rounded-pill px-4" style="background-color: var(--primary-blue); border: none;">Issue Invoice</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const defaultInvoices = [
+        { id: "INV-9201", name: "David Vance", cls: "Class 8", type: "Tuition Fee", due: "2026-08-01", amount: 150, status: "Paid" },
+        { id: "INV-9202", name: "Emily Rose", cls: "Class 7", type: "Tuition Fee", due: "2026-08-01", amount: 150, status: "Partial" },
+        { id: "INV-9203", name: "Alex Wright", cls: "Class 6", type: "Exam Fee", due: "2026-07-25", amount: 80, status: "Overdue" }
+    ];
+
+    function getInvoices() {
+        const stored = localStorage.getItem('school_invoices');
+        if (!stored) {
+            localStorage.setItem('school_invoices', JSON.stringify(defaultInvoices));
+            return defaultInvoices;
+        }
+        return JSON.parse(stored);
+    }
+
+    function renderInvoices() {
+        const invoices = getInvoices();
+        const tbody = document.getElementById('invoiceTableBody');
+        tbody.innerHTML = '';
+
+        invoices.forEach(inv => {
+            let badgeClass = "bg-success";
+            if (inv.status === 'Partial') badgeClass = "bg-warning text-dark";
+            if (inv.status === 'Overdue') badgeClass = "bg-danger";
+
+            tbody.insertAdjacentHTML('beforeend', `
+                <tr>
+                    <td class="fw-bold">${inv.id}</td>
+                    <td class="fw-semibold">${inv.name}</td>
+                    <td>${inv.cls}</td>
+                    <td>${inv.type}</td>
+                    <td>${inv.due}</td>
+                    <td class="fw-bold">$${inv.amount}</td>
+                    <td><span class="badge ${badgeClass} rounded-pill px-2.5">${inv.status}</span></td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="markPaid('${inv.id}')" ${inv.status==='Paid'?'disabled':''}><i class="bi bi-check-circle"></i> Mark Paid</button>
+                    </td>
+                </tr>
+            `);
+        });
+    }
+
+    function loadStudents() {
+        const stored = localStorage.getItem('school_students');
+        const students = stored ? JSON.parse(stored) : [];
+        const select = document.getElementById('invStudent');
+        select.innerHTML = '';
+        students.forEach(st => {
+            select.insertAdjacentHTML('beforeend', `<option value="${st.name}|${st.cls}">${st.name} (${st.cls})</option>`);
+        });
+    }
+
+    function saveInvoice(event) {
+        event.preventDefault();
+        const stData = document.getElementById('invStudent').value.split('|');
+        const name = stData[0];
+        const cls = stData[1];
+        const type = document.getElementById('invType').value;
+        const due = document.getElementById('invDue').value;
+        const amount = document.getElementById('invAmount').value;
+
+        const invoices = getInvoices();
+        invoices.push({
+            id: 'INV-' + Math.floor(1000 + Math.random() * 9000),
+            name, cls, type, due, amount: parseFloat(amount), status: 'Overdue'
+        });
+        localStorage.setItem('school_invoices', JSON.stringify(invoices));
+        
+        bootstrap.Modal.getInstance(document.getElementById('invoiceModal')).hide();
+        document.getElementById('invoiceForm').reset();
+        renderInvoices();
+    }
+
+    function markPaid(id) {
+        let invoices = getInvoices();
+        invoices = invoices.map(inv => {
+            if (inv.id === id) inv.status = 'Paid';
+            return inv;
+        });
+        localStorage.setItem('school_invoices', JSON.stringify(invoices));
+        renderInvoices();
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        renderInvoices();
+        loadStudents();
+    });
+</script>
+{% endblock %}

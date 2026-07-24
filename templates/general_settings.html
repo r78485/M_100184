@@ -1,0 +1,1270 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{% trans "General Settings — EduManage ERP" %}{% endblock %}
+
+{% block extra_css %}
+<style>
+/* =========================================================
+   GENERAL SETTINGS — PREMIUM DESIGN SYSTEM
+   ========================================================= */
+.gs-header {
+    background: linear-gradient(135deg, #0f2444 0%, #1a4080 50%, #0f2444 100%);
+    border-radius: 20px;
+    padding: 28px 32px;
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+}
+.gs-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
+    pointer-events: none;
+}
+.gs-header h2 { color: #fff; font-weight: 800; font-size: 1.6rem; margin: 0; }
+.gs-header p { color: rgba(255,255,255,0.65); margin: 6px 0 0; font-size: 0.9rem; }
+.gs-header .gs-icon-badge {
+    width: 56px; height: 56px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; color: #fff;
+    backdrop-filter: blur(8px);
+}
+.gs-sidebar-nav {
+    background: var(--card-bg);
+    border-radius: 18px;
+    padding: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    border: 1px solid rgba(0,0,0,0.06);
+    position: sticky;
+    top: 90px;
+}
+.gs-sidebar-nav .nav-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #94a3b8;
+    padding: 8px 12px 4px;
+}
+.gs-nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 11px 14px;
+    border: none;
+    background: transparent;
+    border-radius: 12px;
+    text-align: left;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #475569;
+    transition: all 0.22s ease;
+    cursor: pointer;
+}
+.gs-nav-btn:hover { background: rgba(50,98,168,0.08); color: var(--primary-blue); }
+.gs-nav-btn.active {
+    background: linear-gradient(135deg, var(--primary-blue), #1e5fd4);
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(50,98,168,0.35);
+}
+.gs-nav-btn .nav-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.95rem;
+    background: rgba(50,98,168,0.1);
+    color: var(--primary-blue);
+    flex-shrink: 0;
+    transition: all 0.22s;
+}
+.gs-nav-btn.active .nav-icon { background: rgba(255,255,255,0.2); color: #fff; }
+.gs-nav-btn .nav-arrow { margin-left: auto; font-size: 0.75rem; opacity: 0; transition: opacity 0.2s; }
+.gs-nav-btn.active .nav-arrow { opacity: 1; }
+.gs-nav-divider { height: 1px; background: rgba(0,0,0,0.06); margin: 8px 0; }
+
+.gs-pane { display: none; }
+.gs-pane.active { display: block; animation: fadeSlideIn 0.3s ease; }
+@keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateX(12px); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+.gs-card {
+    background: var(--card-bg);
+    border-radius: 18px;
+    padding: 28px 30px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    border: 1px solid rgba(0,0,0,0.06);
+    margin-bottom: 20px;
+}
+.gs-card-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding-bottom: 18px;
+    margin-bottom: 22px;
+    border-bottom: 2px solid rgba(50,98,168,0.1);
+    flex-wrap: wrap;
+}
+.gs-card-header .ch-icon {
+    width: 46px; height: 46px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+.gs-card-header h4 { margin: 0; font-weight: 800; font-size: 1.1rem; color: var(--text-dark); }
+.gs-card-header p  { margin: 2px 0 0; font-size: 0.8rem; color: #94a3b8; }
+
+.icon-blue   { background: #eff6ff; color: #3b82f6; }
+.icon-green  { background: #f0fdf4; color: #16a34a; }
+.icon-amber  { background: #fffbeb; color: #d97706; }
+.icon-rose   { background: #fff1f2; color: #e11d48; }
+.icon-violet { background: #f5f3ff; color: #7c3aed; }
+.icon-teal   { background: #f0fdfa; color: #0d9488; }
+.icon-slate  { background: #f8fafc; color: #475569; }
+
+.gs-form .form-label { font-weight: 600; font-size: 0.83rem; color: #374151; margin-bottom: 5px; }
+.gs-form .form-control,
+.gs-form .form-select {
+    border-radius: 10px;
+    border: 1.5px solid #e2e8f0;
+    padding: 9px 13px;
+    font-size: 0.875rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.gs-form .form-control:focus,
+.gs-form .form-select:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(50,98,168,0.12);
+}
+
+.logo-drop-zone {
+    border: 2.5px dashed #cbd5e1;
+    border-radius: 16px;
+    padding: 24px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s;
+    background: #f8fafc;
+}
+.logo-drop-zone:hover, .logo-drop-zone.drag-over {
+    border-color: var(--primary-blue);
+    background: #eff6ff;
+}
+.logo-drop-zone img { max-height: 100px; max-width: 100px; object-fit: contain; }
+
+.btn-gs-primary {
+    background: linear-gradient(135deg, var(--primary-blue), #1e5fd4);
+    color: #fff; border: none; border-radius: 10px;
+    padding: 10px 28px; font-weight: 700; font-size: 0.875rem;
+    transition: all 0.22s; box-shadow: 0 3px 12px rgba(50,98,168,0.3);
+    cursor: pointer;
+}
+.btn-gs-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(50,98,168,0.4); color: #fff; }
+.btn-gs-outline {
+    border: 1.5px solid var(--primary-blue); color: var(--primary-blue);
+    border-radius: 10px; padding: 7px 18px; font-weight: 600;
+    font-size: 0.83rem; background: transparent; transition: all 0.2s; cursor: pointer;
+}
+.btn-gs-outline:hover { background: var(--primary-blue); color: #fff; }
+.btn-gs-danger-sm {
+    border: 1.5px solid #fca5a5; color: #dc2626; border-radius: 8px;
+    padding: 4px 10px; font-size: 0.8rem; background: #fff1f2; transition: all 0.2s; cursor: pointer;
+}
+.btn-gs-danger-sm:hover { background: #dc2626; color: #fff; border-color: #dc2626; }
+
+.gs-table { width: 100%; border-collapse: separate; border-spacing: 0; }
+.gs-table thead th {
+    background: #f8fafc; padding: 11px 14px;
+    font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.05em; color: #64748b; border-bottom: 2px solid #e2e8f0;
+}
+.gs-table tbody tr { transition: background 0.18s; }
+.gs-table tbody tr:hover td { background: #f8fafc; }
+.gs-table tbody td {
+    padding: 11px 14px; font-size: 0.875rem;
+    color: var(--text-dark); border-bottom: 1px solid #f1f5f9; vertical-align: middle;
+}
+
+.disc-card {
+    background: var(--card-bg); border: 1.5px solid #e2e8f0;
+    border-radius: 16px; padding: 20px; position: relative;
+    overflow: hidden; transition: all 0.25s;
+}
+.disc-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+.disc-card.pct::before { background: linear-gradient(90deg, #3b82f6, #6366f1); }
+.disc-card.fix::before { background: linear-gradient(90deg, #16a34a, #0d9488); }
+.disc-card:hover { border-color: #3b82f6; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+.disc-badge { font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; }
+.disc-value { font-size: 2rem; font-weight: 900; line-height: 1; margin: 10px 0 4px; }
+.disc-name  { font-size: 0.85rem; font-weight: 700; color: var(--text-dark); }
+
+.grade-row-aplus td { background: rgba(22,163,74,0.06) !important; }
+.grade-row-a     td { background: rgba(34,197,94,0.05) !important; }
+.grade-row-aminus td { background: rgba(59,130,246,0.06) !important; }
+.grade-row-b     td { background: rgba(234,179,8,0.06) !important; }
+.grade-row-f     td { background: rgba(239,68,68,0.06) !important; }
+.grade-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; border-radius: 10px;
+    font-weight: 900; font-size: 0.95rem;
+}
+
+.theme-thumb {
+    border: 2.5px solid transparent; border-radius: 14px; padding: 14px 12px;
+    cursor: pointer; text-align: center; transition: all 0.25s;
+    background: var(--card-bg); box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+}
+.theme-thumb:hover   { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
+.theme-thumb.selected { border-color: var(--primary-blue); box-shadow: 0 0 0 3px rgba(50,98,168,0.18); }
+.swatch { display: flex; gap: 6px; justify-content: center; margin-bottom: 8px; }
+.swatch span { width: 24px; height: 24px; border-radius: 6px; }
+.theme-thumb small { font-size: 0.75rem; font-weight: 700; color: #475569; }
+
+.gw-card {
+    border: 1.5px solid #e2e8f0; border-radius: 14px; padding: 16px 18px;
+    display: flex; align-items: center; gap: 14px; transition: all 0.22s;
+}
+.gw-card:hover { border-color: #3b82f6; background: #f0f9ff; }
+.gw-logo { font-size: 1.6rem; }
+
+.rules-tab-nav {
+    display: flex; gap: 8px; background: #f1f5f9;
+    border-radius: 12px; padding: 5px; margin-bottom: 22px;
+}
+.rules-tab-btn {
+    flex: 1; padding: 9px 14px; border: none; border-radius: 9px;
+    font-size: 0.83rem; font-weight: 600; color: #64748b;
+    background: transparent; cursor: pointer; transition: all 0.2s;
+}
+.rules-tab-btn.active { background: #fff; color: var(--primary-blue); box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+
+.security-card {
+    background: linear-gradient(135deg, #0f172a, #1e3a5f);
+    border-radius: 16px; padding: 22px 24px; color: #fff; margin-bottom: 18px;
+}
+.security-card h6 { color: rgba(255,255,255,0.75); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.sw-row { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+.sw-row .form-check-input { width: 2.4em; height: 1.3em; cursor: pointer; background-color: #334155; border-color: #475569; }
+.sw-row .form-check-input:checked { background-color: #22c55e; border-color: #22c55e; }
+
+.gs-toast {
+    position: fixed; bottom: 30px; right: 30px; z-index: 9999;
+    background: #0f2444; color: #fff; padding: 14px 22px; border-radius: 14px;
+    font-weight: 600; font-size: 0.875rem; box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+    display: flex; align-items: center; gap: 10px;
+    transform: translateY(80px); opacity: 0;
+    transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    border-left: 4px solid #22c55e; pointer-events: none;
+}
+.gs-toast.show { transform: translateY(0); opacity: 1; pointer-events: auto; }
+.gs-toast i { font-size: 1.2rem; color: #22c55e; }
+
+.gs-modal .modal-content { border-radius: 20px; border: none; box-shadow: 0 20px 60px rgba(0,0,0,0.2); }
+.gs-modal .modal-header {
+    background: linear-gradient(135deg, var(--primary-blue), #1e5fd4);
+    border-radius: 20px 20px 0 0; padding: 18px 24px;
+}
+.gs-modal .modal-title { color: #fff; font-weight: 800; }
+.gs-modal .btn-close { filter: invert(1); }
+.gs-modal .modal-body { padding: 24px; }
+.gs-modal .modal-footer { padding: 14px 24px; border-top: 1px solid #f1f5f9; }
+
+.struct-row {
+    display: grid; grid-template-columns: 1fr 160px 40px;
+    gap: 10px; align-items: center;
+    background: #f8fafc; border-radius: 10px; padding: 10px 12px;
+    margin-bottom: 8px; border: 1px solid #e2e8f0; transition: border-color 0.2s;
+}
+.struct-row:hover { border-color: #3b82f6; }
+
+body.dark-theme .gs-card, body.dark-theme .gs-sidebar-nav { border-color: rgba(255,255,255,0.08); }
+body.dark-theme .gs-table thead th { background: #1e293b; }
+body.dark-theme .gs-table tbody tr:hover td { background: rgba(255,255,255,0.04); }
+body.dark-theme .gs-table tbody td { border-color: rgba(255,255,255,0.06); }
+body.dark-theme .logo-drop-zone { background: #1e293b; border-color: #334155; }
+body.dark-theme .logo-drop-zone:hover { background: #1e3a5f; }
+body.dark-theme .rules-tab-nav { background: #1e293b; }
+body.dark-theme .rules-tab-btn.active { background: #0f172a; }
+body.dark-theme .struct-row { background: #1e293b; border-color: #334155; }
+body.dark-theme .disc-card, body.dark-theme .gw-card { border-color: #334155; }
+body.dark-theme .gw-card:hover { background: #1e293b; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div id="gsToast" class="gs-toast"><i class="bi bi-check-circle-fill"></i><span id="gsToastMsg"></span></div>
+
+<div class="gs-header no-print">
+    <div class="d-flex align-items-center gap-3">
+        <div class="gs-icon-badge"><i class="bi bi-gear-wide-connected"></i></div>
+        <div>
+            <h2>General Settings</h2>
+            <p>Configure school branding, financial rules, grading policies, and administrator security.</p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 no-print">
+
+    <!-- ── Vertical Sub-Nav ── -->
+    <div class="col-xl-3 col-lg-4">
+        <div class="gs-sidebar-nav">
+            <div class="nav-label">{% trans "Core Setup" %}</div>
+            <button class="gs-nav-btn active" onclick="switchPane('profile',this)">
+                <span class="nav-icon"><i class="bi bi-building"></i></span> {% trans "Institute Profile" %}
+                <i class="bi bi-chevron-right nav-arrow"></i>
+            </button>
+            <button class="gs-nav-btn" onclick="switchPane('fees-part',this)">
+                <span class="nav-icon"><i class="bi bi-journal-text"></i></span> {% trans "Fees Particulars" %}
+                <i class="bi bi-chevron-right nav-arrow"></i>
+            </button>
+            <button class="gs-nav-btn" onclick="switchPane('fees-struct',this)">
+                <span class="nav-icon"><i class="bi bi-calculator"></i></span> {% trans "Fees Structure" %}
+                <i class="bi bi-chevron-right nav-arrow"></i>
+            </button>
+            <div class="gs-nav-divider"></div>
+            <div class="nav-label">{% trans "Financial" %}</div>
+            <button class="gs-nav-btn" onclick="switchPane('discount',this)">
+                <span class="nav-icon"><i class="bi bi-percent"></i></span> {% trans "Discount Types" %}
+                <i class="bi bi-chevron-right nav-arrow"></i>
+            </button>
+            <button class="gs-nav-btn" onclick="switchPane('accounts',this)">
+                <span class="nav-icon"><i class="bi bi-wallet2"></i></span> {% trans "Invoice Accounts" %}
+                <i class="bi bi-chevron-right nav-arrow"></i>
+            </button>
+            <div class="gs-nav-divider"></div>
+            <div class="nav-label">{% trans "Academic" %}</div>
+            <button class="gs-nav-btn" onclick="switchPane('rules',this)">
+                <span class="nav-icon"><i class="bi bi-shield-check"></i></span> {% trans "Rules & Policies" %}
+                <i class="bi bi-chevron-right nav-arrow"></i>
+            </button>
+            <button class="gs-nav-btn" onclick="switchPane('grading',this)">
+                <span class="nav-icon"><i class="bi bi-trophy"></i></span> {% trans "Marks Grading" %}
+                <i class="bi bi-chevron-right nav-arrow"></i>
+            </button>
+            <div class="gs-nav-divider"></div>
+            <div class="nav-label">{% trans "Preferences" %}</div>
+            <button class="gs-nav-btn" onclick="switchPane('theme',this)">
+                <span class="nav-icon"><i class="bi bi-palette"></i></span> {% trans "Theme & Language" %}
+                <i class="bi bi-chevron-right nav-arrow"></i>
+            </button>
+            <button class="gs-nav-btn" onclick="switchPane('admin',this)">
+                <span class="nav-icon"><i class="bi bi-person-gear"></i></span> {% trans "Account Settings" %}
+                <i class="bi bi-chevron-right nav-arrow"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- ── Content Panels ── -->
+    <div class="col-xl-9 col-lg-8">
+
+        <!-- 1. Institute Profile -->
+        <div id="pane-profile" class="gs-pane active">
+            <div class="gs-card gs-form">
+                <div class="gs-card-header">
+                    <div class="ch-icon icon-blue"><i class="bi bi-building-fill"></i></div>
+                    <div>
+                        <h4>{% trans "Institute Profile" %}</h4>
+                        <p>{% trans "School identity — prints on all official documents and certificates" %}</p>
+                    </div>
+                </div>
+                <div class="row g-4">
+                    <div class="col-lg-4">
+                        <label class="form-label">{% trans "School Monogram / Logo" %}</label>
+                        <div class="logo-drop-zone" id="logoDropZone" onclick="document.getElementById('logoFile').click()" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleLogoDrop(event)">
+                            <img id="logoPreviewImg" src="/static/logo.png" style="max-height:100px;max-width:100px;object-fit:contain" onerror="this.style.display='none';document.getElementById('logoPlh').style.display='block'">
+                            <div id="logoPlh" style="display:none">
+                                <i class="bi bi-cloud-upload text-muted" style="font-size:2.5rem"></i>
+                                <div class="mt-2 text-muted small fw-semibold">{% trans "Drag & Drop or click to upload" %}</div>
+                            </div>
+                        </div>
+                        <input type="file" id="logoFile" accept="image/*" style="display:none" onchange="previewLogoFile(event)">
+                        <small class="text-muted d-block mt-2 text-center">{% trans "PNG with transparent bg recommended · Max 2MB" %}</small>
+
+                        <label class="form-label mt-4">{% trans "Principal's Digital Signature" %}</label>
+                        <div class="logo-drop-zone" onclick="document.getElementById('sigFile').click()">
+                            <img id="sigPreviewImg" style="max-height:60px;display:none">
+                            <div id="sigPlh">
+                                <i class="bi bi-pen text-muted" style="font-size:1.8rem"></i>
+                                <div class="mt-1 text-muted small fw-semibold">{% trans "Upload Signature Scan" %}</div>
+                            </div>
+                        </div>
+                        <input type="file" id="sigFile" accept="image/*" style="display:none" onchange="previewSigFile(event)">
+
+                        <label class="form-label mt-4">{% trans "Institutional Round Seal" %}</label>
+                        <div class="logo-drop-zone" onclick="document.getElementById('sealFile').click()">
+                            <img id="sealPreviewImg" style="max-height:80px;display:none">
+                            <div id="sealPlh">
+                                <i class="bi bi-patch-check text-muted" style="font-size:1.8rem"></i>
+                                <div class="mt-1 text-muted small fw-semibold">{% trans "Upload Round Seal" %}</div>
+                            </div>
+                        </div>
+                        <input type="file" id="sealFile" accept="image/*" style="display:none" onchange="previewSealFile(event)">
+                    </div>
+                    <div class="col-lg-8">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">{% trans "School Name (English)" %}</label>
+                                <input type="text" class="form-control" id="instNameEn" value="Gazi Mahmud Junior High School">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{% trans "School Name (Bengali)" %}</label>
+                                <input type="text" class="form-control" id="instNameBn" value="গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{% trans "School Short Name / Abbreviation" %}</label>
+                                <input type="text" class="form-control" id="instShortName" value="Gazi Mahmud JHS" placeholder="e.g. Gazi Mahmud JHS">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{% trans "EIIN Code" %}</label>
+                                <input type="text" class="form-control" id="instEiin" value="100184">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{% trans "Established Year" %}</label>
+                                <input type="number" class="form-control" id="instYear" value="1983">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{% trans "Currency" %}</label>
+                                <select class="form-select" id="instCurrency">
+                                    <option selected>BDT (৳)</option>
+                                    <option>USD ($)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{% trans "Primary Phone" %}</label>
+                                <input type="tel" class="form-control" id="instPhone" value="01309100184">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{% trans "Official Email" %}</label>
+                                <input type="email" class="form-control" id="instEmail" value="school100184@gmail.com">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{% trans "Website URL" %}</label>
+                                <input type="url" class="form-control" id="instWeb" value="https://gazimahmudschool.edu.bd">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">{% trans "District" %}</label>
+                                <input type="text" class="form-control" id="instDist" value="Barguna Sadar, Barguna">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label">{% trans "Full Address" %}</label>
+                                <textarea class="form-control" id="instAddress" rows="2">Barguna Sadar, Barguna, Bangladesh.</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr class="my-4">
+                <button class="btn-gs-primary btn" onclick="saveInstituteProfile()"><i class="bi bi-cloud-check me-2"></i>{% trans "Save Profile" %}</button>
+            </div>
+        </div>
+
+        <!-- 2. Fees Particulars -->
+        <div id="pane-fees-part" class="gs-pane">
+            <div class="gs-card">
+                <div class="gs-card-header">
+                    <div class="ch-icon icon-green"><i class="bi bi-journal-text"></i></div>
+                    <div>
+                        <h4>{% trans "Fees Particulars (Ledger)" %}</h4>
+                        <p>{% trans "Define all fee categories collected from students" %}</p>
+                    </div>
+                    <button class="btn-gs-outline btn ms-auto" onclick="openModal('addParticularModal')"><i class="bi bi-plus-circle me-1"></i> {% trans "Add Ledger" %}</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="gs-table">
+                        <thead>
+                            <tr>
+                                <th>#</th><th>{% trans "Fee Code" %}</th><th>{% trans "Particular Name" %}</th><th>{% trans "Description" %}</th><th>{% trans "Status" %}</th><th>{% trans "Action" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody id="feesPartTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Fees Structure -->
+        <div id="pane-fees-struct" class="gs-pane">
+            <div class="gs-card gs-form">
+                <div class="gs-card-header">
+                    <div class="ch-icon icon-amber"><i class="bi bi-calculator-fill"></i></div>
+                    <div>
+                        <h4>{% trans "Fees Structure Mapping" %}</h4>
+                        <p>{% trans "Build class-wise fee packages with dynamic particulars" %}</p>
+                    </div>
+                </div>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-5">
+                        <label class="form-label">{% trans "Structure Name" %}</label>
+                        <input type="text" class="form-control" id="structName" placeholder="{% trans 'e.g., Class 6 Annual Fees 2026' %}">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">{% trans "Class" %}</label>
+                        <select class="form-select" id="structClass">
+                            <option>Class 6</option><option>Class 7</option><option>Class 8</option>
+                            <option>Class 9</option><option>Class 10</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">{% trans "Section" %}</label>
+                        <select class="form-select"><option>{% trans "All" %}</option><option>A</option><option>B</option></select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">{% trans "Due Day" %}</label>
+                        <div class="input-group">
+                            <input type="number" class="form-control" id="structDue" value="10" min="1" max="28">
+                            <span class="input-group-text">{% trans "th" %}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h6 class="fw-bold mb-0 text-secondary">{% trans "Particular → Amount Mapping" %}</h6>
+                    <button class="btn-gs-outline btn btn-sm" onclick="addStructRow()"><i class="bi bi-plus me-1"></i>{% trans "Add Row" %}</button>
+                </div>
+                <div id="structRowContainer"></div>
+                <div class="d-flex align-items-center gap-4 mt-4 p-3 rounded-3" style="background:#f8fafc;border:1px solid #e2e8f0">
+                    <strong class="text-dark">{% trans "Total Package:" %}</strong>
+                    <span class="fw-black fs-5 text-success">৳ <span id="structTotal">0.00</span></span>
+                </div>
+                <hr class="my-4">
+                <button class="btn-gs-primary btn" onclick="saveStructure()"><i class="bi bi-save me-2"></i>{% trans "Save Fee Structure" %}</button>
+                <div class="mt-4" id="structSavedList"></div>
+            </div>
+        </div>
+
+        <!-- 4. Discount Type -->
+        <div id="pane-discount" class="gs-pane">
+            <div class="gs-card">
+                <div class="gs-card-header">
+                    <div class="ch-icon icon-rose"><i class="bi bi-percent"></i></div>
+                    <div>
+                        <h4>{% trans "Discount & Waiver Types" %}</h4>
+                        <p>{% trans "Configure scholarships, aid, and concession categories" %}</p>
+                    </div>
+                    <button class="btn-gs-outline btn ms-auto" onclick="openModal('addDiscountModal')"><i class="bi bi-plus-circle me-1"></i> {% trans "Add Discount" %}</button>
+                </div>
+                <div class="row g-3" id="discountGrid"></div>
+            </div>
+        </div>
+
+        <!-- 5. Invoice Accounts -->
+        <div id="pane-accounts" class="gs-pane">
+            <div class="gs-card gs-form">
+                <div class="gs-card-header">
+                    <div class="ch-icon icon-violet"><i class="bi bi-wallet2"></i></div>
+                    <div>
+                        <h4>{% trans "Fees Invoice Accounts" %}</h4>
+                        <p>{% trans "Configure invoice numbering, gateways, and bank routing" %}</p>
+                    </div>
+                </div>
+                <div class="row g-3 mb-5">
+                    <div class="col-md-5">
+                        <label class="form-label">{% trans "Invoice Number Prefix" %}</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-hash"></i></span>
+                            <input type="text" class="form-control" value="INV-2026-">
+                        </div>
+                        <small class="text-muted">{% trans "Preview:" %} <strong>INV-2026-00001</strong></small>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{% trans "Starting Number" %}</label>
+                        <input type="number" class="form-control" value="1">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">{% trans "Auto-Increment" %}</label>
+                        <div class="form-check form-switch mt-2">
+                            <input class="form-check-input" type="checkbox" checked>
+                            <label class="form-check-label fw-semibold">{% trans "Enabled" %}</label>
+                        </div>
+                    </div>
+                </div>
+                <h6 class="fw-bold mb-3 text-dark">{% trans "Online Payment Gateways" %}</h6>
+                <div class="row g-3 mb-5">
+                    <div class="col-md-4">
+                        <div class="gw-card">
+                            <span class="gw-logo">📱</span>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold text-dark small">bKash Merchant</div>
+                                <div class="text-muted" style="font-size:.75rem">01309100184</div>
+                            </div>
+                            <div class="form-check form-switch mb-0"><input class="form-check-input" type="checkbox" checked></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="gw-card">
+                            <span class="gw-logo">💳</span>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold text-dark small">Nagad API</div>
+                                <div class="text-muted" style="font-size:.75rem">{% trans "Merchant Integration" %}</div>
+                            </div>
+                            <div class="form-check form-switch mb-0"><input class="form-check-input" type="checkbox" checked></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="gw-card">
+                            <span class="gw-logo">🏦</span>
+                            <div class="flex-grow-1">
+                                <div class="fw-bold text-dark small">SSLCommerz</div>
+                                <div class="text-muted" style="font-size:.75rem">{% trans "Sandbox / Live" %}</div>
+                            </div>
+                            <div class="form-check form-switch mb-0"><input class="form-check-input" type="checkbox"></div>
+                        </div>
+                    </div>
+                </div>
+                <h6 class="fw-bold mb-3 text-dark">{% trans "Bank Account Routing" %}</h6>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label">{% trans "Cash Counter Ledger" %}</label>
+                        <input type="text" class="form-control" value="Cash Vault — Counter 1">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">{% trans "Primary Bank Account" %}</label>
+                        <input type="text" class="form-control" value="Sonali Bank, Barguna Sadar (A/C: 1049-3012)">
+                    </div>
+                </div>
+                <hr class="my-4">
+                <button class="btn-gs-primary btn" onclick="showToast('{% trans 'Invoice Accounts saved!' %}')"><i class="bi bi-save me-2"></i>{% trans "Save Configuration" %}</button>
+            </div>
+        </div>
+
+        <!-- 6. Rules & Regulations -->
+        <div id="pane-rules" class="gs-pane">
+            <div class="gs-card">
+                <div class="gs-card-header">
+                    <div class="ch-icon icon-teal"><i class="bi bi-shield-check"></i></div>
+                    <div>
+                        <h4>{% trans "Rules & Regulation Policies" %}</h4>
+                        <p>{% trans "Attendance logic, late-fee penalties, and pass/fail global criteria" %}</p>
+                    </div>
+                </div>
+                <div class="rules-tab-nav">
+                    <button class="rules-tab-btn active" onclick="switchRulesTab('att',this)"><i class="bi bi-calendar-check me-1"></i> {% trans "Attendance" %}</button>
+                    <button class="rules-tab-btn" onclick="switchRulesTab('late',this)"><i class="bi bi-clock-history me-1"></i> {% trans "Late Fee" %}</button>
+                    <button class="rules-tab-btn" onclick="switchRulesTab('pass',this)"><i class="bi bi-check2-circle me-1"></i> {% trans "Pass / Fail" %}</button>
+                </div>
+                <div id="rulesPane-att" class="gs-form">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">{% trans "Late Entry Cut-off" %}</label>
+                            <input type="time" class="form-control" value="08:15">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{% trans "Lates = 1 Absent" %}</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" value="3" min="1" max="10">
+                                <span class="input-group-text">{% trans "entries" %}</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{% trans "Min. Monthly Attendance" %}</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" value="75">
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="rulesPane-late" class="gs-form" style="display:none">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">{% trans "Monthly Due Day" %}</label>
+                            <input type="number" class="form-control" value="10" min="1" max="28">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{% trans "Grace Period (days)" %}</label>
+                            <input type="number" class="form-control" value="5" min="0">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{% trans "Daily Fine Rate (৳)" %}</label>
+                            <input type="number" class="form-control" value="10" min="0">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{% trans "Max Fine Cap / Month (৳)" %}</label>
+                            <input type="number" class="form-control" value="200">
+                        </div>
+                    </div>
+                </div>
+                <div id="rulesPane-pass" class="gs-form" style="display:none">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">{% trans "Min. Passing Mark (%)" %}</label>
+                            <input type="number" class="form-control" value="33" min="0" max="100">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{% trans "Practical Pass Mark (%)" %}</label>
+                            <input type="number" class="form-control" value="40">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">{% trans "Pass Criteria" %}</label>
+                            <select class="form-select">
+                                <option selected>{% trans "Cumulative (Overall)" %}</option>
+                                <option>{% trans "Separate per Subject" %}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <hr class="my-4">
+                <button class="btn-gs-primary btn" onclick="showToast('{% trans 'Rules & Policies saved!' %}')"><i class="bi bi-save me-2"></i>{% trans "Save Rules" %}</button>
+            </div>
+        </div>
+
+        <!-- 7. Marks Grading -->
+        <div id="pane-grading" class="gs-pane">
+            <div class="gs-card">
+                <div class="gs-card-header">
+                    <div class="ch-icon icon-amber"><i class="bi bi-trophy-fill"></i></div>
+                    <div>
+                        <h4>{% trans "Marks Grading System" %}</h4>
+                        <p>{% trans "GPA / Letter grade ranges with colour-coded classification" %}</p>
+                    </div>
+                    <button class="btn-gs-outline btn ms-auto" onclick="openModal('addGradeModal')"><i class="bi bi-plus-circle me-1"></i> {% trans "Add Grade" %}</button>
+                </div>
+                <div class="table-responsive">
+                    <table class="gs-table">
+                        <thead>
+                            <tr>
+                                <th>{% trans "Grade" %}</th><th>{% trans "Mark Range (%)" %}</th><th>{% trans "GPA Point" %}</th><th>{% trans "Remarks" %}</th><th>{% trans "Action" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody id="gradeTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- 8. Theme & Language -->
+        <div id="pane-theme" class="gs-pane">
+            <div class="gs-card gs-form">
+                <div class="gs-card-header">
+                    <div class="ch-icon icon-violet"><i class="bi bi-palette-fill"></i></div>
+                    <div>
+                        <h4>{% trans "Theme & Language Preferences" %}</h4>
+                        <p>{% trans "Personalise the interface look, colours, and system language" %}</p>
+                    </div>
+                </div>
+
+                <h6 class="fw-bold mb-3 text-dark">{% trans "Appearance Mode" %}</h6>
+                <div class="row g-3 mb-5">
+                    <div class="col-4">
+                        <div class="theme-thumb selected" id="modeLight" onclick="setMode('light')">
+                            <div style="background:#f8fafc;border-radius:8px;height:50px;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;margin-bottom:8px"><i class="bi bi-sun fs-4 text-warning"></i></div>
+                            <small>{% trans "Light Mode" %}</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="theme-thumb" id="modeDark" onclick="setMode('dark')">
+                            <div style="background:#0f172a;border-radius:8px;height:50px;border:1px solid #334155;display:flex;align-items:center;justify-content:center;margin-bottom:8px"><i class="bi bi-moon-stars fs-4" style="color:#93c5fd"></i></div>
+                            <small>{% trans "Dark Mode" %}</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="theme-thumb" id="modeSystem" onclick="setMode('system')">
+                            <div style="background:linear-gradient(90deg,#f8fafc 50%,#0f172a 50%);border-radius:8px;height:50px;margin-bottom:8px"></div>
+                            <small>{% trans "System Default" %}</small>
+                        </div>
+                    </div>
+                </div>
+
+                <h6 class="fw-bold mb-3 text-dark">{% trans "Primary Brand Colour" %}</h6>
+                <div class="row g-3 mb-5">
+                    <div class="col-3"><div class="theme-thumb selected" id="themeNavy" onclick="applyTheme('navy','#3262a8','#7532a8','Navy')"><div class="swatch"><span style="background:#3262a8"></span><span style="background:#7532a8"></span></div><small>{% trans "Navy & Purple" %}</small></div></div>
+                    <div class="col-3"><div class="theme-thumb" id="themeTeal" onclick="applyTheme('teal','#0d9488','#065f46','Teal')"><div class="swatch"><span style="background:#0d9488"></span><span style="background:#065f46"></span></div><small>{% trans "Teal & Emerald" %}</small></div></div>
+                    <div class="col-3"><div class="theme-thumb" id="themeRoyal" onclick="applyTheme('royal','#1e3a8a','#2563eb','Royal Blue')"><div class="swatch"><span style="background:#1e3a8a"></span><span style="background:#2563eb"></span></div><small>{% trans "Royal Blue" %}</small></div></div>
+                    <div class="col-3"><div class="theme-thumb" id="themeRose" onclick="applyTheme('rose','#be123c','#e11d48','Crimson')"><div class="swatch"><span style="background:#be123c"></span><span style="background:#e11d48"></span></div><small>{% trans "Crimson Red" %}</small></div></div>
+                </div>
+
+                <h6 class="fw-bold mb-3 text-dark">{% trans "Interface Language" %}</h6>
+                <div class="col-md-4 mb-4">
+                    <form action="{% url 'set_language' %}" method="post" id="langForm">
+                        {% csrf_token %}
+                        <input name="next" type="hidden" value="{{ request.get_full_path }}">
+                        <select name="language" class="form-select" onchange="document.getElementById('langForm').submit();">
+                            {% get_current_language as LANGUAGE_CODE %}
+                            {% get_available_languages as LANGUAGES %}
+                            {% for lang in LANGUAGES %}
+                                <option value="{{ lang.0 }}" {% if lang.0 == LANGUAGE_CODE %}selected{% endif %}>
+                                    {{ lang.1 }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </form>
+                </div>
+                <button class="btn-gs-primary btn" onclick="showToast('{% trans 'Theme preferences saved!' %}')"><i class="bi bi-palette me-2"></i>{% trans "Save Preferences" %}</button>
+            </div>
+        </div>
+
+        <!-- 9. Account Settings -->
+        <div id="pane-admin" class="gs-pane">
+            <div class="gs-card gs-form mb-4">
+                <div class="gs-card-header">
+                    <div class="ch-icon icon-slate"><i class="bi bi-person-circle"></i></div>
+                    <div><h4>{% trans "Admin Profile" %}</h4><p>{% trans "Update your personal login details" %}</p></div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">{% trans "Username" %}</label>
+                        <input type="text" class="form-control" value="{{ request.user.username }}" readonly style="background:#f8fafc">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{% trans "Display Name" %}</label>
+                        <input type="text" class="form-control" value="{{ request.user.get_full_name }}">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{% trans "Contact Email" %}</label>
+                        <input type="email" class="form-control" value="{{ request.user.email }}">
+                    </div>
+                </div>
+                <hr class="my-4">
+                <button class="btn-gs-primary btn" onclick="showToast('{% trans 'Profile updated!' %}')"><i class="bi bi-person-check me-2"></i>{% trans "Update Profile" %}</button>
+            </div>
+
+            <div class="gs-card gs-form mb-4">
+                <div class="gs-card-header">
+                    <div class="ch-icon icon-rose"><i class="bi bi-key-fill"></i></div>
+                    <div><h4>{% trans "Change Password" %}</h4><p>{% trans "Use a strong, unique password" %}</p></div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">{% trans "Current Password" %}</label>
+                        <input type="password" class="form-control" placeholder="••••••••">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{% trans "New Password" %}</label>
+                        <input type="password" class="form-control" id="newPwdInput" placeholder="••••••••" oninput="checkPwdStrength()">
+                        <div id="pwdStrengthBar" style="height:4px;border-radius:4px;margin-top:8px;transition:all 0.3s;background:#e2e8f0;width:0%"></div>
+                        <small id="pwdStrengthLabel" class="text-muted">{% trans "Enter new password" %}</small>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">{% trans "Confirm Password" %}</label>
+                        <input type="password" class="form-control" placeholder="••••••••">
+                    </div>
+                </div>
+                <hr class="my-4">
+                <button class="btn-gs-primary btn" onclick="showToast('{% trans 'Password changed!' %}')"><i class="bi bi-shield-lock me-2"></i>{% trans "Change Password" %}</button>
+            </div>
+
+            <div class="security-card mb-4">
+                <h6>{% trans "Security & Authentication" %}</h6>
+                <div class="sw-row">
+                    <div>
+                        <div class="fw-bold">{% trans "Two-Factor Authentication (2FA)" %}</div>
+                        <div style="font-size:.8rem;color:rgba(255,255,255,.6)">{% trans "Google Authenticator / OTP verification" %}</div>
+                    </div>
+                    <div class="form-check form-switch mb-0"><input class="form-check-input" type="checkbox" id="mfaToggle"></div>
+                </div>
+                <div class="sw-row mt-3">
+                    <div>
+                        <div class="fw-bold">{% trans "Login Activity Logging" %}</div>
+                        <div style="font-size:.8rem;color:rgba(255,255,255,.6)">{% trans "Log all admin logins with timestamps" %}</div>
+                    </div>
+                    <div class="form-check form-switch mb-0"><input class="form-check-input" type="checkbox" checked></div>
+                </div>
+            </div>
+
+            <div class="gs-card gs-form mb-4">
+                <div class="gs-card-header">
+                    <div class="ch-icon icon-emerald"><i class="bi bi-cloud-arrow-up-fill"></i></div>
+                    <div><h4>{% trans "System Backup" %}</h4><p>{% trans "Backup your entire system locally or to Google Drive" %}</p></div>
+                </div>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <p class="text-muted mb-0">{% trans "You can either download a complete zip backup to your PC or upload it directly to your configured Google Drive account." %}</p>
+                    </div>
+                </div>
+                <hr class="my-4">
+                <div class="d-flex gap-3">
+                    <a href="{% url 'download_full_backup' %}" class="btn btn-outline-primary"><i class="bi bi-download me-2"></i>{% trans "Download to PC" %}</a>
+                    <form action="{% url 'trigger_backup' %}" method="post" class="mb-0">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-gs-primary btn"><i class="bi bi-cloud-arrow-up me-2"></i>{% trans "Run Cloud Backup Now" %}</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /col -->
+</div><!-- /row -->
+
+
+<!-- ══ MODALS ══ -->
+<div class="modal fade gs-modal" id="addParticularModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-journal-plus me-2"></i>Add Fee Ledger</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body gs-form">
+                <div class="mb-3"><label class="form-label">Particular Name</label><input type="text" class="form-control" id="newPartName" placeholder="e.g., Tuition Fee"></div>
+                <div class="mb-3"><label class="form-label">Fee Code</label><input type="text" class="form-control" id="newPartCode" placeholder="e.g., TF-01"></div>
+                <div class="mb-3"><label class="form-label">Description</label><textarea class="form-control" rows="2" id="newPartDesc" placeholder="Brief description..."></textarea></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn-gs-primary btn" onclick="saveNewParticular()">Save Ledger</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade gs-modal" id="addDiscountModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-percent me-2"></i>Add Discount Waiver</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body gs-form">
+                <div class="mb-3"><label class="form-label">Discount Name</label><input type="text" class="form-control" id="newDiscName" placeholder="e.g., Merit Scholarship"></div>
+                <div class="mb-3"><label class="form-label">Type</label><select class="form-select" id="newDiscType"><option>Percentage (%)</option><option>Fixed Amount (BDT)</option></select></div>
+                <div class="mb-3"><label class="form-label">Value</label><input type="number" class="form-control" id="newDiscValue" placeholder="e.g., 50"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn-gs-primary btn" onclick="saveNewDiscount()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade gs-modal" id="addGradeModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-trophy me-2"></i>Add Grade Rule</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body gs-form">
+                <div class="row g-3">
+                    <div class="col-6"><label class="form-label">Grade Label</label><input type="text" class="form-control" id="newGradeName" placeholder="e.g., A+"></div>
+                    <div class="col-6"><label class="form-label">GPA Point</label><input type="number" class="form-control" id="newGradeGPA" step="0.01" placeholder="5.00"></div>
+                    <div class="col-6"><label class="form-label">Min Mark (%)</label><input type="number" class="form-control" id="newGradeMin" placeholder="80"></div>
+                    <div class="col-6"><label class="form-label">Max Mark (%)</label><input type="number" class="form-control" id="newGradeMax" placeholder="100"></div>
+                    <div class="col-12"><label class="form-label">Remarks</label><input type="text" class="form-control" id="newGradeRemarks" placeholder="Outstanding"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn-gs-primary btn" onclick="saveNewGrade()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/* ======================================================
+   GENERAL SETTINGS JS ENGINE
+   ====================================================== */
+function ls(k,d){ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }
+function lsSet(k,v){ localStorage.setItem(k,JSON.stringify(v)); }
+function openModal(id){ new bootstrap.Modal(document.getElementById(id)).show(); }
+function closeModal(id){ const el=document.getElementById(id); const m=bootstrap.Modal.getInstance(el); if(m) m.hide(); }
+
+let toastTmr;
+window.showToast = function(msg){
+    const t=document.getElementById('gsToast');
+    document.getElementById('gsToastMsg').textContent=msg;
+    t.classList.add('show');
+    clearTimeout(toastTmr);
+    toastTmr=setTimeout(()=>t.classList.remove('show'),3200);
+};
+
+window.switchPane = function(id,btn){
+    document.querySelectorAll('.gs-pane').forEach(p=>p.classList.remove('active'));
+    document.querySelectorAll('.gs-nav-btn').forEach(b=>b.classList.remove('active'));
+    document.getElementById('pane-'+id).classList.add('active');
+    btn.classList.add('active');
+};
+
+window.previewLogoFile = function(e){
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader(); r.onload=ev=>{ document.getElementById('logoPreviewImg').src=ev.target.result; }; r.readAsDataURL(f);
+};
+window.handleLogoDrop = function(e){
+    e.preventDefault(); document.getElementById('logoDropZone').classList.remove('drag-over');
+    const f=e.dataTransfer.files[0]; if(!f) return;
+    const r=new FileReader(); r.onload=ev=>{ document.getElementById('logoPreviewImg').src=ev.target.result; }; r.readAsDataURL(f);
+};
+window.previewSigFile = function(e){
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader(); r.onload=ev=>{
+        const img=document.getElementById('sigPreviewImg');
+        img.src=ev.target.result; img.style.display='block';
+        document.getElementById('sigPlh').style.display='none';
+    }; r.readAsDataURL(f);
+};
+window.previewSealFile = function(e){
+    const f=e.target.files[0]; if(!f) return;
+    const r=new FileReader(); r.onload=ev=>{
+        const img=document.getElementById('sealPreviewImg');
+        img.src=ev.target.result; img.style.display='block';
+        document.getElementById('sealPlh').style.display='none';
+    }; r.readAsDataURL(f);
+};
+
+window.saveInstituteProfile = function() {
+    const profile = {
+        nameEn: document.getElementById('instNameEn').value,
+        nameBn: document.getElementById('instNameBn').value,
+        shortName: document.getElementById('instShortName') ? document.getElementById('instShortName').value : '',
+        eiin: document.getElementById('instEiin').value,
+        address: document.getElementById('instAddress').value,
+        logoSrc: document.getElementById('logoPreviewImg').src || '',
+        sigSrc: document.getElementById('sigPreviewImg').src || '',
+        sealSrc: document.getElementById('sealPreviewImg').src || ''
+    };
+    lsSet('gs_institute_profile', profile);
+    if (typeof updateSidebarBrand === 'function') {
+        updateSidebarBrand(profile);
+    }
+    showToast('Institute Profile saved!');
+};
+
+function loadInstituteProfile() {
+    const profile = ls('gs_institute_profile', null);
+    if(profile) {
+        document.getElementById('instNameEn').value = profile.nameEn || '';
+        document.getElementById('instNameBn').value = profile.nameBn || '';
+        if(document.getElementById('instShortName')) {
+            document.getElementById('instShortName').value = profile.shortName || 'Gazi Mahmud JHS';
+        }
+        document.getElementById('instEiin').value = profile.eiin || '';
+        document.getElementById('instAddress').value = profile.address || '';
+        if(profile.logoSrc && profile.logoSrc.startsWith('data:')) {
+            document.getElementById('logoPreviewImg').src = profile.logoSrc;
+            document.getElementById('logoPreviewImg').style.display = 'block';
+            document.getElementById('logoPlh').style.display = 'none';
+        }
+        if(profile.sigSrc && profile.sigSrc.startsWith('data:')) {
+            document.getElementById('sigPreviewImg').src = profile.sigSrc;
+            document.getElementById('sigPreviewImg').style.display = 'block';
+            document.getElementById('sigPlh').style.display = 'none';
+        }
+        if(profile.sealSrc && profile.sealSrc.startsWith('data:')) {
+            document.getElementById('sealPreviewImg').src = profile.sealSrc;
+            document.getElementById('sealPreviewImg').style.display = 'block';
+            document.getElementById('sealPlh').style.display = 'none';
+        }
+    }
+}
+
+/* ---- Fees Particulars ---- */
+const DEF_PARTS=[
+    {code:'TF-01',name:'Tuition Fee',desc:'Monthly class tuition',active:true},
+    {code:'SF-02',name:'Session Fee',desc:'Annual syllabus & admission',active:true},
+    {code:'EF-03',name:'Exam Fee',desc:'Term evaluation',active:true},
+    {code:'LB-04',name:'Library Fee',desc:'Annual library usage',active:true},
+];
+function renderParticulars(){
+    const parts=ls('gs_particulars',DEF_PARTS);
+    document.getElementById('feesPartTableBody').innerHTML=parts.map((p,i)=>`
+        <tr>
+            <td class="text-muted fw-semibold">${i+1}</td>
+            <td><code class="bg-light px-2 py-1 rounded">${p.code}</code></td>
+            <td class="fw-semibold">${p.name}</td>
+            <td class="text-muted" style="font-size:.83rem">${p.desc}</td>
+            <td><div class="form-check form-switch mb-0"><input class="form-check-input" type="checkbox" ${p.active?'checked':''} onchange="togglePart(${i})"></div></td>
+            <td><button class="btn-gs-danger-sm btn" onclick="deletePart(${i})"><i class="bi bi-trash"></i></button></td>
+        </tr>`).join('');
+}
+window.saveNewParticular=function(){
+    const parts=ls('gs_particulars',DEF_PARTS);
+    const name=document.getElementById('newPartName').value.trim();
+    const code=document.getElementById('newPartCode').value.trim();
+    const desc=document.getElementById('newPartDesc').value.trim();
+    if(!name||!code){alert('Fill Name & Code.');return;}
+    parts.push({code,name,desc,active:true}); lsSet('gs_particulars',parts);
+    closeModal('addParticularModal');
+    ['newPartName','newPartCode','newPartDesc'].forEach(id=>document.getElementById(id).value='');
+    renderParticulars(); showToast(`Ledger "${name}" added!`);
+};
+window.togglePart=function(i){const p=ls('gs_particulars',DEF_PARTS);p[i].active=!p[i].active;lsSet('gs_particulars',p);};
+window.deletePart=function(i){
+    const p=ls('gs_particulars',DEF_PARTS);
+    if(!confirm(`Delete "${p[i].name}"?`))return;
+    p.splice(i,1); lsSet('gs_particulars',p); renderParticulars();
+};
+
+/* ---- Fees Structure ---- */
+let srId=0;
+window.addStructRow=function(partName='',amount=''){
+    const parts=ls('gs_particulars',DEF_PARTS).filter(p=>p.active);
+    const opts=parts.map(p=>`<option ${p.name===partName?'selected':''}>${p.name}</option>`).join('');
+    const id=srId++;
+    document.getElementById('structRowContainer').insertAdjacentHTML('beforeend',`
+        <div class="struct-row" id="sr-${id}">
+            <select class="form-select form-select-sm struct-select">${opts}</select>
+            <input type="number" class="form-control form-control-sm struct-amount" placeholder="Amount ৳" value="${amount}" oninput="recalcTotal()">
+            <button class="btn-gs-danger-sm btn" onclick="document.getElementById('sr-${id}').remove();recalcTotal()"><i class="bi bi-x"></i></button>
+        </div>`);
+    recalcTotal();
+};
+function recalcTotal(){
+    const total=[...document.querySelectorAll('.struct-amount')].reduce((a,el)=>a+(parseFloat(el.value)||0),0);
+    document.getElementById('structTotal').textContent=total.toFixed(2);
+}
+window.saveStructure=function(){
+    const name=document.getElementById('structName').value.trim();
+    if(!name){alert('Enter a structure name.');return;}
+    const rows=[...document.querySelectorAll('.struct-row')].map(r=>({
+        particular:r.querySelector('.struct-select').value,
+        amount:parseFloat(r.querySelector('.struct-amount').value)||0
+    }));
+    const total=rows.reduce((a,b)=>a+b.amount,0);
+    const cls=document.getElementById('structClass').value;
+    const s=ls('gs_structures',[]); s.push({name,cls,rows,total}); lsSet('gs_structures',s);
+    renderStructureList(); showToast(`Structure "${name}" saved!`);
+};
+function renderStructureList(){
+    const s=ls('gs_structures',[]); if(!s.length){document.getElementById('structSavedList').innerHTML='';return;}
+    document.getElementById('structSavedList').innerHTML=`<h6 class="fw-bold mb-3 text-muted">Saved Structures</h6>`+
+        s.map((x,i)=>`<div class="d-flex align-items-center gap-3 bg-light p-3 rounded-3 mb-2">
+            <i class="bi bi-grid text-primary fs-5"></i>
+            <div class="flex-grow-1">
+                <div class="fw-bold text-dark">${x.name} <span class="badge bg-primary-subtle text-primary ms-1">${x.cls}</span></div>
+                <div class="text-muted" style="font-size:.8rem">${x.rows.length} particulars — Total: ৳${x.total.toFixed(2)}</div>
+            </div>
+            <button class="btn-gs-danger-sm btn" onclick="deleteStruct(${i})"><i class="bi bi-trash"></i></button>
+        </div>`).join('');
+}
+window.deleteStruct=function(i){const s=ls('gs_structures',[]);s.splice(i,1);lsSet('gs_structures',s);renderStructureList();};
+
+/* ---- Discounts ---- */
+const DEF_DISCS=[
+    {name:'Merit Scholarship',type:'Percentage (%)',value:'100'},
+    {name:'Staff Child Waiver',type:'Percentage (%)',value:'50'},
+    {name:'Freedom Fighter Ward',type:'Percentage (%)',value:'75'},
+    {name:'Poor Student Aid',type:'Fixed Amount (BDT)',value:'500'},
+];
+function renderDiscounts(){
+    const d=ls('gs_discounts',DEF_DISCS);
+    document.getElementById('discountGrid').innerHTML=d.map((x,i)=>
+        `<div class="col-md-4"><div class="disc-card ${x.type.includes('%')?'pct':'fix'}">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="disc-badge" style="background:${x.type.includes('%')?'#dbeafe':'#dcfce7'};color:${x.type.includes('%')?'#1d4ed8':'#15803d'}">
+                    ${x.type.includes('%')?'Percentage':'Fixed BDT'}</span>
+                <button class="btn-gs-danger-sm btn" onclick="deleteDiscount(${i})"><i class="bi bi-trash"></i></button>
+            </div>
+            <div class="disc-value" style="color:${x.type.includes('%')?'#1d4ed8':'#15803d'}">${x.type.includes('%')?x.value+'%':'৳'+x.value}</div>
+            <div class="disc-name">${x.name}</div>
+        </div></div>`).join('');
+}
+window.saveNewDiscount=function(){
+    const d=ls('gs_discounts',DEF_DISCS);
+    const name=document.getElementById('newDiscName').value.trim();
+    const type=document.getElementById('newDiscType').value;
+    const value=document.getElementById('newDiscValue').value.trim();
+    if(!name||!value){alert('Fill all fields.');return;}
+    d.push({name,type,value}); lsSet('gs_discounts',d);
+    closeModal('addDiscountModal');
+    ['newDiscName','newDiscValue'].forEach(id=>document.getElementById(id).value='');
+    renderDiscounts(); showToast(`Discount "${name}" added!`);
+};
+window.deleteDiscount=function(i){const d=ls('gs_discounts',DEF_DISCS);d.splice(i,1);lsSet('gs_discounts',d);renderDiscounts();};
+
+/* ---- Grading ---- */
+const DEF_GRADES=[
+    {name:'A+',min:80,max:100,gpa:5.00,remarks:'Outstanding',badge:'#16a34a',cls:'grade-row-aplus'},
+    {name:'A', min:70,max:79, gpa:4.00,remarks:'Excellent',  badge:'#22c55e',cls:'grade-row-a'},
+    {name:'A-',min:60,max:69, gpa:3.50,remarks:'Very Good',  badge:'#3b82f6',cls:'grade-row-aminus'},
+    {name:'B', min:50,max:59, gpa:3.00,remarks:'Good',       badge:'#d97706',cls:'grade-row-b'},
+    {name:'C', min:40,max:49, gpa:2.00,remarks:'Average',    badge:'#ea580c',cls:'grade-row-b'},
+    {name:'D', min:33,max:39, gpa:1.00,remarks:'Below Avg',  badge:'#dc2626',cls:'grade-row-b'},
+    {name:'F', min:0, max:32, gpa:0.00,remarks:'Fail',       badge:'#dc2626',cls:'grade-row-f'},
+];
+function renderGrades(){
+    const g=ls('gs_grades',DEF_GRADES);
+    document.getElementById('gradeTableBody').innerHTML=g.map((x,i)=>
+        `<tr class="${x.cls}">
+            <td><span class="grade-badge" style="background:${x.badge}20;color:${x.badge};border:2px solid ${x.badge}40">${x.name}</span></td>
+            <td class="fw-semibold">${x.min}% – ${x.max}%</td>
+            <td><span class="fw-black fs-6" style="color:${x.badge}">${x.gpa.toFixed(2)}</span></td>
+            <td class="text-muted" style="font-size:.83rem">${x.remarks}</td>
+            <td><button class="btn-gs-danger-sm btn" onclick="deleteGrade(${i})"><i class="bi bi-trash"></i></button></td>
+        </tr>`).join('');
+}
+window.saveNewGrade=function(){
+    const g=ls('gs_grades',DEF_GRADES);
+    const name=document.getElementById('newGradeName').value.trim();
+    const gpa=parseFloat(document.getElementById('newGradeGPA').value);
+    const min=parseInt(document.getElementById('newGradeMin').value);
+    const max=parseInt(document.getElementById('newGradeMax').value);
+    const remarks=document.getElementById('newGradeRemarks').value.trim()||'Passed';
+    if(!name){alert('Enter grade label.');return;}
+    const badge=gpa>=4?'#16a34a':(gpa>0?'#d97706':'#dc2626');
+    const cls  =gpa>=4?'grade-row-aplus':(gpa>0?'grade-row-b':'grade-row-f');
+    g.push({name,min,max,gpa,remarks,badge,cls}); lsSet('gs_grades',g);
+    closeModal('addGradeModal');
+    ['newGradeName','newGradeGPA','newGradeMin','newGradeMax','newGradeRemarks'].forEach(id=>document.getElementById(id).value='');
+    renderGrades(); showToast(`Grade "${name}" added!`);
+};
+window.deleteGrade=function(i){const g=ls('gs_grades',DEF_GRADES);g.splice(i,1);lsSet('gs_grades',g);renderGrades();};
+
+/* ---- Rules Tabs ---- */
+window.switchRulesTab=function(id,btn){
+    ['att','late','pass'].forEach(k=>document.getElementById('rulesPane-'+k).style.display='none');
+    document.querySelectorAll('.rules-tab-btn').forEach(b=>b.classList.remove('active'));
+    document.getElementById('rulesPane-'+id).style.display='block';
+    btn.classList.add('active');
+};
+
+/* ---- Theme ---- */
+window.setMode = function(mode) {
+    ['modeLight','modeDark','modeSystem'].forEach(id=>document.getElementById(id).classList.remove('selected'));
+    document.getElementById('mode'+mode[0].toUpperCase()+mode.slice(1)).classList.add('selected');
+    if(mode==='dark'){document.body.classList.add('dark-theme');lsSet('settings_darkmode',true);}
+    else{document.body.classList.remove('dark-theme');lsSet('settings_darkmode',false);}
+    showToast('Appearance set to '+mode+'!');
+};
+window.applyTheme=function(id,primary,secondary,label){
+    document.querySelectorAll('.theme-thumb[id^="theme"]').forEach(el=>el.classList.remove('selected'));
+    document.getElementById('theme'+id[0].toUpperCase()+id.slice(1)).classList.add('selected');
+    document.documentElement.style.setProperty('--primary-blue',primary);
+    document.documentElement.style.setProperty('--secondary-purple',secondary);
+    showToast(`"${label}" theme applied!`);
+};
+
+/* ---- Password Strength ---- */
+window.checkPwdStrength=function(){
+    const val=document.getElementById('newPwdInput').value;
+    let score=0;
+    if(val.length>=8) score++;
+    if(/[A-Z]/.test(val)) score++;
+    if(/[0-9]/.test(val)) score++;
+    if(/[^A-Za-z0-9]/.test(val)) score++;
+    const colours=['#e2e8f0','#ef4444','#f97316','#eab308','#22c55e'];
+    const labels=['','Weak','Fair','Good','Strong'];
+    const widths=['0%','25%','50%','75%','100%'];
+    const bar=document.getElementById('pwdStrengthBar');
+    bar.style.background=colours[score]; bar.style.width=widths[score];
+    const lbl=document.getElementById('pwdStrengthLabel');
+    lbl.textContent=labels[score]||''; lbl.style.color=colours[score];
+};
+
+/* ---- Init ---- */
+document.addEventListener('DOMContentLoaded',function(){
+    loadInstituteProfile();
+    renderParticulars(); renderDiscounts(); renderGrades(); renderStructureList();
+    addStructRow('Tuition Fee',800); addStructRow('Session Fee',1500);
+    if(ls('settings_darkmode',false)){
+        document.body.classList.add('dark-theme');
+        document.getElementById('modeDark').classList.add('selected');
+        document.getElementById('modeLight').classList.remove('selected');
+    }
+});
+</script>
+{% endblock %}
