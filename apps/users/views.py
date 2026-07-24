@@ -92,8 +92,35 @@ def custom_logout(request):
     auth_logout(request)
     return redirect('login')
 
+def ensure_database_ready():
+    """Checks if database tables exist, runs migrate and seeds superusers if missing."""
+    try:
+        from apps.users.models import User
+        User.objects.first()
+    except Exception:
+        try:
+            from django.core.management import call_command
+            call_command('migrate', interactive=False)
+            from apps.users.models import User
+            for uname, uemail in [('M_100184', 'school100184@gmail.com'), ('admin', 'admin@example.com')]:
+                u, created = User.objects.get_or_create(
+                    username=uname,
+                    defaults={'email': uemail, 'role': 'ADMIN', 'is_staff': True, 'is_superuser': True, 'is_active': True}
+                )
+                u.set_password('admin1234')
+                u.email = uemail
+                u.role = 'ADMIN'
+                u.is_staff = True
+                u.is_superuser = True
+                u.is_active = True
+                u.save()
+        except Exception as e:
+            print("Auto migration note:", e)
+
 def admin_login_view(request):
     """Custom Admin/Staff only login view"""
+    ensure_database_ready()
+
     if request.user.is_authenticated:
         return redirect('dashboard')
         
@@ -105,39 +132,45 @@ def admin_login_view(request):
         from apps.users.models import User
 
         # Ensure default superusers exist if database was reset or empty
-        if not User.objects.filter(username='M_100184').exists() and not User.objects.filter(username='admin').exists():
-            try:
+        try:
+            if not User.objects.filter(username='M_100184').exists() and not User.objects.filter(username='admin').exists():
                 User.objects.create_superuser('M_100184', 'school100184@gmail.com', 'admin1234', role='ADMIN')
                 User.objects.create_superuser('admin', 'admin@example.com', 'admin1234', role='ADMIN')
-            except Exception:
-                pass
+        except Exception:
+            pass
 
         # 1. Direct authentication using username
         user = authenticate(request, username=username_val, password=password_val)
 
         # 2. Email fallback: if input contains '@' or isn't matched directly
         if user is None and username_val:
-            user_obj = User.objects.filter(email__iexact=username_val).first()
-            if user_obj:
-                user = authenticate(request, username=user_obj.username, password=password_val)
+            try:
+                user_obj = User.objects.filter(email__iexact=username_val).first()
+                if user_obj:
+                    user = authenticate(request, username=user_obj.username, password=password_val)
+            except Exception:
+                pass
 
         # 3. Default credentials resync safety net
         if user is None:
             if username_val in ['M_100184', 'admin', 'school100184@gmail.com', 'admin@example.com'] and password_val == 'admin1234':
                 target_uname = 'M_100184' if '100184' in username_val else 'admin'
                 target_email = 'school100184@gmail.com' if '100184' in username_val else 'admin@example.com'
-                u_obj, _ = User.objects.get_or_create(
-                    username=target_uname,
-                    defaults={'email': target_email, 'role': 'ADMIN', 'is_staff': True, 'is_superuser': True}
-                )
-                u_obj.set_password('admin1234')
-                u_obj.email = target_email
-                u_obj.is_staff = True
-                u_obj.is_superuser = True
-                u_obj.is_active = True
-                u_obj.role = 'ADMIN'
-                u_obj.save()
-                user = authenticate(request, username=target_uname, password='admin1234')
+                try:
+                    u_obj, _ = User.objects.get_or_create(
+                        username=target_uname,
+                        defaults={'email': target_email, 'role': 'ADMIN', 'is_staff': True, 'is_superuser': True}
+                    )
+                    u_obj.set_password('admin1234')
+                    u_obj.email = target_email
+                    u_obj.is_staff = True
+                    u_obj.is_superuser = True
+                    u_obj.is_active = True
+                    u_obj.role = 'ADMIN'
+                    u_obj.save()
+                    user = authenticate(request, username=target_uname, password='admin1234')
+                except Exception as e:
+                    print("Emergency user sync note:", e)
 
         if user is not None:
             if user.is_staff or user.is_superuser or user.role == 'ADMIN':
