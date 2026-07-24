@@ -253,9 +253,55 @@ def admission_slip_view(request, admission_id):
 # ====================================================================
 #  STUDENT ID CARD VIEWS
 # ====================================================================
+def _format_id_card_student(student, school_profile=None):
+    school_name = (school_profile.name_bn or school_profile.name_en) if (school_profile and (school_profile.name_bn or school_profile.name_en)) else "গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়"
+    school_address = getattr(school_profile, 'address', '') if (school_profile and getattr(school_profile, 'address', None)) else "বরগুনা সদর, বরগুনা।"
+    eiin = getattr(school_profile, 'eiin', '') if (school_profile and getattr(school_profile, 'eiin', None)) else "100184"
+    established = getattr(school_profile, 'established', '1983') or '1983'
+    school_mobile = getattr(school_profile, 'mobile', '') if (school_profile and getattr(school_profile, 'mobile', None)) else "017309100184"
+    school_email = getattr(school_profile, 'email', '') if (school_profile and getattr(school_profile, 'email', None)) else "school100184@gmail.com"
+    logo_url = school_profile.logo.url if (school_profile and hasattr(school_profile, 'logo') and school_profile.logo) else '/static/logo.png'
+
+    adm_no = student.admission_no or f"ADM-2026-{student.id:04d}"
+
+    try:
+        rv = io.BytesIO()
+        CODE128 = barcode.get_barcode_class('code128')
+        barcode_instance = CODE128(adm_no, writer=ImageWriter())
+        barcode_instance.write(rv, options={'write_text': False, 'quiet_zone': 1, 'module_height': 8.0})
+        barcode_b64 = base64.b64encode(rv.getvalue()).decode('utf-8')
+    except Exception:
+        barcode_b64 = ''
+
+    return {
+        'id': student.id,
+        'school_name': school_name,
+        'school_address': school_address,
+        'eiin': eiin,
+        'established': established,
+        'school_mobile': school_mobile,
+        'school_email': school_email,
+        'logo_url': logo_url,
+        'unique_id': adm_no,
+        'barcode_no': adm_no,
+        'barcode_b64': barcode_b64,
+        'name': student.student_name_bn or student.student_name_en or student.name or "শিক্ষার্থী",
+        'student_class': student.desired_class or "অষ্টম",
+        'section': student.section or "ক",
+        'roll': student.roll_no or "—",
+        'session': student.academic_year or "২০২৬",
+        'blood_group': student.blood_group or "O+ Positive",
+        'dob': student.dob.strftime("%d/%m/%Y") if student.dob else "১০/০৫/২০১২",
+        'photo': student.photo if (hasattr(student, 'photo') and student.photo) else None,
+        'father_name': student.father_name or "—",
+        'mother_name': student.mother_name or "—",
+        'parent_mobile': student.mobile or "—",
+    }
+
+
 @login_required
 def student_id_card_view(request, student_id):
-    """Render a single student ID card (front + back) as printable page."""
+    """Render a single student ID card (front + back) matching user design."""
     try:
         student = StudentAdmission.objects.get(id=student_id)
     except StudentAdmission.DoesNotExist:
@@ -268,25 +314,11 @@ def student_id_card_view(request, student_id):
         student.admission_no = f"ADM-2026-{student.id:04d}"
         student.save(update_fields=['admission_no'])
 
-    # Generate barcode image (Code128) as base64
-    try:
-        rv = io.BytesIO()
-        CODE128 = barcode.get_barcode_class('code128')
-        barcode_instance = CODE128(student.admission_no, writer=ImageWriter())
-        barcode_instance.write(rv, options={'write_text': False, 'quiet_zone': 1, 'module_height': 8.0})
-        barcode_b64 = base64.b64encode(rv.getvalue()).decode('utf-8')
-    except Exception:
-        barcode_b64 = ''
-
     from apps.admit_cards.models import SchoolProfile
     school_profile = SchoolProfile.objects.first()
 
-    context = {
-        'student': student,
-        'barcode_b64': barcode_b64,
-        'school_profile': school_profile,
-    }
-    return render(request, 'id_cards.html', context)
+    card_student = _format_id_card_student(student, school_profile)
+    return render(request, 'id_cards.html', {'students': [card_student]})
 
 
 @login_required
@@ -305,22 +337,9 @@ def student_id_cards_all_view(request):
         if not student.admission_no:
             student.admission_no = f"ADM-2026-{student.id:04d}"
             student.save(update_fields=['admission_no'])
-        try:
-            rv = io.BytesIO()
-            CODE128 = barcode.get_barcode_class('code128')
-            barcode_instance = CODE128(student.admission_no, writer=ImageWriter())
-            barcode_instance.write(rv, options={'write_text': False, 'quiet_zone': 1, 'module_height': 8.0})
-            bc_b64 = base64.b64encode(rv.getvalue()).decode('utf-8')
-        except Exception:
-            bc_b64 = ''
-        students_data.append({'student': student, 'barcode_b64': bc_b64})
+        students_data.append(_format_id_card_student(student, school_profile))
 
-    context = {
-        'students_data': students_data,
-        'school_profile': school_profile,
-        'selected_class': cls,
-    }
-    return render(request, 'id_cards.html', context)
+    return render(request, 'id_cards.html', {'students': students_data})
 
 
 from django.http import JsonResponse
