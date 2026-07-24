@@ -1,23 +1,24 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}NCTB Subjects - EduManage ERP{% endblock %}
+{% block title %}{% trans "NCTB Subjects (Class 6 - 8)" %} - EduManage ERP{% endblock %}
 
 {% block content %}
 <div class="container-fluid p-0">
     <div class="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
-            <h2 class="fw-bold mb-1" style="color: var(--primary-blue);">NCTB Subjects (Class 6 - 8) / জাতীয় শিক্ষাক্রম বিষয়াবলী</h2>
-            <p class="text-muted mb-0">এনসিটিবি কর্তৃক নির্ধারিত বিষয়াবলী ও বিষয় কোড পর্যবেক্ষণ, সংশোধন এবং নতুন বিষয় যুক্ত করুন।</p>
+            <h2 class="fw-bold mb-1" style="color: var(--primary-blue); font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">{% trans "NCTB Subjects (Class 6 - 8)" %}</h2>
+            <p class="text-muted mb-0">{% trans "Manage board curriculum subjects, edit course names, and assign to target grades." %}</p>
         </div>
         <div class="d-flex gap-2">
-            <button class="btn btn-outline-primary rounded-pill px-3" onclick="resetToNCTB()" title="মূল এনসিটিবি বিষয় তালিকায় রিসেট করুন">
-                <i class="bi bi-arrow-counterclockwise me-1"></i>রিসেট NCTB বিষয়
+            <button class="btn btn-outline-primary rounded-pill px-3" onclick="resetToNCTB()" title="{% trans 'Reset to default NCTB curriculum' %}">
+                <i class="bi bi-arrow-counterclockwise me-1"></i>{% trans "Reset NCTB Subjects" %}
             </button>
             <button class="btn btn-outline-secondary rounded-pill px-3" onclick="window.print()">
-                <i class="bi bi-printer me-1"></i>প্রিন্ট কারিকুলাম
+                <i class="bi bi-printer me-1"></i>{% trans "Print Curriculum" %}
             </button>
             <button class="btn text-white rounded-pill px-4" style="background-color: var(--secondary-purple); border: none;" data-bs-toggle="modal" data-bs-target="#addSubjectModal">
-                <i class="bi bi-plus-lg me-2"></i>নতুন বিষয় যুক্ত করুন
+                <i class="bi bi-plus-lg me-2"></i>{% trans "Add Custom Subject" %}
             </button>
         </div>
     </div>
@@ -29,25 +30,25 @@
     <div class="card custom-card p-4">
         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
             <div class="d-flex align-items-center gap-2">
-                <label class="fw-semibold me-1">শ্রেণী অনুযায়ী ফিল্টার:</label>
+                <label class="fw-semibold me-1">{% trans "Filter by Class:" %}</label>
                 <select class="form-select form-select-sm" id="classFilter" onchange="renderSubjects()" style="width: 140px; border-radius: 8px;">
-                    <option value="All">সব শ্রেণী (All)</option>
+                    <option value="All">{% trans "All Classes" %}</option>
                     <option value="Class 6">Class 6</option>
                     <option value="Class 7">Class 7</option>
                     <option value="Class 8">Class 8</option>
                 </select>
             </div>
-            <span class="badge bg-primary rounded-pill px-3 py-2" id="subjectCount">মোট বিষয়: 0টি</span>
+            <span class="badge bg-primary rounded-pill px-3 py-2" id="subjectCount">{% trans "Total Subjects:" %} 0</span>
         </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="table-light">
                     <tr>
-                        <th>Subject Title / বিষয়ের নাম</th>
-                        <th>Subject Code / বিষয় কোড</th>
-                        <th>Target Class / শ্রেণী</th>
-                        <th>Board Curriculum / কারিকুলাম</th>
-                        <th class="text-center" style="width: 140px;">Actions / কার্যক্রম</th>
+                        <th>{% trans "Subject Title" %}</th>
+                        <th>{% trans "Subject Code" %}</th>
+                        <th>{% trans "Target Class" %}</th>
+                        <th>{% trans "Board Curriculum" %}</th>
+                        <th class="text-center" style="width: 140px;">{% trans "Actions" %}</th>
                     </tr>
                 </thead>
                 <tbody id="subjectsTableBody">

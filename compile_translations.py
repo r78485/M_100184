@@ -7,25 +7,7 @@ os.makedirs(LOCALE_DIR, exist_ok=True)
 
 PO_FILE = os.path.join(LOCALE_DIR, 'django.po')
 
-translations = {
-    "General Settings — EduManage ERP": "সাধারণ সেটিংস — এডুম্যানেজ ইআরপি",
-    "Interface Language": "ইন্টারফেস ভাষা",
-    "Save Preferences": "সেটিংস সেভ করুন",
-    "Core Administration": "কোর এডমিনিস্ট্রেশন",
-    "Dashboard": "ড্যাশবোর্ড",
-    "General Settings": "সাধারণ সেটিংস",
-    "Academic & Students": "একাডেমিক এবং শিক্ষার্থী",
-    "Admissions": "ভর্তি",
-    "Classes & Sections": "ক্লাস ও সেকশন",
-    "Subjects": "বিষয়সমূহ",
-    "Students": "শিক্ষার্থীবৃন্দ",
-    "Employees": "কর্মচারীবৃন্দ",
-    "Financials & ERP": "অর্থনীতি ও ইআরপি",
-    "Accounts": "অ্যাকাউন্টস",
-    "Fees": "ফি",
-    "Salary": "বেতন",
-    "Online Store & POS": "অনলাইন স্টোর ও পস",
-}
+from school_management.translations import _translations as translations
 
 po_content = """msgid ""
 msgstr ""
