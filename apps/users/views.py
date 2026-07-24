@@ -211,7 +211,7 @@ def admission_slip_view(request, admission_id):
     )
     qr_img = qrcode.make(qr_data)
     qr_buffer = io.BytesIO()
-    qr_img.save(qr_buffer, format="PNG")
+    qr_img.save(qr_buffer, "PNG")
     qr_code_b64 = base64.b64encode(qr_buffer.getvalue()).decode('utf-8')
 
     # --- 2. Barcode Generation (Code128) ---
@@ -457,7 +457,7 @@ def generate_result_card(request):
         qr_img = qr.make_image(fill_color="black", back_color="white")
         
         qr_buffer = io.BytesIO()
-        qr_img.save(qr_buffer, format="PNG")
+        qr_img.save(qr_buffer, "PNG")
         qr_base64 = base64.b64encode(qr_buffer.getvalue()).decode('utf-8')
 
         # ৩. অফলাইন Barcode জেনারেশন (Code128)
@@ -734,7 +734,7 @@ def generate_registration_card(request, student_id):
     qr_data = f"Reg:{student_data['reg_no']}|Name:{student_data['name']}|EIIN:{institution_info['eiin']}"
     qr = qrcode.make(qr_data)
     qr_buffer = io.BytesIO()
-    qr.save(qr_buffer, format="PNG")
+    qr.save(qr_buffer, "PNG")
     qr_buffer.seek(0)
     qr_img = RLImage(qr_buffer, width=1.1 * inch, height=1.1 * inch)
 
