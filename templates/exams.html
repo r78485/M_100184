@@ -271,25 +271,6 @@
 }
 
 /* --- Floating Action Button --- */
-.fab-print {
-    position: fixed; bottom: 30px; right: 30px;
-    width: 56px; height: 56px;
-    background: linear-gradient(135deg, #7c3aed, #5b21b6);
-    color: #fff; border: none; border-radius: 50%;
-    box-shadow: 0 6px 20px rgba(124,58,237,0.4);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.4rem; cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-    z-index: 99;
-}
-.fab-print:hover {
-    transform: scale(1.1);
-    box-shadow: 0 8px 28px rgba(124,58,237,0.5);
-}
-@media (max-width: 991px) {
-    .fab-print { bottom: 20px; right: 20px; width: 48px; height: 48px; font-size: 1.2rem; }
-}
-
 /* --- Action Buttons --- */
 .btn-exam-primary {
     background: linear-gradient(135deg, #7c3aed, #5b21b6);
@@ -1241,11 +1222,6 @@ body.dark-theme .publish-switch { background: rgba(255,255,255,0.06); color: #94
     </div>
 </div>
 
-<!-- Floating Action Button -->
-<button type="button" class="fab-print no-print" onclick="window.print()" title="Print Current View">
-    <i class="bi bi-printer"></i>
-</button>
-
 <!-- ====== Schedule Add Modal ====== -->
 <div class="modal fade" id="scheduleModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -1427,7 +1403,9 @@ function switchTab(panelId, btn) {
     document.querySelectorAll('.ex-nav-btn').forEach(b => b.classList.remove('active'));
     const targetPanel = document.getElementById('panel-' + panelId);
     if (targetPanel) targetPanel.classList.add('active');
-    if (btn) btn.classList.add('active');
+
+    const targetBtn = btn || document.querySelector(`.ex-nav-btn[onclick*="${panelId}"]`);
+    if (targetBtn) targetBtn.classList.add('active');
 
     if (panelId === 'students-registry') {
         loadExamStudentRegistry();
@@ -1722,12 +1700,20 @@ function openResultSheetForClass(cls) {
 // ====================================================================
 function loadMarksGrid() {
     const tbody = document.getElementById('marksGridBody');
-    const examId = document.getElementById('markExamSelect').value;
-    const cls = document.getElementById('markClassSelect').value;
-    const sec = document.getElementById('markSectionSelect').value;
-    const subj = document.getElementById('markSubjectSelect').value;
+    if (!tbody) return;
+    let examId = document.getElementById('markExamSelect')?.value;
+    const cls = document.getElementById('markClassSelect')?.value || 'Class 6';
+    const sec = document.getElementById('markSectionSelect')?.value || 'A';
+    const subj = document.getElementById('markSubjectSelect')?.value || '';
 
-    const allMarks = getData(KEYS.marks);
+    const exams = getData(KEYS.exams);
+    if (!examId && exams.length) {
+        examId = String(exams[0].id);
+        const sel = document.getElementById('markExamSelect');
+        if (sel) sel.value = examId;
+    }
+
+    const allMarks = getData(KEYS.marks, {});
     const key = `${examId}_${cls}_${sec}_${subj}`;
 
     const appStudents = getAppStudents();
@@ -1866,8 +1852,15 @@ function loadResultCard() {
     if (!container) return;
 
     const searchVal = (document.getElementById('rcStudentSearch')?.value || '').trim().toLowerCase();
-    const examId = document.getElementById('rcExamSelect')?.value || '';
+    let examId = document.getElementById('rcExamSelect')?.value || '';
     const cls = document.getElementById('rcClassSelect')?.value || 'Class 6';
+
+    const exams = getData(KEYS.exams);
+    if ((!examId || examId === 'all') && exams.length) {
+        examId = String(exams[0].id);
+        const sel = document.getElementById('rcExamSelect');
+        if (sel) sel.value = examId;
+    }
 
     const students = getAppStudents();
     
