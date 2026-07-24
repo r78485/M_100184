@@ -840,44 +840,40 @@ body.dark-theme .publish-switch { background: rgba(255,255,255,0.06); color: #94
                     <!-- Filters -->
                     <div class="row g-3 mb-4 no-print">
                         <div class="col-md-3">
-                            <label class="form-label fw-semibold">Exam</label>
+                            <label class="form-label fw-semibold">Exam / পরীক্ষা</label>
                             <select class="form-select" id="markExamSelect" onchange="loadMarksGrid()">
                                 <option value="">— Select Exam —</option>
                             </select>
                         </div>
-                        <div class="col-md-2">
-                            <label class="form-label fw-semibold">Class</label>
-                            <select class="form-select" id="markClassSelect" onchange="loadMarksGrid()">
-                                <option>৬ষ্ঠ</option>
-                                <option>৭ম</option>
-                                <option>৮ম</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label fw-semibold">Section</label>
-                            <select class="form-select" id="markSectionSelect" onchange="loadMarksGrid()">
-                                <option>ক</option>
-                                <option>খ</option>
-                            </select>
-                        </div>
                         <div class="col-md-3">
-                            <label class="form-label fw-semibold">Subject</label>
-                            <select class="form-select" id="markSubjectSelect" onchange="loadMarksGrid()">
-                                <option>বাংলা</option>
-                                <option>English</option>
-                                <option>গণিত</option>
-                                <option>বিজ্ঞান</option>
-                                <option>সামাজিক বিজ্ঞান</option>
-                                <option>ধর্ম ও নৈতিক শিক্ষা</option>
-                                <option>ICT</option>
+                            <label class="form-label fw-semibold">Class / শ্রেণি</label>
+                            <select class="form-select" id="markClassSelect" onchange="updateMarkSubjectOptions(); loadMarksGrid();">
+                                <option value="Class 6">Class 6 (৬ষ্ঠ)</option>
+                                <option value="Class 7">Class 7 (৭ম)</option>
+                                <option value="Class 8">Class 8 (৮ম)</option>
+                                <option value="Class 9">Class 9 (৯ম)</option>
+                                <option value="Class 10">Class 10 (১০ম)</option>
                             </select>
                         </div>
-                        <div class="col-md-2 d-flex align-items-end gap-2">
+                        <div class="col-md-2">
+                            <label class="form-label fw-semibold">Section / সেকশন</label>
+                            <select class="form-select" id="markSectionSelect" onchange="loadMarksGrid()">
+                                <option value="A">Section A (ক)</option>
+                                <option value="B">Section B (খ)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">NCTB Subject / বিষয় (শ্রেণীভিত্তিক)</label>
+                            <select class="form-select" id="markSubjectSelect" onchange="loadMarksGrid()">
+                                <!-- Loaded dynamically per selected class -->
+                            </select>
+                        </div>
+                        <div class="col-md-12 d-flex justify-content-end gap-2 mt-2">
                             <button class="btn-exam-outline" onclick="exportBlankExcel()" title="Download blank Excel">
-                                <i class="bi bi-download"></i>
+                                <i class="bi bi-download me-1"></i> Download Blank CSV
                             </button>
                             <button class="btn-exam-outline" onclick="document.getElementById('excelUpload').click()" title="Upload filled Excel">
-                                <i class="bi bi-upload"></i>
+                                <i class="bi bi-upload me-1"></i> Upload CSV
                             </button>
                             <input type="file" id="excelUpload" accept=".csv,.xlsx" style="display:none" onchange="importExcel(event)">
                         </div>
@@ -1306,8 +1302,121 @@ body.dark-theme .publish-switch { background: rgba(255,255,255,0.06); color: #94
                                 <option>ফাতেমা বেগম</option>
                                 <option>মোঃ রফিকুল ইসলাম</option>
                                 <option>সালমা আক্তার</option>
-const SUBJECTS = ['বাংলা', 'English', 'গণিত', 'বিজ্ঞান', 'সামাজিক বিজ্ঞান', 'ধর্ম ও নৈতিক শিক্ষা', 'ICT'];
+const NCTB_SUBJECTS_MAP = {
+    "Class 6": [
+        { name: "বাংলা (Bangla)", code: "১০১" },
+        { name: "ইংরেজি (English)", code: "১০২" },
+        { name: "গণিত (Mathematics)", code: "১০৯" },
+        { name: "বিজ্ঞান (Science)", code: "১১২" },
+        { name: "ডিজিটাল প্রযুক্তি (ICT)", code: "১৫৪" },
+        { name: "ইতিহাস ও সামাজিক বিজ্ঞান (History & Social Science)", code: "১৫৩" },
+        { name: "জীবন ও জীবিকা", code: "১৫৬" },
+        { name: "স্বাস্থ্য সুরক্ষা", code: "১৪৭" },
+        { name: "শিল্প ও সংস্কৃতি", code: "১৪৮" },
+        { name: "ইসলাম ধর্ম ও নৈতিক শিক্ষা", code: "১১১" },
+        { name: "হিন্দুধর্ম ও নৈতিক শিক্ষা", code: "১১২" },
+        { name: "খ্রিষ্টধর্ম ও নৈতিক শিক্ষা", code: "১১৩" },
+        { name: "বৌদ্ধধর্ম ও নৈতিক শিক্ষা", code: "১১৪" }
+    ],
+    "Class 7": [
+        { name: "বাংলা (Bangla)", code: "১০১" },
+        { name: "ইংরেজি (English)", code: "১০২" },
+        { name: "গণিত (Mathematics)", code: "১০৯" },
+        { name: "বিজ্ঞান (Science)", code: "১১২" },
+        { name: "ডিজিটাল প্রযুক্তি (ICT)", code: "১৫৪" },
+        { name: "ইতিহাস ও সামাজিক বিজ্ঞান (History & Social Science)", code: "১৫৩" },
+        { name: "জীবন ও জীবিকা", code: "১৫৬" },
+        { name: "স্বাস্থ্য সুরক্ষা", code: "১৪৭" },
+        { name: "শিল্প ও সংস্কৃতি", code: "১৪৮" },
+        { name: "ইসলাম ধর্ম ও নৈতিক শিক্ষা", code: "১১১" },
+        { name: "হিন্দুধর্ম ও নৈতিক শিক্ষা", code: "১১২" },
+        { name: "খ্রিষ্টধর্ম ও নৈতিক শিক্ষা", code: "১১৩" },
+        { name: "বৌদ্ধধর্ম ও নৈতিক শিক্ষা", code: "১১৪" }
+    ],
+    "Class 8": [
+        { name: "বাংলা (Bangla)", code: "১০১" },
+        { name: "ইংরেজি (English)", code: "১০২" },
+        { name: "গণিত (Mathematics)", code: "১০৯" },
+        { name: "বিজ্ঞান (Science)", code: "১১২" },
+        { name: "ডিজিটাল প্রযুক্তি (ICT)", code: "১৫৪" },
+        { name: "ইতিহাস ও সামাজিক বিজ্ঞান (History & Social Science)", code: "১৫৩" },
+        { name: "জীবন ও জীবিকা", code: "১৫৬" },
+        { name: "স্বাস্থ্য সুরক্ষা", code: "১৪৭" },
+        { name: "শিল্প ও সংস্কৃতি", code: "১৪৮" },
+        { name: "ইসলাম ধর্ম ও নৈতিক শিক্ষা", code: "১১১" },
+        { name: "হিন্দুধর্ম ও নৈতিক শিক্ষা", code: "১১২" },
+        { name: "খ্রিষ্টধর্ম ও নৈতিক শিক্ষা", code: "১১৩" },
+        { name: "বৌদ্ধধর্ম ও নৈতিক শিক্ষা", code: "১১৪" }
+    ],
+    "Class 9": [
+        { name: "বাংলা ১ম পত্র (Bangla 1st)", code: "১০১" },
+        { name: "বাংলা ২য় পত্র (Bangla 2nd)", code: "১০২" },
+        { name: "English 1st Paper", code: "১০৭" },
+        { name: "English 2nd Paper", code: "১০৮" },
+        { name: "সাধারণ গণিত (General Math)", code: "১০৯" },
+        { name: "পদার্থবিজ্ঞান (Physics)", code: "১৩৬" },
+        { name: "রসায়ন (Chemistry)", code: "১৩৭" },
+        { name: "জীববিজ্ঞান (Biology)", code: "১৩৮" },
+        { name: "উচ্চতর গণিত (Higher Math)", code: "১২৬" },
+        { name: "বাংলাদেশ ও বিশ্বপরিচয় (BGS)", code: "১৫০" },
+        { name: "তথ্য ও যোগাযোগ প্রযুক্তি (ICT)", code: "১৫৪" },
+        { name: "ইসলাম ও নৈতিক শিক্ষা", code: "১১১" },
+        { name: "হিন্দুধর্ম ও নৈতিক শিক্ষা", code: "১১২" }
+    ],
+    "Class 10": [
+        { name: "বাংলা ১ম পত্র (Bangla 1st)", code: "১০১" },
+        { name: "বাংলা ২য় পত্র (Bangla 2nd)", code: "১০২" },
+        { name: "English 1st Paper", code: "১০৭" },
+        { name: "English 2nd Paper", code: "১০৮" },
+        { name: "সাধারণ গণিত (General Math)", code: "১০৯" },
+        { name: "পদার্থবিজ্ঞান (Physics)", code: "১৩৬" },
+        { name: "রসায়ন (Chemistry)", code: "১৩৭" },
+        { name: "জীববিজ্ঞান (Biology)", code: "১৩৮" },
+        { name: "উচ্চতর গণিত (Higher Math)", code: "১২৬" },
+        { name: "বাংলাদেশ ও বিশ্বপরিচয় (BGS)", code: "১৫০" },
+        { name: "তথ্য ও যোগাযোগ প্রযুক্তি (ICT)", code: "১৫৪" },
+        { name: "ইসলাম ও নৈতিক শিক্ষা", code: "১১১" },
+        { name: "হিন্দুধর্ম ও নৈতিক শিক্ষা", code: "১১২" }
+    ]
+};
+
+const SUBJECTS = ['বাংলা (Bangla)', 'ইংরেজি (English)', 'গণিত (Mathematics)', 'বিজ্ঞান (Science)', 'ডিজিটাল প্রযুক্তি (ICT)', 'ইতিহাস ও সামাজিক বিজ্ঞান (History & Social Science)', 'জীবন ও জীবিকা', 'স্বাস্থ্য সুরক্ষা', 'শিল্প ও সংস্কৃতি', 'ইসলাম ধর্ম ও নৈতিক শিক্ষা'];
 const DAYS_BN = ['রবিবার', 'সোমবার', 'মঙ্গলবার', 'বুধবার', 'বৃহস্পতিবার', 'শুক্রবার', 'শনিবার'];
+
+function updateMarkSubjectOptions() {
+    const clsSelect = document.getElementById('markClassSelect');
+    const subjSelect = document.getElementById('markSubjectSelect');
+    if (!clsSelect || !subjSelect) return;
+
+    const rawCls = clsSelect.value || 'Class 6';
+    let clsKey = rawCls;
+    if (rawCls.includes('6') || rawCls.includes('৬')) clsKey = 'Class 6';
+    else if (rawCls.includes('7') || rawCls.includes('৭')) clsKey = 'Class 7';
+    else if (rawCls.includes('8') || rawCls.includes('৮')) clsKey = 'Class 8';
+    else if (rawCls.includes('9') || rawCls.includes('৯')) clsKey = 'Class 9';
+    else if (rawCls.includes('10') || rawCls.includes('১০')) clsKey = 'Class 10';
+
+    let subjects = (NCTB_SUBJECTS_MAP[clsKey] || NCTB_SUBJECTS_MAP["Class 6"]).slice();
+
+    try {
+        const storedCustom = JSON.parse(localStorage.getItem('nctb_subjects')) || [];
+        const classCustom = storedCustom.filter(s => s.cls === clsKey);
+        classCustom.forEach(cs => {
+            if (!subjects.some(s => s.name === cs.title || s.code === cs.code)) {
+                subjects.push({ name: cs.title, code: cs.code });
+            }
+        });
+    } catch(e){}
+
+    const currentVal = subjSelect.value;
+    subjSelect.innerHTML = subjects.map(s => `
+        <option value="${s.name}">${s.name} (কোড: ${s.code})</option>
+    `).join('');
+
+    if (currentVal && Array.from(subjSelect.options).some(o => o.value === currentVal)) {
+        subjSelect.value = currentVal;
+    }
+}
 
 // ============== TAB SWITCHING ==============
 function switchTab(panelId, btn) {
@@ -1317,6 +1426,9 @@ function switchTab(panelId, btn) {
     btn.classList.add('active');
     if (panelId === 'result-card') {
         loadResultCard();
+    } else if (panelId === 'add-marks') {
+        updateMarkSubjectOptions();
+        loadMarksGrid();
     }
 }
 
@@ -2183,6 +2295,7 @@ document.addEventListener('DOMContentLoaded', function() {
     populateExamDropdowns();
     updateProgressTracker();
     loadExamStudentRegistry();
+    updateMarkSubjectOptions();
     loadMarksGrid();
     loadResultCard();
 });
