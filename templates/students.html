@@ -1659,8 +1659,48 @@
         if (stIndex === -1) return;
         const st = students[stIndex];
 
-        const targetId = st.db_id || st.id;
-        window.open('/admission-slip/' + targetId + '/', '_blank');
+        // If we already have a real DB id, open directly
+        if (st.db_id) {
+            window.open('/admission-slip/' + st.db_id + '/', '_blank');
+            return;
+        }
+
+        // Otherwise sync to DB first, then open
+        const formData = new FormData();
+        formData.append('student_name_bn', st.name_bn || st.name || '');
+        formData.append('student_name_en', st.name_en || st.name || '');
+        formData.append('desired_class', st.cls || st.student_class || 'Class 6');
+        formData.append('father_name', st.father || st.guardian || '');
+        formData.append('mother_name', st.mother || '');
+        formData.append('mobile', st.phone || '');
+        formData.append('re_mobile', st.phone || '');
+        formData.append('section', st.section || 'A');
+        formData.append('status', 'Approved');
+
+        fetch('/api/save-student/', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success' && data.db_id) {
+                // Save db_id back to localStorage
+                const allStudents = getStudents();
+                const idx = allStudents.findIndex(s => s.id == id || s.db_id == id);
+                if (idx !== -1) {
+                    allStudents[idx].db_id = data.db_id;
+                    allStudents[idx].id = data.db_id;
+                    localStorage.setItem('school_students', JSON.stringify(allStudents));
+                }
+                window.open('/admission-slip/' + data.db_id + '/', '_blank');
+            } else {
+                alert('ভর্তি স্লিপ তৈরি করা যায়নি। প্রথমে শিক্ষার্থীর তথ্য সম্পূর্ণ করুন।');
+            }
+        })
+        .catch(() => {
+            alert('সার্ভার সংযোগ ব্যর্থ। পরে আবার চেষ্টা করুন।');
+        });
     }
 
     window.printFilteredStudentList = function() {

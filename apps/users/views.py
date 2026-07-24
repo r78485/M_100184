@@ -189,7 +189,13 @@ def admin_login_view(request):
 
 @login_required
 def admission_slip_view(request, admission_id):
-    student = get_object_or_404(StudentAdmission, id=admission_id)
+    try:
+        student = StudentAdmission.objects.get(id=admission_id)
+    except StudentAdmission.DoesNotExist:
+        from django.shortcuts import render as django_render
+        return django_render(request, 'admission/admission_slip_not_found.html', {
+            'admission_id': admission_id,
+        }, status=404)
 
     if not student.admission_no:
         student.admission_no = f"ADM-2026-{student.id:04d}"
@@ -225,7 +231,7 @@ def admission_slip_view(request, admission_id):
         school_address = getattr(school_profile, 'address', '')
         school_logo = school_profile.logo.url if (hasattr(school_profile, 'logo') and school_profile.logo) else '/static/logo.png'
     else:
-        school_name = request.session.get('school_name', 'গাজী মাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়')
+        school_name = request.session.get('school_name', 'গাজী মাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়')
         school_eiin = request.session.get('eiin', '১০০১৩৮')
         school_address = request.session.get('school_address', 'স্থাপিত-১৯৮৩ খ্রিঃ')
         school_logo = '/static/logo.png'
@@ -242,6 +248,7 @@ def admission_slip_view(request, admission_id):
     }
 
     return render(request, 'admission/admission_slip.html', context)
+
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt

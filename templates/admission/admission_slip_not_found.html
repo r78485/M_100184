@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load i18n static %}
+
+{% block title %}ভর্তি স্লিপ পাওয়া যায়নি — EduManage ERP{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="row justify-content-center mt-5">
+        <div class="col-md-6 text-center">
+            <div class="card border-0 shadow-lg" style="border-radius:20px; overflow:hidden;">
+                <div style="background:linear-gradient(135deg,#1a0f3e,#3b1f7a); padding:40px 30px;">
+                    <div style="font-size:4rem; margin-bottom:16px;">📋</div>
+                    <h3 style="color:#fff; font-weight:800; margin:0;">ভর্তি স্লিপ পাওয়া যায়নি</h3>
+                    <p style="color:rgba(255,255,255,0.65); margin:8px 0 0; font-size:0.95rem;">
+                        Admission Slip Not Found
+                    </p>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-warning border-0 rounded-3 text-start mb-4">
+                        <strong>⚠️ কারণ:</strong><br>
+                        ID <strong>#{{ admission_id }}</strong> সহ কোনো শিক্ষার্থীর তথ্য ডেটাবেজে পাওয়া যায়নি।<br>
+                        <small class="text-muted mt-1 d-block">
+                            এটি হতে পারে কারণ:<br>
+                            • শিক্ষার্থী শুধু local browser-এ সংরক্ষিত ছিল, server-এ নয়<br>
+                            • অথবা server redeploy-এর কারণে data মুছে গেছে
+                        </small>
+                    </div>
+
+                    <p class="text-muted mb-4">
+                        Students পেজ থেকে শিক্ষার্থীর তথ্য পুনরায় সংরক্ষণ করুন এবং তারপর স্লিপ প্রিন্ট করুন।
+                    </p>
+
+                    <div class="d-flex gap-3 justify-content-center flex-wrap">
+                        <a href="{% url 'dashboard' %}"
+                           class="btn btn-outline-secondary rounded-pill px-4">
+                            <i class="bi bi-house me-1"></i> ড্যাশবোর্ড
+                        </a>
+                        <a href="javascript:history.back()"
+                           class="btn btn-outline-primary rounded-pill px-4">
+                            <i class="bi bi-arrow-left me-1"></i> ফিরে যান
+                        </a>
+                        <a href="/students/"
+                           class="btn rounded-pill px-4 text-white"
+                           style="background:linear-gradient(135deg,#7c3aed,#5b21b6);">
+                            <i class="bi bi-people-fill me-1"></i> Students পেজ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
