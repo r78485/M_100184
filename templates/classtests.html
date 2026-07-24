@@ -399,34 +399,30 @@ body.dark-theme .ct-marks-table .ct-input.locked { background: #0f172a; color: #
 
                     <!-- Test Selector Filters -->
                     <div class="row g-3 mb-4 no-print">
-                        <div class="col-md-2">
-                            <label class="form-label fw-semibold">Class</label>
-                            <select class="form-select" id="tmClassSelect" onchange="loadTestMarksGrid()">
-                                <option>৬ষ্ঠ</option>
-                                <option>৭ম</option>
-                                <option>৮ম</option>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Class / শ্রেণি</label>
+                            <select class="form-select" id="tmClassSelect" onchange="updateCtSubjectOptions('tmClassSelect', 'tmSubjectSelect'); loadTestMarksGrid();">
+                                <option value="Class 6">Class 6 (৬ষ্ঠ)</option>
+                                <option value="Class 7">Class 7 (৭ম)</option>
+                                <option value="Class 8">Class 8 (৮ম)</option>
+                                <option value="Class 9">Class 9 (৯ম)</option>
+                                <option value="Class 10">Class 10 (১০ম)</option>
                             </select>
                         </div>
                         <div class="col-md-2">
-                            <label class="form-label fw-semibold">Section</label>
+                            <label class="form-label fw-semibold">Section / সেকশন</label>
                             <select class="form-select" id="tmSectionSelect" onchange="loadTestMarksGrid()">
-                                <option>ক</option>
-                                <option>খ</option>
+                                <option value="A">Section A (ক)</option>
+                                <option value="B">Section B (খ)</option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <label class="form-label fw-semibold">Subject</label>
+                            <label class="form-label fw-semibold">NCTB Subject / বিষয় (শ্রেণীভিত্তিক)</label>
                             <select class="form-select" id="tmSubjectSelect" onchange="loadTestMarksGrid()">
-                                <option>বাংলা</option>
-                                <option>English</option>
-                                <option>গণিত</option>
-                                <option>বিজ্ঞান</option>
-                                <option>সামাজিক বিজ্ঞান</option>
-                                <option>ধর্ম ও নৈতিক শিক্ষা</option>
-                                <option>ICT</option>
+                                <!-- Loaded dynamically per class -->
                             </select>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2">
                             <label class="form-label fw-semibold">Test Type</label>
                             <select class="form-select" id="tmTestType" onchange="loadTestMarksGrid()">
                                 <option>Class Test 1</option>
@@ -545,24 +541,27 @@ body.dark-theme .ct-marks-table .ct-input.locked { background: #0f172a; color: #
 
                     <!-- Filters -->
                     <div class="row g-3 mb-4 no-print">
-                        <div class="col-md-2">
-                            <label class="form-label fw-semibold">Class</label>
-                            <select class="form-select" id="trClassSelect" onchange="loadTestResults()">
-                                <option>৬ষ্ঠ</option><option>৭ম</option><option>৮ম</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label class="form-label fw-semibold">Section</label>
-                            <select class="form-select" id="trSectionSelect" onchange="loadTestResults()">
-                                <option>ক</option><option>খ</option>
-                            </select>
-                        </div>
                         <div class="col-md-3">
-                            <label class="form-label fw-semibold">Subject</label>
+                            <label class="form-label fw-semibold">Class / শ্রেণি</label>
+                            <select class="form-select" id="trClassSelect" onchange="updateCtSubjectOptions('trClassSelect', 'trSubjectSelect'); loadTestResults();">
+                                <option value="Class 6">Class 6 (৬ষ্ঠ)</option>
+                                <option value="Class 7">Class 7 (৭ম)</option>
+                                <option value="Class 8">Class 8 (৮ম)</option>
+                                <option value="Class 9">Class 9 (৯ম)</option>
+                                <option value="Class 10">Class 10 (১০ম)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label fw-semibold">Section / সেকশন</label>
+                            <select class="form-select" id="trSectionSelect" onchange="loadTestResults()">
+                                <option value="A">Section A (ক)</option>
+                                <option value="B">Section B (খ)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold">NCTB Subject / বিষয় (শ্রেণীভিত্তিক)</label>
                             <select class="form-select" id="trSubjectSelect" onchange="loadTestResults()">
-                                <option>বাংলা</option><option>English</option><option>গণিত</option>
-                                <option>বিজ্ঞান</option><option>সামাজিক বিজ্ঞান</option>
-                                <option>ধর্ম ও নৈতিক শিক্ষা</option><option>ICT</option>
+                                <!-- Loaded dynamically per class -->
                             </select>
                         </div>
                         <div class="col-md-3">
@@ -571,11 +570,6 @@ body.dark-theme .ct-marks-table .ct-input.locked { background: #0f172a; color: #
                                 <option value="combined">Combined — All Tests</option>
                                 <option value="single">Single Test Only</option>
                             </select>
-                        </div>
-                        <div class="col-md-2 d-flex align-items-end">
-                            <button class="btn-ct-primary w-100" onclick="loadTestResults()">
-                                <i class="bi bi-funnel me-1"></i> Load
-                            </button>
                         </div>
                     </div>
 
@@ -713,6 +707,119 @@ const TEST_TYPES = ['Class Test 1','Class Test 2','Class Test 3','Weekly Test 1'
 function ctGet(key, fallback) { try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch { return fallback; } }
 function ctSet(key, val) { localStorage.setItem(key, JSON.stringify(val)); }
 
+const CT_NCTB_SUBJECTS_MAP = {
+    "Class 6": [
+        { name: "বাংলা (Bangla)", code: "১০১" },
+        { name: "ইংরেজি (English)", code: "১০২" },
+        { name: "গণিত (Mathematics)", code: "১০৯" },
+        { name: "বিজ্ঞান (Science)", code: "১১২" },
+        { name: "ডিজিটাল প্রযুক্তি (ICT)", code: "১৫৪" },
+        { name: "ইতিহাস ও সামাজিক বিজ্ঞান (History & Social Science)", code: "১৫৩" },
+        { name: "জীবন ও জীবিকা", code: "১৫৬" },
+        { name: "স্বাস্থ্য সুরক্ষা", code: "১৪৭" },
+        { name: "শিল্প ও সংস্কৃতি", code: "১৪৮" },
+        { name: "ইসলাম ধর্ম ও নৈতিক শিক্ষা", code: "১১১" },
+        { name: "হিন্দুধর্ম ও নৈতিক শিক্ষা", code: "১১২" },
+        { name: "খ্রিষ্টধর্ম ও নৈতিক শিক্ষা", code: "১১৩" },
+        { name: "বৌদ্ধধর্ম ও নৈতিক শিক্ষা", code: "১১৪" }
+    ],
+    "Class 7": [
+        { name: "বাংলা (Bangla)", code: "১০১" },
+        { name: "ইংরেজি (English)", code: "১০২" },
+        { name: "গণিত (Mathematics)", code: "১০৯" },
+        { name: "বিজ্ঞান (Science)", code: "১১২" },
+        { name: "ডিজিটাল প্রযুক্তি (ICT)", code: "১৫৪" },
+        { name: "ইতিহাস ও সামাজিক বিজ্ঞান (History & Social Science)", code: "১৫৩" },
+        { name: "জীবন ও জীবিকা", code: "১৫৬" },
+        { name: "স্বাস্থ্য সুরক্ষা", code: "১৪৭" },
+        { name: "শিল্প ও সংস্কৃতি", code: "১৪৮" },
+        { name: "ইসলাম ধর্ম ও নৈতিক শিক্ষা", code: "১১১" },
+        { name: "হিন্দুধর্ম ও নৈতিক শিক্ষা", code: "১১২" },
+        { name: "খ্রিষ্টধর্ম ও নৈতিক শিক্ষা", code: "১১৩" },
+        { name: "বৌদ্ধধর্ম ও নৈতিক শিক্ষা", code: "১১৪" }
+    ],
+    "Class 8": [
+        { name: "বাংলা (Bangla)", code: "১০১" },
+        { name: "ইংরেজি (English)", code: "১০২" },
+        { name: "গণিত (Mathematics)", code: "১০৯" },
+        { name: "বিজ্ঞান (Science)", code: "১১২" },
+        { name: "ডিজিটাল প্রযুক্তি (ICT)", code: "১৫৪" },
+        { name: "ইতিহাস ও সামাজিক বিজ্ঞান (History & Social Science)", code: "১৫৩" },
+        { name: "জীবন ও জীবিকা", code: "১৫৬" },
+        { name: "স্বাস্থ্য সুরক্ষা", code: "১৪৭" },
+        { name: "শিল্প ও সংস্কৃতি", code: "১৪৮" },
+        { name: "ইসলাম ধর্ম ও নৈতিক শিক্ষা", code: "১১১" },
+        { name: "হিন্দুধর্ম ও নৈতিক শিক্ষা", code: "১১২" },
+        { name: "খ্রিষ্টধর্ম ও নৈতিক শিক্ষা", code: "১১৩" },
+        { name: "বৌদ্ধধর্ম ও নৈতিক শিক্ষা", code: "১১৪" }
+    ],
+    "Class 9": [
+        { name: "বাংলা ১ম পত্র (Bangla 1st)", code: "১০১" },
+        { name: "বাংলা ২য় পত্র (Bangla 2nd)", code: "১০২" },
+        { name: "English 1st Paper", code: "১০৭" },
+        { name: "English 2nd Paper", code: "১০৮" },
+        { name: "সাধারণ গণিত (General Math)", code: "১০৯" },
+        { name: "পদার্থবিজ্ঞান (Physics)", code: "১৩৬" },
+        { name: "রসায়ন (Chemistry)", code: "১৩৭" },
+        { name: "জীববিজ্ঞান (Biology)", code: "১৩৮" },
+        { name: "উচ্চতর গণিত (Higher Math)", code: "১২৬" },
+        { name: "বাংলাদেশ ও বিশ্বপরিচয় (BGS)", code: "১৫০" },
+        { name: "তথ্য ও যোগাযোগ প্রযুক্তি (ICT)", code: "১৫৪" },
+        { name: "ইসলাম ও নৈতিক শিক্ষা", code: "১১১" },
+        { name: "হিন্দুধর্ম ও নৈতিক শিক্ষা", code: "১১২" }
+    ],
+    "Class 10": [
+        { name: "বাংলা ১ম পত্র (Bangla 1st)", code: "১০১" },
+        { name: "বাংলা ২য় পত্র (Bangla 2nd)", code: "১০২" },
+        { name: "English 1st Paper", code: "১০৭" },
+        { name: "English 2nd Paper", code: "১০৮" },
+        { name: "সাধারণ গণিত (General Math)", code: "১০৯" },
+        { name: "পদার্থবিজ্ঞান (Physics)", code: "১৩৬" },
+        { name: "রসায়ন (Chemistry)", code: "১৩৭" },
+        { name: "জীববিজ্ঞান (Biology)", code: "১৩৮" },
+        { name: "উচ্চতর গণিত (Higher Math)", code: "১২৬" },
+        { name: "বাংলাদেশ ও বিশ্বপরিচয় (BGS)", code: "১৫০" },
+        { name: "তথ্য ও যোগাযোগ প্রযুক্তি (ICT)", code: "১৫৪" },
+        { name: "ইসলাম ও নৈতিক শিক্ষা", code: "১১১" },
+        { name: "হিন্দুধর্ম ও নৈতিক শিক্ষা", code: "১১২" }
+    ]
+};
+
+function updateCtSubjectOptions(clsSelectId, subjSelectId) {
+    const clsSelect = document.getElementById(clsSelectId || 'tmClassSelect');
+    const subjSelect = document.getElementById(subjSelectId || 'tmSubjectSelect');
+    if (!clsSelect || !subjSelect) return;
+
+    const rawCls = clsSelect.value || 'Class 6';
+    let clsKey = rawCls;
+    if (rawCls.includes('6') || rawCls.includes('৬')) clsKey = 'Class 6';
+    else if (rawCls.includes('7') || rawCls.includes('৭')) clsKey = 'Class 7';
+    else if (rawCls.includes('8') || rawCls.includes('৮')) clsKey = 'Class 8';
+    else if (rawCls.includes('9') || rawCls.includes('৯')) clsKey = 'Class 9';
+    else if (rawCls.includes('10') || rawCls.includes('১০')) clsKey = 'Class 10';
+
+    let subjects = (CT_NCTB_SUBJECTS_MAP[clsKey] || CT_NCTB_SUBJECTS_MAP["Class 6"]).slice();
+
+    try {
+        const storedCustom = JSON.parse(localStorage.getItem('nctb_subjects')) || [];
+        const classCustom = storedCustom.filter(s => s.cls === clsKey);
+        classCustom.forEach(cs => {
+            if (!subjects.some(s => s.name === cs.title || s.code === cs.code)) {
+                subjects.push({ name: cs.title, code: cs.code });
+            }
+        });
+    } catch(e){}
+
+    const currentVal = subjSelect.value;
+    subjSelect.innerHTML = subjects.map(s => `
+        <option value="${s.name}">${s.name} (কোড: ${s.code})</option>
+    `).join('');
+
+    if (currentVal && Array.from(subjSelect.options).some(o => o.value === currentVal)) {
+        subjSelect.value = currentVal;
+    }
+}
+
 // ============== TAB SWITCHING ==============
 function ctSwitchTab(panelId, btn) {
     document.querySelectorAll('.ct-panel').forEach(p => p.classList.remove('active'));
@@ -720,7 +827,13 @@ function ctSwitchTab(panelId, btn) {
     document.getElementById('panel-' + panelId).classList.add('active');
     btn.classList.add('active');
 
-    if (panelId === 'test-result') loadTestResults();
+    if (panelId === 'test-result') {
+        updateCtSubjectOptions('trClassSelect', 'trSubjectSelect');
+        loadTestResults();
+    } else if (panelId === 'manage-marks') {
+        updateCtSubjectOptions('tmClassSelect', 'tmSubjectSelect');
+        loadTestMarksGrid();
+    }
 }
 
 // ============== GRADING (for test marks out of N) ==============
@@ -1228,6 +1341,8 @@ function showCtToast(message) {
 
 // ============== INIT ==============
 document.addEventListener('DOMContentLoaded', function() {
+    updateCtSubjectOptions('tmClassSelect', 'tmSubjectSelect');
+    updateCtSubjectOptions('trClassSelect', 'trSubjectSelect');
     loadTestMarksGrid();
 });
 </script>
