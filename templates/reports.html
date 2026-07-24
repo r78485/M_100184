@@ -302,6 +302,25 @@
         return students;
     }
 
+    function updateReportStudentDropdown() {
+        const clsEl = document.getElementById('rep_class');
+        const stEl = document.getElementById('rep_student');
+        if (!clsEl || !stEl) return;
+        const selectedCls = clsEl.value;
+        const allStudents = getReportStudents();
+        const filtered = (selectedCls === 'All') ? allStudents : allStudents.filter(s => (s.cls === selectedCls || s.desired_class === selectedCls || String(s.cls).includes(selectedCls)));
+        
+        let opts = '<option value="All">All Students in Selected Class</option>';
+        filtered.forEach(st => {
+            const sName = st.name_en || st.name_bn || st.name || "Student";
+            const sRoll = st.roll || "N/A";
+            const sCls = st.cls || st.desired_class || "Class 6";
+            const sId = st.id || st.db_id || st.student_id;
+            opts += `<option value="${sId}">${sName} (Roll: ${sRoll} - ${sCls})</option>`;
+        });
+        stEl.innerHTML = opts;
+    }
+
     // Config Panel Builders
     const reportConfigs = {
         student_report_card: {

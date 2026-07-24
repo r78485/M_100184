@@ -562,11 +562,9 @@
 
 <script>
     function loadStudents() {
-        // Fetch from localStorage simulation
         const stored = localStorage.getItem('school_students');
         let students = stored ? JSON.parse(stored) : [];
         
-        // Add some dummy data if empty to show the functionality
         if (students.length === 0) {
             students = [
                 { id: "S-501", name: "Arif Rahman", cls: "Class 8" },
@@ -576,11 +574,13 @@
         }
 
         const select = document.getElementById('docStudent');
-        select.innerHTML = '<option value="" disabled selected>Select Student...</option>';
+        select.innerHTML = '<option value="" disabled selected>Select Student / শিক্ষার্থী নির্বাচন করুন...</option>';
         students.forEach(st => {
-            const id = st.id || st.studentId || `STU-${Math.floor(Math.random()*1000)}`;
-            const cls = st.cls || st.studentClass || "Unknown Class";
-            select.insertAdjacentHTML('beforeend', `<option value="${st.name}|${cls}|${id}">${st.name} (${id})</option>`);
+            const sName = st.name_bn || st.name_en || st.name || "Student";
+            const id = st.id || st.studentId || st.db_id || `STU-${Math.floor(Math.random()*1000)}`;
+            const cls = st.cls || st.desired_class || st.studentClass || "Class 6";
+            const roll = st.roll || "N/A";
+            select.insertAdjacentHTML('beforeend', `<option value="${sName}|${cls}|${id}">${sName} (Roll: ${roll} - ${cls})</option>`);
         });
     }
 
