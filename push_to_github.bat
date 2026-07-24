@@ -11,7 +11,7 @@ git remote remove origin 2>nul
 git remote add origin https://github.com/r78485/M_100184.git
 git branch -M main
 git add .
-git commit -m "Fix Render SQLite missing table error with auto migration check on container start"
+git commit -m "Add delete functionality for Fees & Invoices and Accounts ledger"
 git push -u origin main
 
 echo.

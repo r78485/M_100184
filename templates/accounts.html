@@ -4,50 +4,56 @@
 
 {% block content %}
 <div class="container-fluid p-0">
-    <div class="mb-4 d-flex justify-content-between align-items-center">
+    <div class="mb-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
         <div>
-            <h2 class="fw-bold mb-1" style="color: var(--primary-blue);">Financial Ledger & Accounts</h2>
-            <p class="text-muted">Track school income, operational expenses, and general balances.</p>
+            <h2 class="fw-bold mb-1" style="color: var(--primary-blue);">Financial Ledger & Accounts / হিসাব খাত</h2>
+            <p class="text-muted mb-0">প্রতিষ্ঠানের আয়-ব্যয় হিসাব পর্যবেক্ষণ করুন এবং ট্রানজেকশন যুক্ত বা মুছে ফেলুন (Delete)।</p>
         </div>
-        <button class="btn text-white rounded-pill px-4" style="background-color: var(--secondary-purple); border: none;" data-bs-toggle="modal" data-bs-target="#addTxModal">
-            <i class="bi bi-plus-lg me-2"></i>Record Transaction
-        </button>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-danger rounded-pill px-3" onclick="deleteAllTx()">
+                <i class="bi bi-trash3 me-1"></i>সকল ট্রানজেকশন মুছুন
+            </button>
+            <button class="btn text-white rounded-pill px-4" style="background-color: var(--secondary-purple); border: none;" data-bs-toggle="modal" data-bs-target="#addTxModal">
+                <i class="bi bi-plus-lg me-2"></i>Record Transaction
+            </button>
+        </div>
     </div>
 
     <!-- Overview Cards -->
     <div class="row g-4 mb-4">
         <div class="col-md-4">
             <div class="card custom-card p-4 border-start border-4 border-success">
-                <span class="text-muted small fw-semibold">TOTAL INCOME</span>
-                <h3 class="fw-bold text-success mt-1" id="totalIncome">৳124,500</h3>
+                <span class="text-muted small fw-semibold">TOTAL INCOME (মোট আয়)</span>
+                <h3 class="fw-bold text-success mt-1" id="totalIncome">৳0</h3>
             </div>
         </div>
         <div class="col-md-4">
             <div class="card custom-card p-4 border-start border-4 border-danger">
-                <span class="text-muted small fw-semibold">TOTAL EXPENSES</span>
-                <h3 class="fw-bold text-danger mt-1" id="totalExpense">৳45,200</h3>
+                <span class="text-muted small fw-semibold">TOTAL EXPENSES (মোট ব্যয়)</span>
+                <h3 class="fw-bold text-danger mt-1" id="totalExpense">৳0</h3>
             </div>
         </div>
         <div class="col-md-4">
             <div class="card custom-card p-4 border-start border-4 border-primary">
-                <span class="text-muted small fw-semibold">NET BALANCE</span>
-                <h3 class="fw-bold text-primary mt-1" id="netBalance">৳79,300</h3>
+                <span class="text-muted small fw-semibold">NET BALANCE (অবশিষ্ট তহবিল)</span>
+                <h3 class="fw-bold text-primary mt-1" id="netBalance">৳0</h3>
             </div>
         </div>
     </div>
 
     <!-- Ledger Table -->
     <div class="card custom-card p-4">
-        <h5 class="fw-bold mb-3">Transaction History</h5>
+        <h5 class="fw-bold mb-3">Transaction History / ট্রানজেকশন ইতিহাস</h5>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead>
+                <thead class="table-light">
                     <tr>
                         <th>Date</th>
                         <th>Description</th>
                         <th>Category</th>
                         <th>Type</th>
                         <th>Amount</th>
+                        <th class="text-center">Action / কার্যক্রম</th>
                     </tr>
                 </thead>
                 <tbody id="ledgerTableBody">
@@ -63,17 +69,17 @@
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow" style="border-radius: 14px;">
             <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold">Record Transaction</h5>
+                <h5 class="modal-title fw-bold">Record Transaction / ট্রানজেকশন এন্ট্রি</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form id="txForm" onsubmit="saveTransaction(event)">
                 <div class="modal-body py-3">
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Description</label>
+                        <label class="form-label fw-semibold">বিবরণ / Description</label>
                         <input type="text" class="form-control" id="txDesc" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Category</label>
+                        <label class="form-label fw-semibold">ক্যাটাগরি / Category</label>
                         <select class="form-select" id="txCat" required>
                             <option>Student Fees Collection</option>
                             <option>Electricity & Utilities</option>
@@ -83,20 +89,20 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Type</label>
+                        <label class="form-label fw-semibold">ধরন / Type</label>
                         <select class="form-select" id="txType" required>
-                            <option value="Income">Income</option>
-                            <option value="Expense">Expense</option>
+                            <option value="Income">Income (আয়)</option>
+                            <option value="Expense">Expense (ব্যয়)</option>
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Amount ($)</label>
+                        <label class="form-label fw-semibold">টাকার পরিমাণ (৳)</label>
                         <input type="number" class="form-control" id="txAmount" required>
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn text-white rounded-pill px-4" style="background-color: var(--primary-blue); border: none;">Save Transaction</button>
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">বাতিল</button>
+                    <button type="submit" class="btn text-white rounded-pill px-4" style="background-color: var(--primary-blue); border: none;">সেভ করুন</button>
                 </div>
             </form>
         </div>
@@ -107,9 +113,9 @@
 {% block extra_js %}
 <script>
     const defaultTx = [
-        { id: 1, date: "2026-07-18", desc: "Admission Fee - David Vance", cat: "Student Fees Collection", type: "Income", amount: 450 },
+        { id: 1, date: "2026-07-18", desc: "Admission Fee - David Vance", cat: "Student Fees Collection", type: "Income", amount: 4500 },
         { id: 2, date: "2026-07-19", desc: "Electricity Bill July", cat: "Electricity & Utilities", type: "Expense", amount: 1200 },
-        { id: 3, date: "2026-07-19", desc: "Classroom Whiteboards", cat: "Office Stationery", type: "Expense", amount: 350 }
+        { id: 3, date: "2026-07-19", desc: "Classroom Whiteboards", cat: "Office Stationery", type: "Expense", amount: 3500 }
     ];
 
     function getTx() {
@@ -126,12 +132,23 @@
         const tbody = document.getElementById('ledgerTableBody');
         tbody.innerHTML = '';
 
-        let inc = 124500;
-        let exp = 45200;
+        let inc = 0;
+        let exp = 0;
+
+        if (txs.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox display-6 d-block mb-2"></i>
+                        কোনো হিসাব বা ট্রানজেকশন তথ্য পাওয়া যায়নি।
+                    </td>
+                </tr>
+            `;
+        }
 
         txs.forEach(t => {
-            if (t.type === 'Income') inc += t.amount;
-            else exp += t.amount;
+            if (t.type === 'Income') inc += Number(t.amount);
+            else exp += Number(t.amount);
 
             tbody.insertAdjacentHTML('beforeend', `
                 <tr>
@@ -139,7 +156,12 @@
                     <td class="fw-semibold">${t.desc}</td>
                     <td><span class="badge bg-light text-dark">${t.cat}</span></td>
                     <td><span class="badge ${t.type==='Income'?'bg-success-subtle text-success':'bg-danger-subtle text-danger'} rounded-pill px-2.5">${t.type}</span></td>
-                    <td class="fw-bold ${t.type==='Income'?'text-success':'text-danger'}">${t.type==='Income'?'+':'-'}৳${t.amount}</td>
+                    <td class="fw-bold ${t.type==='Income'?'text-success':'text-danger'}">${t.type==='Income'?'+':'-'}৳${Number(t.amount).toLocaleString()}</td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteTx(${t.id})" title="Delete Transaction">
+                            <i class="bi bi-trash me-1"></i>ডিলেট
+                        </button>
+                    </td>
                 </tr>
             `);
         });
@@ -164,9 +186,27 @@
         });
         localStorage.setItem('school_tx', JSON.stringify(txs));
         
-        bootstrap.Modal.getInstance(document.getElementById('addTxModal')).hide();
+        const modalEl = document.getElementById('addTxModal');
+        const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        modal.hide();
         document.getElementById('txForm').reset();
         renderLedger();
+    }
+
+    function deleteTx(id) {
+        if (confirm("আপনি কি নিশ্চিত যে এই ট্রানজেকশনটি স্থায়ীভাবে মুছে ফেলতে চান?")) {
+            let txs = getTx();
+            txs = txs.filter(t => t.id !== id);
+            localStorage.setItem('school_tx', JSON.stringify(txs));
+            renderLedger();
+        }
+    }
+
+    function deleteAllTx() {
+        if (confirm("আপনি কি নিশ্চিত যে সকল ট্রানজেকশন রেকর্ড মুছে ফেলতে চান?")) {
+            localStorage.setItem('school_tx', JSON.stringify([]));
+            renderLedger();
+        }
     }
 
     document.addEventListener("DOMContentLoaded", renderLedger);

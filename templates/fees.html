@@ -1,81 +1,117 @@
 {% extends 'base.html' %}
 
-{% block title %}Fees Management - EduManage ERP{% endblock %}
+{% block title %}Fees & Invoices Management - EduManage ERP{% endblock %}
 
 {% block content %}
 <div class="container-fluid p-0">
-    <div class="mb-4 d-flex justify-content-between align-items-center">
+    <div class="mb-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
         <div>
-            <h2 class="fw-bold mb-1" style="color: var(--primary-blue);">Fees & Invoices</h2>
-            <p class="text-muted">Generate invoices, trace student fee accounts, and review invoice payment statuses.</p>
+            <h2 class="fw-bold mb-1" style="color: var(--primary-blue);">Fees & Invoices / ফি ও চালান ব্যবস্থাপনা</h2>
+            <p class="text-muted mb-0">শিক্ষার্থীদের বেতন ও অন্যান্য ফি ইনভয়েস তৈরি করুন, আপডেট এবং কাঙ্ক্ষিত ইনভয়েস মুছে ফেলুন (Delete)।</p>
         </div>
-        <button class="btn text-white rounded-pill px-4" style="background-color: var(--secondary-purple); border: none;" data-bs-toggle="modal" data-bs-target="#invoiceModal">
-            <i class="bi bi-plus-lg me-2"></i>Generate Invoice
-        </button>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-danger rounded-pill px-3" onclick="deleteAllInvoices()" title="সকল ইনভয়েস একসাথে মুছে ফেলুন">
+                <i class="bi bi-trash3 me-1"></i>সকল চালান খালি করুন
+            </button>
+            <button class="btn text-white rounded-pill px-4" style="background-color: var(--secondary-purple); border: none;" data-bs-toggle="modal" data-bs-target="#invoiceModal">
+                <i class="bi bi-plus-lg me-2"></i>নতুন চালান তৈরি করুন
+            </button>
+        </div>
     </div>
 
-    <!-- Table -->
+    <!-- Table Card -->
     <div class="card custom-card p-4">
-        <h5 class="fw-bold mb-3">Invoices Register</h5>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex align-items-center gap-3">
+                <h5 class="fw-bold mb-0">চালান রেজিস্টার (Invoices Register)</h5>
+                <button id="btnDeleteSelected" class="btn btn-sm btn-danger rounded-pill px-3 d-none" onclick="promptDeleteSelected()">
+                    <i class="bi bi-trash3-fill me-1"></i>নির্বাচিত (<span id="selectedCount">0</span>টি) ডিলেট করুন
+                </button>
+            </div>
+            <span class="badge bg-primary rounded-pill px-3 py-2" id="invoiceCount">মোট চালান: 0টি</span>
+        </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead>
+                <thead class="table-light">
                     <tr>
+                        <th style="width: 40px;" class="text-center">
+                            <input class="form-check-input" type="checkbox" id="selectAllCheck" onchange="toggleSelectAll(this)" title="সবগুলো একসাথে নির্বাচন করুন">
+                        </th>
                         <th>Invoice ID</th>
                         <th>Student Name</th>
                         <th>Class</th>
                         <th>Fee Category</th>
                         <th>Due Date</th>
-                        <th>Amount</th>
+                        <th>Amount (৳)</th>
                         <th>Status</th>
-                        <th>Action</th>
+                        <th class="text-center" style="width: 210px;">Action / কার্যক্রম</th>
                     </tr>
                 </thead>
                 <tbody id="invoiceTableBody">
-                    <!-- Dynamic -->
+                    <!-- Dynamic Rows -->
                 </tbody>
             </table>
         </div>
     </div>
 </div>
 
-<!-- Modal -->
+<!-- Generate Invoice Modal -->
 <div class="modal fade" id="invoiceModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow" style="border-radius: 14px;">
             <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold">Generate Fee Invoice</h5>
+                <h5 class="modal-title fw-bold">Generate Fee Invoice / ইনভয়েস তৈরি করুন</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form id="invoiceForm" onsubmit="saveInvoice(event)">
                 <div class="modal-body py-3">
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Student Name</label>
+                        <label class="form-label fw-semibold">শিক্ষার্থীর নাম (Student Name)</label>
                         <select class="form-select" id="invStudent" required></select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Fee Type</label>
+                        <label class="form-label fw-semibold">ফি ক্যাটাগরি (Fee Type)</label>
                         <select class="form-select" id="invType" required>
-                            <option>Tuition Fee</option>
-                            <option>Exam Fee</option>
-                            <option>Library Fee</option>
-                            <option>Transport Fee</option>
+                            <option>Tuition Fee (মাসিক বেতন)</option>
+                            <option>Exam Fee (পরীক্ষা ফি)</option>
+                            <option>Session Fee (সেশন ফি)</option>
+                            <option>Library Fee (লাইব্রেরি ফি)</option>
+                            <option>Transport Fee (পরিবহন ফি)</option>
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Due Date</label>
+                        <label class="form-label fw-semibold">পরিশোধের শেষ তারিখ (Due Date)</label>
                         <input type="date" class="form-control" id="invDue" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Amount ($)</label>
-                        <input type="number" class="form-control" id="invAmount" required>
+                        <label class="form-label fw-semibold">টাকার পরিমাণ / Amount (৳)</label>
+                        <input type="number" class="form-control" id="invAmount" placeholder="৫০০" required>
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn text-white rounded-pill px-4" style="background-color: var(--primary-blue); border: none;">Issue Invoice</button>
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">বাতিল</button>
+                    <button type="submit" class="btn text-white rounded-pill px-4" style="background-color: var(--primary-blue); border: none;">ইস্যু করুন</button>
                 </div>
             </form>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content border-0 shadow text-center p-3" style="border-radius: 16px;">
+            <div class="modal-body py-3">
+                <div class="text-danger mb-3">
+                    <i class="bi bi-exclamation-triangle-fill display-4"></i>
+                </div>
+                <h5 class="fw-bold mb-2" id="deleteModalTitle">চালান ডিলেট করুন</h5>
+                <p class="text-muted small mb-0" id="deleteModalText">আপনি কি নিশ্চিত যে এই ইনভয়েসটি মুছে ফেলতে চান?</p>
+            </div>
+            <div class="d-flex justify-content-center gap-2 pb-2">
+                <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">না</button>
+                <button type="button" class="btn btn-danger rounded-pill px-4" id="confirmDeleteBtn">হ্যাঁ, ডিলেট করুন</button>
+            </div>
         </div>
     </div>
 </div>
@@ -83,10 +119,13 @@
 
 {% block extra_js %}
 <script>
+    let deleteMode = 'single'; // 'single' | 'selected' | 'all'
+    let invoiceToDelete = null;
+
     const defaultInvoices = [
-        { id: "INV-9201", name: "David Vance", cls: "Class 8", type: "Tuition Fee", due: "2026-08-01", amount: 150, status: "Paid" },
-        { id: "INV-9202", name: "Emily Rose", cls: "Class 7", type: "Tuition Fee", due: "2026-08-01", amount: 150, status: "Partial" },
-        { id: "INV-9203", name: "Alex Wright", cls: "Class 6", type: "Exam Fee", due: "2026-07-25", amount: 80, status: "Overdue" }
+        { id: "INV-9201", name: "David Vance", cls: "Class 8", type: "Tuition Fee", due: "2026-08-01", amount: 1500, status: "Paid" },
+        { id: "INV-9202", name: "Emily Rose", cls: "Class 7", type: "Tuition Fee", due: "2026-08-01", amount: 1500, status: "Partial" },
+        { id: "INV-9203", name: "Alex Wright", cls: "Class 6", type: "Exam Fee", due: "2026-07-25", amount: 800, status: "Overdue" }
     ];
 
     function getInvoices() {
@@ -101,28 +140,87 @@
     function renderInvoices() {
         const invoices = getInvoices();
         const tbody = document.getElementById('invoiceTableBody');
+        const countBadge = document.getElementById('invoiceCount');
+        
         tbody.innerHTML = '';
+        if (countBadge) countBadge.innerText = `মোট চালান: ${invoices.length}টি`;
+
+        const selectAll = document.getElementById('selectAllCheck');
+        if (selectAll) selectAll.checked = false;
+        updateSelectedCount();
+
+        if (invoices.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="9" class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox display-6 d-block mb-2"></i>
+                        কোনো ইনভয়েস তথ্য পাওয়া যায়নি। নতুন চালান তৈরি করতে উপরের বোতামটি চাপুন।
+                    </td>
+                </tr>
+            `;
+            return;
+        }
 
         invoices.forEach(inv => {
             let badgeClass = "bg-success";
-            if (inv.status === 'Partial') badgeClass = "bg-warning text-dark";
-            if (inv.status === 'Overdue') badgeClass = "bg-danger";
+            let statusText = inv.status;
+            if (inv.status === 'Paid') statusText = 'পরিশোধিত (Paid)';
+            if (inv.status === 'Partial') { badgeClass = "bg-warning text-dark"; statusText = 'আংশিক (Partial)'; }
+            if (inv.status === 'Overdue') { badgeClass = "bg-danger"; statusText = 'বকেয়া (Overdue)'; }
 
             tbody.insertAdjacentHTML('beforeend', `
                 <tr>
+                    <td class="text-center">
+                        <input class="form-check-input row-checkbox" type="checkbox" value="${inv.id}" onchange="updateSelectedCount()">
+                    </td>
                     <td class="fw-bold">${inv.id}</td>
                     <td class="fw-semibold">${inv.name}</td>
                     <td>${inv.cls}</td>
                     <td>${inv.type}</td>
                     <td>${inv.due}</td>
-                    <td class="fw-bold">$${inv.amount}</td>
-                    <td><span class="badge ${badgeClass} rounded-pill px-2.5">${inv.status}</span></td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-secondary" onclick="markPaid('${inv.id}')" ${inv.status==='Paid'?'disabled':''}><i class="bi bi-check-circle"></i> Mark Paid</button>
+                    <td class="fw-bold">৳${Number(inv.amount).toLocaleString()}</td>
+                    <td><span class="badge ${badgeClass} rounded-pill px-2.5">${statusText}</span></td>
+                    <td class="text-center">
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button class="btn btn-outline-success" onclick="markPaid('${inv.id}')" ${inv.status==='Paid'?'disabled':''} title="Mark Paid">
+                                <i class="bi bi-check-circle me-1"></i>Paid
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="promptDeleteInvoice('${inv.id}', '${inv.name}')" title="Delete Invoice">
+                                <i class="bi bi-trash me-1"></i>ডিলেট
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `);
         });
+    }
+
+    function toggleSelectAll(master) {
+        const checkboxes = document.querySelectorAll('.row-checkbox');
+        checkboxes.forEach(cb => cb.checked = master.checked);
+        updateSelectedCount();
+    }
+
+    function updateSelectedCount() {
+        const selectedCBs = document.querySelectorAll('.row-checkbox:checked');
+        const count = selectedCBs.length;
+        const btn = document.getElementById('btnDeleteSelected');
+        const countBadge = document.getElementById('selectedCount');
+        
+        if (btn && countBadge) {
+            if (count > 0) {
+                btn.classList.remove('d-none');
+                countBadge.innerText = count;
+            } else {
+                btn.classList.add('d-none');
+            }
+        }
+
+        const allCBs = document.querySelectorAll('.row-checkbox');
+        const selectAll = document.getElementById('selectAllCheck');
+        if (selectAll && allCBs.length > 0) {
+            selectAll.checked = (selectedCBs.length === allCBs.length);
+        }
     }
 
     function loadStudents() {
@@ -130,9 +228,24 @@
         const students = stored ? JSON.parse(stored) : [];
         const select = document.getElementById('invStudent');
         select.innerHTML = '';
-        students.forEach(st => {
-            select.insertAdjacentHTML('beforeend', `<option value="${st.name}|${st.cls}">${st.name} (${st.cls})</option>`);
-        });
+
+        if (students.length === 0) {
+            const fallbackStudents = [
+                { name: "MD OLIUL ISLAM SAYEM", cls: "Class 6" },
+                { name: "David Vance", cls: "Class 8" },
+                { name: "Emily Rose", cls: "Class 7" },
+                { name: "Alex Wright", cls: "Class 6" }
+            ];
+            fallbackStudents.forEach(st => {
+                select.insertAdjacentHTML('beforeend', `<option value="${st.name}|${st.cls}">${st.name} (${st.cls})</option>`);
+            });
+        } else {
+            students.forEach(st => {
+                const sName = st.name || st.student_name_bn || st.student_name_en || "Student";
+                const sCls = st.cls || st.desired_class || "Class 6";
+                select.insertAdjacentHTML('beforeend', `<option value="${sName}|${sCls}">${sName} (${sCls})</option>`);
+            });
+        }
     }
 
     function saveInvoice(event) {
@@ -151,7 +264,9 @@
         });
         localStorage.setItem('school_invoices', JSON.stringify(invoices));
         
-        bootstrap.Modal.getInstance(document.getElementById('invoiceModal')).hide();
+        const modalEl = document.getElementById('invoiceModal');
+        const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        modal.hide();
         document.getElementById('invoiceForm').reset();
         renderInvoices();
     }
@@ -166,9 +281,67 @@
         renderInvoices();
     }
 
+    // --- DELETE FUNCTIONS ---
+    function promptDeleteInvoice(id, studentName) {
+        deleteMode = 'single';
+        invoiceToDelete = id;
+        document.getElementById('deleteModalTitle').innerText = 'চালান ডিলেট করুন';
+        document.getElementById('deleteModalText').innerText = `আপনি কি নিশ্চিত যে ${studentName}-এর চালান (${id}) স্থায়ীভাবে মুছে ফেলতে চান?`;
+        const delModalEl = document.getElementById('deleteModal');
+        const modal = bootstrap.Modal.getOrCreateInstance(delModalEl);
+        modal.show();
+    }
+
+    function promptDeleteSelected() {
+        const selected = Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => cb.value);
+        if (selected.length === 0) return;
+        deleteMode = 'selected';
+        document.getElementById('deleteModalTitle').innerText = 'নির্বাচিত চালান ডিলেট';
+        document.getElementById('deleteModalText').innerText = `আপনি কি নিশ্চিত যে নির্বাচিত ${selected.length}টি ইনভয়েস স্থায়ীভাবে মুছে ফেলতে চান?`;
+        const delModalEl = document.getElementById('deleteModal');
+        const modal = bootstrap.Modal.getOrCreateInstance(delModalEl);
+        modal.show();
+    }
+
+    function deleteAllInvoices() {
+        const invoices = getInvoices();
+        if (invoices.length === 0) {
+            alert('মুছে ফেলার মতো কোনো ইনভয়েস পাওয়া যায়নি।');
+            return;
+        }
+        deleteMode = 'all';
+        document.getElementById('deleteModalTitle').innerText = 'সকল চালান খালি করুন';
+        document.getElementById('deleteModalText').innerText = 'আপনি কি নিশ্চিত যে রেজিস্টার থেকে সকল ইনভয়েস এক ক্লিকে স্থায়ীভাবে মুছে ফেলতে চান?';
+        const delModalEl = document.getElementById('deleteModal');
+        const modal = bootstrap.Modal.getOrCreateInstance(delModalEl);
+        modal.show();
+    }
+
+    document.getElementById('confirmDeleteBtn').addEventListener('click', () => {
+        let invoices = getInvoices();
+        if (deleteMode === 'single' && invoiceToDelete) {
+            invoices = invoices.filter(inv => inv.id !== invoiceToDelete);
+            invoiceToDelete = null;
+        } else if (deleteMode === 'selected') {
+            const selected = Array.from(document.querySelectorAll('.row-checkbox:checked')).map(cb => cb.value);
+            invoices = invoices.filter(inv => !selected.includes(inv.id));
+        } else if (deleteMode === 'all') {
+            invoices = [];
+        }
+        
+        localStorage.setItem('school_invoices', JSON.stringify(invoices));
+        
+        const delModalEl = document.getElementById('deleteModal');
+        const modal = bootstrap.Modal.getInstance(delModalEl);
+        if (modal) modal.hide();
+        
+        renderInvoices();
+    });
+
     document.addEventListener("DOMContentLoaded", () => {
         renderInvoices();
         loadStudents();
     });
 </script>
 {% endblock %}
+
