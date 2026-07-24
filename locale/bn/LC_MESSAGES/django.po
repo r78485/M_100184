@@ -47,6 +47,45 @@ msgstr "ক্লাস ও সেকশন"
 msgid "Subjects"
 msgstr "বিষয়সমূহ"
 
+msgid "NCTB Subjects (Class 6 - 8)"
+msgstr "জাতীয় শিক্ষাক্রম বিষয়াবলী (Class 6 - 8)"
+
+msgid "Manage board curriculum subjects, edit course names, and assign to target grades."
+msgstr "এনসিটিবি কর্তৃক নির্ধারিত বিষয়াবলী ও বিষয় কোড পর্যবেক্ষণ, সংশোধন এবং নতুন বিষয় যুক্ত করুন।"
+
+msgid "Reset NCTB Subjects"
+msgstr "রিসেট NCTB বিষয়"
+
+msgid "Print Curriculum"
+msgstr "প্রিন্ট কারিকুলাম"
+
+msgid "Add Custom Subject"
+msgstr "নতুন বিষয় যুক্ত করুন"
+
+msgid "Filter by Class:"
+msgstr "শ্রেণী অনুযায়ী ফিল্টার:"
+
+msgid "All Classes"
+msgstr "সব শ্রেণী (All)"
+
+msgid "Total Subjects:"
+msgstr "মোট বিষয়:"
+
+msgid "Subject Title"
+msgstr "বিষয়ের নাম"
+
+msgid "Subject Code"
+msgstr "বিষয় কোড"
+
+msgid "Target Class"
+msgstr "টার্গেট শ্রেণী"
+
+msgid "Board Curriculum"
+msgstr "কারিকুলাম"
+
+msgid "Actions"
+msgstr "কার্যক্রম"
+
 msgid "Students"
 msgstr "শিক্ষার্থীবৃন্দ"
 
@@ -604,43 +643,4 @@ msgstr "রুটিন"
 
 msgid "Clean Exam Routine for Students & Parents — Download & Print"
 msgstr "শিক্ষার্থী ও অভিভাবকদের জন্য পরিচ্ছন্ন পরীক্ষার রুটিন — ডাউনলোড ও প্রিন্ট করুন"
-
-msgid "NCTB Subjects (Class 6 - 8)"
-msgstr "জাতীয় শিক্ষাক্রম বিষয়াবলী (Class 6 - 8)"
-
-msgid "Manage board curriculum subjects, edit course names, and assign to target grades."
-msgstr "এনসিটিবি কর্তৃক নির্ধারিত বিষয়াবলী ও বিষয় কোড পর্যবেক্ষণ, সংশোধন এবং নতুন বিষয় যুক্ত করুন।"
-
-msgid "Reset NCTB Subjects"
-msgstr "রিসেট NCTB বিষয়"
-
-msgid "Print Curriculum"
-msgstr "প্রিন্ট কারিকুলাম"
-
-msgid "Add Custom Subject"
-msgstr "নতুন বিষয় যুক্ত করুন"
-
-msgid "Filter by Class:"
-msgstr "শ্রেণী অনুযায়ী ফিল্টার:"
-
-msgid "All Classes"
-msgstr "সব শ্রেণী (All)"
-
-msgid "Total Subjects:"
-msgstr "মোট বিষয়:"
-
-msgid "Subject Title"
-msgstr "বিষয়ের নাম"
-
-msgid "Subject Code"
-msgstr "বিষয় কোড"
-
-msgid "Target Class"
-msgstr "টার্গেট শ্রেণী"
-
-msgid "Board Curriculum"
-msgstr "কারিকুলাম"
-
-msgid "Actions"
-msgstr "কার্যক্রম"
 

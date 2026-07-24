@@ -5,6 +5,9 @@
 
 {% block extra_css %}
 <style>
+    body, html, .container-fluid {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
     .bh-header {
         background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
         border-radius: 20px;
@@ -18,7 +21,7 @@
     }
     
     @media print {
-        body { background: #fff !important; font-family: 'SolaimanLipi', sans-serif; }
+        body { background: #fff !important; font-family: 'Inter', 'Segoe UI', sans-serif; }
         .no-print, .top-navbar, .sidebar, header, nav, footer { display: none !important; }
         #behaviourPrintArea { display: block !important; position: absolute; top:0; left:0; width:100%; padding:20px; }
     }
@@ -62,17 +65,17 @@
             <div class="card custom-card p-4">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div>
-                        <h5 class="fw-bold mb-1" style="color: var(--primary-blue);"><i class="bi bi-bar-chart-line me-2"></i>Student Progress & Merit Report (শ্রেণীভিত্তিক ও একক প্রগ্রেস ও রেটিং রিপোর্ট)</h5>
-                        <p class="text-muted small mb-0">শ্রেণীভিত্তিক এবং শিক্ষার্থী অনুযায়ী ডিসিপ্লিন, পাঙ্কচুয়ালিটি, উপস্থিতি এবং পারফরম্যান্স রেটিং রিপোর্ট তৈরি করুন।</p>
+                        <h5 class="fw-bold mb-1" style="color: var(--primary-blue);"><i class="bi bi-bar-chart-line me-2"></i>Student Progress & Merit Report</h5>
+                        <p class="text-muted small mb-0">Generate class-wide and individual student discipline, punctuality, attendance, and performance rating reports.</p>
                     </div>
-                    <button class="btn btn-primary fw-bold" onclick="printProgressReport()"><i class="bi bi-printer me-2"></i>প্রিন্ট করুন / Print Progress Report</button>
+                    <button class="btn btn-primary fw-bold" onclick="printProgressReport()"><i class="bi bi-printer me-2"></i>Print Progress Report</button>
                 </div>
 
                 <div class="row g-3 mb-4 border-bottom pb-3">
                     <div class="col-md-5">
-                        <label class="form-label fw-semibold small">শ্রেণী নির্বাচন করুন / Select Class</label>
+                        <label class="form-label fw-semibold small">Select Class</label>
                         <select class="form-select" id="bhClassFilter" onchange="renderProgressReports()">
-                            <option value="All">সকল শ্রেণী / All Classes</option>
+                            <option value="All">All Classes</option>
                             <option value="Class 6">Class 6</option>
                             <option value="Class 7">Class 7</option>
                             <option value="Class 8">Class 8</option>
@@ -81,9 +84,9 @@
                         </select>
                     </div>
                     <div class="col-md-5">
-                        <label class="form-label fw-semibold small">নির্দিষ্ট শিক্ষার্থী / Select Student</label>
+                        <label class="form-label fw-semibold small">Select Student</label>
                         <select class="form-select" id="bhStudentFilter" onchange="renderProgressReports()">
-                            <option value="All">সকল শিক্ষার্থী (Class-wise All Students)</option>
+                            <option value="All">All Students</option>
                         </select>
                     </div>
                 </div>
@@ -196,15 +199,17 @@
         const select = document.getElementById('bhStudentFilter');
         const pointSelect = document.getElementById('pointStudent');
         if (select) {
-            select.innerHTML = '<option value="All">সকল শিক্ষার্থী (Class-wise All Students)</option>';
+            select.innerHTML = '<option value="All">All Students</option>';
             students.forEach(st => {
-                select.insertAdjacentHTML('beforeend', `<option value="${st.id}">${st.name_bn || st.name_en || st.name} (Roll: ${st.roll} - ${st.cls || 'Class 6'})</option>`);
+                const sName = st.name_en || st.name || st.name_bn;
+                select.insertAdjacentHTML('beforeend', `<option value="${st.id}">${sName} (Roll: ${st.roll} - ${st.cls || 'Class 6'})</option>`);
             });
         }
         if (pointSelect) {
             pointSelect.innerHTML = '';
             students.forEach(st => {
-                pointSelect.insertAdjacentHTML('beforeend', `<option value="${st.name_en || st.name}|${st.cls || 'Class 6'}">${st.name_bn || st.name_en || st.name} (${st.cls || 'Class 6'})</option>`);
+                const sName = st.name_en || st.name || st.name_bn;
+                pointSelect.insertAdjacentHTML('beforeend', `<option value="${sName}|${st.cls || 'Class 6'}">${sName} (${st.cls || 'Class 6'})</option>`);
             });
         }
     }
@@ -226,11 +231,13 @@
         container.innerHTML = '';
 
         if (students.length === 0) {
-            container.innerHTML = '<div class="text-center p-5 text-muted fw-bold">কোনো শিক্ষার্থীর তথ্য পাওয়া যায়নি।</div>';
+            container.innerHTML = '<div class="text-center p-5 text-muted fw-bold">No student records found for the selected criteria.</div>';
             return;
         }
 
         students.forEach((st, idx) => {
+            const displayName = st.name_en || st.name || st.name_bn;
+            const guardianName = st.guardian || st.father || 'N/A';
             const reportHtml = `
                 <div class="card border rounded-3 p-4 mb-4 shadow-sm bg-white">
                     <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
@@ -239,15 +246,15 @@
                                 ${st.roll}
                             </div>
                             <div>
-                                <h5 class="fw-bold mb-1 text-dark">${st.name_bn || st.name_en || st.name}</h5>
+                                <h5 class="fw-bold mb-1 text-dark">${displayName}</h5>
                                 <span class="badge bg-primary-subtle text-primary me-2">${st.cls || 'Class 6'}</span>
-                                <span class="badge bg-secondary-subtle text-secondary me-2">অভিভাবক: ${st.guardian || st.father || 'N/A'}</span>
-                                <span class="badge bg-light text-dark border">ফোন: ${st.phone || 'N/A'}</span>
+                                <span class="badge bg-secondary-subtle text-secondary me-2">Guardian: ${guardianName}</span>
+                                <span class="badge bg-light text-dark border">Phone: ${st.phone || 'N/A'}</span>
                             </div>
                         </div>
                         <div class="text-end">
                             <span class="badge bg-success-subtle text-success fs-6 px-3 py-2 border border-success">
-                                <i class="bi bi-check-circle-fill me-1"></i>উত্তীর্ণের সুপারিশ: PASSED & RECOMMENDED FOR PROMOTION
+                                <i class="bi bi-check-circle-fill me-1"></i>Status: PASSED & RECOMMENDED FOR PROMOTION
                             </span>
                         </div>
                     </div>
@@ -256,30 +263,30 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-3">
                             <div class="p-3 border rounded text-center bg-light">
-                                <small class="text-muted fw-semibold d-block mb-1">Discipline Rating (শৃঙ্খলা)</small>
+                                <small class="text-muted fw-semibold d-block mb-1">Discipline Rating</small>
                                 <div class="fs-5 rating-star mb-1">⭐⭐⭐⭐⭐</div>
-                                <span class="fw-bold text-success small">৫.০ / ৫.০ (Outstanding)</span>
+                                <span class="fw-bold text-success small">5.0 / 5.0 (Outstanding)</span>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="p-3 border rounded text-center bg-light">
-                                <small class="text-muted fw-semibold d-block mb-1">Punctuality & Habit (নিয়মানুবর্তিতা)</small>
+                                <small class="text-muted fw-semibold d-block mb-1">Punctuality & Habits</small>
                                 <div class="fs-5 rating-star mb-1">⭐⭐⭐⭐⭐</div>
-                                <span class="fw-bold text-success small">৫.০ / ৫.০ (Exemplary)</span>
+                                <span class="fw-bold text-success small">5.0 / 5.0 (Exemplary)</span>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="p-3 border rounded text-center bg-light">
-                                <small class="text-muted fw-semibold d-block mb-1">Attendance Rate (উপস্থিতি)</small>
-                                <div class="fs-4 fw-bold text-primary mb-1">৯৬.৫%</div>
-                                <span class="fw-bold text-primary small">নিয়মিত শিক্ষার্থী</span>
+                                <small class="text-muted fw-semibold d-block mb-1">Attendance Rate</small>
+                                <div class="fs-4 fw-bold text-primary mb-1">96.5%</div>
+                                <span class="fw-bold text-primary small">Regular Student</span>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="p-3 border rounded text-center bg-light">
-                                <small class="text-muted fw-semibold d-block mb-1">Co-Curricular Rank (মেধা ও প্রতিযোগিতা)</small>
-                                <div class="fs-4 fw-bold text-purple mb-1">১ম স্থান (1st Rank)</div>
-                                <span class="fw-bold text-dark small">বিজ্ঞান ও বিতর্ক ক্লাব</span>
+                                <small class="text-muted fw-semibold d-block mb-1">Co-Curricular & Merit Rank</small>
+                                <div class="fs-4 fw-bold text-purple mb-1">1st Rank</div>
+                                <span class="fw-bold text-dark small">Science & Debate Club</span>
                             </div>
                         </div>
                     </div>
@@ -288,30 +295,30 @@
                     <table class="table table-bordered align-middle small text-center mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th>মূল্যায়ন সূচক (Evaluation Metric)</th>
-                                <th>রেটিং (Rating)</th>
-                                <th>গ্রেড (Assessment Grade)</th>
-                                <th>শিক্ষকের মন্তব্য (Remarks)</th>
+                                <th>Evaluation Metric</th>
+                                <th>Rating</th>
+                                <th>Assessment Grade</th>
+                                <th>Remarks</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
-                                <td>শ্রেণীকক্ষে আচরণ ও পারস্পরিক সম্মান (Classroom Conduct)</td>
-                                <td>৫ / ৫ ⭐</td>
-                                <td><span class="badge bg-success">অতি উত্তম (Excellent)</span></td>
-                                <td>বিনয়ী, শিক্ষক ও সহপাঠীদের প্রতি শ্রদ্ধাশীল।</td>
+                                <td>Classroom Conduct & Respect</td>
+                                <td>5 / 5 ⭐</td>
+                                <td><span class="badge bg-success">Excellent</span></td>
+                                <td>Polite, respectful to teachers and peers.</td>
                             </tr>
                             <tr>
-                                <td>হোমওয়ার্ক ও কুইজ টেস্টে ধারাবাহিকতা (Homework & Test)</td>
-                                <td>৫ / ৫ ⭐</td>
-                                <td><span class="badge bg-success">অসাধারণ (Outstanding)</span></td>
-                                <td>সকল বাড়ির কাজ ও কুইজ টেস্টে প্রথম সারিতে থাকে।</td>
+                                <td>Homework & Test Consistency</td>
+                                <td>5 / 5 ⭐</td>
+                                <td><span class="badge bg-success">Outstanding</span></td>
+                                <td>Consistently top-ranked in all homework and quizzes.</td>
                             </tr>
                             <tr>
-                                <td>নেতৃত্ব ও দলগত মনোভাব (Leadership & Teamwork)</td>
-                                <td>৪.৮ / ৫ ⭐</td>
-                                <td><span class="badge bg-primary">উত্তম (Very Good)</span></td>
-                                <td>গ্রুপ স্টাডি ও টিম প্রজেক্টে চমৎকার নেতৃত্ব দেয়।</td>
+                                <td>Leadership & Teamwork</td>
+                                <td>4.8 / 5 ⭐</td>
+                                <td><span class="badge bg-primary">Very Good</span></td>
+                                <td>Demonstrates excellent leadership in group activities.</td>
                             </tr>
                         </tbody>
                     </table>
@@ -327,9 +334,9 @@
         if (container && printArea) {
             printArea.innerHTML = `
                 <div class="text-center mb-4">
-                    <h2 class="fw-bold" style="color:#0f766e;">গাজী মাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়</h2>
+                    <h2 class="fw-bold" style="color:#0f766e;">Digital School Management ERP</h2>
                     <p class="mb-0 text-muted">Student Behaviour, Skills & Merit Progress Report</p>
-                    <small>মুদ্রণের তারিখ: ${new Date().toLocaleDateString('bn-BD')}</small>
+                    <small>Print Date: ${new Date().toLocaleDateString('en-US')}</small>
                 </div>
                 ${container.innerHTML}
             `;
@@ -400,3 +407,4 @@
     });
 </script>
 {% endblock %}
+
