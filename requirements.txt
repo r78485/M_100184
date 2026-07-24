@@ -3,6 +3,10 @@ gunicorn
 dj-database-url
 psycopg2-binary
 whitenoise
+qrcode
+python-barcode
+Pillow
+reportlab
 google-api-python-client
 google-auth-httplib2
 google-auth-oauthlib
