@@ -1,0 +1,91 @@
+{% load static %}
+{% comment %}
+  ID Card BACK side — included from id_cards.html
+  Variables: student, barcode_b64, school_profile
+{% endcomment %}
+
+{% with school_name=school_profile.name_bn|default:"গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়" school_addr=school_profile.address|default:"বরগুনা সদর, বরগুনা।" school_eiin=school_profile.eiin|default:"100184" school_est=school_profile.established|default:"1983" school_mobile=school_profile.mobile|default:"017309100184" school_email=school_profile.email|default:"school100184@gmail.com" %}
+
+<div class="id-card">
+    <div class="card-inner">
+
+        <!-- Lanyard Clip -->
+        <div class="card-clip"></div>
+
+        <!-- Back Title Header -->
+        <div class="back-header">
+            {% if school_profile and school_profile.logo %}
+                <img src="{{ school_profile.logo.url }}" alt="Logo" class="school-logo" style="width:32px; height:32px;">
+            {% else %}
+                <svg class="school-logo-svg" style="width:32px; height:32px;" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="48" fill="#0d3b66" stroke="#c0392b" stroke-width="3"/>
+                    <circle cx="50" cy="50" r="36" fill="none" stroke="#fff" stroke-width="1.5"/>
+                    <text x="50" y="40" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold" font-family="serif">বিদ্যালয়</text>
+                    <path d="M35 60 L50 45 L65 60 L60 60 L50 50 L40 60 Z" fill="#fff"/>
+                </svg>
+            {% endif %}
+            <div class="back-heading">নির্দেশনাবলী ও তথ্য</div>
+        </div>
+
+        <!-- Back Content -->
+        <div class="back-body">
+            <!-- Section 1 -->
+            <div>
+                <div class="back-section-title">১. কার্ডের নির্দেশনাবলী:</div>
+                <ul class="back-list">
+                    <li>এই কার্ড সর্বদা গলায় ঝুলিয়ে রাখা আবশ্যক।</li>
+                    <li>কার্ডটি হস্তান্তরযোগ্য নয়।</li>
+                    <li>হারিয়ে গেলে বা নষ্ট হলে অবিলম্বে বিদ্যালয় কর্তৃপক্ষকে জানাতে হবে।</li>
+                    <li>বিদ্যালয় চলাকালীন কার্ড প্রদর্শন বাধ্যতামূলক।</li>
+                </ul>
+            </div>
+
+            <!-- Section 2 -->
+            <div>
+                <div class="back-section-title">২. অভিভাবকের তথ্য ও যোগাযোগ:</div>
+                <ul class="back-list">
+                    <li><strong>পিতার নাম:</strong> {{ student.father_name|default:"—" }}</li>
+                    <li><strong>মাতার নাম:</strong> {{ student.mother_name|default:"—" }}</li>
+                    <li><strong>মোবাইল নং (জরুরী):</strong> {{ student.mobile|default:"—" }}</li>
+                </ul>
+            </div>
+
+            <!-- Section 3 -->
+            <div>
+                <div class="back-section-title">৩. বিদ্যালয়ের ঠিকানা ও যোগাযোগ:</div>
+                <ul class="back-list">
+                    <li><strong>{{ school_name }}</strong></li>
+                    <li><strong>ঠিকানা:</strong> {{ school_addr }}</li>
+                    <li><strong>EIIN:</strong> {{ school_eiin }} | <strong>স্থাপিত:</strong> {{ school_est }}</li>
+                    <li><strong>মোবাইল:</strong> {{ school_mobile }}</li>
+                    <li><strong>ইমেইল:</strong> {{ school_email }}</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Hologram Strip -->
+        <div class="hologram">
+            <span>SECURITY</span>
+            <span>GAZI MAHMUD SCHOOL</span>
+            <span>SECURITY</span>
+        </div>
+
+        <!-- Back Footer: Barcode -->
+        <div class="back-footer">
+            <div class="barcode-area">
+                {% if barcode_b64 %}
+                    <img src="data:image/png;base64,{{ barcode_b64 }}" alt="Barcode" class="barcode-img">
+                {% else %}
+                    <div class="barcode-fake"></div>
+                {% endif %}
+                <div class="barcode-no">{{ student.admission_no|default:"—" }}</div>
+            </div>
+        </div>
+
+        <!-- Security Bar -->
+        <div class="security-bar"></div>
+
+    </div>
+</div>
+
+{% endwith %}

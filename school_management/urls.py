@@ -42,6 +42,8 @@ urlpatterns = [
     # Public Pages
     path('online-admission/', TemplateView.as_view(template_name='online_admission.html'), name='online_admission'),
     path('admission-slip/<int:admission_id>/', user_views.admission_slip_view, name='admission_slip'),
+    path('id-card/<int:student_id>/', user_views.student_id_card_view, name='student_id_card'),
+    path('id-cards/', user_views.student_id_cards_all_view, name='student_id_cards_all'),
     path('api/save-student/', user_views.api_save_student, name='api_save_student'),
     path('api/students/', user_views.api_get_students, name='api_get_students'),
     path('api/approve-student/<int:student_id>/', user_views.api_approve_student, name='api_approve_student'),

@@ -1,0 +1,143 @@
+{% load static %}
+{% comment %}
+  ID Card FRONT side — included from id_cards.html
+  Variables: student, barcode_b64, school_profile
+{% endcomment %}
+
+{% with school_name=school_profile.name_bn|default:"গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়" school_addr=school_profile.address|default:"বরগুনা সদর, বরগুনা।" school_eiin=school_profile.eiin|default:"100184" school_mobile=school_profile.mobile|default:"017309100184" school_email=school_profile.email|default:"school100184@gmail.com" %}
+
+<div class="id-card">
+    <div class="card-inner">
+
+        <!-- Lanyard Clip -->
+        <div class="card-clip"></div>
+
+        <!-- School Header -->
+        <div class="card-header">
+            {% if school_profile and school_profile.logo %}
+                <img src="{{ school_profile.logo.url }}" alt="Logo" class="school-logo">
+            {% else %}
+                <!-- Embedded school emblem SVG -->
+                <svg class="school-logo-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="50" cy="50" r="48" fill="#0d3b66" stroke="#c0392b" stroke-width="3"/>
+                    <circle cx="50" cy="50" r="36" fill="none" stroke="#fff" stroke-width="1.5"/>
+                    <text x="50" y="40" text-anchor="middle" fill="#fff" font-size="10" font-weight="bold" font-family="serif">বিদ্যালয়</text>
+                    <path d="M30 55 Q50 35 70 55" fill="#f59e0b" stroke="none"/>
+                    <path d="M35 60 L50 45 L65 60 L60 60 L50 50 L40 60 Z" fill="#fff"/>
+                    <text x="50" y="72" text-anchor="middle" fill="#f59e0b" font-size="8" font-weight="bold">SCHOOL</text>
+                </svg>
+            {% endif %}
+            <div class="school-text">
+                <div class="school-name-main">{{ school_name }}</div>
+                <div class="school-sub">{{ school_addr }}</div>
+            </div>
+        </div>
+
+        <div class="card-divider"></div>
+
+        <!-- Title Badge -->
+        <div class="card-title-badge">
+            <span>স্টুডেন্ট ইউনিক আইডি কার্ড</span>
+        </div>
+
+        <!-- Student Photo -->
+        <div class="photo-section">
+            {% if student.photo %}
+                <img src="{{ student.photo.url }}" alt="{{ student.name }}" class="student-photo">
+            {% else %}
+                <div class="photo-placeholder">
+                    <svg width="32" height="32" fill="#94a3b8" viewBox="0 0 24 24">
+                        <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+                    </svg>
+                    <span>ছবি নেই</span>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Student Info -->
+        <div class="info-area">
+            <div class="info-row">
+                <span class="info-label">UNIQUE ID</span>
+                <span class="info-sep">:</span>
+                <span class="info-value uid">{{ student.admission_no|default:"—" }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">শিক্ষার্থীর নাম</span>
+                <span class="info-sep">:</span>
+                <span class="info-value">{{ student.name }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">শ্রেণী / সেকশন</span>
+                <span class="info-sep">:</span>
+                <span class="info-value">{{ student.desired_class }} — {{ student.section }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">রোল নং</span>
+                <span class="info-sep">:</span>
+                <span class="info-value">{{ student.roll_no|default:"—" }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">শিক্ষাবর্ষ</span>
+                <span class="info-sep">:</span>
+                <span class="info-value">{{ student.academic_year|default:"২০২৬" }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">রক্তের গ্রুপ</span>
+                <span class="info-sep">:</span>
+                <span class="info-value">{{ student.blood_group|default:"—" }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">জন্ম তারিখ</span>
+                <span class="info-sep">:</span>
+                <span class="info-value">{{ student.dob|date:"d/m/Y"|default:"—" }}</span>
+            </div>
+        </div>
+
+        <!-- Government Banner -->
+        <div class="gov-banner">
+            <svg class="gov-flag" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+                <rect width="100" height="60" fill="#006a4e"/>
+                <circle cx="48" cy="30" r="20" fill="#f42a41"/>
+            </svg>
+            <div class="gov-text">বাংলাদেশ শিক্ষা মন্ত্রণালয় অনুমোদিত</div>
+        </div>
+
+        <!-- Footer: Signature | Seal | Barcode -->
+        <div class="card-footer">
+            <div class="sig-area">
+                <div class="sig-line"></div>
+                <div class="sig-label">প্রধান শিক্ষক</div>
+            </div>
+
+            <div class="seal-area">
+                {% if school_profile and school_profile.logo %}
+                    <img src="{{ school_profile.logo.url }}" alt="Seal" class="seal-img">
+                {% else %}
+                    <!-- Official Seal SVG Placeholder -->
+                    <svg class="seal-svg-placeholder" viewBox="0 0 100 100">
+                        <circle cx="50" cy="50" r="46" fill="none" stroke="#0d3b66" stroke-width="3"/>
+                        <circle cx="50" cy="50" r="38" fill="none" stroke="#0d3b66" stroke-width="1.5" stroke-dasharray="4,3"/>
+                        <text x="50" y="38" text-anchor="middle" font-size="9" font-weight="bold" fill="#0d3b66">গাজীমাহমুদ</text>
+                        <text x="50" y="50" text-anchor="middle" font-size="8" fill="#0d3b66">বিদ্যালয়</text>
+                        <text x="50" y="62" text-anchor="middle" font-size="8" fill="#c0392b">OFFICIAL SEAL</text>
+                    </svg>
+                {% endif %}
+            </div>
+
+            <div class="barcode-area">
+                {% if barcode_b64 %}
+                    <img src="data:image/png;base64,{{ barcode_b64 }}" alt="Barcode" class="barcode-img">
+                {% else %}
+                    <div class="barcode-fake"></div>
+                {% endif %}
+                <div class="barcode-no">{{ student.admission_no|default:"—" }}</div>
+            </div>
+        </div>
+
+        <!-- Security Bar -->
+        <div class="security-bar"></div>
+
+    </div>
+</div>
+
+{% endwith %}

@@ -1,0 +1,523 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>স্টুডেন্ট আইডি কার্ড — গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়</title>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Inter:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: #e8ecf0;
+            font-family: 'Hind Siliguri', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px 16px 40px;
+            min-height: 100vh;
+        }
+
+        /* ===== TOOLBAR ===== */
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .btn-print {
+            background: #0d3b66;
+            color: #fff;
+            border: none;
+            padding: 11px 30px;
+            font-size: 15px;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+        .btn-print:hover { background: #0a2d50; }
+        .btn-back {
+            background: #fff;
+            color: #374151;
+            border: 1.5px solid #d1d5db;
+            padding: 10px 22px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* ===== CARD WRAPPER (one student = front + back side-by-side) ===== */
+        .card-wrapper {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 36px;
+            page-break-after: always;
+        }
+        .card-wrapper:last-child { page-break-after: auto; }
+
+        /* ===== ID CARD BASE ===== */
+        .id-card {
+            width: 320px;
+            height: 500px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 4px solid #0d3b66;
+            padding: 3px;
+        }
+
+        .card-inner {
+            border: 1.5px solid #c0392b;
+            border-radius: 11px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        /* ===== LANYARD CLIP ===== */
+        .card-clip {
+            width: 60px;
+            height: 12px;
+            background: #cbd5e1;
+            border-radius: 8px;
+            margin: 8px auto 2px;
+            border: 1px solid #b0bec5;
+            flex-shrink: 0;
+        }
+
+        /* ===== HEADER ===== */
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 12px 4px;
+            flex-shrink: 0;
+        }
+
+        .school-logo {
+            width: 46px;
+            height: 46px;
+            object-fit: contain;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+
+        .school-logo-svg {
+            width: 46px;
+            height: 46px;
+            flex-shrink: 0;
+        }
+
+        .school-text {
+            flex: 1;
+            text-align: center;
+        }
+
+        .school-name-main {
+            font-size: 13px;
+            font-weight: 700;
+            color: #0d3b66;
+            line-height: 1.25;
+        }
+
+        .school-sub {
+            font-size: 10px;
+            color: #64748b;
+            font-weight: 600;
+        }
+
+        .card-divider {
+            height: 2.5px;
+            background: linear-gradient(90deg, #0d3b66 0%, #c0392b 100%);
+            margin: 2px 10px;
+            flex-shrink: 0;
+            border-radius: 2px;
+        }
+
+        .card-title-badge {
+            text-align: center;
+            margin: 4px 0 6px;
+            flex-shrink: 0;
+        }
+
+        .card-title-badge span {
+            background: linear-gradient(135deg, #0d3b66, #1a56a0);
+            color: #fff;
+            padding: 3px 20px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        /* ===== PHOTO ===== */
+        .photo-section {
+            display: flex;
+            justify-content: center;
+            padding: 0 12px;
+            flex-shrink: 0;
+        }
+
+        .student-photo {
+            width: 90px;
+            height: 110px;
+            object-fit: cover;
+            border: 2.5px solid #0d3b66;
+            border-radius: 8px;
+            background: #f1f5f9;
+        }
+
+        .photo-placeholder {
+            width: 90px;
+            height: 110px;
+            border: 2.5px solid #0d3b66;
+            border-radius: 8px;
+            background: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        /* ===== INFO AREA ===== */
+        .info-area {
+            flex: 1;
+            padding: 8px 12px 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .info-row {
+            display: flex;
+            font-size: 11.5px;
+            line-height: 1.35;
+            border-bottom: 1px dashed #e2e8f0;
+            padding-bottom: 2px;
+        }
+
+        .info-row:last-child { border-bottom: none; }
+
+        .info-label {
+            font-weight: 700;
+            width: 90px;
+            color: #374151;
+            flex-shrink: 0;
+        }
+
+        .info-sep {
+            color: #94a3b8;
+            margin: 0 4px;
+        }
+
+        .info-value {
+            flex: 1;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .info-value.uid {
+            font-family: 'Inter', monospace;
+            color: #c0392b;
+            font-weight: 700;
+            font-size: 12px;
+        }
+
+        /* ===== GOV BANNER ===== */
+        .gov-banner {
+            background: #006a4e;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 12px;
+            flex-shrink: 0;
+        }
+
+        .gov-flag {
+            width: 22px;
+            height: 22px;
+            flex-shrink: 0;
+        }
+
+        .gov-text {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+        }
+
+        /* ===== FOOTER ===== */
+        .card-footer {
+            height: 80px;
+            padding: 8px 12px 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            background: #fff;
+            flex-shrink: 0;
+        }
+
+        .sig-area {
+            text-align: center;
+            width: 88px;
+            margin-top: 20px;
+        }
+
+        .sig-line {
+            width: 100%;
+            height: 1px;
+            background: #374151;
+            margin-bottom: 3px;
+        }
+
+        .sig-label {
+            font-size: 9.5px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .seal-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 2px;
+        }
+
+        .seal-img {
+            width: 64px;
+            height: 64px;
+            opacity: 0.85;
+            object-fit: contain;
+        }
+
+        /* SVG placeholder seal */
+        .seal-svg-placeholder {
+            width: 60px;
+            height: 60px;
+            opacity: 0.6;
+        }
+
+        .barcode-area {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 8px;
+        }
+
+        .barcode-img {
+            width: 90px;
+            height: 28px;
+            object-fit: fill;
+        }
+
+        .barcode-fake {
+            width: 90px;
+            height: 28px;
+            background: repeating-linear-gradient(
+                90deg,
+                #000 0px, #000 2px, transparent 2px, transparent 4px,
+                #000 4px, #000 8px, transparent 8px, transparent 11px,
+                #000 11px, #000 14px, transparent 14px, transparent 18px,
+                #000 18px, #000 19px, transparent 19px, transparent 22px,
+                #000 22px, #000 27px, transparent 27px, transparent 30px,
+                #000 30px, #000 33px, transparent 33px, transparent 37px,
+                #000 37px, #000 42px, transparent 42px, transparent 44px,
+                #000 44px, #000 47px, transparent 47px, transparent 51px,
+                #000 51px, #000 55px, transparent 55px, transparent 58px,
+                #000 58px, #000 60px, transparent 60px, transparent 63px,
+                #000 63px, #000 68px, transparent 68px, transparent 71px,
+                #000 71px, #000 73px, transparent 73px, transparent 77px,
+                #000 77px, #000 82px, transparent 82px, transparent 90px
+            );
+        }
+
+        .barcode-no {
+            font-size: 9px;
+            letter-spacing: 1px;
+            margin-top: 2px;
+            font-family: 'Inter', monospace;
+            font-weight: 600;
+        }
+
+        .security-bar {
+            height: 10px;
+            background: linear-gradient(90deg, #0d3b66 0%, #0d3b66 65%, #c0392b 65%, #c0392b 100%);
+            flex-shrink: 0;
+        }
+
+        /* ===== BACK SIDE ===== */
+        .back-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px 3px;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .back-heading {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0d3b66;
+            border-bottom: 2px solid #0d3b66;
+            padding-bottom: 2px;
+        }
+
+        .back-body {
+            flex: 1;
+            padding: 6px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        .back-section-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #0d3b66;
+            text-decoration: underline;
+            margin-bottom: 3px;
+        }
+
+        .back-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .back-list li {
+            font-size: 10.5px;
+            font-weight: 600;
+            color: #1f2937;
+            line-height: 1.4;
+            margin-bottom: 2px;
+            padding-left: 10px;
+            position: relative;
+        }
+
+        .back-list li::before {
+            content: '›';
+            position: absolute;
+            left: 0;
+            color: #0d3b66;
+            font-weight: 900;
+        }
+
+        .hologram {
+            background: linear-gradient(90deg,
+                #76c7c0 0%, #98ddca 20%, #ffb6b9 40%, #fae3d9 60%, #a8edea 80%, #76c7c0 100%);
+            padding: 2px 12px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 8.5px;
+            font-weight: 700;
+            color: #1a1a1a;
+            letter-spacing: 1px;
+            border-top: 1px solid #ccc;
+            border-bottom: 1px solid #ccc;
+            opacity: 0.85;
+            flex-shrink: 0;
+        }
+
+        .back-footer {
+            height: 62px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #fff;
+            flex-shrink: 0;
+        }
+
+        /* ===== PRINT ===== */
+        @media print {
+            body { background: #fff; padding: 0; }
+            .toolbar { display: none !important; }
+            .card-wrapper {
+                page-break-after: always;
+                margin: 0;
+                padding: 10px;
+            }
+            .card-wrapper:last-child { page-break-after: auto; }
+            .id-card {
+                box-shadow: none;
+                border-color: #000 !important;
+            }
+            .security-bar {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .gov-banner {
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+
+        @media (max-width: 700px) {
+            .id-card { width: 280px; height: 440px; }
+            .student-photo, .photo-placeholder { width: 75px; height: 92px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="toolbar no-print">
+    <a href="javascript:history.back()" class="btn-back">← ফিরে যান</a>
+    <button class="btn-print" onclick="window.print()">
+        <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/>
+        </svg>
+        আইডি কার্ড প্রিন্ট করুন
+    </button>
+    <a href="/id-cards/" class="btn-back">📋 সকলের কার্ড দেখুন</a>
+</div>
+
+{% if student %}
+{% comment %} Single student mode {% endcomment %}
+<div class="card-wrapper">
+    {% include "id_card_front.html" with student=student barcode_b64=barcode_b64 school_profile=school_profile %}
+    {% include "id_card_back.html" with student=student barcode_b64=barcode_b64 school_profile=school_profile %}
+</div>
+
+{% elif students_data %}
+{% comment %} All students mode {% endcomment %}
+{% for item in students_data %}
+<div class="card-wrapper">
+    {% include "id_card_front.html" with student=item.student barcode_b64=item.barcode_b64 school_profile=school_profile %}
+    {% include "id_card_back.html" with student=item.student barcode_b64=item.barcode_b64 school_profile=school_profile %}
+</div>
+{% empty %}
+<div style="text-align:center; padding:60px; color:#64748b;">
+    <svg width="64" height="64" fill="#cbd5e1" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+    <p style="margin-top:16px; font-size:18px; font-weight:700;">কোনো শিক্ষার্থীর তথ্য পাওয়া যায়নি</p>
+    <p style="font-size:14px; margin-top:6px;">প্রথমে Students পেজ থেকে শিক্ষার্থী যোগ করুন।</p>
+    <a href="/admin-panel/students/" style="display:inline-block; margin-top:16px; background:#0d3b66; color:#fff; padding:10px 24px; border-radius:8px; text-decoration:none; font-weight:700;">Students পেজে যান</a>
+</div>
+{% endfor %}
+{% endif %}
+
+</body>
+</html>

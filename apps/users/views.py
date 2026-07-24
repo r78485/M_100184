@@ -250,10 +250,84 @@ def admission_slip_view(request, admission_id):
     return render(request, 'admission/admission_slip.html', context)
 
 
+# ====================================================================
+#  STUDENT ID CARD VIEWS
+# ====================================================================
+@login_required
+def student_id_card_view(request, student_id):
+    """Render a single student ID card (front + back) as printable page."""
+    try:
+        student = StudentAdmission.objects.get(id=student_id)
+    except StudentAdmission.DoesNotExist:
+        from django.shortcuts import render as django_render
+        return django_render(request, 'admission/admission_slip_not_found.html', {
+            'admission_id': student_id,
+        }, status=404)
+
+    if not student.admission_no:
+        student.admission_no = f"ADM-2026-{student.id:04d}"
+        student.save(update_fields=['admission_no'])
+
+    # Generate barcode image (Code128) as base64
+    try:
+        rv = io.BytesIO()
+        CODE128 = barcode.get_barcode_class('code128')
+        barcode_instance = CODE128(student.admission_no, writer=ImageWriter())
+        barcode_instance.write(rv, options={'write_text': False, 'quiet_zone': 1, 'module_height': 8.0})
+        barcode_b64 = base64.b64encode(rv.getvalue()).decode('utf-8')
+    except Exception:
+        barcode_b64 = ''
+
+    from apps.admit_cards.models import SchoolProfile
+    school_profile = SchoolProfile.objects.first()
+
+    context = {
+        'student': student,
+        'barcode_b64': barcode_b64,
+        'school_profile': school_profile,
+    }
+    return render(request, 'id_cards.html', context)
+
+
+@login_required
+def student_id_cards_all_view(request):
+    """Render ID cards for all students (or filtered by class)."""
+    cls = request.GET.get('class', '')
+    students_qs = StudentAdmission.objects.all().order_by('desired_class', 'roll_no')
+    if cls:
+        students_qs = students_qs.filter(desired_class__icontains=cls)
+
+    from apps.admit_cards.models import SchoolProfile
+    school_profile = SchoolProfile.objects.first()
+
+    students_data = []
+    for student in students_qs:
+        if not student.admission_no:
+            student.admission_no = f"ADM-2026-{student.id:04d}"
+            student.save(update_fields=['admission_no'])
+        try:
+            rv = io.BytesIO()
+            CODE128 = barcode.get_barcode_class('code128')
+            barcode_instance = CODE128(student.admission_no, writer=ImageWriter())
+            barcode_instance.write(rv, options={'write_text': False, 'quiet_zone': 1, 'module_height': 8.0})
+            bc_b64 = base64.b64encode(rv.getvalue()).decode('utf-8')
+        except Exception:
+            bc_b64 = ''
+        students_data.append({'student': student, 'barcode_b64': bc_b64})
+
+    context = {
+        'students_data': students_data,
+        'school_profile': school_profile,
+        'selected_class': cls,
+    }
+    return render(request, 'id_cards.html', context)
+
+
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 from datetime import datetime
+
 
 @csrf_exempt
 def api_save_student(request):
