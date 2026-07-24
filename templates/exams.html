@@ -280,11 +280,14 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 1.4rem; cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
-    z-index: 100;
+    z-index: 99;
 }
 .fab-print:hover {
     transform: scale(1.1);
     box-shadow: 0 8px 28px rgba(124,58,237,0.5);
+}
+@media (max-width: 991px) {
+    .fab-print { bottom: 20px; right: 20px; width: 48px; height: 48px; font-size: 1.2rem; }
 }
 
 /* --- Action Buttons --- */
@@ -636,50 +639,50 @@ body.dark-theme .publish-switch { background: rgba(255,255,255,0.06); color: #94
         <div class="col-lg-3">
             <div class="ex-sidebar-nav">
                 <div class="nav-label">Students Registry</div>
-                <button class="ex-nav-btn active" onclick="switchTab('students-registry', this)">
+                <button type="button" class="ex-nav-btn active" onclick="switchTab('students-registry', this)">
                     <span class="nav-icon"><i class="bi bi-people-fill"></i></span>
                     Students Registry & Command
                     <span class="nav-chevron"><i class="bi bi-chevron-right"></i></span>
                 </button>
 
                 <div class="nav-label mt-2">Exam Setup</div>
-                <button class="ex-nav-btn" onclick="switchTab('create-exam', this)">
+                <button type="button" class="ex-nav-btn" onclick="switchTab('create-exam', this)">
                     <span class="nav-icon"><i class="bi bi-plus-circle"></i></span>
                     Create New Exam
                     <span class="nav-chevron"><i class="bi bi-chevron-right"></i></span>
                 </button>
-                <button class="ex-nav-btn" onclick="switchTab('add-marks', this)">
+                <button type="button" class="ex-nav-btn" onclick="switchTab('add-marks', this)">
                     <span class="nav-icon"><i class="bi bi-pencil-square"></i></span>
                     Add / Update Marks
                     <span class="nav-chevron"><i class="bi bi-chevron-right"></i></span>
                 </button>
 
                 <div class="nav-label mt-2">Results & Reports</div>
-                <button class="ex-nav-btn" onclick="switchTab('result-card', this)">
+                <button type="button" class="ex-nav-btn" onclick="switchTab('result-card', this)">
                     <span class="nav-icon"><i class="bi bi-person-lines-fill"></i></span>
                     Result Card
                     <span class="nav-chevron"><i class="bi bi-chevron-right"></i></span>
                 </button>
-                <button class="ex-nav-btn" onclick="switchTab('result-sheet', this)">
+                <button type="button" class="ex-nav-btn" onclick="switchTab('result-sheet', this)">
                     <span class="nav-icon"><i class="bi bi-table"></i></span>
                     Result Sheet
                     <span class="nav-chevron"><i class="bi bi-chevron-right"></i></span>
                 </button>
 
                 <div class="nav-label mt-2">Scheduling</div>
-                <button class="ex-nav-btn" onclick="switchTab('exam-schedule', this)">
+                <button type="button" class="ex-nav-btn" onclick="switchTab('exam-schedule', this)">
                     <span class="nav-icon"><i class="bi bi-calendar3-event"></i></span>
                     Exam Schedule
                     <span class="nav-chevron"><i class="bi bi-chevron-right"></i></span>
                 </button>
-                <button class="ex-nav-btn" onclick="switchTab('date-sheet', this)">
+                <button type="button" class="ex-nav-btn" onclick="switchTab('date-sheet', this)">
                     <span class="nav-icon"><i class="bi bi-calendar2-week"></i></span>
                     Date Sheet
                     <span class="nav-chevron"><i class="bi bi-chevron-right"></i></span>
                 </button>
 
                 <div class="nav-label mt-2">Print Forms</div>
-                <button class="ex-nav-btn" onclick="switchTab('blank-award', this)">
+                <button type="button" class="ex-nav-btn" onclick="switchTab('blank-award', this)">
                     <span class="nav-icon"><i class="bi bi-printer"></i></span>
                     Blank Award List
                     <span class="nav-chevron"><i class="bi bi-chevron-right"></i></span>
@@ -1239,7 +1242,7 @@ body.dark-theme .publish-switch { background: rgba(255,255,255,0.06); color: #94
 </div>
 
 <!-- Floating Action Button -->
-<button class="fab-print no-print" onclick="window.print()" title="Print Current View">
+<button type="button" class="fab-print no-print" onclick="window.print()" title="Print Current View">
     <i class="bi bi-printer"></i>
 </button>
 
@@ -1422,13 +1425,27 @@ function updateMarkSubjectOptions() {
 function switchTab(panelId, btn) {
     document.querySelectorAll('.ex-panel').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.ex-nav-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('panel-' + panelId).classList.add('active');
-    btn.classList.add('active');
-    if (panelId === 'result-card') {
+    const targetPanel = document.getElementById('panel-' + panelId);
+    if (targetPanel) targetPanel.classList.add('active');
+    if (btn) btn.classList.add('active');
+
+    if (panelId === 'students-registry') {
+        loadExamStudentRegistry();
+    } else if (panelId === 'create-exam') {
+        renderExamList();
+    } else if (panelId === 'result-card') {
         loadResultCard();
     } else if (panelId === 'add-marks') {
         updateMarkSubjectOptions();
         loadMarksGrid();
+    } else if (panelId === 'result-sheet') {
+        loadResultSheet();
+    } else if (panelId === 'exam-schedule') {
+        loadScheduleTimeline();
+    } else if (panelId === 'date-sheet') {
+        loadDateSheet();
+    } else if (panelId === 'blank-award') {
+        generateAwardList();
     }
 }
 
@@ -2033,9 +2050,15 @@ function downloadResultPDF() {
 //  PANEL 4: RESULT SHEET
 // ====================================================================
 function loadResultSheet() {
-    const examId = document.getElementById('rsExamSelect').value;
-    const cls = document.getElementById('rsClassSelect').value;
-    const sec = document.getElementById('rsSectionSelect').value;
+    let examId = document.getElementById('rsExamSelect')?.value;
+    const cls = document.getElementById('rsClassSelect')?.value || '৬ষ্ঠ';
+    const sec = document.getElementById('rsSectionSelect')?.value || 'ক';
+    const exams = getData(KEYS.exams);
+    if ((!examId || examId === 'all') && exams.length) {
+        examId = String(exams[0].id);
+        const sel = document.getElementById('rsExamSelect');
+        if (sel) sel.value = examId;
+    }
     if (!examId) return;
 
     const allMarks = getData(KEYS.marks, {});
@@ -2065,26 +2088,28 @@ function loadResultSheet() {
     results.sort((a, b) => b.total - a.total);
 
     const tbody = document.getElementById('resultSheetBody');
-    tbody.innerHTML = results.map((r, i) => {
-        const grade = getGrade(r.total, SUBJECTS.length * 100);
-        let meritClass = '';
-        if (i === 0) meritClass = 'merit-gold';
-        else if (i === 1) meritClass = 'merit-silver';
-        else if (i === 2) meritClass = 'merit-bronze';
+    if (tbody) {
+        tbody.innerHTML = results.map((r, i) => {
+            const grade = getGrade(r.total, SUBJECTS.length * 100);
+            let meritClass = '';
+            if (i === 0) meritClass = 'merit-gold';
+            else if (i === 1) meritClass = 'merit-silver';
+            else if (i === 2) meritClass = 'merit-bronze';
 
-        return `<tr class="${meritClass}">
-            <td>
-                ${i < 3 ? `<i class="bi bi-trophy-fill" style="color:${i===0?'#f59e0b':i===1?'#9ca3af':'#b45309'}; margin-right:4px;"></i>` : ''}
-                <span class="fw-bold">${i + 1}</span>
-            </td>
-            <td>${r.roll}</td>
-            <td class="fw-semibold">${r.name}</td>
-            <td class="fw-bold">${r.total}</td>
-            <td class="fw-bold" style="color:#7c3aed;">${r.gpa.toFixed(2)}</td>
-            <td><span class="grade-badge ${grade.cls}">${grade.letter}</span></td>
-            <td><span class="badge ${r.hasFail ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'} rounded-pill px-3">${r.hasFail ? 'Fail' : 'Pass'}</span></td>
-        </tr>`;
-    }).join('');
+            return `<tr class="${meritClass}">
+                <td>
+                    ${i < 3 ? `<i class="bi bi-trophy-fill" style="color:${i===0?'#f59e0b':i===1?'#9ca3af':'#b45309'}; margin-right:4px;"></i>` : ''}
+                    <span class="fw-bold">${i + 1}</span>
+                </td>
+                <td>${r.roll}</td>
+                <td class="fw-semibold">${r.name}</td>
+                <td class="fw-bold">${r.total}</td>
+                <td class="fw-bold" style="color:#7c3aed;">${r.gpa.toFixed(2)}</td>
+                <td><span class="grade-badge ${grade.cls}">${grade.letter}</span></td>
+                <td><span class="badge ${r.hasFail ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'} rounded-pill px-3">${r.hasFail ? 'Fail' : 'Pass'}</span></td>
+            </tr>`;
+        }).join('');
+    }
 }
 
 // ====================================================================
@@ -2116,11 +2141,19 @@ function saveScheduleEntry(e) {
 }
 
 function loadScheduleTimeline() {
-    const examId = document.getElementById('schExamSelect').value;
-    const cls = document.getElementById('schClassSelect').value;
+    let examId = document.getElementById('schExamSelect')?.value;
+    const cls = document.getElementById('schClassSelect')?.value || '৬ষ্ঠ';
     const container = document.getElementById('scheduleTimeline');
+    if (!container) return;
 
-    const schedules = getData(KEYS.schedule).filter(s => s.examId === examId && s.cls === cls);
+    const exams = getData(KEYS.exams);
+    if (!examId && exams.length) {
+        examId = String(exams[0].id);
+        const sel = document.getElementById('schExamSelect');
+        if (sel) sel.value = examId;
+    }
+
+    const schedules = getData(KEYS.schedule).filter(s => String(s.examId) === String(examId) && s.cls === cls);
     schedules.sort((a, b) => new Date(a.date) - new Date(b.date));
 
     if (!schedules.length) {
@@ -2132,7 +2165,7 @@ function loadScheduleTimeline() {
 
     container.innerHTML = schedules.map(s => {
         const d = new Date(s.date);
-        const dayName = DAYS_BN[d.getDay()];
+        const dayName = DAYS_BN[d.getDay()] || '';
         return `<div class="timeline-item">
             <div class="timeline-card">
                 <div class="d-flex justify-content-between align-items-start">
@@ -2153,7 +2186,7 @@ function loadScheduleTimeline() {
                     <span><i class="bi bi-person-badge me-1"></i>Invigilator: ${s.invigilator || '—'}</span>
                 </div>
                 <div class="mt-2">
-                    <button class="btn btn-sm btn-outline-danger" onclick="deleteSchedule(${s.id})">
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteSchedule(${s.id})">
                         <i class="bi bi-trash"></i> Remove
                     </button>
                 </div>
@@ -2166,61 +2199,81 @@ function loadScheduleTimeline() {
 //  PANEL 6: DATE SHEET
 // ====================================================================
 function loadDateSheet() {
-    const examId = document.getElementById('dsExamSelect').value;
-    const cls = document.getElementById('dsClassSelect').value;
+    let examId = document.getElementById('dsExamSelect')?.value;
+    const cls = document.getElementById('dsClassSelect')?.value || '৬ষ্ঠ';
     const exams = getData(KEYS.exams);
-    const exam = exams.find(e => e.id === parseInt(examId));
+    if (!examId && exams.length) {
+        examId = String(exams[0].id);
+        const sel = document.getElementById('dsExamSelect');
+        if (sel) sel.value = examId;
+    }
+    const exam = exams.find(e => String(e.id) === String(examId));
 
-    document.getElementById('dsExamTitle').textContent = exam ? `${exam.name} — ${exam.year}` : 'Date Sheet';
-    document.getElementById('dsClassTitle').textContent = `Class: ${cls}`;
+    const dsTitleEl = document.getElementById('dsTitle');
+    if (dsTitleEl) {
+        dsTitleEl.textContent = exam ? `${exam.name} — ${exam.year} | শ্রেণি: ${cls}` : `পরীক্ষার রুটিন — ${cls}`;
+    }
 
-    const schedules = getData(KEYS.schedule).filter(s => s.examId === examId && s.cls === cls);
+    const schedules = getData(KEYS.schedule).filter(s => String(s.examId) === String(examId) && s.cls === cls);
     schedules.sort((a, b) => new Date(a.date) - new Date(b.date));
 
     const tbody = document.getElementById('dateSheetBody');
-    tbody.innerHTML = schedules.map(s => {
-        const d = new Date(s.date);
-        const dayName = DAYS_BN[d.getDay()];
-        return `<tr>
-            <td class="fw-bold">${s.date}</td>
-            <td><span class="badge bg-light text-dark">${dayName}</span></td>
-            <td class="subject-name">${s.subject}</td>
-            <td>${s.start} — ${s.end}</td>
-            <td class="fw-bold">${s.fullMarks || 100}</td>
-        </tr>`;
-    }).join('');
+    if (tbody) {
+        tbody.innerHTML = schedules.length ? schedules.map(s => {
+            const d = new Date(s.date);
+            const dayName = DAYS_BN[d.getDay()] || '';
+            return `<tr>
+                <td class="fw-bold">${s.date}</td>
+                <td><span class="badge bg-light text-dark">${dayName}</span></td>
+                <td class="subject-name">${s.subject}</td>
+                <td>${s.start} — ${s.end}</td>
+                <td class="fw-bold">${s.fullMarks || 100}</td>
+            </tr>`;
+        }).join('') : `<tr><td colspan="5" class="text-center py-4 text-muted">এই শ্রেণি ও পরীক্ষার জন্য কোনো রুটিন শিডিউল পাওয়া যায়নি</td></tr>`;
+    }
 }
 
 // ====================================================================
 //  PANEL 7: BLANK AWARD LIST
 // ====================================================================
 function generateAwardList() {
-    const examId = document.getElementById('awExamSelect').value;
-    const cls = document.getElementById('awClassSelect').value;
-    const sec = document.getElementById('awSectionSelect').value;
-    const subj = document.getElementById('awSubjectSelect').value;
+    let examId = document.getElementById('awExamSelect')?.value;
+    const cls = document.getElementById('awClassSelect')?.value || '৬ষ্ঠ';
+    const sec = document.getElementById('awSectionSelect')?.value || 'ক';
+    const subj = document.getElementById('awSubjectSelect')?.value || 'বাংলা';
     const exams = getData(KEYS.exams);
-    const exam = exams.find(e => e.id === parseInt(examId));
+    if (!examId && exams.length) {
+        examId = String(exams[0].id);
+        const sel = document.getElementById('awExamSelect');
+        if (sel) sel.value = examId;
+    }
+    const exam = exams.find(e => String(e.id) === String(examId));
 
-    document.getElementById('awTitle').textContent = exam ? `${exam.name} — ${exam.year} | নম্বরপত্র` : 'নম্বরপত্র';
-    document.getElementById('awSubTitle').textContent = `বিষয়: ${subj}  |  শ্রেণি: ${cls} (${sec})`;
+    const awTitleEl = document.getElementById('awTitle');
+    if (awTitleEl) awTitleEl.textContent = exam ? `${exam.name} — ${exam.year} | নম্বরপত্র` : 'নম্বরপত্র';
+    const awSubTitleEl = document.getElementById('awSubTitle');
+    if (awSubTitleEl) awSubTitleEl.textContent = `বিষয়: ${subj}  |  শ্রেণি: ${cls} (${sec})`;
 
     const appStudents = getAppStudents();
     const tbody = document.getElementById('awardBody');
-    tbody.innerHTML = appStudents.map((s, i) => `
-        <tr>
-            <td>${i + 1}</td>
-            <td>${s.roll}</td>
-            <td style="text-align:left; padding-left:20px;">${s.name}</td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr>
-    `).join('');
+    if (tbody) {
+        tbody.innerHTML = appStudents.map((s, i) => `
+            <tr>
+                <td>${i + 1}</td>
+                <td>${s.roll}</td>
+                <td style="text-align:left; padding-left:20px;">${s.name}</td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+        `).join('');
+    }
 
-    document.getElementById('awardListContent').style.display = 'block';
-    document.getElementById('awEmptyState').style.display = 'none';
+    const awardContent = document.getElementById('awardListContent');
+    if (awardContent) awardContent.style.display = 'block';
+    const emptyState = document.getElementById('awEmptyState');
+    if (emptyState) emptyState.style.display = 'none';
 }
 
 // ====================================================================
