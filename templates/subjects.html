@@ -4,15 +4,20 @@
 
 {% block content %}
 <div class="container-fluid p-0">
-    <div class="mb-4 d-flex justify-content-between align-items-center">
+    <div class="mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
-            <h2 class="fw-bold mb-1" style="color: var(--primary-blue);">NCTB Subjects (Class 6 - 8)</h2>
-            <p class="text-muted">Manage board curriculum subjects, edit course names, and assign to target grades.</p>
+            <h2 class="fw-bold mb-1" style="color: var(--primary-blue);">NCTB Subjects (Class 6 - 8) / জাতীয় শিক্ষাক্রম বিষয়াবলী</h2>
+            <p class="text-muted mb-0">এনসিটিবি কর্তৃক নির্ধারিত বিষয়াবলী ও বিষয় কোড পর্যবেক্ষণ, সংশোধন এবং নতুন বিষয় যুক্ত করুন।</p>
         </div>
-        <div>
-            <button class="btn btn-outline-secondary rounded-pill px-3 me-2" onclick="window.print()"><i class="bi bi-printer me-1"></i> Print Curriculum</button>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-primary rounded-pill px-3" onclick="resetToNCTB()" title="মূল এনসিটিবি বিষয় তালিকায় রিসেট করুন">
+                <i class="bi bi-arrow-counterclockwise me-1"></i>রিসেট NCTB বিষয়
+            </button>
+            <button class="btn btn-outline-secondary rounded-pill px-3" onclick="window.print()">
+                <i class="bi bi-printer me-1"></i>প্রিন্ট কারিকুলাম
+            </button>
             <button class="btn text-white rounded-pill px-4" style="background-color: var(--secondary-purple); border: none;" data-bs-toggle="modal" data-bs-target="#addSubjectModal">
-                <i class="bi bi-plus-lg me-2"></i>Add Custom Subject
+                <i class="bi bi-plus-lg me-2"></i>নতুন বিষয় যুক্ত করুন
             </button>
         </div>
     </div>
@@ -20,17 +25,29 @@
     <!-- Alerts -->
     <div id="alertPlaceholder"></div>
 
-    <!-- Subjects Table -->
+    <!-- Subjects Table Card -->
     <div class="card custom-card p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <div class="d-flex align-items-center gap-2">
+                <label class="fw-semibold me-1">শ্রেণী অনুযায়ী ফিল্টার:</label>
+                <select class="form-select form-select-sm" id="classFilter" onchange="renderSubjects()" style="width: 140px; border-radius: 8px;">
+                    <option value="All">সব শ্রেণী (All)</option>
+                    <option value="Class 6">Class 6</option>
+                    <option value="Class 7">Class 7</option>
+                    <option value="Class 8">Class 8</option>
+                </select>
+            </div>
+            <span class="badge bg-primary rounded-pill px-3 py-2" id="subjectCount">মোট বিষয়: 0টি</span>
+        </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
-                <thead>
+                <thead class="table-light">
                     <tr>
-                        <th>Subject Title</th>
-                        <th>Subject Code</th>
-                        <th>Target Class</th>
-                        <th>Board Curriculum</th>
-                        <th>Actions</th>
+                        <th>Subject Title / বিষয়ের নাম</th>
+                        <th>Subject Code / বিষয় কোড</th>
+                        <th>Target Class / শ্রেণী</th>
+                        <th>Board Curriculum / কারিকুলাম</th>
+                        <th class="text-center" style="width: 140px;">Actions / কার্যক্রম</th>
                     </tr>
                 </thead>
                 <tbody id="subjectsTableBody">
@@ -41,37 +58,37 @@
     </div>
 </div>
 
-<!-- Add Subject Modal -->
+<!-- Add/Edit Subject Modal -->
 <div class="modal fade" id="addSubjectModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow" style="border-radius: 14px;">
             <div class="modal-header border-0 pb-0">
-                <h5 class="modal-title fw-bold">Add Subject</h5>
+                <h5 class="modal-title fw-bold" id="modalTitle">Add Subject / বিষয় যুক্ত করুন</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form id="addSubjectForm" onsubmit="saveSubject(event)">
                 <div class="modal-body py-3">
                     <input type="hidden" id="editSubjectId">
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Subject Title</label>
-                        <input type="text" class="form-control" id="subjectTitleInput" required>
+                        <label class="form-label fw-semibold">বিষয়ের নাম (Subject Title)</label>
+                        <input type="text" class="form-control" id="subjectTitleInput" placeholder="যেমন: বাংলা (Bangla)" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Subject Code</label>
-                        <input type="text" class="form-control" id="subjectCodeInput" required>
+                        <label class="form-label fw-semibold">বিষয় কোড (Subject Code)</label>
+                        <input type="text" class="form-control" id="subjectCodeInput" placeholder="যেমন: ১০১" required>
                     </div>
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Target Class</label>
+                        <label class="form-label fw-semibold">টার্গেট শ্রেণী (Target Class)</label>
                         <select class="form-select" id="subjectClassSelect" required>
-                            <option>Class 6</option>
-                            <option>Class 7</option>
-                            <option>Class 8</option>
+                            <option value="Class 6">Class 6</option>
+                            <option value="Class 7">Class 7</option>
+                            <option value="Class 8">Class 8</option>
                         </select>
                     </div>
                 </div>
                 <div class="modal-footer border-0 pt-0">
-                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn text-white rounded-pill px-4" style="background-color: var(--primary-blue); border: none;">Save Subject</button>
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">বাতিল</button>
+                    <button type="submit" class="btn text-white rounded-pill px-4" style="background-color: var(--primary-blue); border: none;">সংরক্ষণ করুন</button>
                 </div>
             </form>
         </div>
@@ -81,39 +98,62 @@
 
 {% block extra_js %}
 <script>
-    // NCTB Book Seeds for Class 6, 7, and 8
+    const NCTB_VERSION = "2026_nctb_v3";
+
+    // NCTB Official Subjects & Codes for Class 6, 7, and 8
     const nctbSubjects = [
-        // Class 6
-        { id: 101, title: "বাংলা (Bangla)", code: "BGL-06", cls: "Class 6", nctb: true },
-        { id: 102, title: "English", code: "ENG-06", cls: "Class 6", nctb: true },
-        { id: 103, title: "গণিত (Mathematics)", code: "MAT-06", cls: "Class 6", nctb: true },
-        { id: 104, title: "বিজ্ঞান (Science)", code: "SCI-06", cls: "Class 6", nctb: true },
-        { id: 105, title: "ইতিহাস ও সামাজিক বিজ্ঞান (History & Social Science)", code: "HSS-06", cls: "Class 6", nctb: true },
-        { id: 106, title: "ডিজিটাল প্রযুক্তি (Digital Technology)", code: "DIT-06", cls: "Class 6", nctb: true },
-        { id: 107, title: "জীবন ও জীবিকা (Life & Livelihood)", code: "LAL-06", cls: "Class 6", nctb: true },
-        { id: 108, title: "স্বাস্থ্য সুরক্ষা (Wellbeing)", code: "WEL-06", cls: "Class 6", nctb: true },
-        { id: 109, title: "ধর্ম শিক্ষা (Religious Education)", code: "REL-06", cls: "Class 6", nctb: true },
-        { id: 110, title: "শিল্প ও সংস্কৃতি (Art & Culture)", code: "AAC-06", cls: "Class 6", nctb: true },
+        // --- Class 6 ---
+        { id: 101, title: "বাংলা (Bangla)", code: "১০১", cls: "Class 6", nctb: true },
+        { id: 102, title: "ইংরেজি (English)", code: "১০২", cls: "Class 6", nctb: true },
+        { id: 103, title: "গণিত (Mathematics)", code: "১০৯", cls: "Class 6", nctb: true },
+        { id: 104, title: "বিজ্ঞান (Science)", code: "১১২", cls: "Class 6", nctb: true },
+        { id: 105, title: "ডিজিটাল প্রযুক্তি / তথ্য ও যোগাযোগ প্রযুক্তি (ICT)", code: "১৫৪", cls: "Class 6", nctb: true },
+        { id: 106, title: "ইতিহাস ও সামাজিক বিজ্ঞান (History & Social Science)", code: "১৫৩", cls: "Class 6", nctb: true },
+        { id: 107, title: "জীবন ও জীবিকা / কর্ম ও জীবনমুখী শিক্ষা", code: "১৫৬", cls: "Class 6", nctb: true },
+        { id: 108, title: "স্বাস্থ্য সুরক্ষা / শারীরিক শিক্ষা ও স্বাস্থ্য", code: "১৪৭", cls: "Class 6", nctb: true },
+        { id: 109, title: "শিল্প ও সংস্কৃতি / চারু ও কারুকলা", code: "১৪৮", cls: "Class 6", nctb: true },
+        { id: 110, title: "ইসলাম ধর্ম ও নৈতিক শিক্ষা", code: "১১১", cls: "Class 6", nctb: true },
+        { id: 111, title: "হিন্দুধর্ম ও নৈতিক শিক্ষা", code: "১১২", cls: "Class 6", nctb: true },
+        { id: 112, title: "খ্রিষ্টধর্ম ও নৈতিক শিক্ষা", code: "১১৩", cls: "Class 6", nctb: true },
+        { id: 113, title: "বৌদ্ধধর্ম ও নৈতিক শিক্ষা", code: "১১৪", cls: "Class 6", nctb: true },
 
-        // Class 7
-        { id: 201, title: "বাংলা (Bangla)", code: "BGL-07", cls: "Class 7", nctb: true },
-        { id: 202, title: "English", code: "ENG-07", cls: "Class 7", nctb: true },
-        { id: 203, title: "গণিত (Mathematics)", code: "MAT-07", cls: "Class 7", nctb: true },
-        { id: 204, title: "বিজ্ঞান (Science)", code: "SCI-07", cls: "Class 7", nctb: true },
-        { id: 205, title: "ইতিহাস ও সামাজিক বিজ্ঞান", code: "HSS-07", cls: "Class 7", nctb: true },
-        { id: 206, title: "ডিজিটাল প্রযুক্তি", code: "DIT-07", cls: "Class 7", nctb: true },
+        // --- Class 7 ---
+        { id: 201, title: "বাংলা (Bangla)", code: "১০১", cls: "Class 7", nctb: true },
+        { id: 202, title: "ইংরেজি (English)", code: "১০২", cls: "Class 7", nctb: true },
+        { id: 203, title: "গণিত (Mathematics)", code: "১০৯", cls: "Class 7", nctb: true },
+        { id: 204, title: "বিজ্ঞান (Science)", code: "১১২", cls: "Class 7", nctb: true },
+        { id: 205, title: "ডিজিটাল প্রযুক্তি / তথ্য ও যোগাযোগ প্রযুক্তি (ICT)", code: "১৫৪", cls: "Class 7", nctb: true },
+        { id: 206, title: "ইতিহাস ও সামাজিক বিজ্ঞান (History & Social Science)", code: "১৫৩", cls: "Class 7", nctb: true },
+        { id: 207, title: "জীবন ও জীবিকা / কর্ম ও জীবনমুখী শিক্ষা", code: "১৫৬", cls: "Class 7", nctb: true },
+        { id: 208, title: "স্বাস্থ্য সুরক্ষা / শারীরিক শিক্ষা ও স্বাস্থ্য", code: "১৪৭", cls: "Class 7", nctb: true },
+        { id: 209, title: "শিল্প ও সংস্কৃতি / চারু ও কারুকলা", code: "১৪৮", cls: "Class 7", nctb: true },
+        { id: 210, title: "ইসলাম ধর্ম ও নৈতিক শিক্ষা", code: "১১১", cls: "Class 7", nctb: true },
+        { id: 211, title: "হিন্দুধর্ম ও নৈতিক শিক্ষা", code: "১১২", cls: "Class 7", nctb: true },
+        { id: 212, title: "খ্রিষ্টধর্ম ও নৈতিক শিক্ষা", code: "১১৩", cls: "Class 7", nctb: true },
+        { id: 213, title: "বৌদ্ধধর্ম ও নৈতিক শিক্ষা", code: "১১৪", cls: "Class 7", nctb: true },
 
-        // Class 8
-        { id: 301, title: "বাংলা (Bangla)", code: "BGL-08", cls: "Class 8", nctb: true },
-        { id: 302, title: "English", code: "ENG-08", cls: "Class 8", nctb: true },
-        { id: 303, title: "গণিত (Mathematics)", code: "MAT-08", cls: "Class 8", nctb: true },
-        { id: 304, title: "বিজ্ঞান (Science)", code: "SCI-08", cls: "Class 8", nctb: true }
+        // --- Class 8 ---
+        { id: 301, title: "বাংলা (Bangla)", code: "১০১", cls: "Class 8", nctb: true },
+        { id: 302, title: "ইংরেজি (English)", code: "১০২", cls: "Class 8", nctb: true },
+        { id: 303, title: "গণিত (Mathematics)", code: "১০৯", cls: "Class 8", nctb: true },
+        { id: 304, title: "বিজ্ঞান (Science)", code: "১১২", cls: "Class 8", nctb: true },
+        { id: 305, title: "ডিজিটাল প্রযুক্তি / তথ্য ও যোগাযোগ প্রযুক্তি (ICT)", code: "১৫৪", cls: "Class 8", nctb: true },
+        { id: 306, title: "ইতিহাস ও সামাজিক বিজ্ঞান (History & Social Science)", code: "১৫৩", cls: "Class 8", nctb: true },
+        { id: 307, title: "জীবন ও জীবিকা / কর্ম ও জীবনমুখী শিক্ষা", code: "১৫৬", cls: "Class 8", nctb: true },
+        { id: 308, title: "স্বাস্থ্য সুরক্ষা / শারীরিক শিক্ষা ও স্বাস্থ্য", code: "১৪৭", cls: "Class 8", nctb: true },
+        { id: 309, title: "শিল্প ও সংস্কৃতি / চারু ও কারুকলা", code: "১৪৮", cls: "Class 8", nctb: true },
+        { id: 310, title: "ইসলাম ধর্ম ও নৈতিক শিক্ষা", code: "১১১", cls: "Class 8", nctb: true },
+        { id: 311, title: "হিন্দুধর্ম ও নৈতিক শিক্ষা", code: "১১২", cls: "Class 8", nctb: true },
+        { id: 312, title: "খ্রিষ্টধর্ম ও নৈতিক শিক্ষা", code: "১১৩", cls: "Class 8", nctb: true },
+        { id: 313, title: "বৌদ্ধধর্ম ও নৈতিক শিক্ষা", code: "১১৪", cls: "Class 8", nctb: true }
     ];
 
     function getSubjects() {
         const stored = localStorage.getItem('school_subjects');
-        if (!stored) {
+        const storedVer = localStorage.getItem('school_subjects_ver');
+        if (!stored || storedVer !== NCTB_VERSION) {
             localStorage.setItem('school_subjects', JSON.stringify(nctbSubjects));
+            localStorage.setItem('school_subjects_ver', NCTB_VERSION);
             return nctbSubjects;
         }
         return JSON.parse(stored);
@@ -122,20 +162,38 @@
     function renderSubjects() {
         const subjects = getSubjects();
         const tbody = document.getElementById('subjectsTableBody');
+        const filterVal = document.getElementById('classFilter') ? document.getElementById('classFilter').value : 'All';
+        const countBadge = document.getElementById('subjectCount');
+        
         tbody.innerHTML = '';
+        
+        const filtered = (filterVal === 'All') ? subjects : subjects.filter(s => s.cls === filterVal);
+        if (countBadge) countBadge.innerText = `মোট বিষয়: ${filtered.length}টি`;
 
-        subjects.forEach(sub => {
+        if (filtered.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center py-5 text-muted">
+                        <i class="bi bi-journal-x display-6 d-block mb-2"></i>
+                        কোনো বিষয় তথ্য পাওয়া যায়নি।
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        filtered.forEach(sub => {
             const row = `
                 <tr>
-                    <td class="fw-bold">${sub.title}</td>
-                    <td><code>${sub.code}</code></td>
+                    <td class="fw-bold" style="color: #1e293b;">${sub.title}</td>
+                    <td><code class="bg-light text-dark fs-6 px-2.5 py-1 border rounded">${sub.code}</code></td>
                     <td><span class="badge bg-primary-subtle text-primary rounded-pill px-2.5">${sub.cls}</span></td>
                     <td>
                         <span class="badge ${sub.nctb ? 'bg-success' : 'bg-secondary'} rounded-pill px-2.5">
                             ${sub.nctb ? 'NCTB Curriculum' : 'Local Extension'}
                         </span>
                     </td>
-                    <td>
+                    <td class="text-center">
                         <button class="btn btn-sm btn-outline-secondary me-1" onclick="editSubject(${sub.id})" title="Edit Subject"><i class="bi bi-pencil"></i></button>
                         <button class="btn btn-sm btn-outline-danger" onclick="deleteSubject(${sub.id})" title="Delete Subject"><i class="bi bi-trash"></i></button>
                     </td>
@@ -143,6 +201,15 @@
             `;
             tbody.insertAdjacentHTML('beforeend', row);
         });
+    }
+
+    function resetToNCTB() {
+        if (confirm("আপনি কি নিশ্চিত যে সকল বিষয় এনসিটিবি (NCTB) কারিকুলামের আপডেট তালিকাতে রিসেট করতে চান?")) {
+            localStorage.setItem('school_subjects', JSON.stringify(nctbSubjects));
+            localStorage.setItem('school_subjects_ver', NCTB_VERSION);
+            renderSubjects();
+            showAlert('success', 'NCTB বিষয়াবলী ও বিষয় কোড নতুন তালিকায় সফলভাবে আপডেট করা হয়েছে!');
+        }
     }
 
     function saveSubject(event) {
@@ -155,23 +222,24 @@
         let subjects = getSubjects();
 
         if (id) {
-            // Edit existing
             subjects = subjects.map(sub => {
                 if (sub.id == id) {
                     return { ...sub, title, code, cls };
                 }
                 return sub;
             });
-            showAlert('success', 'Subject updated successfully!');
+            showAlert('success', 'বিষয় তথ্য সফলভাবে আপডেট করা হয়েছে!');
         } else {
-            // Add new
             const newSub = { id: Date.now(), title, code, cls, nctb: false };
             subjects.push(newSub);
-            showAlert('success', `${title} registered under ${cls}!`);
+            showAlert('success', `"${title}" বিষয় (${cls}) যুক্ত করা হয়েছে!`);
         }
 
         localStorage.setItem('school_subjects', JSON.stringify(subjects));
-        bootstrap.Modal.getInstance(document.getElementById('addSubjectModal')).hide();
+        const modalEl = document.getElementById('addSubjectModal');
+        const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+        modal.hide();
+        
         document.getElementById('addSubjectForm').reset();
         document.getElementById('editSubjectId').value = '';
         renderSubjects();
@@ -185,19 +253,21 @@
             document.getElementById('subjectTitleInput').value = sub.title;
             document.getElementById('subjectCodeInput').value = sub.code;
             document.getElementById('subjectClassSelect').value = sub.cls;
+            document.getElementById('modalTitle').innerText = 'Edit Subject / বিষয় সংশোধন';
             
-            const modal = new bootstrap.Modal(document.getElementById('addSubjectModal'));
+            const modalEl = document.getElementById('addSubjectModal');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
             modal.show();
         }
     }
 
     function deleteSubject(id) {
-        if (confirm("Are you sure you want to delete this subject?")) {
+        if (confirm("আপনি কি নিশ্চিত যে এই বিষয়টি স্থায়ীভাবে মুছে ফেলতে চান?")) {
             let subjects = getSubjects();
             subjects = subjects.filter(s => s.id != id);
             localStorage.setItem('school_subjects', JSON.stringify(subjects));
             renderSubjects();
-            showAlert('danger', 'Subject removed.');
+            showAlert('danger', 'বিষয় অপসারণ করা হয়েছে।');
         }
     }
 
@@ -215,3 +285,4 @@
     document.addEventListener("DOMContentLoaded", renderSubjects);
 </script>
 {% endblock %}
+
