@@ -1011,6 +1011,7 @@
                         <td>${statusBadge}</td>
                         <td>
                             ${approveBtn}
+                            <button class="btn btn-sm btn-dark text-white me-1 fw-bold" onclick="openStudentIdCard(${st.id})" title="Print Unique ID Card"><i class="bi bi-person-badge me-1"></i>ID Card</button>
                             <button class="btn btn-sm btn-outline-primary me-1" onclick="editStudent(${st.id})" title="Edit"><i class="bi bi-pencil"></i></button>
                             <button class="btn btn-sm btn-outline-secondary me-1" onclick="printSingleStudent(${st.id})" title="Print Form"><i class="bi bi-printer"></i></button>
                             <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent(${st.id})" title="Delete"><i class="bi bi-trash"></i></button>
@@ -1044,6 +1045,7 @@
                         <td>${statusBadge}</td>
                         <td>
                             ${approveBtn}
+                            <button class="btn btn-sm btn-dark text-white me-1 fw-bold" onclick="openStudentIdCard(${st.id})" title="Print Unique ID Card"><i class="bi bi-person-badge me-1"></i>ID Card</button>
                             <button class="btn btn-sm btn-outline-primary me-1" onclick="editStudent(${st.id})" title="Edit"><i class="bi bi-pencil"></i></button>
                             <button class="btn btn-sm btn-outline-secondary me-1" onclick="printSingleStudent(${st.id})" title="Print Profile"><i class="bi bi-printer"></i></button>
                             <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent(${st.id})" title="Delete"><i class="bi bi-trash"></i></button>
@@ -1502,22 +1504,16 @@
         students.forEach(st => {
             const cardHtml = `
                 <div class="col-md-4 col-sm-6">
-                    <div class="id-card mx-auto shadow border mb-3" style="width: 280px; border-radius: 14px; background: linear-gradient(135deg, #0f766e 0%, #115e59 100%); color: white; overflow: hidden;">
-                        <div class="p-2 text-center" style="background: rgba(0,0,0,0.18); border-bottom: 2px solid #0284c7;">
-                            <h6 class="mb-0 fw-bold" style="font-size: 13px;">GAZI MAHMUD JUNIOR HIGH SCHOOL</h6>
-                            <small style="font-size: 8px; letter-spacing: 1px;">STUDENT IDENTITY CARD</small>
+                    <div class="card shadow-sm border-2 mb-3 text-center p-3" style="border-color:#0d3b66 !important; border-radius:14px; background:#fff;">
+                        <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+                            <span class="badge bg-danger rounded-pill">ID: ${st.roll}</span>
+                            <span class="badge bg-primary rounded-pill">${st.cls || 'Class 6'}</span>
                         </div>
-                        <div class="p-3 text-center">
-                            <img src="${st.photo || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120'}" alt="avatar" class="id-card-avatar mb-2" style="width:70px; height:70px; border-radius:50%; object-fit:cover; border:2px solid white;">
-                            <h6 class="fw-bold mb-1">${st.name_en || st.name_bn || st.name}</h6>
-                            <p class="small text-white-50 mb-2" style="font-size: 10px;">${st.cls || st.desired_class || 'Class 6'} | Roll: <strong class="text-white">${st.roll}</strong></p>
-                            
-                            <div class="bg-white text-dark rounded p-2 text-start small" style="font-size: 9.5px; line-height: 1.4;">
-                                <div><strong>Guardian:</strong> ${st.guardian || st.father || 'N/A'}</div>
-                                <div><strong>Mobile:</strong> ${st.phone || st.mobile || 'N/A'}</div>
-                                <div><strong>DOB:</strong> ${st.dob || 'N/A'}</div>
-                            </div>
-                        </div>
+                        <h6 class="fw-bold mb-1 text-dark">${st.name_bn || st.name_en || st.name}</h6>
+                        <p class="small text-muted mb-2" style="font-size:11px;">অভিভাবক: ${st.guardian || st.father || 'N/A'}</p>
+                        <button class="btn btn-sm text-white fw-bold w-100 mt-2" style="background:#0d3b66; border-radius:8px;" onclick="openStudentIdCard(${st.id || st.db_id})">
+                            <i class="bi bi-printer me-1"></i> আইডি কার্ড দেখুন ও প্রিন্ট করুন
+                        </button>
                     </div>
                 </div>
             `;
@@ -1526,13 +1522,59 @@
     }
 
     function printGeneratedIdCards() {
-        const container = document.getElementById('idCardsContainer');
-        const printArea = document.getElementById('printArea');
-        if (container && printArea) {
-            printArea.innerHTML = `<div class="row g-3 justify-content-center p-3">${container.innerHTML}</div>`;
-            window.print();
+        const classVal = document.getElementById('idCardClassSelect')?.value || 'All';
+        const studentVal = document.getElementById('idCardStudentSelect')?.value || 'All';
+
+        if (studentVal !== 'All') {
+            openStudentIdCard(studentVal);
+        } else if (classVal !== 'All') {
+            window.open('/id-cards/?class=' + encodeURIComponent(classVal), '_blank');
+        } else {
+            window.open('/id-cards/', '_blank');
         }
     }
+
+    window.openStudentIdCard = function(id) {
+        const students = getStudents();
+        const stIndex = students.findIndex(s => s.id == id || s.db_id == id);
+        const st = stIndex !== -1 ? students[stIndex] : null;
+
+        if (st && st.db_id) {
+            window.open('/id-card/' + st.db_id + '/', '_blank');
+            return;
+        }
+
+        if (id && !isNaN(id) && Number(id) < 100000) {
+            window.open('/id-card/' + id + '/', '_blank');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('student_name_bn', st ? (st.name_bn || st.name || '') : '');
+        formData.append('student_name_en', st ? (st.name_en || st.name || '') : '');
+        formData.append('desired_class', st ? (st.cls || st.desired_class || 'Class 6') : 'Class 6');
+        formData.append('father_name', st ? (st.father || st.guardian || '') : '');
+        formData.append('mobile', st ? (st.phone || st.mobile || '') : '');
+        formData.append('status', 'Approved');
+
+        fetch('/api/save-student/', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success' && data.db_id) {
+                if (st) { st.db_id = data.db_id; localStorage.setItem('school_students', JSON.stringify(students)); }
+                window.open('/id-card/' + data.db_id + '/', '_blank');
+            } else {
+                window.open('/id-cards/', '_blank');
+            }
+        })
+        .catch(() => {
+            window.open('/id-cards/', '_blank');
+        });
+    };
 
     // --- 2. Print List Tab ---
     function loadPrintList() {
