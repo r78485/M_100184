@@ -20,7 +20,7 @@
             margin: 0;
             padding: 0;
             background-color: #525659;
-            font-family: 'SolaimanLipi', Arial, sans-serif;
+            font-family: 'SolaimanLipi', Arial, 'Kalpurush', sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -31,145 +31,211 @@
             height: 210mm;
             background: #fff;
             display: flex;
-            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            box-shadow: 0 0 12px rgba(0,0,0,0.4);
             position: relative;
             overflow: hidden;
         }
         
-        /* Left Stub */
+        /* -------------------------------------------------------------
+           LEFT TOKEN STUB (কাউন্টারফয়েল / অফিসে গচ্ছিত অংশ)
+        ------------------------------------------------------------- */
         .token-stub {
-            width: 28%;
+            width: 27%;
             height: 100%;
-            border-right: 2px dashed #999;
+            border-right: 2px dashed #888;
             position: relative;
             padding: 6mm 7mm;
-            background: white;
+            background: #fff;
             color: #000;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
         }
         
-        /* Right Certificate */
+        .stub-header {
+            text-align: center;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 5px;
+            margin-bottom: 4px;
+        }
+        .stub-school-name {
+            font-size: 13.5px;
+            font-weight: bold;
+            color: #b81414;
+            line-height: 1.25;
+            margin: 2px 0 0 0;
+        }
+        .stub-address {
+            font-size: 10px;
+            color: #333;
+            line-height: 1.2;
+        }
+
+        .stub-badge {
+            display: inline-block;
+            background: #e8f5e9;
+            color: #1b5e20;
+            border: 1px solid #81c784;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 10px;
+            border-radius: 12px;
+            margin: 4px 0;
+            text-align: center;
+        }
+
+        .stub-row {
+            display: flex;
+            align-items: flex-end;
+            font-size: 11px;
+            margin-bottom: 4px;
+            line-height: 1.3;
+        }
+        .stub-label {
+            white-space: nowrap;
+            font-weight: bold;
+            color: #222;
+            margin-right: 4px;
+        }
+        .stub-dotted {
+            flex-grow: 1;
+            border-bottom: 1.2px dotted #444;
+            text-align: center;
+            font-weight: bold;
+            color: #000;
+            padding-bottom: 1px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .stub-barcode-box {
+            text-align: center;
+            padding-top: 4px;
+            border-top: 1px dashed #eee;
+        }
+
+        /* -------------------------------------------------------------
+           RIGHT MAIN CERTIFICATE (প্রশংসা পত্র)
+        ------------------------------------------------------------- */
         .certificate-main {
-            width: 72%;
+            width: 73%;
             height: 100%;
             position: relative;
             padding: 6mm;
             background: #fff;
         }
 
-        /* Border styles */
         .cert-outer-border {
-            border: 10px solid #85c285;
+            border: 9px double #2e7d32;
             height: 100%;
-            padding: 2px;
+            padding: 3px;
             position: relative;
         }
         .cert-inner-border {
-            border: 2px solid #5CBA5C;
+            border: 2px solid #388e3c;
             height: 100%;
-            padding: 12px 18px;
+            padding: 12px 20px;
             position: relative;
-            background-image: repeating-linear-gradient(45deg, rgba(92, 186, 92, 0.03) 0px, rgba(92, 186, 92, 0.03) 2px, transparent 2px, transparent 8px), repeating-linear-gradient(-45deg, rgba(92, 186, 92, 0.03) 0px, rgba(92, 186, 92, 0.03) 2px, transparent 2px, transparent 8px);
+            background-image: repeating-linear-gradient(45deg, rgba(56, 142, 60, 0.02) 0px, rgba(56, 142, 60, 0.02) 2px, transparent 2px, transparent 8px), repeating-linear-gradient(-45deg, rgba(56, 142, 60, 0.02) 0px, rgba(56, 142, 60, 0.02) 2px, transparent 2px, transparent 8px);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
         }
 
-        /* Typography */
-        .school-name {
+        /* Certificate Header Layout (Non-Overlapping Flex) */
+        .cert-header-layout {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 6px;
+        }
+        .cert-header-left {
+            width: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .cert-header-center {
+            flex: 1;
+            text-align: center;
+            padding: 0 10px;
+        }
+        .cert-header-right {
+            width: 120px;
+            text-align: right;
+        }
+
+        .school-name-main {
             color: #b81414;
             font-weight: bold;
-            text-align: center;
+            font-size: 25px;
             margin: 0;
-            text-shadow: 1px 1px 0px rgba(0,0,0,0.1);
+            line-height: 1.2;
+            letter-spacing: 0.3px;
+            text-shadow: 1px 1px 0px rgba(0,0,0,0.08);
         }
-        .school-address {
-            color: #000;
-            text-align: center;
-            margin: 3px 0;
+        .school-address-main {
+            color: #111;
+            font-size: 13px;
+            font-weight: 600;
+            margin-top: 3px;
         }
-        
-        /* Ribbon Styles */
-        .ribbon-container {
+
+        /* Ribbon Banner */
+        .ribbon-wrapper {
             text-align: center;
-            margin: 6px 0 10px 0;
+            margin: 8px 0 12px 0;
             position: relative;
         }
-        .ribbon-main {
-            background-color: #e6c86e;
+        .ribbon-banner {
+            background: linear-gradient(180deg, #fbc02d 0%, #f57f17 100%);
             color: #b81414;
             display: inline-block;
             font-weight: bold;
+            font-size: 19px;
+            padding: 4px 40px;
+            border-radius: 3px;
             position: relative;
             z-index: 2;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            box-shadow: 0 3px 6px rgba(0,0,0,0.18);
+            border: 1px solid #f57f17;
         }
-        .certificate-main .ribbon-main {
-            padding: 4px 32px;
-            font-size: 18px;
-            border-radius: 2px;
-        }
-        .certificate-main .ribbon-main::before, .certificate-main .ribbon-main::after {
+        .ribbon-banner::before, .ribbon-banner::after {
             content: "";
             position: absolute;
             top: 100%;
             z-index: -1;
-            border-top: 8px solid #b89c3f;
+            border-top: 8px solid #c76a00;
         }
-        .certificate-main .ribbon-main::before {
+        .ribbon-banner::before {
             left: 0;
             border-left: 8px solid transparent;
         }
-        .certificate-main .ribbon-main::after {
+        .ribbon-banner::after {
             right: 0;
             border-right: 8px solid transparent;
         }
-        .ribbon-tail-left, .ribbon-tail-right {
-            position: absolute;
-            top: 8px;
-            width: 25px;
-            height: 22px;
-            background: #d6b85e;
-            z-index: 1;
-        }
-        .ribbon-tail-left {
-            left: 50%;
-            margin-left: -95px;
-            clip-path: polygon(0 0, 100% 0, 100% 100%, 0 50%);
-        }
-        .ribbon-tail-right {
-            right: 50%;
-            margin-right: -95px;
-            clip-path: polygon(0 0, 100% 0, 100% 50%, 0 100%);
-        }
 
-        .token-stub .ribbon-main {
-            padding: 3px 16px;
-            font-size: 13px;
-            border-radius: 15px;
-            border: 2px solid #00796b;
-            background: #fff;
-            color: #00796b;
-            box-shadow: none;
-        }
-
-        /* Form Fields - Flex alignment */
+        /* Form Fields */
         .field-row {
             display: flex;
             align-items: flex-end;
-            margin-bottom: 5px;
-            line-height: 1.4;
+            margin-bottom: 7px;
+            line-height: 1.45;
             color: #111;
+            font-size: 15px;
         }
         .label {
             white-space: nowrap;
+            font-weight: 600;
+            color: #222;
             margin-right: 5px;
         }
         .dotted-line {
             flex-grow: 1;
-            border-bottom: 1.5px dotted #444;
+            border-bottom: 1.5px dotted #333;
             text-align: center;
             font-weight: bold;
             color: #000;
@@ -178,30 +244,43 @@
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            font-size: 15px;
         }
 
-        .signature-area {
-            text-align: center;
-            align-self: flex-end;
+        .paragraph-text {
+            line-height: 1.6;
             margin-top: 8px;
+            margin-bottom: 8px;
+            font-size: 15px;
+            color: #111;
+            text-align: justify;
+        }
+        .character-text {
+            margin-top: 10px;
+            text-align: center;
+            font-size: 15px;
+            font-weight: bold;
+            color: #1b5e20;
+        }
+
+        /* Footer Signatures */
+        .signature-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            width: 100%;
+            padding: 0 10px;
+            margin-top: 12px;
+        }
+        .signature-block {
+            text-align: center;
         }
         .signature-line {
             border-top: 1.5px solid #000;
-            width: 120px;
-            margin: 0 auto 3px auto;
+            width: 130px;
+            margin: 0 auto 4px auto;
         }
 
-        /* Stub specific */
-        .token-stub .school-name { font-size: 14px; color: #1565c0; margin-top: 2px; }
-        .token-stub .school-address { font-size: 10.5px; line-height: 1.25; color: #1565c0; font-weight: bold;}
-        .token-stub .field-row { font-size: 11px; margin-bottom: 4px; }
-        
-        /* Main cert specific */
-        .certificate-main .school-name { font-size: 26px; margin-top: 2px; }
-        .certificate-main .school-address { font-size: 13px; font-weight: bold; }
-        .certificate-main .field-row { font-size: 15px; margin-bottom: 5px; }
-        .certificate-main .dotted-line { font-weight: bold; font-size: 14.5px; }
-        
         .watermark {
             position: absolute;
             top: 50%;
@@ -209,19 +288,12 @@
             transform: translate(-50%, -50%);
             width: 220px;
             height: 220px;
-            opacity: 0.08;
+            opacity: 0.07;
             pointer-events: none;
             background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/8/84/Government_Seal_of_Bangladesh.svg/512px-Government_Seal_of_Bangladesh.svg.png');
             background-size: contain;
             background-repeat: no-repeat;
             background-position: center;
-        }
-
-        .header-flex {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
         }
 
         @media print {
@@ -237,7 +309,7 @@
             background: #0d6efd;
             color: white;
             border: none;
-            padding: 8px 16px;
+            padding: 8px 18px;
             font-size: 14px;
             font-weight: bold;
             border-radius: 4px;
@@ -249,123 +321,128 @@
 </head>
 <body>
 
-<button class="print-btn" onclick="printTestimonial()">প্রিন্ট করুন</button>
+<button class="print-btn" onclick="printTestimonial()">
+    <i class="bi bi-printer"></i> প্রিন্ট করুন
+</button>
 
 <div class="page-container">
 
-    <!-- বাম অংশ (Stub / Counterfoil) -->
+    <!-- =================================================================
+         বাম অংশ (Token Stub / অফিসের জন্য গচ্ছিত অংশ)
+    ================================================================== -->
     <div class="token-stub">
         <div>
-            <div class="header-flex" style="gap: 5px; margin-top: 5px;">
-                <img src="{% if institution.logo %}{{ institution.logo.url }}{% else %}/static/logo.png{% endif %}" alt="Logo" style="width: 30px; height: 30px; object-fit: contain;" onerror="this.onerror=null;this.src='/static/logo.png';">
-                <h2 class="school-name" style="text-align: left; font-size: 13.5px; line-height: 1.2;">{{ institution.name_bn|default:"গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়" }}</h2>
+            <div class="stub-header">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
+                    <img src="{% if institution.logo %}{{ institution.logo.url }}{% else %}/static/logo.png{% endif %}" alt="Logo" style="width: 28px; height: 28px; object-fit: contain;" onerror="this.onerror=null;this.src='/static/logo.png';">
+                    <h2 class="stub-school-name">{{ institution.name_bn|default:request.session.school_name|default:"গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়" }}</h2>
+                </div>
+                <div class="stub-address">
+                    {{ institution.address_bn|default:"গাইবান্ধা সদর, জেলা: গাইবান্ধা" }}<br>
+                    স্থাপিত: {{ institution.established_year|default:"২০১৪" }}
+                </div>
             </div>
-            <div class="school-address">
-                ডাকঘর: {{ institution.address_bn|default:"গাইবান্ধা" }}, উপজেলা: গাইবান্ধা সদর<br>
-                জেলা: গাইবান্ধা | স্থাপিত: {{ institution.established_year|default:"২০১৪" }}
+
+            <div style="text-align: center;">
+                <span class="stub-badge">কাউন্টারফয়েল / স্টাব টিকিট</span>
             </div>
             
-            <div style="display: flex; justify-content: space-between; font-size: 10.5px; margin-top: 8px; margin-bottom: 4px; color: #1565c0; font-weight: bold;">
-                <div class="field-row" style="width: 48%; margin-bottom: 0;">
-                    <span class="label">ক্রমিক:</span><span class="dotted-line">{{ student.sl_no }}</span>
+            <div style="display: flex; justify-content: space-between; font-size: 11px; margin-top: 6px; margin-bottom: 6px; color: #1565c0; font-weight: bold;">
+                <div class="stub-row" style="width: 48%; margin-bottom: 0;">
+                    <span class="stub-label">ক্রমিক:</span><span class="stub-dotted">{{ student.sl_no }}</span>
                 </div>
-                <div class="field-row" style="width: 48%; margin-bottom: 0;">
-                    <span class="label">তারিখ:</span><span class="dotted-line">{{ student.issue_date|date:"d/m/Y" }}</span>
+                <div class="stub-row" style="width: 48%; margin-bottom: 0;">
+                    <span class="stub-label">তারিখ:</span><span class="stub-dotted">{{ student.issue_date|date:"d/m/Y" }}</span>
                 </div>
             </div>
 
-            <div class="ribbon-container">
-                <span class="ribbon-main">প্রশংসা পত্র (কাউন্টারফয়েল)</span>
-            </div>
-
-            <div style="margin-top: 4px;">
-                <div class="field-row">
-                    <span class="label">প্রত্যয়ন করছি যে,</span><span class="dotted-line">{{ student.name }}</span>
+            <div style="margin-top: 6px;">
+                <div class="stub-row">
+                    <span class="stub-label">নাম:</span><span class="stub-dotted">{{ student.name }}</span>
                 </div>
-                <div class="field-row">
-                    <span class="label">পিতা:</span><span class="dotted-line">{{ student.father_name }}</span>
+                <div class="stub-row">
+                    <span class="stub-label">পিতা:</span><span class="stub-dotted">{{ student.father_name }}</span>
                 </div>
-                <div class="field-row">
-                    <span class="label">মাতা:</span><span class="dotted-line">{{ student.mother_name }}</span>
+                <div class="stub-row">
+                    <span class="stub-label">মাতা:</span><span class="stub-dotted">{{ student.mother_name }}</span>
                 </div>
-                <div style="display: flex; gap: 8px;">
-                    <div class="field-row" style="flex: 1;">
-                        <span class="label">গ্রাম:</span><span class="dotted-line">{{ student.village }}</span>
+                <div style="display: flex; gap: 6px;">
+                    <div class="stub-row" style="flex: 1;">
+                        <span class="stub-label">গ্রাম:</span><span class="stub-dotted">{{ student.village|default:"গাইবান্ধা সদর" }}</span>
                     </div>
-                    <div class="field-row" style="flex: 1;">
-                        <span class="label">ডাক:</span><span class="dotted-line">{{ student.post_office }}</span>
+                    <div class="stub-row" style="flex: 1;">
+                        <span class="stub-label">ডাক:</span><span class="stub-dotted">{{ student.post_office|default:"গাইবান্ধা" }}</span>
                     </div>
                 </div>
-                <div style="display: flex; gap: 8px;">
-                    <div class="field-row" style="flex: 1;">
-                        <span class="label">উপজেলা:</span><span class="dotted-line">{{ student.upazila }}</span>
+                <div style="display: flex; gap: 6px;">
+                    <div class="stub-row" style="flex: 1;">
+                        <span class="stub-label">উপজেলা:</span><span class="stub-dotted">{{ student.upazila|default:"গাইবান্ধা সদর" }}</span>
                     </div>
-                    <div class="field-row" style="flex: 1;">
-                        <span class="label">জেলা:</span><span class="dotted-line">{{ student.district }}</span>।
+                    <div class="stub-row" style="flex: 1;">
+                        <span class="stub-label">জেলা:</span><span class="stub-dotted">{{ student.district|default:"গাইবান্ধা" }}</span>
                     </div>
                 </div>
-                <div style="text-align: justify; line-height: 1.45; font-size: 10.5px; margin-top: 4px; margin-bottom: 4px;">
-                    সে সমাপনী পরীক্ষা, ২০<span class="dotted-line" style="display: inline-block; width: 22px;">{{ student.exam_year }}</span> এ জিপিএ <span class="dotted-line" style="display: inline-block; width: 28px;">{{ student.gpa }}</span> পেয়ে উত্তীর্ণ হয়েছে। জন্ম তারিখ: <span class="dotted-line" style="display: inline-block; width: 55px;">{{ student.dob }}</span>।
+                <div style="text-align: justify; line-height: 1.45; font-size: 10.5px; margin-top: 6px; margin-bottom: 6px; color: #222;">
+                    সে সমাপনী পরীক্ষা, <strong>{{ clean_exam_year }}</strong> এ জিপিএ <strong>{{ student.gpa }}</strong> প্রাপ্ত হয়ে উত্তীর্ণ হয়েছে। জন্ম তারিখ: <strong>{{ student.dob }}</strong>।
                 </div>
-                <div style="text-align: justify; font-size: 10.5px;">
+                <div style="text-align: justify; font-size: 10.5px; color: #333;">
                     আমার জানামতে সে উত্তম চরিত্রের অধিকারী।
                 </div>
             </div>
         </div>
 
-        <div>
-            <!-- টোকেন বারকোড -->
-            <div class="barcode-container" style="text-align: center; margin-bottom: 6px;">
-                <svg id="token-barcode"></svg>
-            </div>
-
-            <div style="text-align: center; font-size: 10.5px;">
-                <div class="signature-line" style="width: 75px; margin: 0 auto 3px auto;"></div>
+        <div class="stub-barcode-box">
+            <svg id="token-barcode"></svg>
+            <div style="text-align: center; font-size: 10.5px; margin-top: 4px;">
+                <div class="signature-line" style="width: 80px; margin: 0 auto 3px auto;"></div>
                 <strong>প্রধান শিক্ষক</strong>
             </div>
         </div>
     </div>
 
-    <!-- ডান অংশ (Main Certificate) -->
+    <!-- =================================================================
+         ডান অংশ (Main Certificate / মূল প্রশংসা পত্র)
+    ================================================================== -->
     <div class="certificate-main">
         <div class="cert-outer-border">
             <div class="cert-inner-border">
                 
                 <div class="watermark"></div>
 
-                <!-- টপ হেডার, লোগো ও মূল তথ্য -->
+                <!-- টপ হেডার (Logo + Title + Barcode Flexbox Layout) -->
                 <div>
-                    <!-- টপ বারকোড/রেফারেন্স -->
-                    <div style="position: absolute; right: 15px; top: 10px; text-align: right;">
-                        <svg id="cert-barcode"></svg>
-                        <div style="font-size: 9.5px; color: #555;">Ref Token: {{ student.token_number }}</div>
-                    </div>
-
-                    <div class="header-flex">
-                        <img src="{% if institution.logo %}{{ institution.logo.url }}{% else %}/static/logo.png{% endif %}" alt="Logo" style="width: 45px; height: 45px; object-fit: contain;" onerror="this.onerror=null;this.src='/static/logo.png';">
-                        <div style="text-align: center;">
-                            <h1 class="school-name">{{ institution.name_bn|default:"গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়" }}</h1>
-                            <div class="school-address">
-                                {{ institution.address_bn|default:"গাইবান্ধা সদর, জেলা: গাইবান্ধা" }} | স্থাপিত: {{ institution.established_year|default:"২০১৪" }}
+                    <div class="cert-header-layout">
+                        <div class="cert-header-left">
+                            <img src="{% if institution.logo %}{{ institution.logo.url }}{% else %}/static/logo.png{% endif %}" alt="Logo" style="width: 48px; height: 48px; object-fit: contain;" onerror="this.onerror=null;this.src='/static/logo.png';">
+                        </div>
+                        <div class="cert-header-center">
+                            <h1 class="school-name-main">{{ institution.name_bn|default:request.session.school_name|default:"গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়" }}</h1>
+                            <div class="school-address-main">
+                                {{ institution.address_bn|default:"গাইবান্ধা সদর, জেলা: গাইবান্ধা" }} &nbsp;|&nbsp; স্থাপিত: {{ institution.established_year|default:"২০১৪" }}
                             </div>
                         </div>
+                        <div class="cert-header-right">
+                            <svg id="cert-barcode"></svg>
+                            <div style="font-size: 9px; color: #555; font-weight: bold; margin-top: 1px;">Ref: {{ student.token_number }}</div>
+                        </div>
                     </div>
 
-                    <div class="ribbon-container">
-                        <div class="ribbon-tail-left"></div>
-                        <span class="ribbon-main">প্রশংসা পত্র</span>
-                        <div class="ribbon-tail-right"></div>
+                    <!-- রিপন ব্যানার -->
+                    <div class="ribbon-wrapper">
+                        <span class="ribbon-banner">প্রশংসা পত্র</span>
                     </div>
 
-                    <div style="display: flex; justify-content: space-between; font-size: 14.5px; margin-bottom: 10px; font-weight: bold; color: #1565c0; padding: 0 5px;">
+                    <!-- ক্রমিক নং ও তারিখ বার -->
+                    <div style="display: flex; justify-content: space-between; font-size: 15px; margin-bottom: 12px; font-weight: bold; color: #1565c0; padding: 0 5px;">
                         <div class="field-row" style="width: 38%; margin-bottom: 0;">
-                            <span class="label">ক্রমিক নং:</span><span class="dotted-line">{{ student.sl_no }}</span>
+                            <span class="label" style="color: #1565c0;">ক্রমিক নং:</span><span class="dotted-line" style="color: #1565c0;">{{ student.sl_no }}</span>
                         </div>
-                        <div class="field-row" style="width: 40%; margin-bottom: 0;">
-                            <span class="label">তারিখ:</span><span class="dotted-line">{{ student.issue_date|date:"d/m/Y" }}</span>
+                        <div class="field-row" style="width: 38%; margin-bottom: 0;">
+                            <span class="label" style="color: #1565c0;">তারিখ:</span><span class="dotted-line" style="color: #1565c0;">{{ student.issue_date|date:"d/m/Y" }}</span>
                         </div>
                     </div>
 
+                    <!-- ছাত্র/ছাত্রীর বিস্তারিত তথ্য -->
                     <div style="padding: 0 5px;">
                         <div class="field-row">
                             <span class="label">আমি এই মর্মে প্রত্যয়ন করছি যে,</span><span class="dotted-line">{{ student.name }}</span>
@@ -376,41 +453,43 @@
                         <div class="field-row">
                             <span class="label">মাতা:</span><span class="dotted-line">{{ student.mother_name }}</span>
                         </div>
-                        <div style="display: flex; gap: 15px;">
+                        <div style="display: flex; gap: 18px;">
                             <div class="field-row" style="flex: 1;">
-                                <span class="label">গ্রাম/পাড়া:</span><span class="dotted-line">{{ student.village }}</span>
+                                <span class="label">গ্রাম/পাড়া:</span><span class="dotted-line">{{ student.village|default:"গাইবান্ধা সদর" }}</span>
                             </div>
                             <div class="field-row" style="flex: 1;">
-                                <span class="label">ডাকঘর:</span><span class="dotted-line">{{ student.post_office }}</span>
-                            </div>
-                        </div>
-                        <div style="display: flex; gap: 15px;">
-                            <div class="field-row" style="flex: 1;">
-                                <span class="label">উপজেলা:</span><span class="dotted-line">{{ student.upazila }}</span>
-                            </div>
-                            <div class="field-row" style="flex: 1;">
-                                <span class="label">জেলা:</span><span class="dotted-line">{{ student.district }}</span>।
+                                <span class="label">ডাকঘর:</span><span class="dotted-line">{{ student.post_office|default:"গাইবান্ধা" }}</span>
                             </div>
                         </div>
-                        <div style="line-height: 1.55; margin-top: 6px; margin-bottom: 6px; font-size: 15px;">
-                            সে শিক্ষা সমাপনী পরীক্ষা, ২০<span class="dotted-line" style="display: inline-block; width: 35px; font-weight: bold; font-size: 14.5px;">{{ student.exam_year }}</span> এ অংশগ্রহণ করে <span class="dotted-line" style="display: inline-block; width: 50px; font-weight: bold; font-size: 14.5px;">{{ student.gpa }}</span> জিপিএ প্রাপ্ত হয়ে সসম্মানে উত্তীর্ণ হয়েছে। তার জন্ম তারিখ: <span class="dotted-line" style="display: inline-block; width: 100px; font-weight: bold; font-size: 14.5px;">{{ student.dob }}</span> ।
+                        <div style="display: flex; gap: 18px;">
+                            <div class="field-row" style="flex: 1;">
+                                <span class="label">উপজেলা:</span><span class="dotted-line">{{ student.upazila|default:"গাইবান্ধা সদর" }}</span>
+                            </div>
+                            <div class="field-row" style="flex: 1;">
+                                <span class="label">জেলা:</span><span class="dotted-line">{{ student.district|default:"গাইবান্ধা" }}</span>।
+                            </div>
                         </div>
-                        <div style="margin-top: 8px; text-align: center; font-size: 15px;">
+
+                        <div class="paragraph-text">
+                            সে শিক্ষা সমাপনী পরীক্ষা, <strong>{{ clean_exam_year }}</strong> এ অংশগ্রহণ করে <strong>{{ student.gpa }}</strong> জিপিএ প্রাপ্ত হয়ে সসম্মানে উত্তীর্ণ হয়েছে। তার জন্ম তারিখ: <strong>{{ student.dob }}</strong> ।
+                        </div>
+
+                        <div class="character-text">
                             আমার জানামতে, সে উত্তম চরিত্রের অধিকারী। আমি তার সর্বাঙ্গীন উন্নতি ও উজ্জ্বল ভবিষ্যৎ কামনা করি।
                         </div>
                     </div>
                 </div>
 
                 <!-- বটম স্বাক্ষর এরিয়া -->
-                <div class="signature-area" style="display: flex; justify-content: space-between; align-items: flex-end; width: 100%; padding: 0 10px;">
-                    <div style="text-align: center;">
-                        <div class="signature-line" style="width: 120px;"></div>
-                        <strong style="font-size: 12.5px;">শ্রেণি শিক্ষক</strong>
+                <div class="signature-area">
+                    <div class="signature-block">
+                        <div class="signature-line"></div>
+                        <strong style="font-size: 13px;">শ্রেণি শিক্ষক</strong>
                     </div>
-                    <div style="text-align: center;">
-                        <div class="signature-line" style="width: 130px;"></div>
-                        <strong style="font-size: 12.5px;">প্রধান শিক্ষক</strong><br>
-                        <span style="color: #5CBA5C; font-size: 11.5px; font-weight: bold;">{{ institution.name_bn|default:"গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়" }}</span>
+                    <div class="signature-block">
+                        <div class="signature-line"></div>
+                        <strong style="font-size: 13px;">প্রধান শিক্ষক</strong><br>
+                        <span style="color: #2e7d32; font-size: 12px; font-weight: bold;">{{ institution.name_bn|default:request.session.school_name|default:"গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়" }}</span>
                     </div>
                 </div>
 
@@ -424,12 +503,12 @@
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         var tokenNumber = "{{ student.token_number }}";
-        if (!tokenNumber) tokenNumber = "123456";
+        if (!tokenNumber) tokenNumber = "TKN-2026-6CFCF9";
 
         JsBarcode("#token-barcode", tokenNumber, {
             format: "CODE128",
             width: 1.1,
-            height: 25,
+            height: 24,
             displayValue: true,
             fontSize: 9,
             margin: 0
@@ -438,8 +517,8 @@
         JsBarcode("#cert-barcode", tokenNumber, {
             format: "CODE128",
             displayValue: false,
-            height: 25,
-            width: 1.3,
+            height: 24,
+            width: 1.2,
             lineColor: "#000000"
         });
     });

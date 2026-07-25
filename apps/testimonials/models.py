@@ -2,11 +2,12 @@ import uuid
 from django.db import models
 
 class InstitutionProfile(models.Model):
-    name_bn = models.CharField(max_length=255, default="স্নিগ্ধ জ্ঞানের আলো বিদ্যাপীঠ")
-    name_en = models.CharField(max_length=255, default="SNIGDHA GYANER ALO VIDYAPITH")
+    name_bn = models.CharField(max_length=255, default="গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়")
+    name_en = models.CharField(max_length=255, default="Gazi Mahmud Secondary School")
     address_bn = models.CharField(max_length=255, default="গাইবান্ধা সদর, জেলা: গাইবান্ধা")
     established_year = models.CharField(max_length=20, default="২০১৪ইং")
     logo = models.ImageField(upload_to='logos/', blank=True, null=True)
+
     
     def __str__(self):
         return self.name_bn

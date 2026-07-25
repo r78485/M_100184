@@ -95,16 +95,22 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 # HTML View with Token
 @xframe_options_exempt
 def testimonial_view(request, student_id=None):
+    active_school_name = request.session.get('school_name', 'গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়')
+    
     institution = InstitutionProfile.objects.first()
     
     if not institution:
         class DummyInstitution:
-            name_en = "SNIGDHA GYANER ALO VIDYAPITH"
-            name_bn = "স্নিগ্ধ জ্ঞানের আলো বিদ্যাপীঠ"
+            name_en = "Gazi Mahmud Secondary School"
+            name_bn = active_school_name
             address_bn = "গাইবান্ধা সদর, জেলা: গাইবান্ধা"
-            established_year = "২০১৪ইং"
+            established_year = "২০১৪"
             logo = None
         institution = DummyInstitution()
+    elif "স্নিগ্ধ" in institution.name_bn:
+        institution.name_bn = active_school_name
+        institution.name_en = "Gazi Mahmud Secondary School"
+        institution.save()
 
     if student_id:
         student = Student.objects.filter(sl_no=student_id).first()
@@ -118,11 +124,11 @@ def testimonial_view(request, student_id=None):
                     name=adm.student_name_en or adm.student_name_bn,
                     father_name=adm.father_name,
                     mother_name=adm.mother_name,
-                    village=adm.address,
-                    post_office="",
-                    upazila="",
-                    district="",
-                    exam_year=adm.academic_year,
+                    village=adm.address or "গাইবান্ধা সদর",
+                    post_office="গাইবান্ধা",
+                    upazila="গাইবান্ধা সদর",
+                    district="গাইবান্ধা",
+                    exam_year=adm.academic_year or "2026",
                     gpa="5.00",
                     dob=adm.date_of_birth.strftime('%d-%m-%Y') if adm.date_of_birth else "01-01-2010"
                 )
@@ -132,26 +138,32 @@ def testimonial_view(request, student_id=None):
     if not student:
         # Dummy data for preview
         class DummyStudent:
-            sl_no = "120"
-            token_number = "TKN-2026-A1B2C3"
-            name = "Md. Demo Student"
-            father_name = "Mr. Father Demo"
-            mother_name = "Mrs. Mother Demo"
-            village = "Demo Village"
-            post_office = "Demo PO"
-            upazila = "Demo Upazila"
-            district = "Demo District"
-            exam_year = "26"
+            sl_no = "ADM-2026-002"
+            token_number = "TKN-2026-6CFCF9"
+            name = "Nusrat Jahan"
+            father_name = "Md. Abdur Rahman"
+            mother_name = "Farida Yasmin"
+            village = "Gaibandha Sadar"
+            post_office = "Gaibandha"
+            upazila = "Gaibandha Sadar"
+            district = "Gaibandha"
+            exam_year = "2026"
             gpa = "5.00"
-            dob = "01-01-2015"
+            dob = "20-02-2011"
             issue_date = date.today()
         student = DummyStudent()
+
+    # Format exam year cleanly so "২০2026" is prevented
+    raw_year = str(getattr(student, 'exam_year', '2026'))
+    clean_exam_year = raw_year if len(raw_year) == 4 else f"20{raw_year}"
 
     context = {
         'student': student,
         'institution': institution,
+        'clean_exam_year': clean_exam_year,
     }
     return render(request, 'testimonial_template.html', context)
+
 
 # PDF View using ReportLab
 def generate_pdf_with_token(request, student_id):
