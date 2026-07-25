@@ -381,6 +381,12 @@ from datetime import datetime
 def api_save_student(request):
     if request.method == 'POST':
         try:
+            from school_management.middleware import auto_repair_student_admission_schema
+            auto_repair_student_admission_schema()
+        except Exception:
+            pass
+
+        try:
             data = {}
             if request.content_type == 'application/json' or (request.body and request.body.startswith(b'{')):
                 try:
@@ -553,6 +559,12 @@ def generate_result_card(request):
 
 @csrf_exempt
 def api_get_students(request):
+    try:
+        from school_management.middleware import auto_repair_student_admission_schema
+        auto_repair_student_admission_schema()
+    except Exception:
+        pass
+
     try:
         students = StudentAdmission.objects.all().order_by('-created_at')
         data = []

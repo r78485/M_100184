@@ -10,6 +10,12 @@ from apps.users.models import StudentAdmission
 from django.views.decorators.clickjacking import xframe_options_exempt
 
 def transcript_dashboard_view(request):
+    try:
+        from school_management.middleware import auto_repair_student_admission_schema
+        auto_repair_student_admission_schema()
+    except Exception:
+        pass
+
     class_name = request.GET.get('class_name', '')
     
     admissions = StudentAdmission.objects.all().order_by('-created_at')

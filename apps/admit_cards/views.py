@@ -4,6 +4,12 @@ from .models import Student, SchoolProfile
 from apps.users.models import StudentAdmission
 
 def admit_card_dashboard_view(request):
+    try:
+        from school_management.middleware import auto_repair_student_admission_schema
+        auto_repair_student_admission_schema()
+    except Exception:
+        pass
+
     class_name = request.GET.get('class_name', '').strip()
     search_query = request.GET.get('search_query', '').strip() or request.GET.get('roll_no', '').strip()
     

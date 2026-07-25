@@ -14,11 +14,20 @@ from django.db.models import Q
 # Dashboard / Search View for Testimonial
 @login_required
 def testimonial_dashboard_view(request):
+    try:
+        from school_management.middleware import auto_repair_student_admission_schema
+        auto_repair_student_admission_schema()
+    except Exception:
+        pass
+
     class_name = request.GET.get('class_name', '').strip()
     roll_no = request.GET.get('roll_no', '').strip()
     
-    # Query central Student Registry
-    admissions = StudentAdmission.objects.all().order_by('-created_at')
+    # Query central Student Registry with explicit field selection
+    admissions = StudentAdmission.objects.all().only(
+        'id', 'admission_no', 'student_name_en', 'student_name_bn', 
+        'father_name', 'desired_class', 'academic_year', 'roll_no', 'created_at'
+    ).order_by('-created_at')
     
     if class_name:
         admissions = admissions.filter(
@@ -145,6 +154,11 @@ def testimonial_view(request, student_id=None):
     if student_id:
         student = Student.objects.filter(sl_no=student_id).first()
         if not student and student_id != '0':
+            try:
+                from school_management.middleware import auto_repair_student_admission_schema
+                auto_repair_student_admission_schema()
+            except Exception:
+                pass
             adm = StudentAdmission.objects.filter(Q(admission_no=student_id) | Q(id=student_id if student_id.isdigit() else 0)).first()
             if adm:
                 village_val = getattr(adm, 'present_address_detail', '') or getattr(adm, 'permanent_address_detail', '') or "গাইবান্ধা সদর"
