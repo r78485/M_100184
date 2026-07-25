@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'apps.admit_cards',
     'apps.testimonials',
     'apps.sync',  # অফলাইন-অনলাইন সিঙ্ক সিস্টেম
+    'apps.question_paper',
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ current_subject }} Builder — EduManage ERP{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h3 class="fw-bold text-dark mb-1"><i class="bi bi-pencil-square me-2 text-primary"></i>{{ current_subject }} Question Studio</h3>
+            <p class="text-muted mb-0">বিশেষায়িত প্রশ্ন ফর্ম বিল্ডার ও ডাটাবেস এন্ট্রি</p>
+        </div>
+        <a href="{% url 'question_paper:create' %}" class="btn btn-primary rounded-pill px-4">
+            <i class="bi bi-file-earmark-plus me-1"></i> Paper Builder
+        </a>
+    </div>
+
+    <!-- Add Question Form -->
+    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
+        <h5 class="fw-bold mb-3">Add New {{ current_subject }} Question</h5>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row g-3 mb-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Class Level</label>
+                    <select class="form-select" name="class_level">
+                        {% for c_val, c_name in classes %}
+                        <option value="{{ c_val }}">{{ c_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Question Type</label>
+                    <select class="form-select" name="question_type">
+                        {% for t_val, t_name in question_types %}
+                        <option value="{{ t_val }}">{{ t_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Difficulty</label>
+                    <select class="form-select" name="difficulty">
+                        {% for d_val, d_name in difficulties %}
+                        <option value="{{ d_val }}">{{ d_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Marks</label>
+                    <input type="number" class="form-control" name="marks" value="10">
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-bold">Question / Stimulus / Equation Text</label>
+                    <textarea class="form-control" name="question_text" rows="3" required></textarea>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary rounded-pill px-4">
+                <i class="bi bi-check2-circle me-1"></i> Save to Question Bank
+            </button>
+        </form>
+    </div>
+
+    <!-- Questions Table -->
+    <div class="card border-0 shadow-sm rounded-4 p-4">
+        <h5 class="fw-bold mb-3">Recent {{ current_subject }} Questions</h5>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Class</th>
+                        <th>Type</th>
+                        <th>Question</th>
+                        <th>Marks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for q in questions %}
+                    <tr>
+                        <td>{{ q.class_level }}</td>
+                        <td><span class="badge bg-info text-dark">{{ q.get_question_type_display }}</span></td>
+                        <td>{{ q.question_text|truncatewords:20 }}</td>
+                        <td>{{ q.marks }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4 text-muted">কোনো প্রশ্ন সংরক্ষিত নেই</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

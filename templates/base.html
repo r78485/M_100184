@@ -496,8 +496,13 @@
                 </a>
             </li>
             <li>
-                <a href="{% url 'questionpaper' %}" class="{% if request.resolver_match.url_name == 'questionpaper' %}active{% endif %}">
-                    <i class="bi bi-file-earmark-pdf"></i> {% trans "Question Paper" %}
+                <a href="{% url 'question_paper:create' %}" class="{% if 'question_paper' in request.resolver_match.namespace or request.resolver_match.url_name == 'questionpaper' %}active{% endif %}">
+                    <i class="bi bi-file-earmark-plus-fill text-warning"></i> {% trans "Create Question Paper" %}
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'question_paper:question_bank' %}" class="{% if request.resolver_match.url_name == 'question_bank' %}active{% endif %}">
+                    <i class="bi bi-database"></i> {% trans "Question Bank" %}
                 </a>
             </li>
             <li>

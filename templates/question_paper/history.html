@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Question Paper History — EduManage ERP{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+        <div>
+            <h3 class="fw-bold text-dark mb-1"><i class="bi bi-clock-history me-2 text-primary"></i>Question Paper History</h3>
+            <p class="text-muted mb-0">পূর্বে তৈরি কৃত সকল প্রশ্নপত্রের তালিকা, সংস্করণ ও অ্যাকশন</p>
+        </div>
+        <a href="{% url 'question_paper:create' %}" class="btn btn-primary rounded-pill px-4">
+            <i class="bi bi-file-earmark-plus me-1"></i> Create New Question Paper
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 p-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Exam Title</th>
+                        <th>Class</th>
+                        <th>Subject</th>
+                        <th>Full Marks</th>
+                        <th>Version</th>
+                        <th>Created Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in papers %}
+                    <tr>
+                        <td>{{ p.id }}</td>
+                        <td class="fw-bold">{{ p.title }}</td>
+                        <td>{{ p.class_name }}</td>
+                        <td><span class="badge bg-primary">{{ p.subject }}</span></td>
+                        <td>{{ p.full_marks }}</td>
+                        <td><span class="badge bg-secondary">v{{ p.version }}</span></td>
+                        <td class="small text-muted">{{ p.created_at|date:"d M Y, h:i A" }}</td>
+                        <td>
+                            <a href="{% url 'question_paper:print_preview' p.id %}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                <i class="bi bi-printer me-1"></i> Print / PDF
+                            </a>
+                            <a href="{% url 'question_paper:edit_paper' p.id %}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-pencil"></i> Edit
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">কোনো হিস্ট্রি পাওয়া যায়নি</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

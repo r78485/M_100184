@@ -1,0 +1,796 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Question Paper — NCTB Standard — EduManage ERP{% endblock %}
+
+{% block extra_css %}
+<!-- MathJax for Rendering Math/Science LaTeX Equations -->
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
+
+<style>
+/* =========================================================
+   CREATE QUESTION PAPER MODULE — SYSTEM THEME
+   Primary: #3262a8 | Secondary: #7532a8
+   ========================================================= */
+
+:root {
+    --qp-primary: #3262a8;
+    --qp-primary-dark: #24497e;
+    --qp-secondary: #7532a8;
+    --qp-secondary-dark: #55237b;
+    --qp-bg-soft: #f4f6fc;
+}
+
+/* Header Banner */
+.qp-header-banner {
+    background: linear-gradient(135deg, var(--qp-primary) 0%, var(--qp-secondary) 100%);
+    border-radius: 18px;
+    padding: 24px 30px;
+    color: #ffffff;
+    margin-bottom: 24px;
+    box-shadow: 0 8px 24px rgba(50, 98, 168, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+.qp-header-banner::after {
+    content: '';
+    position: absolute;
+    top: -50%; right: -10%;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%);
+    pointer-events: none;
+}
+.qp-header-banner h2 { font-weight: 800; font-size: 1.6rem; margin: 0; }
+.qp-header-banner p { color: rgba(255,255,255,0.85); font-size: 0.9rem; margin: 4px 0 0; }
+
+/* Filter Card */
+.qp-filter-card {
+    background: var(--card-bg, #ffffff);
+    border-radius: 16px;
+    border: 1px solid rgba(50, 98, 168, 0.12);
+    padding: 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+}
+
+/* Builder Canvas Layout */
+.qp-builder-layout {
+    display: grid;
+    grid-template-columns: 1fr 420px;
+    gap: 24px;
+}
+
+@media (max-width: 991px) {
+    .qp-builder-layout { grid-template-columns: 1fr; }
+}
+
+/* Canvas Cards */
+.qp-card {
+    background: var(--card-bg, #ffffff);
+    border-radius: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 18px rgba(0,0,0,0.04);
+    padding: 24px;
+    margin-bottom: 20px;
+}
+.qp-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 14px;
+    margin-bottom: 18px;
+    border-bottom: 2px solid #eef2f7;
+}
+.qp-card-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--qp-primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+}
+
+/* Buttons */
+.btn-qp-primary {
+    background: linear-gradient(135deg, var(--qp-primary), var(--qp-primary-dark));
+    color: #fff; border: none; border-radius: 10px;
+    padding: 9px 20px; font-weight: 600; font-size: 0.88rem;
+    transition: all 0.2s ease;
+}
+.btn-qp-primary:hover {
+    background: linear-gradient(135deg, var(--qp-primary-dark), #19345c);
+    color: #fff; transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(50, 98, 168, 0.3);
+}
+
+.btn-qp-secondary {
+    background: linear-gradient(135deg, var(--qp-secondary), var(--qp-secondary-dark));
+    color: #fff; border: none; border-radius: 10px;
+    padding: 9px 20px; font-weight: 600; font-size: 0.88rem;
+    transition: all 0.2s ease;
+}
+.btn-qp-secondary:hover {
+    background: linear-gradient(135deg, var(--qp-secondary-dark), #3c1657);
+    color: #fff; transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(117, 50, 168, 0.3);
+}
+
+.btn-qp-outline {
+    background: transparent;
+    border: 1.5px solid var(--qp-primary);
+    color: var(--qp-primary);
+    border-radius: 10px; padding: 8px 18px;
+    font-weight: 600; font-size: 0.88rem;
+    transition: all 0.2s ease;
+}
+.btn-qp-outline:hover {
+    background: rgba(50, 98, 168, 0.08);
+    color: var(--qp-primary-dark);
+}
+
+/* Question Selection Card in Bank */
+.bank-q-card {
+    border: 1.5px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 10px;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.bank-q-card:hover {
+    border-color: var(--qp-primary);
+    box-shadow: 0 4px 12px rgba(50, 98, 168, 0.1);
+}
+.bank-q-card.selected {
+    border-color: var(--qp-secondary);
+    background: rgba(117, 50, 168, 0.04);
+}
+
+/* Paper Preview Sheet */
+.paper-preview-sheet {
+    background: #ffffff;
+    border: 2px solid #cbd5e1;
+    border-radius: 14px;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+    padding: 24px;
+    min-height: 700px;
+    position: sticky;
+    top: 90px;
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+}
+.preview-header-area {
+    text-align: center;
+    border-bottom: 2px double #334155;
+    padding-bottom: 14px;
+    margin-bottom: 18px;
+}
+.preview-header-area h5 { font-weight: 800; font-size: 1.25rem; color: #0f172a; margin: 0; }
+.preview-header-area h6 { font-weight: 700; font-size: 1.05rem; color: #334155; margin: 4px 0; }
+.preview-header-meta {
+    display: flex; justify-content: space-between;
+    font-size: 0.85rem; font-weight: 700; color: #1e293b;
+    margin-top: 10px; padding: 4px 0;
+}
+
+/* Preview Item */
+.preview-q-row {
+    padding: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    background: #fafafa;
+    position: relative;
+    cursor: grab;
+    transition: all 0.2s ease;
+}
+.preview-q-row:hover { background: #f1f5f9; border-color: var(--qp-primary); }
+.preview-q-row.dragging { opacity: 0.4; }
+
+/* Subject Math Toolbar */
+.subject-toolbar-btn {
+    padding: 4px 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.subject-toolbar-btn:hover {
+    background: var(--qp-primary);
+    color: #ffffff;
+    border-color: var(--qp-primary);
+}
+
+/* Print CSS */
+@media print {
+    .no-print, nav, .qp-header-banner, .qp-filter-card, .qp-builder-layout > div:first-child, .btn {
+        display: none !important;
+    }
+    .qp-builder-layout { display: block !important; }
+    .paper-preview-sheet {
+        position: static !important;
+        max-height: none !important;
+        border: none !important;
+        box-shadow: none !important;
+        padding: 0 !important;
+        width: 100% !important;
+    }
+    body { background: #fff !important; color: #000 !important; }
+    @page { margin: 15mm; size: auto; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-0">
+
+    <!-- Header Banner -->
+    <div class="qp-header-banner no-print">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+            <div class="d-flex align-items-center gap-3">
+                <div class="rounded-3 p-3 bg-white bg-opacity-20 fs-3">
+                    <i class="bi bi-file-earmark-spreadsheet-fill text-white"></i>
+                </div>
+                <div>
+                    <h2>Create Question Paper Module</h2>
+                    <p>NCTB কারিকুলাম অনুযায়ী সৃজনশীল, MCQ ও বিষয়ভিত্তিক প্রশ্নপত্র তৈরি ও প্রিন্ট লেআউট</p>
+                </div>
+            </div>
+            <div class="d-flex gap-2">
+                <a href="{% url 'question_paper:history' %}" class="btn btn-light rounded-pill font-weight-bold px-3 py-2">
+                    <i class="bi bi-clock-history me-1"></i> Question Paper History
+                </a>
+                <a href="{% url 'question_paper:question_bank' %}" class="btn btn-warning rounded-pill text-dark font-weight-bold px-3 py-2">
+                    <i class="bi bi-database me-1"></i> Central Question Bank
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="qp-filter-card no-print">
+        <div class="row g-3">
+            <div class="col-md-2">
+                <label class="form-label fw-bold text-dark fs-7 mb-1">Academic Year</label>
+                <select class="form-select form-select-sm" id="fltYear">
+                    <option value="2026" selected>2026</option>
+                    <option value="2025">2025</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold text-dark fs-7 mb-1">Exam</label>
+                <input type="text" class="form-control form-control-sm" id="fltExam" value="বার্ষিক পরীক্ষা — ২০২৬">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold text-dark fs-7 mb-1">Class</label>
+                <select class="form-select form-select-sm" id="fltClass" onchange="filterQuestions()">
+                    {% for c_val, c_name in classes %}
+                    <option value="{{ c_val }}" {% if c_val == 'Class 9' %}selected{% endif %}>{{ c_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold text-dark fs-7 mb-1">Subject</label>
+                <select class="form-select form-select-sm" id="fltSubject" onchange="filterQuestions()">
+                    {% for s_val, s_name in subjects %}
+                    <option value="{{ s_val }}" {% if s_val == 'MATH' %}selected{% endif %}>{{ s_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold text-dark fs-7 mb-1">Question Type</label>
+                <select class="form-select form-select-sm" id="fltType" onchange="filterQuestions()">
+                    <option value="">All Types</option>
+                    {% for t_val, t_name in question_types %}
+                    <option value="{{ t_val }}">{{ t_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label fw-bold text-dark fs-7 mb-1">Difficulty</label>
+                <select class="form-select form-select-sm" id="fltDiff" onchange="filterQuestions()">
+                    <option value="">All Levels</option>
+                    {% for d_val, d_name in difficulties %}
+                    <option value="{{ d_val }}">{{ d_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Master Builder Layout -->
+    <div class="qp-builder-layout">
+
+        <!-- LEFT COLUMN: Question Generators & Builders -->
+        <div>
+
+            <!-- Panel Mode Selector -->
+            <div class="qp-card p-3 no-print">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div class="btn-group" role="group">
+                        <button class="btn btn-sm btn-qp-primary" id="btnTabManual" onclick="switchBuilderTab('manual')">
+                            <i class="bi bi-hand-index me-1"></i> Question Bank Select
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary" id="btnTabCreative" onclick="switchBuilderTab('creative')">
+                            <i class="bi bi-layers me-1"></i> Creative Question Builder
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary" id="btnTabSubject" onclick="switchBuilderTab('subject')">
+                            <i class="bi bi-journal-code me-1"></i> Subject Tools (Math/Chem/Phys)
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary" id="btnTabAI" onclick="switchBuilderTab('ai')">
+                            <i class="bi bi-stars me-1"></i> AI Question Generator
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 1: Central Question Bank Selection -->
+            <div class="qp-card" id="tabManual">
+                <div class="qp-card-header">
+                    <h5 class="qp-card-title"><i class="bi bi-database text-primary"></i> Select Questions from Central Bank</h5>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-secondary" onclick="selectAllQuestions()">Select All</button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="clearSelectedQuestions()">Clear All</button>
+                    </div>
+                </div>
+                
+                <div id="bankQuestionContainer" style="max-height: 480px; overflow-y: auto; padding-right: 5px;">
+                    {% for q in questions %}
+                    <div class="bank-q-card q-item-card" 
+                         data-id="{{ q.id }}" 
+                         data-class="{{ q.class_level }}" 
+                         data-subject="{{ q.subject }}" 
+                         data-type="{{ q.question_type }}" 
+                         data-diff="{{ q.difficulty }}"
+                         onclick="toggleSelectPaperQ({{ q.id }}, '{{ q.question_text|escapejs }}', {{ q.marks }}, '{{ q.question_type }}')">
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                            <div>
+                                <span class="badge bg-primary me-1">{{ q.get_question_type_display }}</span>
+                                <span class="badge bg-info text-dark me-1">{{ q.get_difficulty_display }}</span>
+                                {% if q.board_standard %}
+                                <span class="badge bg-secondary">{{ q.get_board_standard_display }} {{ q.board_year }}</span>
+                                {% endif %}
+                            </div>
+                            <span class="fw-bold text-primary">{{ q.marks }} Marks</span>
+                        </div>
+                        <div class="fw-semibold text-dark fs-7 mb-1">{{ q.question_text|truncatewords:25 }}</div>
+                        {% if q.stimulus_passage %}
+                        <div class="text-muted small italic ms-2 border-start ps-2 mb-1">উদ্দীপক: {{ q.stimulus_passage|truncatewords:15 }}</div>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi bi-folder-x fs-1 text-secondary"></i>
+                        <p class="mt-2">কোনো প্রশ্ন পাওয়া যায়নি। উপরে ফিল্টার বদলান অথবা প্রশ্ন যোগ করুন।</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- TAB 2: Creative Question Builder (উদ্দীপক + ক/খ/গ/ঘ) -->
+            <div class="qp-card" id="tabCreative" style="display:none;">
+                <div class="qp-card-header">
+                    <h5 class="qp-card-title"><i class="bi bi-layers-fill text-purple"></i> Creative Question Builder (সৃজনশীল)</h5>
+                    <span class="badge bg-success">Total: 10 Marks (Editable)</span>
+                </div>
+                <form id="creativeForm" onsubmit="addCreativeQuestionToPaper(event)">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">উদ্দীপক (Stimulus / Passage / Table / Image)</label>
+                        <textarea class="form-control" id="cqStimulus" rows="3" placeholder="উদ্দীপকটি এখানে লিখুন..."></textarea>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold fs-7">ক নম্বর প্রশ্ন (জ্ঞানমূলক - ১ মার্ক)</label>
+                            <input type="text" class="form-control form-control-sm" id="cqKa" placeholder="ক) ...">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold fs-7">খ নম্বর প্রশ্ন (অনুধাবনমূলক - ২ মার্ক)</label>
+                            <input type="text" class="form-control form-control-sm" id="cqKha" placeholder="খ) ...">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold fs-7">গ নম্বর প্রশ্ন (প্রয়োগমূলক - ৩ মার্ক)</label>
+                            <input type="text" class="form-control form-control-sm" id="cqGa" placeholder="গ) ...">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold fs-7">ঘ নম্বর প্রশ্ন (উচ্চতর দক্ষতা - ৪ মার্ক)</label>
+                            <input type="text" class="form-control form-control-sm" id="cqGha" placeholder="ঘ) ...">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-qp-secondary w-100">
+                        <i class="bi bi-plus-circle me-1"></i> Add Creative Question to Paper
+                    </button>
+                </form>
+            </div>
+
+            <!-- TAB 3: Subject Toolbars (MathJax, Chemistry, Physics, ICT) -->
+            <div class="qp-card" id="tabSubject" style="display:none;">
+                <div class="qp-card-header">
+                    <h5 class="qp-card-title"><i class="bi bi-calculator-fill text-primary"></i> Subject Formula & Equation Editor</h5>
+                </div>
+                
+                <!-- Math Toolbar -->
+                <div class="mb-3 p-3 bg-light rounded-3">
+                    <h6 class="fw-bold text-dark mb-2">Math & Physics Formulas (MathJax / LaTeX)</h6>
+                    <div class="d-flex flex-wrap gap-1 mb-2">
+                        <button class="subject-toolbar-btn" onclick="insertSymbol('\\frac{a}{b}')">Fraction \(\frac{a}{b}\)</button>
+                        <button class="subject-toolbar-btn" onclick="insertSymbol('\\sqrt{x}')">Square Root \(\sqrt{x}\)</button>
+                        <button class="subject-toolbar-btn" onclick="insertSymbol('\\int_{a}^{b}')">Integral \(\int\)</button>
+                        <button class="subject-toolbar-btn" onclick="insertSymbol('\\sum_{i=1}^{n}')">Summation \(\sum\)</button>
+                        <button class="subject-toolbar-btn" onclick="insertSymbol('x^{2}')">Power \(x^2\)</button>
+                        <button class="subject-toolbar-btn" onclick="insertSymbol('\\alpha, \\beta, \\theta, \\pi')">Greek \(\alpha,\beta,\pi\)</button>
+                    </div>
+                </div>
+
+                <!-- Chemistry Toolbar -->
+                <div class="mb-3 p-3 bg-light rounded-3">
+                    <h6 class="fw-bold text-dark mb-2">Chemistry Reactions & Formulas</h6>
+                    <div class="d-flex flex-wrap gap-1 mb-2">
+                        <button class="subject-toolbar-btn" onclick="insertSymbol('H_2SO_4')">H₂SO₄</button>
+                        <button class="subject-toolbar-btn" onclick="insertSymbol('CaCO_3 \\rightarrow CaO + CO_2')">Reaction \(\rightarrow\)</button>
+                        <button class="subject-toolbar-btn" onclick="insertSymbol('N_2 + 3H_2 \\rightleftharpoons 2NH_3')">Equilibrium \(\rightleftharpoons\)</button>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Editor Preview</label>
+                    <textarea class="form-control" id="mathEditorText" rows="3" placeholder="LaTeX সমীকরণ লিখুন... e.g. \(x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}\)"></textarea>
+                    <div class="p-3 border rounded-3 bg-white mt-2" id="mathPreviewBox">
+                        <em>Live MathJax Preview will appear here...</em>
+                    </div>
+                </div>
+                <button class="btn btn-qp-primary w-100" onclick="addMathQuestionToPaper()">
+                    <i class="bi bi-plus-lg me-1"></i> Add Formula Question to Paper
+                </button>
+            </div>
+
+            <!-- TAB 4: AI Question Generator -->
+            <div class="qp-card" id="tabAI" style="display:none;">
+                <div class="qp-card-header">
+                    <h5 class="qp-card-title"><i class="bi bi-stars text-warning"></i> AI Question Generator (NCTB Standard)</h5>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold fs-7">Chapter Name</label>
+                        <input type="text" class="form-control form-control-sm" id="aiChapter" value="সংখ্যা পদ্ধতি ও বীজগণিত">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold fs-7">Topic</label>
+                        <input type="text" class="form-control form-control-sm" id="aiTopic" value="বীজগণিতীয় রাশিমালা">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold fs-7">Question Type</label>
+                        <select class="form-select form-select-sm" id="aiType">
+                            <option value="CREATIVE">Creative Question (সৃজনশীল)</option>
+                            <option value="MCQ">MCQ (বহুনির্বাচনী)</option>
+                            <option value="SHORT">Short Question (সংক্ষিপ্ত)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold fs-7">Bloom's Taxonomy</label>
+                        <select class="form-select form-select-sm" id="aiBloom">
+                            <option value="APPLY">Application & Analysis (প্রয়োগ ও বিশ্লেষণ)</option>
+                            <option value="KNOWLEDGE">Remember & Knowledge (জ্ঞান ও অনুধাবন)</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-warning w-100 fw-bold text-dark" onclick="generateAIQuestion()">
+                    <i class="bi bi-magic me-1"></i> Generate Board Standard Question with AI
+                </button>
+            </div>
+
+            <!-- Paper Settings (Header/Footer Customizer) -->
+            <div class="qp-card no-print">
+                <div class="qp-card-header">
+                    <h5 class="qp-card-title"><i class="bi bi-sliders text-secondary"></i> Header, Footer & Instructions Customizer</h5>
+                </div>
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold fs-7">School Name</label>
+                        <input type="text" class="form-control form-control-sm" id="hdrSchool" value="গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়" onchange="updateHeaderPreview()">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold fs-7">EIIN / Address</label>
+                        <input type="text" class="form-control form-control-sm" id="hdrEiin" value="EIIN: 123456 | স্থাপিত: ১৯৯৫" onchange="updateHeaderPreview()">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold fs-7">Time Allowed</label>
+                        <input type="text" class="form-control form-control-sm" id="hdrTime" value="৩ ঘণ্টা" onchange="updateHeaderPreview()">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold fs-7">Full Marks</label>
+                        <input type="number" class="form-control form-control-sm" id="hdrFullMarks" value="100" onchange="updateHeaderPreview()">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold fs-7">Numbering Style</label>
+                        <select class="form-select form-select-sm" id="hdrNumbering" onchange="renderPaperPreview()">
+                            <option value="BANGLA">Bangla (১, ২, ৩ / ক, খ, গ)</option>
+                            <option value="ENGLISH">English (1, 2, 3)</option>
+                            <option value="ROMAN">Roman (i, ii, iii)</option>
+                        </select>
+                    </div>
+                    <div class="col-12 mt-2">
+                        <label class="form-label fw-semibold fs-7">Exam Instructions</label>
+                        <textarea class="form-control form-control-sm" id="hdrInstructions" rows="2" onchange="updateHeaderPreview()">১. সকল প্রশ্নের মান সমান। প্রয়োজনীয় ক্ষেত্রে ডান পার্শ্বের সংখ্যা প্রশ্নের পূর্ণমান জ্ঞাপন করে।
+২. ক্যালকুলেটর ব্যবহার করার অনুমতি আছে।</textarea>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN: Pixel-Perfect Paper Canvas / Live Preview Sheet -->
+        <div>
+            <div class="paper-preview-sheet" id="paperPrintSheet">
+                
+                <!-- Printable Header -->
+                <div class="preview-header-area">
+                    <h5 id="pvSchool">গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়</h5>
+                    <div class="small text-muted" id="pvEiin">EIIN: 123456 | স্থাপিত: ১৯৯৫</div>
+                    <h6 class="mt-2" id="pvExam">বার্ষিক পরীক্ষা — ২০২৬</h6>
+                    <div class="preview-header-meta">
+                        <span id="pvClassSub">শ্রেণি: ৯মি | বিষয়: গণিত</span>
+                        <span id="pvTime">সময়: ৩ ঘণ্টা</span>
+                        <span id="pvMarks">পূর্ণমান: ১০০</span>
+                    </div>
+                </div>
+
+                <!-- Instructions Block -->
+                <div class="mb-3 p-2 border-bottom small text-dark italic" id="pvInstructionsBlock">
+                    <strong>বিশেষ দ্রষ্টব্য:</strong> <span id="pvInstructionsText">১. সকল প্রশ্নের মান সমান। প্রয়োজনীয় ক্ষেত্রে ডান পার্শ্বের সংখ্যা প্রশ্নের পূর্ণমান জ্ঞাপন করে।</span>
+                </div>
+
+                <!-- Selected Questions Container -->
+                <div id="pvQuestionsList">
+                    <div class="text-center py-5 text-muted" id="pvEmptyState">
+                        <i class="bi bi-file-earmark-text fs-1 text-secondary"></i>
+                        <p class="mt-2">বামের প্যানেল থেকে প্রশ্ন সিলেক্ট করুন। এখানে রিয়েল-টাইম প্রিভিউ দেখাবে।</p>
+                    </div>
+                </div>
+
+                <!-- Footer Signatures (For Print Layout) -->
+                <div class="d-flex justify-content-between align-items-center mt-5 pt-4 border-top text-center text-dark font-weight-bold fs-7">
+                    <div>
+                        <div class="mb-4">...............................</div>
+                        <div>প্রস্তুতকারক signature</div>
+                    </div>
+                    <div>
+                        <div class="mb-4">...............................</div>
+                        <div>পরীক্ষা নিয়ন্ত্রক</div>
+                    </div>
+                    <div>
+                        <div class="mb-4">...............................</div>
+                        <div>প্রধান শিক্ষক signature</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Controls -->
+            <div class="d-flex gap-2 mt-3 no-print">
+                <button class="btn btn-qp-primary flex-fill" onclick="window.print()">
+                    <i class="bi bi-printer-fill me-1"></i> Print Question Paper
+                </button>
+                <button class="btn btn-qp-secondary flex-fill" onclick="savePaperToBackend()">
+                    <i class="bi bi-save-fill me-1"></i> Save to Database
+                </button>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Paper Builder State
+let selectedPaperQuestions = [];
+
+function switchBuilderTab(tabName) {
+    ['manual', 'creative', 'subject', 'ai'].forEach(t => {
+        document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)).style.display = (t === tabName) ? 'block' : 'none';
+    });
+}
+
+function filterQuestions() {
+    const cls = document.getElementById('fltClass').value;
+    const subj = document.getElementById('fltSubject').value;
+    const type = document.getElementById('fltType').value;
+    const diff = document.getElementById('fltDiff').value;
+
+    document.querySelectorAll('.q-item-card').forEach(card => {
+        const matchClass = !cls || card.dataset.class === cls;
+        const matchSubj = !subj || card.dataset.subject === subj;
+        const matchType = !type || card.dataset.type === type;
+        const matchDiff = !diff || card.dataset.diff === diff;
+
+        if (matchClass && matchSubj && matchType && matchDiff) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+function toggleSelectPaperQ(id, text, marks, type) {
+    const card = document.querySelector(`.q-item-card[data-id="${id}"]`);
+    const existingIdx = selectedPaperQuestions.findIndex(q => q.id === id);
+
+    if (existingIdx >= 0) {
+        selectedPaperQuestions.splice(existingIdx, 1);
+        if (card) card.classList.remove('selected');
+    } else {
+        selectedPaperQuestions.push({
+            id: id,
+            text: text,
+            marks: marks,
+            type: type
+        });
+        if (card) card.classList.add('selected');
+    }
+    renderPaperPreview();
+}
+
+function addCreativeQuestionToPaper(e) {
+    e.preventDefault();
+    const stim = document.getElementById('cqStimulus').value.trim();
+    const ka = document.getElementById('cqKa').value.trim();
+    const kha = document.getElementById('cqKha').value.trim();
+    const ga = document.getElementById('cqGa').value.trim();
+    const gha = document.getElementById('cqGha').value.trim();
+
+    if (!stim) { alert('উদ্দীপক প্রদান করুন!'); return; }
+
+    const newQ = {
+        id: Date.now(),
+        type: 'CREATIVE',
+        marks: 10,
+        text: stim,
+        cqKa: ka,
+        cqKha: kha,
+        cqGa: ga,
+        cqGha: gha,
+    };
+    selectedPaperQuestions.push(newQ);
+    renderPaperPreview();
+    document.getElementById('creativeForm').reset();
+}
+
+function addMathQuestionToPaper() {
+    const val = document.getElementById('mathEditorText').value.trim();
+    if (!val) return;
+    selectedPaperQuestions.push({
+        id: Date.now(),
+        type: 'SHORT',
+        marks: 5,
+        text: val,
+    });
+    renderPaperPreview();
+    document.getElementById('mathEditorText').value = '';
+}
+
+function insertSymbol(sym) {
+    const editor = document.getElementById('mathEditorText');
+    editor.value += ' ' + sym + ' ';
+    updateMathPreview();
+}
+
+document.getElementById('mathEditorText')?.addEventListener('input', updateMathPreview);
+
+function updateMathPreview() {
+    const box = document.getElementById('mathPreviewBox');
+    box.innerHTML = document.getElementById('mathEditorText').value || '<em>Live MathJax Preview will appear here...</em>';
+    if (window.MathJax) {
+        MathJax.typesetPromise([box]);
+    }
+}
+
+function generateAIQuestion() {
+    const payload = {
+        subject: document.getElementById('fltSubject').value,
+        class_level: document.getElementById('fltClass').value,
+        chapter: document.getElementById('aiChapter').value,
+        topic: document.getElementById('aiTopic').value,
+        question_type: document.getElementById('aiType').value,
+    };
+
+    fetch("{% url 'question_paper:api_ai_generate' %}", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success' && data.questions.length) {
+            const q = data.questions[0];
+            selectedPaperQuestions.push(q);
+            renderPaperPreview();
+            alert('AI Question Generated & Added to Paper!');
+        }
+    })
+    .catch(err => console.error(err));
+}
+
+function renderPaperPreview() {
+    const container = document.getElementById('pvQuestionsList');
+    const empty = document.getElementById('pvEmptyState');
+
+    if (!selectedPaperQuestions.length) {
+        empty.style.display = 'block';
+        container.innerHTML = '';
+        return;
+    }
+    empty.style.display = 'none';
+
+    let totalMarks = 0;
+    container.innerHTML = selectedPaperQuestions.map((q, idx) => {
+        totalMarks += q.marks;
+        const num = idx + 1;
+        let bodyHtml = `<div class="fw-bold text-dark mb-1">${num}. ${q.text} <span class="float-end text-primary">(${q.marks})</span></div>`;
+
+        if (q.type === 'CREATIVE' && (q.cqKa || q.cqKha || q.cqGa || q.cqGha)) {
+            bodyHtml += `<div class="ms-3 font-weight-normal small">
+                ${q.cqKa ? `<div>ক) ${q.cqKa} <span class="float-end">(১)</span></div>` : ''}
+                ${q.cqKha ? `<div>খ) ${q.cqKha} <span class="float-end">(২)</span></div>` : ''}
+                ${q.cqGa ? `<div>গ) ${q.cqGa} <span class="float-end">(৩)</span></div>` : ''}
+                ${q.cqGha ? `<div>ঘ) ${q.cqGha} <span class="float-end">(৪)</span></div>` : ''}
+            </div>`;
+        }
+
+        return `<div class="preview-q-row" id="pq-${q.id}">
+            <span class="badge bg-danger position-absolute top-0 end-0 m-1 no-print cursor-pointer" onclick="removePaperQ(${q.id})">×</span>
+            ${bodyHtml}
+        </div>`;
+    }).join('');
+
+    document.getElementById('pvMarks').textContent = 'পূর্ণমান: ' + totalMarks;
+    if (window.MathJax) {
+        MathJax.typesetPromise([container]);
+    }
+}
+
+function removePaperQ(id) {
+    selectedPaperQuestions = selectedPaperQuestions.filter(q => q.id !== id);
+    renderPaperPreview();
+}
+
+function updateHeaderPreview() {
+    document.getElementById('pvSchool').textContent = document.getElementById('hdrSchool').value;
+    document.getElementById('pvEiin').textContent = document.getElementById('hdrEiin').value;
+    document.getElementById('pvExam').textContent = document.getElementById('fltExam').value;
+    document.getElementById('pvTime').textContent = 'সময়: ' + document.getElementById('hdrTime').value;
+    document.getElementById('pvInstructionsText').textContent = document.getElementById('hdrInstructions').value;
+}
+
+function savePaperToBackend() {
+    const payload = {
+        title: document.getElementById('fltExam').value,
+        class_name: document.getElementById('fltClass').value,
+        subject: document.getElementById('fltSubject').value,
+        time_allowed: document.getElementById('hdrTime').value,
+        full_marks: parseInt(document.getElementById('hdrFullMarks').value) || 100,
+        school_name: document.getElementById('hdrSchool').value,
+        eiin_number: document.getElementById('hdrEiin').value,
+        instructions: document.getElementById('hdrInstructions').value,
+        questions_json: selectedPaperQuestions,
+    };
+
+    fetch("{% url 'question_paper:api_save_paper' %}", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            alert('✅ ' + data.message);
+        } else {
+            alert('❌ Error: ' + data.message);
+        }
+    });
+}
+</script>
+{% endblock %}
