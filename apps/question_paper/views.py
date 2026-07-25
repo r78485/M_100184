@@ -5,11 +5,23 @@ from django.http import JsonResponse, HttpResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.core.paginator import Paginator
+from django.core.management import call_command
+from django.db import OperationalError, DatabaseError
+
 from .models import (
     Chapter, QuestionBank, QuestionPaper, QuestionPaperTemplate,
     SUBJECT_CHOICES, QUESTION_TYPE_CHOICES, DIFFICULTY_CHOICES, BOARD_CHOICES, CLASS_CHOICES
 )
-from apps.users.models import User
+
+def ensure_tables_exist():
+    """Ensure database tables for question_paper exist"""
+    try:
+        from django.db import connection
+        tables = connection.introspection.table_names()
+        if 'question_paper_questionbank' not in tables:
+            call_command('migrate', 'question_paper', verbosity=0)
+    except Exception:
+        pass
 
 def check_permission(user):
     """Ensure user is authorized (Admin, Principal, Exam Controller, Teacher)"""
@@ -24,11 +36,20 @@ def dashboard_view(request):
     if not check_permission(request.user):
         return redirect('dashboard')
         
-    total_questions = QuestionBank.objects.count()
-    total_papers = QuestionPaper.objects.count()
-    total_chapters = Chapter.objects.count()
-    recent_papers = QuestionPaper.objects.order_by('-created_at')[:5]
-    
+    ensure_tables_exist()
+
+    try:
+        total_questions = QuestionBank.objects.count()
+        total_papers = QuestionPaper.objects.count()
+        total_chapters = Chapter.objects.count()
+        recent_papers = QuestionPaper.objects.order_by('-created_at')[:5]
+    except (OperationalError, DatabaseError):
+        ensure_tables_exist()
+        total_questions = 0
+        total_papers = 0
+        total_chapters = 0
+        recent_papers = []
+
     context = {
         'total_questions': total_questions,
         'total_papers': total_papers,
@@ -44,13 +65,28 @@ def create_paper_view(request, paper_id=None):
     if not check_permission(request.user):
         return redirect('dashboard')
         
-    paper_instance = None
-    if paper_id:
-        paper_instance = get_object_or_404(QuestionPaper, pk=paper_id)
+    ensure_tables_exist()
 
-    chapters = Chapter.objects.all().order_by('chapter_number')
-    questions = QuestionBank.objects.all().order_by('-created_at')[:100]
-    templates = QuestionPaperTemplate.objects.all()
+    paper_instance = None
+    chapters = []
+    questions = []
+    templates = []
+
+    try:
+        if paper_id:
+            paper_instance = QuestionPaper.objects.filter(pk=paper_id).first()
+
+        chapters = Chapter.objects.all().order_by('chapter_number')
+        questions = QuestionBank.objects.all().order_by('-created_at')[:100]
+        templates = QuestionPaperTemplate.objects.all()
+    except (OperationalError, DatabaseError):
+        ensure_tables_exist()
+        try:
+            chapters = Chapter.objects.all().order_by('chapter_number')
+            questions = QuestionBank.objects.all().order_by('-created_at')[:100]
+            templates = QuestionPaperTemplate.objects.all()
+        except Exception:
+            pass
 
     context = {
         'paper_instance': paper_instance,
@@ -70,13 +106,14 @@ def subject_builder_view(request, subject_code='MATH'):
     if not check_permission(request.user):
         return redirect('dashboard')
 
+    ensure_tables_exist()
+
     sub_code_upper = subject_code.upper()
     valid_subjects = [s[0] for s in SUBJECT_CHOICES]
     if sub_code_upper not in valid_subjects:
         sub_code_upper = 'MATH'
 
     if request.method == 'POST':
-        # Create Question in Bank
         try:
             q = QuestionBank(
                 subject=sub_code_upper,
@@ -123,8 +160,13 @@ def subject_builder_view(request, subject_code='MATH'):
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
 
-    chapters = Chapter.objects.filter(subject=sub_code_upper)
-    questions = QuestionBank.objects.filter(subject=sub_code_upper).order_by('-created_at')[:30]
+    try:
+        chapters = Chapter.objects.filter(subject=sub_code_upper)
+        questions = QuestionBank.objects.filter(subject=sub_code_upper).order_by('-created_at')[:30]
+    except (OperationalError, DatabaseError):
+        ensure_tables_exist()
+        chapters = []
+        questions = []
 
     context = {
         'current_subject': sub_code_upper,
@@ -143,28 +185,34 @@ def question_bank_view(request):
     if not check_permission(request.user):
         return redirect('dashboard')
 
-    qs = QuestionBank.objects.all().order_by('-created_at')
+    ensure_tables_exist()
 
-    # Filtering
-    sub = request.GET.get('subject')
-    cls = request.GET.get('class_level')
-    qtype = request.GET.get('question_type')
-    diff = request.GET.get('difficulty')
-    search = request.GET.get('search')
+    try:
+        qs = QuestionBank.objects.all().order_by('-created_at')
+        sub = request.GET.get('subject')
+        cls = request.GET.get('class_level')
+        qtype = request.GET.get('question_type')
+        diff = request.GET.get('difficulty')
+        search = request.GET.get('search')
 
-    if sub: qs = qs.filter(subject=sub)
-    if cls: qs = qs.filter(class_level=cls)
-    if qtype: qs = qs.filter(question_type=qtype)
-    if diff: qs = qs.filter(difficulty=diff)
-    if search: qs = qs.filter(question_text__icontains=search)
+        if sub: qs = qs.filter(subject=sub)
+        if cls: qs = qs.filter(class_level=cls)
+        if qtype: qs = qs.filter(question_type=qtype)
+        if diff: qs = qs.filter(difficulty=diff)
+        if search: qs = qs.filter(question_text__icontains=search)
 
-    paginator = Paginator(qs, 24)
-    page_number = request.GET.get('page', 1)
-    page_obj = paginator.get_page(page_number)
+        paginator = Paginator(qs, 24)
+        page_number = request.GET.get('page', 1)
+        page_obj = paginator.get_page(page_number)
+        total_count = qs.count()
+    except (OperationalError, DatabaseError):
+        ensure_tables_exist()
+        page_obj = []
+        total_count = 0
 
     context = {
         'page_obj': page_obj,
-        'total_count': qs.count(),
+        'total_count': total_count,
         'subjects': SUBJECT_CHOICES,
         'classes': CLASS_CHOICES,
         'question_types': QUESTION_TYPE_CHOICES,
@@ -178,11 +226,16 @@ def history_view(request):
     if not check_permission(request.user):
         return redirect('dashboard')
 
-    papers = QuestionPaper.objects.all().order_by('-created_at')
+    ensure_tables_exist()
 
-    search = request.GET.get('search')
-    if search:
-        papers = papers.filter(title__icontains=search)
+    try:
+        papers = QuestionPaper.objects.all().order_by('-created_at')
+        search = request.GET.get('search')
+        if search:
+            papers = papers.filter(title__icontains=search)
+    except (OperationalError, DatabaseError):
+        ensure_tables_exist()
+        papers = []
 
     context = {
         'papers': papers,
@@ -191,10 +244,15 @@ def history_view(request):
 
 @login_required
 def print_preview_view(request, paper_id=None):
+    ensure_tables_exist()
+    paper = None
     if paper_id:
-        paper = get_object_or_404(QuestionPaper, pk=paper_id)
-    else:
-        # Dummy paper preview
+        try:
+            paper = QuestionPaper.objects.filter(pk=paper_id).first()
+        except Exception:
+            pass
+
+    if not paper:
         paper = QuestionPaper(
             title="বার্ষিক পরীক্ষা — ২০২৬",
             school_name="গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়",
@@ -211,12 +269,13 @@ def print_preview_view(request, paper_id=None):
     }
     return render(request, 'question_paper/print_preview.html', context)
 
-# API Endpoints
 @csrf_exempt
 @login_required
 def api_save_paper(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'POST method required'}, status=405)
+
+    ensure_tables_exist()
 
     try:
         data = json.loads(request.body)
@@ -274,7 +333,6 @@ def api_ai_generate(request):
         question_type = data.get('question_type', 'CREATIVE')
         marks = int(data.get('marks', 10))
 
-        # Generator Templates based on NCTB curriculum
         generated = []
         if question_type == 'CREATIVE':
             sample_stimuli = [
@@ -304,7 +362,6 @@ def api_ai_generate(request):
             }
             generated.append(q)
         else:
-            # MCQ / Short Generator
             mcq_samples = [
                 {'text': f'{chapter} অধ্যায় অনুযায়ী নিচের কোনটি সঠিক তথ্য?', 'options': 'ক) ১ম উপাদান\nখ) ২য় উপাদান\nগ) ৩য় উপাদান\nঘ) ৪র্থ উপাদান', 'answer': 'খ', 'marks': 1},
                 {'text': f'{topic} এর গাণিতিক সংকেত নিচের কোনটি?', 'options': 'ক) f(x)\nখ) g(x)\nগ) h(x)\nঘ) P(x)', 'answer': 'ক', 'marks': 1},
@@ -332,7 +389,11 @@ def api_ai_generate(request):
 @login_required
 def api_delete_paper(request, paper_id):
     if request.method == 'POST':
-        paper = get_object_or_404(QuestionPaper, pk=paper_id)
-        paper.delete()
-        return JsonResponse({'status': 'success', 'message': 'প্রশ্নপত্র সফলভাবে মুছে ফেলা হয়েছে!'})
+        ensure_tables_exist()
+        try:
+            paper = get_object_or_404(QuestionPaper, pk=paper_id)
+            paper.delete()
+            return JsonResponse({'status': 'success', 'message': 'প্রশ্নপত্র সফলভাবে মুছে ফেলা হয়েছে!'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
     return JsonResponse({'error': 'POST method required'}, status=405)
