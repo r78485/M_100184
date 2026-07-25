@@ -25,6 +25,7 @@ urlpatterns = [
     path('transcripts/', include('apps.transcripts.urls')),
     path('admit-card/', include('apps.admit_cards.urls')),
     path('testimonial/', include('apps.testimonials.urls')),
+    path('api/sync/', include('apps.sync.urls')),  # অফলাইন-অনলাইন সিঙ্ক API
     
     # PWA Support
     path('sw.js', TemplateView.as_view(template_name="sw.js", content_type='application/javascript'), name='sw.js'),

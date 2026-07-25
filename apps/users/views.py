@@ -2,19 +2,36 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 import io
 import base64
-import qrcode
-import barcode
-from barcode.writer import ImageWriter
 from .models import StudentAdmission
 
 from django.http import HttpResponse
-from reportlab.lib import colors
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import inch
-from reportlab.pdfgen import canvas
-from reportlab.platypus import Image as RLImage
-from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
-from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+
+# ── প্যাকেজ নিরাপদভাবে ইম্পোর্ট (না থাকলেও অ্যাপ চলবে) ──
+try:
+    import qrcode
+    _HAS_QRCODE = True
+except ImportError:
+    _HAS_QRCODE = False
+
+try:
+    import barcode
+    from barcode.writer import ImageWriter
+    _HAS_BARCODE = True
+except ImportError:
+    _HAS_BARCODE = False
+
+try:
+    from reportlab.lib import colors
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib.units import inch
+    from reportlab.pdfgen import canvas
+    from reportlab.platypus import Image as RLImage
+    from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+    from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+    _HAS_REPORTLAB = True
+except ImportError:
+    _HAS_REPORTLAB = False
+
 
 @login_required
 def admin_dashboard(request):

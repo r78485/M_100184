@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'apps.transcripts',
     'apps.admit_cards',
     'apps.testimonials',
+    'apps.sync',  # অফলাইন-অনলাইন সিঙ্ক সিস্টেম
 ]
 
 MIDDLEWARE = [
@@ -125,6 +126,19 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# ──────────────────────────────────────────────────────────────
+# অফলাইন ↔ অনলাইন সিঙ্ক কনফিগারেশন
+# ──────────────────────────────────────────────────────────────
+# অনলাইন সার্ভারের URL (নেটওয়ার্ক ব্যাকআপ)
+ONLINE_SERVER_URL = os.environ.get('ONLINE_SERVER_URL', 'https://m-100184.onrender.com')
+
+# সিঙ্ক API কী — উভয় সার্ভারে একই কী থাকতে হবে
+# প্রোডাকশনে অবশ্যই env variable দিয়ে বদলান!
+SYNC_API_KEY = os.environ.get('SYNC_API_KEY', 'offline-sync-secret-key-change-me')
+
+# স্বয়ংক্রিয় সিঙ্কের বিরতি (সেকেন্ড) — ডিফল্ট ১৫ মিনিট
+SYNC_INTERVAL_SECONDS = int(os.environ.get('SYNC_INTERVAL_SECONDS', 900))
 
 # Auto-compile translations on reload
 try:

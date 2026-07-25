@@ -144,8 +144,50 @@
 {% block content %}
 <div class="container-fluid p-0 space-y-5">
 
+    <!-- 🔄 Sync Status Bar — অফলাইন/অনলাইন সিঙ্ক স্ট্যাটাস -->
+    <div id="sync-status-bar" class="mb-3 px-1">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 p-3 rounded-3"
+             style="background: linear-gradient(90deg,#0f172a,#1e293b); border: 1px solid #334155;">
+            <!-- বাম: সার্ভার স্ট্যাটাস -->
+            <div class="d-flex align-items-center gap-3">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="position-relative">
+                        <span id="sync-dot-local" class="d-inline-block rounded-circle"
+                              style="width:10px;height:10px;background:#22c55e;box-shadow:0 0 6px #22c55e;"></span>
+                    </span>
+                    <span class="text-white text-xs fw-semibold">লোকাল সার্ভার</span>
+                    <span class="badge rounded-pill text-xs px-2" style="background:#16a34a22;color:#4ade80;border:1px solid #16a34a;">
+                        127.0.0.1:8000 ✓
+                    </span>
+                </div>
+                <div class="text-slate-400" style="font-size:1.1rem;">⇆</div>
+                <div class="d-flex align-items-center gap-2">
+                    <span id="sync-dot-online" class="d-inline-block rounded-circle"
+                          style="width:10px;height:10px;background:#94a3b8;"></span>
+                    <span class="text-white text-xs fw-semibold">অনলাইন ব্যাকআপ</span>
+                    <span id="sync-online-badge" class="badge rounded-pill text-xs px-2"
+                          style="background:#1e293b;color:#94a3b8;border:1px solid #334155;">
+                        চেক করছে...
+                    </span>
+                </div>
+            </div>
+            <!-- ডান: শেষ সিঙ্কের সময় + বাটন -->
+            <div class="d-flex align-items-center gap-3">
+                <div class="text-xs text-slate-400">
+                    শেষ সিঙ্ক: <span id="sync-last-time" class="text-slate-300">—</span>
+                </div>
+                <button onclick="triggerManualSync()" id="sync-now-btn"
+                        class="btn btn-sm px-3 py-1 fw-semibold text-xs"
+                        style="background:linear-gradient(135deg,#0d9488,#0284c7);color:white;border:none;border-radius:8px;">
+                    <i class="bi bi-arrow-repeat me-1"></i> এখনই সিঙ্ক করুন
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- 2. Weather & Welcome Admin Banner -->
     <div class="welcome-weather-card mb-4">
+
         <div class="row align-items-center g-4">
             <!-- Left: Welcome & Email Status -->
             <div class="col-lg-7">
@@ -615,5 +657,90 @@
 
     updateDashboardClock();
     setInterval(updateDashboardClock, 1000);
+
+    // ──────────────────────────────────────────────────
+    //  🔄 সিঙ্ক স্ট্যাটাস পোলিং (প্রতি ৩০ সেকেন্ডে)
+    // ──────────────────────────────────────────────────
+    function updateSyncStatus() {
+        fetch('/api/sync/status/')
+            .then(r => r.json())
+            .then(data => {
+                const dot = document.getElementById('sync-dot-online');
+                const badge = document.getElementById('sync-online-badge');
+                const lastTime = document.getElementById('sync-last-time');
+
+                if (data.last_sync) {
+                    const d = new Date(data.last_sync);
+                    const fmt = d.toLocaleTimeString('bn-BD', {hour:'2-digit', minute:'2-digit'}) +
+                                ' — ' + d.toLocaleDateString('bn-BD', {month:'short', day:'numeric'});
+                    if (lastTime) lastTime.textContent = fmt;
+                    // সফল সিঙ্ক হয়েছে — সবুজ
+                    if (dot) { dot.style.background='#22c55e'; dot.style.boxShadow='0 0 6px #22c55e'; }
+                    if (badge) {
+                        badge.textContent = 'সংযুক্ত ✓';
+                        badge.style.background = '#16a34a22';
+                        badge.style.color = '#4ade80';
+                        badge.style.border = '1px solid #16a34a';
+                    }
+                } else {
+                    // কখনো সিঙ্ক হয়নি
+                    if (dot) { dot.style.background='#f59e0b'; dot.style.boxShadow='0 0 6px #f59e0b'; }
+                    if (badge) {
+                        badge.textContent = 'সিঙ্ক হয়নি';
+                        badge.style.background = '#78350f22';
+                        badge.style.color = '#fbbf24';
+                        badge.style.border = '1px solid #92400e';
+                    }
+                }
+            })
+            .catch(() => {
+                const dot = document.getElementById('sync-dot-online');
+                const badge = document.getElementById('sync-online-badge');
+                if (dot) { dot.style.background='#ef4444'; dot.style.boxShadow='none'; }
+                if (badge) {
+                    badge.textContent = 'সংযোগ নেই';
+                    badge.style.color = '#f87171';
+                    badge.style.border = '1px solid #7f1d1d';
+                }
+            });
+    }
+
+    function triggerManualSync() {
+        const btn = document.getElementById('sync-now-btn');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="bi bi-arrow-repeat me-1" style="animation:spin 1s linear infinite;display:inline-block;"></i> সিঙ্ক হচ্ছে...';
+        }
+        fetch('/api/sync/trigger/', { method: 'POST', headers: {'X-CSRFToken': '{{ csrf_token }}'} })
+            .then(r => r.json())
+            .then(d => {
+                updateSyncStatus();
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-check-circle-fill me-1"></i> সিঙ্ক সম্পন্ন!';
+                    setTimeout(() => {
+                        btn.innerHTML = '<i class="bi bi-arrow-repeat me-1"></i> এখনই সিঙ্ক করুন';
+                    }, 3000);
+                }
+            })
+            .catch(() => {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-exclamation-triangle me-1"></i> ব্যর্থ হয়েছে';
+                    setTimeout(() => {
+                        btn.innerHTML = '<i class="bi bi-arrow-repeat me-1"></i> এখনই সিঙ্ক করুন';
+                    }, 3000);
+                }
+            });
+    }
+
+    // স্পিন অ্যানিমেশন
+    const spinStyle = document.createElement('style');
+    spinStyle.textContent = '@keyframes spin { from{transform:rotate(0deg)} to{transform:rotate(360deg)} }';
+    document.head.appendChild(spinStyle);
+
+    // পেজ লোড হলে ও প্রতি ৩০ সেকেন্ডে চেক
+    updateSyncStatus();
+    setInterval(updateSyncStatus, 30000);
 </script>
 {% endblock %}

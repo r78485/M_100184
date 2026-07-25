@@ -1,13 +1,25 @@
-const CACHE_NAME = 'edumanage-offline-v2';
+// EduManage Service Worker — অফলাইন-ফার্স্ট কৌশল
+// লোকাল সার্ভার (127.0.0.1:8000) সবসময় Primary।
+// এই SW শুধু static assets ক্যাশ করে।
 
-// Add the URLs you want to cache here (static assets and offline fallback page)
+const CACHE_NAME = 'edumanage-offline-v3';
+const SYNC_CACHE = 'edumanage-sync-v1';
+
+// প্রি-ক্যাশ করার URL গুলো
 const URLS_TO_CACHE = [
   '/',
   '/login/',
   '/dashboard/admin/',
+  '/dashboard/teacher/',
+  '/dashboard/student/',
   '/admin-panel/students/',
   '/admin-panel/admissions/',
   '/admin-panel/employees/',
+  '/admin-panel/classes/',
+  '/admin-panel/subjects/',
+  '/finance/fees/',
+  '/finance/accounts/',
+  '/operations/attendance/',
   '/online-admission/',
   '/static/logo.png',
   '/static/school_campus.png',
@@ -21,42 +33,77 @@ const URLS_TO_CACHE = [
   '/static/vendor/tailwindcss/tailwindcss.js'
 ];
 
+// ──────────────────────────────────────────────
+//  Install — সব রিসোর্স প্রি-ক্যাশ করা
+// ──────────────────────────────────────────────
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => {
-        console.log('Opened cache');
-        return cache.addAll(URLS_TO_CACHE);
-      })
+    caches.open(CACHE_NAME).then((cache) => {
+      console.log('[EduManage SW] ক্যাশ খুলছে...');
+      // addAll ব্যর্থ হলেও SW ইনস্টল হবে
+      return Promise.allSettled(
+        URLS_TO_CACHE.map(url => cache.add(url).catch(e => console.warn(`Cache miss: ${url}`)))
+      );
+    })
   );
   self.skipWaiting();
 });
 
+// ──────────────────────────────────────────────
+//  Activate — পুরনো ক্যাশ সাফ করা
+// ──────────────────────────────────────────────
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
-        cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
-            return caches.delete(cacheName);
-          }
-        })
+        cacheNames
+          .filter(name => name !== CACHE_NAME && name !== SYNC_CACHE)
+          .map(name => {
+            console.log(`[EduManage SW] পুরনো ক্যাশ মুছছে: ${name}`);
+            return caches.delete(name);
+          })
       );
     })
   );
   self.clients.claim();
 });
 
+// ──────────────────────────────────────────────
+//  Fetch — অফলাইন-ফার্স্ট কৌশল
+//  লোকালহোস্ট: Network First (সবসময় তাজা ডেটা)
+//  Static assets: Cache First (দ্রুত লোড)
+// ──────────────────────────────────────────────
 self.addEventListener('fetch', (event) => {
-  // We use a Stale-While-Revalidate strategy for mostly static or offline-first content.
-  // Or Network First for dynamic content. 
-  // Since this is a dashboard, Network First with a fallback to cache is usually safest.
   if (event.request.method !== 'GET') return;
 
+  const url = new URL(event.request.url);
+
+  // সিঙ্ক API — SW বাইপাস করে সরাসরি নেটওয়ার্কে
+  if (url.pathname.startsWith('/api/sync/')) {
+    return;
+  }
+
+  // Static files — Cache First
+  if (url.pathname.startsWith('/static/') || url.pathname.startsWith('/media/')) {
+    event.respondWith(
+      caches.match(event.request).then((cached) => {
+        if (cached) return cached;
+        return fetch(event.request).then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then(c => c.put(event.request, clone));
+          }
+          return response;
+        });
+      })
+    );
+    return;
+  }
+
+  // Django পেজ — Network First, Cache ফলব্যাক
   event.respondWith(
     fetch(event.request)
       .then((networkResponse) => {
-        // Only cache valid responses
         if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -66,8 +113,12 @@ self.addEventListener('fetch', (event) => {
         return networkResponse;
       })
       .catch(() => {
-        // If network fails, try cache
-        return caches.match(event.request);
+        // নেটওয়ার্ক ব্যর্থ — ক্যাশ থেকে সার্ভ করা
+        return caches.match(event.request).then(cached => {
+          if (cached) return cached;
+          // ক্যাশেও নেই — রুট পেজ দেওয়া
+          return caches.match('/');
+        });
       })
   );
 });
