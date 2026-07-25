@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Account Settings - EduManage ERP{% endblock %}
 
@@ -6,11 +7,23 @@
 <div class="container-fluid p-0">
     <div class="mb-4">
         <h2 class="fw-bold mb-1" style="color: var(--primary-blue);">Account Settings</h2>
-        <p class="text-muted">Manage your personal profile settings, password, and UI theme preferences.</p>
+        <p class="text-muted">Manage your personal profile settings, password, theme, and database backup.</p>
     </div>
 
+    <!-- Restore alert message -->
+    {% if restore_message %}
+    <div class="alert alert-{% if restore_status == 'success' %}success{% else %}danger{% endif %} d-flex align-items-center gap-2 mb-4 shadow-sm" role="alert" id="restore-alert">
+        <i class="bi bi-{% if restore_status == 'success' %}check-circle-fill{% else %}exclamation-triangle-fill{% endif %} fs-5"></i>
+        <div class="fw-semibold">{{ restore_message }}</div>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+
     <div class="row g-4">
+        <!-- Left Column -->
         <div class="col-lg-8">
+
+            <!-- Profile -->
             <div class="card custom-card p-4 mb-4">
                 <h5 class="fw-bold mb-4">Update Profile Details</h5>
                 <form>
@@ -36,7 +49,8 @@
                 </form>
             </div>
 
-            <div class="card custom-card p-4">
+            <!-- Change Password -->
+            <div class="card custom-card p-4 mb-4">
                 <h5 class="fw-bold mb-4">Change Password</h5>
                 <form>
                     <div class="row g-3 mb-4">
@@ -56,9 +70,107 @@
                     <button type="submit" class="btn text-white px-4" style="background-color: var(--secondary-purple); border: none;">Save New Password</button>
                 </form>
             </div>
+
+            <!-- ══════════════════════════════════════════════
+                 ডেটাবেজ ব্যাকআপ ও পুনরুদ্ধার সেকশন
+                 ══════════════════════════════════════════════ -->
+            <div class="card custom-card p-4">
+                <div class="d-flex align-items-center gap-2 mb-4">
+                    <div class="rounded-circle d-flex align-items-center justify-content-center"
+                         style="width:40px;height:40px;background:linear-gradient(135deg,#0d9488,#0284c7);">
+                        <i class="bi bi-database-fill text-white fs-6"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-0">ডেটাবেজ ব্যাকআপ ও পুনরুদ্ধার</h5>
+                        <small class="text-muted">Database Backup &amp; Restore</small>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+
+                    <!-- ── ডাউনলোড ব্লক ── -->
+                    <div class="col-md-6">
+                        <div class="h-100 rounded-3 p-4" style="background:#f0fdf4;border:1.5px solid #bbf7d0;">
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <i class="bi bi-cloud-arrow-down-fill fs-4 text-success"></i>
+                                <h6 class="fw-bold mb-0 text-success">ব্যাকআপ ডাউনলোড</h6>
+                            </div>
+                            <p class="text-muted small mb-3">
+                                বর্তমান ডেটাবেজ পিসিতে ডাউনলোড করে সংরক্ষণ করুন।
+                                <br><span class="fw-semibold text-dark">ফাইলের আকার: {{ db_size_mb }} MB</span>
+                            </p>
+                            <div class="d-flex flex-column gap-2">
+                                <a href="{% url 'backup_database' %}"
+                                   class="btn btn-sm fw-semibold"
+                                   style="background:#16a34a;color:#fff;border:none;border-radius:8px;">
+                                    <i class="bi bi-download me-1"></i> db_backup.sqlite3 ডাউনলোড
+                                </a>
+                                <a href="{% url 'download_full_backup' %}"
+                                   class="btn btn-sm fw-semibold"
+                                   style="background:#0284c7;color:#fff;border:none;border-radius:8px;">
+                                    <i class="bi bi-file-earmark-zip me-1"></i> পূর্ণ ব্যাকআপ (.zip) ডাউনলোড
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── আপলোড / পুনরুদ্ধার ব্লক ── -->
+                    <div class="col-md-6">
+                        <div class="h-100 rounded-3 p-4" style="background:#fff7ed;border:1.5px solid #fed7aa;">
+                            <div class="d-flex align-items-center gap-2 mb-3">
+                                <i class="bi bi-cloud-arrow-up-fill fs-4 text-warning"></i>
+                                <h6 class="fw-bold mb-0 text-warning">ব্যাকআপ থেকে পুনরুদ্ধার</h6>
+                            </div>
+                            <p class="text-muted small mb-3">
+                                পিসি থেকে ব্যাকআপ ফাইল আপলোড করে ডেটা ফিরিয়ে আনুন।
+                                <br><span class="text-danger small fw-semibold">⚠️ বিদ্যমান ডেটা মুছে যাবে!</span>
+                            </p>
+                            <form method="POST" action="{% url 'restore_database' %}" enctype="multipart/form-data"
+                                  onsubmit="return confirmRestore()">
+                                {% csrf_token %}
+                                <div class="mb-2">
+                                    <label class="form-label small fw-semibold text-dark">ফাইল নির্বাচন করুন</label>
+                                    <input type="file" name="backup_file" id="backup_file_input"
+                                           class="form-control form-control-sm"
+                                           accept=".sqlite3,.db,.zip" required
+                                           onchange="showFileName(this)">
+                                    <div class="form-text text-muted">গ্রহণযোগ্য: .sqlite3 অথবা .zip</div>
+                                </div>
+                                <div id="file-name-display" class="small text-primary mb-2 d-none">
+                                    <i class="bi bi-file-earmark-check me-1"></i>
+                                    <span id="file-name-text"></span>
+                                </div>
+                                <button type="submit" id="restore-btn"
+                                        class="btn btn-sm fw-semibold w-100"
+                                        style="background:#d97706;color:#fff;border:none;border-radius:8px;">
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i> ডেটা পুনরুদ্ধার করুন
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- নোট -->
+                    <div class="col-12">
+                        <div class="d-flex align-items-start gap-2 p-3 rounded-2"
+                             style="background:#eff6ff;border:1px solid #bfdbfe;">
+                            <i class="bi bi-info-circle-fill text-primary mt-1"></i>
+                            <div class="small text-primary-emphasis">
+                                <strong>পুনরুদ্ধারের আগে জানুন:</strong> ফাইল আপলোড করার আগে বর্তমান ডেটার একটি ব্যাকআপ স্বয়ংক্রিয়ভাবে
+                                <code>db_backup_before_restore.sqlite3</code> নামে সংরক্ষিত হবে।
+                                পুনরুদ্ধার ব্যর্থ হলে সেটি ব্যবহার করা হবে।
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <!-- ── ব্যাকআপ সেকশন শেষ ── -->
+
         </div>
 
+        <!-- Right Column -->
         <div class="col-lg-4">
+            <!-- Theme -->
             <div class="card custom-card p-4 mb-4">
                 <h5 class="fw-bold mb-3">Theme Preferences</h5>
                 <div class="d-flex flex-column gap-2">
@@ -78,7 +190,62 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Backup সারসংক্ষেপ -->
+            <div class="card custom-card p-4">
+                <h6 class="fw-bold mb-3">
+                    <i class="bi bi-shield-lock-fill text-success me-2"></i>ডেটা সুরক্ষা তথ্য
+                </h6>
+                <ul class="list-unstyled small text-muted mb-0 space-y-2">
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle-fill text-success me-1"></i>
+                        লোকাল ডেটাবেজ সাইজ: <strong class="text-dark">{{ db_size_mb }} MB</strong>
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle-fill text-success me-1"></i>
+                        অটো ব্যাকআপ অনলাইনে প্রতি ১৫ মিনিটে
+                    </li>
+                    <li class="mb-2">
+                        <i class="bi bi-check-circle-fill text-success me-1"></i>
+                        পুনরুদ্ধারে আগের ডেটা স্বয়ংক্রিয় সংরক্ষিত
+                    </li>
+                    <li>
+                        <i class="bi bi-cloud-check-fill text-primary me-1"></i>
+                        অনলাইন: <a href="https://m-100184.onrender.com" target="_blank" class="text-primary small">m-100184.onrender.com</a>
+                    </li>
+                </ul>
+            </div>
         </div>
     </div>
 </div>
+
+<script>
+function confirmRestore() {
+    const fileInput = document.getElementById('backup_file_input');
+    if (!fileInput.files.length) {
+        alert('অনুগ্রহ করে একটি ফাইল নির্বাচন করুন।');
+        return false;
+    }
+    const fname = fileInput.files[0].name;
+    return confirm(
+        '⚠️ সতর্কতা!\n\n' +
+        'ফাইল: ' + fname + '\n\n' +
+        'এই ফাইল দিয়ে পুনরুদ্ধার করলে বিদ্যমান সকল ডেটা প্রতিস্থাপিত হবে।\n' +
+        'আগের ডেটা স্বয়ংক্রিয়ভাবে ব্যাকআপ হবে।\n\n' +
+        'নিশ্চিতভাবে পুনরুদ্ধার করতে চান?'
+    );
+}
+
+function showFileName(input) {
+    const display = document.getElementById('file-name-display');
+    const nameSpan = document.getElementById('file-name-text');
+    if (input.files.length > 0) {
+        const size = (input.files[0].size / 1024 / 1024).toFixed(2);
+        nameSpan.textContent = input.files[0].name + ' (' + size + ' MB)';
+        display.classList.remove('d-none');
+    } else {
+        display.classList.add('d-none');
+    }
+}
+</script>
 {% endblock %}

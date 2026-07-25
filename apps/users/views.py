@@ -85,7 +85,18 @@ def general_settings(request):
 
 @login_required
 def account_settings(request):
-    return render(request, 'account_settings.html')
+    import os
+    from django.conf import settings as djsettings
+    db_path = os.path.join(djsettings.BASE_DIR, 'db.sqlite3')
+    db_size_mb = round(os.path.getsize(db_path) / (1024 * 1024), 2) if os.path.exists(db_path) else 0
+    restore_message = request.session.pop('restore_message', None)
+    restore_status = request.session.pop('restore_status', None)
+    return render(request, 'account_settings.html', {
+        'db_size_mb': db_size_mb,
+        'restore_message': restore_message,
+        'restore_status': restore_status,
+    })
+
 
 @login_required
 def dashboard_router(request):
@@ -999,6 +1010,91 @@ def backup_database_view(request):
             response['Content-Disposition'] = 'attachment; filename=db_backup.sqlite3'
             return response
     return HttpResponse('Database not found', status=404)
+
+
+@login_required
+def restore_database_view(request):
+    """
+    পিসি থেকে ব্যাকআপ ফাইল (.sqlite3 বা .zip) আপলোড করে ডেটাবেজ পুনরুদ্ধার করা।
+    """
+    if request.user.role != 'ADMIN' and not request.user.is_superuser:
+        return HttpResponse('Permission denied', status=403)
+
+    if request.method != 'POST':
+        return redirect('account_settings')
+
+    uploaded = request.FILES.get('backup_file')
+    if not uploaded:
+        request.session['restore_message'] = 'কোনো ফাইল নির্বাচন করা হয়নি।'
+        request.session['restore_status'] = 'error'
+        return redirect('account_settings')
+
+    fname = uploaded.name.lower()
+    db_path = os.path.join(settings.BASE_DIR, 'db.sqlite3')
+    backup_path = os.path.join(settings.BASE_DIR, 'db_backup_before_restore.sqlite3')
+
+    try:
+        # ── বিদ্যমান DB-এর ব্যাকআপ রাখা ──
+        if os.path.exists(db_path):
+            import shutil
+            shutil.copy2(db_path, backup_path)
+
+        if fname.endswith('.sqlite3') or fname.endswith('.db'):
+            # সরাসরি SQLite ফাইল
+            file_data = uploaded.read()
+            # SQLite magic header যাচাই
+            if not file_data.startswith(b'SQLite format 3'):
+                request.session['restore_message'] = 'অবৈধ ফাইল! এটি SQLite ডেটাবেজ ফাইল নয়।'
+                request.session['restore_status'] = 'error'
+                return redirect('account_settings')
+
+            with open(db_path, 'wb') as f:
+                f.write(file_data)
+
+            request.session['restore_message'] = f'✅ ডেটাবেজ সফলভাবে পুনরুদ্ধার হয়েছে! ({round(len(file_data)/1024/1024, 2)} MB)'
+            request.session['restore_status'] = 'success'
+
+        elif fname.endswith('.zip'):
+            # ZIP থেকে db.sqlite3 বের করা
+            import zipfile
+            import io as _io
+
+            zip_data = uploaded.read()
+            with zipfile.ZipFile(_io.BytesIO(zip_data)) as zf:
+                # ZIP-এর মধ্যে db.sqlite3 খোঁজা
+                sqlite_names = [n for n in zf.namelist() if n.endswith('db.sqlite3') or n == 'db.sqlite3']
+                if not sqlite_names:
+                    request.session['restore_message'] = 'ZIP ফাইলের মধ্যে db.sqlite3 খুঁজে পাওয়া যায়নি।'
+                    request.session['restore_status'] = 'error'
+                    return redirect('account_settings')
+
+                db_data = zf.read(sqlite_names[0])
+                if not db_data.startswith(b'SQLite format 3'):
+                    request.session['restore_message'] = 'ZIP-এর db.sqlite3 ফাইলটি অবৈধ।'
+                    request.session['restore_status'] = 'error'
+                    return redirect('account_settings')
+
+                with open(db_path, 'wb') as f:
+                    f.write(db_data)
+
+            request.session['restore_message'] = f'✅ ZIP থেকে ডেটাবেজ সফলভাবে পুনরুদ্ধার হয়েছে!'
+            request.session['restore_status'] = 'success'
+
+        else:
+            request.session['restore_message'] = 'শুধুমাত্র .sqlite3 বা .zip ফাইল গ্রহণযোগ্য।'
+            request.session['restore_status'] = 'error'
+            return redirect('account_settings')
+
+    except Exception as e:
+        # ব্যর্থ হলে পুরনো DB ফিরিয়ে দেওয়া
+        if os.path.exists(backup_path):
+            import shutil
+            shutil.copy2(backup_path, db_path)
+        request.session['restore_message'] = f'পুনরুদ্ধারে ত্রুটি: {str(e)}'
+        request.session['restore_status'] = 'error'
+
+    return redirect('account_settings')
+
 
 import sys
 @login_required

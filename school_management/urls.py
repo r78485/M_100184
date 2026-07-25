@@ -52,6 +52,7 @@ urlpatterns = [
     path('backup/cloud/', user_views.trigger_cloud_backup, name='trigger_backup'),
     path('backup/download-full/', user_views.download_full_backup, name='download_full_backup'),
     path('backup/database/', user_views.backup_database_view, name='backup_database'),
+    path('backup/restore/', user_views.restore_database_view, name='restore_database'),
     path('clone/student-admission/<int:pk>/', user_views.clone_student_admission, name='clone_student_admission'),
 
     # Administration
