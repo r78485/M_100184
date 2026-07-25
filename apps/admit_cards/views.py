@@ -1,17 +1,29 @@
 from django.shortcuts import render, get_object_or_404
+from django.db.models import Q
 from .models import Student, SchoolProfile
-
 from apps.users.models import StudentAdmission
 
 def admit_card_dashboard_view(request):
-    class_name = request.GET.get('class_name', '')
+    class_name = request.GET.get('class_name', '').strip()
+    search_query = request.GET.get('search_query', '').strip() or request.GET.get('roll_no', '').strip()
     
     admissions = StudentAdmission.objects.all().order_by('-created_at')
     
     if class_name:
-        admissions = admissions.filter(desired_class__icontains=class_name)
+        admissions = admissions.filter(
+            Q(desired_class__icontains=class_name) | Q(desired_class__endswith=class_name)
+        )
         
-    db_classes = StudentAdmission.objects.values_list('desired_class', flat=True).distinct()
+    if search_query:
+        admissions = admissions.filter(
+            Q(student_name_en__icontains=search_query) |
+            Q(student_name_bn__icontains=search_query) |
+            Q(father_name__icontains=search_query) |
+            Q(admission_no__icontains=search_query) |
+            Q(roll_no__icontains=search_query)
+        )
+        
+    db_classes = list(StudentAdmission.objects.values_list('desired_class', flat=True).distinct())
     db_classes = [c for c in db_classes if c]
     
     standard_classes = ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10', 'SSC 2024', 'SSC 2025', 'SSC 2026']
@@ -22,6 +34,7 @@ def admit_card_dashboard_view(request):
         'students': admissions,
         'classes': classes,
         'selected_class': class_name,
+        'search_query': search_query,
     }
     return render(request, 'admit_card_dashboard.html', context)
 
@@ -29,86 +42,106 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 
 @xframe_options_exempt
 def generate_admit_card(request, student_id=None):
-    school = SchoolProfile.objects.first() # অথবা সক্রিয় প্রোফাইল
-    
-    class DummySubject:
+    active_school_name = "Gazimahmud Junior High School"
+    active_school_name_bn = "গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়"
+    active_school_eiin = "100184"
+    active_school_address = "Barguna Sadar, Barguna"
+
+    sp = SchoolProfile.objects.first()
+    if not sp:
+        sp = SchoolProfile.objects.create(
+            name_en=active_school_name,
+            name_bn=active_school_name_bn,
+            eiin=active_school_eiin,
+            address=active_school_address
+        )
+    else:
+        sp.name_en = active_school_name
+        sp.name_bn = active_school_name_bn
+        sp.eiin = active_school_eiin
+        sp.address = active_school_address
+        sp.save()
+
+    school = sp
+
+    # Official NCTB Subjects with Codes for Admit Card
+    class SubjectItem:
         def __init__(self, code, name):
             self.code = code
             self.name = name
 
-    class SubjectManager:
+    class SubjectList:
+        def __init__(self, items):
+            self.items = items
         def all(self):
-            return [DummySubject("101", "Bangla"), DummySubject("107", "English"), DummySubject("109", "Mathematics")]
+            return self.items
+
+    def get_subjects_for_class(cls_str):
+        return SubjectList([
+            SubjectItem("101", "BANGLA"),
+            SubjectItem("102", "ENGLISH"),
+            SubjectItem("109", "MATHEMATICS"),
+            SubjectItem("112", "SCIENCE"),
+            SubjectItem("154", "ICT / DIGITAL TECHNOLOGY"),
+            SubjectItem("153", "HISTORY & SOCIAL SCIENCE"),
+            SubjectItem("156", "LIFE & LIVELIHOOD"),
+            SubjectItem("147", "HEALTH & WELL-BEING"),
+            SubjectItem("148", "ART & CULTURE"),
+            SubjectItem("111", "ISLAM & MORAL EDUCATION")
+        ])
 
     class MappedStudent:
         def __init__(self, adm):
-            self.student_id = adm.admission_no
-            self.serial_no = f"100{adm.roll_no}" if adm.roll_no else "1000"
-            self.name = adm.student_name_en or adm.student_name_bn
-            self.father_name = adm.father_name
-            self.mother_name = adm.mother_name
+            self.student_id = adm.admission_no or f"ADM-2026-{adm.id:04d}"
+            self.serial_no = f"100{adm.roll_no}" if adm.roll_no else f"100{adm.id}"
+            self.name = adm.student_name_en or adm.student_name_bn or "STUDENT"
+            self.father_name = adm.father_name or "FATHER NAME"
+            self.mother_name = adm.mother_name or "MOTHER NAME"
             self.roll_no = str(adm.roll_no) if adm.roll_no else "N/A"
-            self.reg_no = f"2026100{adm.roll_no}" if adm.roll_no else "N/A"
-            self.student_class = adm.student_class
-            self.session = adm.academic_year
+            self.reg_no = f"2026100{adm.roll_no if adm.roll_no else adm.id}"
+            self.student_class = adm.desired_class or "Class 9"
+            self.session = adm.academic_year or "2026-2027"
             self.group = adm.section if adm.section else "General"
             self.examinee_type = "REGULAR"
-            self.subjects = SubjectManager()
+            self.subjects = get_subjects_for_class(self.student_class)
 
     students = []
-    
-    if student_id:
-        if student_id != '0':
-            adm = StudentAdmission.objects.filter(admission_no=student_id).first()
-            if adm:
-                students = [MappedStudent(adm)]
+    if student_id and student_id != '0':
+        adm = StudentAdmission.objects.filter(Q(admission_no=student_id) | Q(id=student_id if student_id.isdigit() else 0)).first()
+        if adm:
+            students = [MappedStudent(adm)]
     else:
-        # নির্দিষ্ট শ্রেণীর সব ছাত্রের জন্য (Bulk Print)
         class_name = request.GET.get('class_name')
         if class_name:
-            admissions = StudentAdmission.objects.filter(desired_class=class_name)
-            students = [MappedStudent(adm) for adm in admissions]
+            admissions = StudentAdmission.objects.filter(Q(desired_class__icontains=class_name) | Q(desired_class__endswith=class_name))
+        else:
+            admissions = StudentAdmission.objects.all().order_by('-created_at')
+        students = [MappedStudent(adm) for adm in admissions]
 
     if not students:
-        # Create a dummy student for preview if database is empty or not found
         class DummyStudent:
             def __init__(self, sid, name, cls, roll):
                 self.student_id = sid
                 self.serial_no = f"100{roll}"
                 self.name = name
-                self.father_name = "Mr. Dummy Father"
-                self.mother_name = "Mrs. Dummy Mother"
+                self.father_name = "Md. Abdur Rahman"
+                self.mother_name = "Farida Yasmin"
                 self.roll_no = roll
                 self.reg_no = f"2026100{roll}"
                 self.student_class = cls
                 self.session = "2026-2027"
-                self.group = "Science"
+                self.group = "General"
                 self.examinee_type = "REGULAR"
-                self.subjects = SubjectManager()
+                self.subjects = get_subjects_for_class(cls)
 
         cls_name = request.GET.get('class_name', "Class 9")
-        target_id = student_id if student_id else "S-501"
+        target_id = student_id if student_id else "ADM-2026-001"
         
         students = [
-            DummyStudent(target_id, "Arif Rahman (Demo)", cls_name, "101"),
-            DummyStudent("S-502", "Jannatul Ferdous (Demo)", cls_name, "102"),
-            DummyStudent("S-503", "Rakib Hasan (Demo)", cls_name, "103")
+            DummyStudent(target_id, "ARIF RAHMAN", cls_name, "101"),
+            DummyStudent("ADM-2026-002", "NUSRAT JAHAN", cls_name, "102"),
+            DummyStudent("ADM-2026-003", "HASIBUL ISLAM", cls_name, "103")
         ]
-        
-    if not school:
-        class DummyImage:
-            @property
-            def url(self):
-                return "/static/logo.png"
-
-        class DummySchool:
-            name_en = "EduManage International School"
-            name_bn = "এডুম্যানেজ ইন্টারন্যাশনাল স্কুল"
-            address = "Barguna Sadar, Barguna - 8700"
-            eiin = "100184"
-            logo = DummyImage()
-            controller_signature = None
-        school = DummySchool()
 
     context = {
         'school': school,

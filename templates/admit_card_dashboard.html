@@ -21,29 +21,33 @@
     <div class="card custom-card p-4 mb-4">
         <form method="GET" action="{% url 'admit_card_dashboard' %}">
             <div class="row g-3 align-items-end">
-                <div class="col-md-5">
-                    <label class="form-label fw-semibold text-secondary">Class (শ্রেণী)</label>
-                    <select class="form-select" name="class_name" id="class_select">
-                        <option value="">Select a Class...</option>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold text-secondary">Class (শ্রেণী নির্বাচন করুন)</label>
+                    <select class="form-select" name="class_name" id="class_select" onchange="this.form.submit()">
+                        <option value="">All Classes (সকল শ্রেণী)</option>
                         {% for c in classes %}
                         <option value="{{ c }}" {% if selected_class == c %}selected{% endif %}>{{ c }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <div class="col-md-4">
+                    <label class="form-label fw-semibold text-secondary">Student Search (শিক্ষার্থীর নাম / রোল / আইডি)</label>
+                    <input type="text" class="form-control" name="search_query" placeholder="Search by name, roll, or ID..." value="{{ search_query }}">
+                </div>
+                <div class="col-md-2">
                     <button type="submit" class="btn text-white w-100 fw-semibold" style="background-color: var(--primary-blue);">
-                        <i class="bi bi-search me-2"></i>View Students
+                        <i class="bi bi-search me-2"></i>Search
                     </button>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     {% if selected_class %}
                     <a href="#" onclick="loadPreview('{% url 'admit_cards_generate_all' %}?class_name={{ selected_class }}', event)" class="btn btn-success w-100 fw-semibold">
-                        <i class="bi bi-printer me-2"></i>Print All Admit Cards
+                        <i class="bi bi-printer me-2"></i>Print All
                     </a>
                     {% else %}
-                    <button type="button" class="btn btn-secondary w-100 fw-semibold" disabled>
-                        <i class="bi bi-printer me-2"></i>Print All Admit Cards
-                    </button>
+                    <a href="#" onclick="loadPreview('{% url 'admit_cards_generate_all' %}', event)" class="btn btn-outline-success w-100 fw-semibold">
+                        <i class="bi bi-printer me-2"></i>Print All
+                    </a>
                     {% endif %}
                 </div>
             </div>
