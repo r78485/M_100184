@@ -98,7 +98,11 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 @xframe_options_exempt
 def testimonial_view(request, student_id=None):
     active_school_name = request.session.get('school_name', 'গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়')
-    active_school_address = request.session.get('school_address', 'গাইবান্ধা সদর, জেলা: গাইবান্ধা')
+    active_school_address = request.session.get('school_address', 'বরগুনা সদর, জেলা: বরগুনা')
+    active_school_estd = request.session.get('school_estd', '1983')
+    active_school_eiin = request.session.get('school_eiin', '100184')
+    active_school_mobile = request.session.get('school_mobile', '01309100184')
+    active_school_email = request.session.get('school_email', 'school100184@gmail.com')
     
     try:
         from apps.admit_cards.models import SchoolProfile
@@ -108,6 +112,8 @@ def testimonial_view(request, student_id=None):
                 active_school_name = sp.name_bn or sp.name_en
             if sp.address:
                 active_school_address = sp.address
+            if getattr(sp, 'eiin', None):
+                active_school_eiin = sp.eiin
     except Exception:
         pass
     
@@ -118,12 +124,22 @@ def testimonial_view(request, student_id=None):
             name_en = "Gazi Mahmud Secondary School"
             name_bn = active_school_name
             address_bn = active_school_address
-            established_year = "২০১৪"
+            established_year = active_school_estd
+            eiin = active_school_eiin
+            mobile = active_school_mobile
+            email = active_school_email
             logo = None
         institution = DummyInstitution()
     else:
         institution.name_bn = active_school_name
         institution.address_bn = active_school_address
+        institution.established_year = active_school_estd
+        if hasattr(institution, 'eiin'):
+            institution.eiin = active_school_eiin
+        if hasattr(institution, 'mobile'):
+            institution.mobile = active_school_mobile
+        if hasattr(institution, 'email'):
+            institution.email = active_school_email
         institution.save()
 
     if student_id:
@@ -190,6 +206,10 @@ def testimonial_view(request, student_id=None):
         'clean_exam_year': clean_exam_year,
         'school_name': active_school_name,
         'school_address': active_school_address,
+        'school_estd': active_school_estd,
+        'school_eiin': active_school_eiin,
+        'school_mobile': active_school_mobile,
+        'school_email': active_school_email,
     }
     return render(request, 'testimonial_template.html', context)
 
