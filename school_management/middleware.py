@@ -37,6 +37,31 @@ def auto_repair_question_paper_schema():
         print("Schema auto-repair warning:", e)
 
 
+def auto_repair_student_admission_schema():
+    """Dynamically ensure missing SQLite columns exist for users_studentadmission table"""
+    try:
+        tables = connection.introspection.table_names()
+        if 'users_studentadmission' in tables:
+            with connection.cursor() as cursor:
+                cursor.execute("PRAGMA table_info(users_studentadmission);")
+                columns = [row[1] for row in cursor.fetchall()]
+
+                if 'father_dob' not in columns:
+                    cursor.execute("ALTER TABLE users_studentadmission ADD COLUMN father_dob date NULL;")
+                if 'father_occupation' not in columns:
+                    cursor.execute("ALTER TABLE users_studentadmission ADD COLUMN father_occupation varchar(100) DEFAULT '';")
+                if 'mother_dob' not in columns:
+                    cursor.execute("ALTER TABLE users_studentadmission ADD COLUMN mother_dob date NULL;")
+                if 'mother_occupation' not in columns:
+                    cursor.execute("ALTER TABLE users_studentadmission ADD COLUMN mother_occupation varchar(100) DEFAULT '';")
+                if 'present_post_office' not in columns:
+                    cursor.execute("ALTER TABLE users_studentadmission ADD COLUMN present_post_office varchar(100) DEFAULT '';")
+                if 'permanent_post_office' not in columns:
+                    cursor.execute("ALTER TABLE users_studentadmission ADD COLUMN permanent_post_office varchar(100) DEFAULT '';")
+    except Exception as e:
+        print("StudentAdmission schema auto-repair warning:", e)
+
+
 class AutoMigrateMiddleware:
     """
     Guarantees that database tables (django_session, users_user, question_paper_questionbank, etc.)
@@ -70,8 +95,9 @@ class AutoMigrateMiddleware:
             except Exception as e:
                 print("AutoMigrateMiddleware exception:", e)
 
-        # Auto repair question_paper schema columns if missing
+        # Auto repair question_paper & student_admission schema columns if missing
         auto_repair_question_paper_schema()
+        auto_repair_student_admission_schema()
 
         return self.get_response(request)
 
