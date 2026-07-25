@@ -1,44 +1,80 @@
 <!DOCTYPE html>
-<html lang="bn">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ paper.title }} — Print Preview</title>
+    <title>{{ paper.title }} — NCTB Board Print Preview</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" id="MathJax-script" async></script>
     <style>
         body {
-            background-color: #f8fafc;
-            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f1f5f9;
             color: #0f172a;
+            font-family: 'Arial', 'Segoe UI', sans-serif;
         }
+
+        /* Font Family Definitions */
+        .font-arial { font-family: 'Arial', 'Inter', sans-serif !important; }
+        .font-times { font-family: 'Times New Roman', Times, serif !important; }
+        .font-roboto { font-family: 'Roboto', sans-serif !important; }
+        .font-kalpurush { font-family: 'Kalpurush', 'SolaimanLipi', Arial, sans-serif !important; }
+
         .page-paper {
             background: #ffffff;
             width: 210mm;
             min-height: 297mm;
-            padding: 15mm;
+            padding: 18mm 15mm;
             margin: 20px auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 35px rgba(0,0,0,0.12);
             border-radius: 4px;
+            position: relative;
         }
+
         .paper-header {
             text-align: center;
             border-bottom: 2px double #334155;
             padding-bottom: 12px;
             margin-bottom: 16px;
         }
-        .paper-header h3 { font-size: 1.4rem; font-weight: 800; margin: 0; }
-        .paper-header h5 { font-size: 1.1rem; font-weight: 700; margin: 4px 0; }
+        .paper-header h3 { font-size: 1.45rem; font-weight: 800; margin: 0; color: #0f172a; }
+        .paper-header h5 { font-size: 1.15rem; font-weight: 700; margin: 4px 0; color: #1e293b; }
         .header-meta {
             display: flex; justify-content: space-between;
-            font-weight: 700; font-size: 0.9rem;
-            margin-top: 10px;
+            font-weight: 700; font-size: 0.92rem;
+            margin-top: 10px; padding: 4px 0; border-top: 1px solid #e2e8f0;
         }
+
+        /* 2 Column Layout Style for Board Exam */
+        .column-layout-2 #questionsBody {
+            column-count: 2;
+            column-gap: 24px;
+            column-rule: 1px solid #cbd5e1;
+        }
+
         .q-row {
             margin-bottom: 14px;
             page-break-inside: avoid;
+            break-inside: avoid;
         }
+
+        .mcq-options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px 12px;
+            margin-top: 5px;
+            font-size: 0.9rem;
+        }
+
+        .stimulus-box {
+            background: #f8fafc;
+            border-left: 3px solid #3262a8;
+            padding: 8px 12px;
+            font-style: italic;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
         @media print {
             .no-print { display: none !important; }
             body { background: #fff !important; }
@@ -52,71 +88,146 @@
         }
     </style>
 </head>
-<body>
+<body class="{% if paper.font_family %}{% if paper.font_family == 'TIMES' %}font-times{% elif paper.font_family == 'ROBOTO' %}font-roboto{% elif paper.font_family == 'KALPURUSH' %}font-kalpurush{% else %}font-arial{% endif %}{% else %}font-arial{% endif %}">
 
-<div class="no-print p-3 bg-dark text-white text-center d-flex justify-content-center gap-3">
-    <button class="btn btn-primary px-4 fw-bold" onclick="window.print()"><i class="bi bi-printer me-1"></i> Print / Download PDF</button>
-    <button class="btn btn-outline-light px-4" onclick="window.close()"><i class="bi bi-x-circle me-1"></i> Close</button>
+<!-- Top Action Toolbar -->
+<div class="no-print p-3 bg-dark text-white text-center d-flex justify-content-center align-items-center gap-3">
+    <button class="btn btn-primary px-4 fw-bold" onclick="window.print()">
+        <i class="bi bi-printer-fill me-1"></i> Print / Download PDF
+    </button>
+    <div class="d-flex align-items-center gap-2 bg-secondary bg-opacity-25 px-3 py-1 rounded">
+        <label class="small text-white fw-bold me-1">Font:</label>
+        <select class="form-select form-select-sm w-auto" id="prnFont" onchange="changePrnFont(this.value)">
+            <option value="font-arial" {% if paper.font_family == 'ARIAL' or not paper.font_family %}selected{% endif %}>English (Arial / Inter)</option>
+            <option value="font-times" {% if paper.font_family == 'TIMES' %}selected{% endif %}>English (Times New Roman)</option>
+            <option value="font-roboto" {% if paper.font_family == 'ROBOTO' %}selected{% endif %}>English (Roboto)</option>
+            <option value="font-kalpurush" {% if paper.font_family == 'KALPURUSH' %}selected{% endif %}>Bangla (Kalpurush)</option>
+        </select>
+    </div>
+    <div class="d-flex align-items-center gap-2 bg-secondary bg-opacity-25 px-3 py-1 rounded">
+        <label class="small text-white fw-bold me-1">Layout:</label>
+        <select class="form-select form-select-sm w-auto" id="prnCol" onchange="changePrnCol(this.value)">
+            <option value="1" {% if paper.column_layout == '1' or not paper.column_layout %}selected{% endif %}>1 Column</option>
+            <option value="2" {% if paper.column_layout == '2' %}selected{% endif %}>2 Columns (Board Style)</option>
+        </select>
+    </div>
+    <button class="btn btn-outline-light px-3" onclick="window.close()">
+        <i class="bi bi-x-circle me-1"></i> Close
+    </button>
 </div>
 
-<div class="page-paper" id="printableContent">
+<!-- Printable Paper Container -->
+<div class="page-paper {% if paper.column_layout == '2' %}column-layout-2{% endif %}" id="printableContent">
+    
+    <!-- Paper Header -->
     <div class="paper-header">
         <h3>{{ paper.school_name }}</h3>
         <div class="small text-muted">{{ paper.eiin_number }}</div>
         <h5>{{ paper.title }}</h5>
         <div class="header-meta">
-            <span>শ্রেণি: {{ paper.class_name }} | বিষয়: {{ paper.subject }}</span>
-            <span>সময়: {{ paper.time_allowed }}</span>
-            <span>পূর্ণমান: {{ paper.full_marks }}</span>
+            <span>Class: {{ paper.class_name }} | Subject: {{ paper.subject }}</span>
+            <span>Time: {{ paper.time_allowed }}</span>
+            <span>Full Marks: {{ paper.full_marks }}</span>
         </div>
     </div>
 
+    <!-- Instructions Block -->
     {% if paper.instructions %}
     <div class="small italic border-bottom pb-2 mb-3">
-        <strong>বিশেষ দ্রষ্টব্য:</strong> {{ paper.instructions }}
+        <strong>N.B.:</strong> {{ paper.instructions }}
     </div>
     {% endif %}
 
+    <!-- Questions Body -->
     <div id="questionsBody">
         {% if paper.questions_json %}
             {% for q in paper.questions_json %}
             <div class="q-row">
+                <!-- Stimulus if present -->
+                {% if q.stimulus_passage %}
+                <div class="stimulus-box">
+                    <strong>Stimulus:</strong> {{ q.stimulus_passage }}
+                </div>
+                {% endif %}
+
+                <!-- Question Line -->
                 <div class="fw-bold fs-6">
                     {{ forloop.counter }}. {{ q.text }}
                     <span class="float-end">({{ q.marks }})</span>
                 </div>
-                {% if q.type == 'CREATIVE' and q.cqKa %}
+
+                <!-- Statements if Polynomial MCQ -->
+                {% if q.statement_i %}
                 <div class="ms-3 small mt-1">
-                    {% if q.cqKa %}<div>ক) {{ q.cqKa }} <span class="float-end">(১)</span></div>{% endif %}
-                    {% if q.cqKha %}<div>খ) {{ q.cqKha }} <span class="float-end">(২)</span></div>{% endif %}
-                    {% if q.cqGa %}<div>গ) {{ q.cqGa }} <span class="float-end">(৩)</span></div>{% endif %}
-                    {% if q.cqGha %}<div>ঘ) {{ q.cqGha }} <span class="float-end">(৪)</span></div>{% endif %}
+                    {% if q.statement_i %}<div>i. {{ q.statement_i }}</div>{% endif %}
+                    {% if q.statement_ii %}<div>ii. {{ q.statement_ii }}</div>{% endif %}
+                    {% if q.statement_iii %}<div>iii. {{ q.statement_iii }}</div>{% endif %}
+                </div>
+                {% endif %}
+
+                <!-- MCQ Options -->
+                {% if q.type == 'MCQ' or q.option_a %}
+                <div class="mcq-options-grid ms-2">
+                    <div><strong>(A)</strong> {{ q.option_a }}</div>
+                    <div><strong>(B)</strong> {{ q.option_b }}</div>
+                    <div><strong>(C)</strong> {{ q.option_c }}</div>
+                    <div><strong>(D)</strong> {{ q.option_d }}</div>
+                </div>
+                {% endif %}
+
+                <!-- Creative Questions (Sub-parts) -->
+                {% if q.type == 'CREATIVE' or q.cqKa %}
+                <div class="ms-3 small mt-1">
+                    {% if q.cqKa %}<div>a) {{ q.cqKa }} <span class="float-end fw-bold">(1)</span></div>{% endif %}
+                    {% if q.cqKha %}<div>b) {{ q.cqKha }} <span class="float-end fw-bold">(2)</span></div>{% endif %}
+                    {% if q.cqGa %}<div>c) {{ q.cqGa }} <span class="float-end fw-bold">(3)</span></div>{% endif %}
+                    {% if q.cqGha %}<div>d) {{ q.cqGha }} <span class="float-end fw-bold">(4)</span></div>{% endif %}
                 </div>
                 {% endif %}
             </div>
             {% endfor %}
         {% else %}
+            <!-- Demo Fallback Content -->
             <div class="q-row">
-                <div class="fw-bold fs-6">১. একটি আয়তাকার বাগানের দৈর্ঘ্য ২৫ মিটার এবং প্রস্থ ১৫ মিটার। (১০)</div>
+                <div class="stimulus-box">
+                    <strong>Stimulus:</strong> A rectangular garden has length (x + 4) meters and breadth (x - 2) meters. The total area of the garden is 24 square meters.
+                </div>
+                <div class="fw-bold fs-6">1. Answer the following questions based on the stimulus: <span class="float-end">(10)</span></div>
                 <div class="ms-3 small mt-1">
-                    <div>ক) আয়তক্ষেত্রের ক্ষেত্রফলের সূত্র লিখ। (১)</div>
-                    <div>খ) বাগানটির ক্ষেত্রফল ও পরিসীমা নির্ণয় কর। (২)</div>
-                    <div>গ) প্রতি বর্গমিটারে ৫০ টাকা দরে বাগানে ঘাস লাগাতে কত খরচ হবে? (৩)</div>
-                    <div>ঘ) বাগানের চতুর্দিকে ২ মিটার চওড়া রাস্তা থাকলে রাস্তার ক্ষেত্রফল নির্ণয় কর। (৪)</div>
+                    <div>a) State the formula for the area of a rectangle. <span class="float-end fw-bold">(1)</span></div>
+                    <div>b) Express the area in terms of an algebraic quadratic equation. <span class="float-end fw-bold">(2)</span></div>
+                    <div>c) Determine the exact value of x and find the perimeter of the garden. <span class="float-end fw-bold">(3)</span></div>
+                    <div>d) If a 2-meter wide path is constructed around the garden, calculate the total area of the path. <span class="float-end fw-bold">(4)</span></div>
                 </div>
             </div>
+
             <div class="q-row">
-                <div class="fw-bold fs-6">২. বীজগণিতীয় রাশি \(x + \frac{1}{x} = 5\) হলে, (১০)</div>
-                <div class="ms-3 small mt-1">
-                    <div>ক) \(x^2 + \frac{1}{x^2}\) এর মান কত? (২)</div>
-                    <div>খ) প্রমাণ কর যে, \(x^3 + \frac{1}{x^3} = 110\) (৪)</div>
-                    <div>গ) \(x^4 - \frac{1}{x^4}\) এর মান নির্ণয় কর। (৪)</div>
+                <div class="fw-bold fs-6">2. Which of the following is correct regarding photosynthesis in green plants? <span class="float-end">(1)</span></div>
+                <div class="mcq-options-grid ms-2">
+                    <div><strong>(A)</strong> Oxygen is absorbed</div>
+                    <div><strong>(B)</strong> Carbon dioxide is released</div>
+                    <div><strong>(C)</strong> Oxygen is produced as byproduct</div>
+                    <div><strong>(D)</strong> Nitrogen gas is fixed</div>
                 </div>
             </div>
         {% endif %}
     </div>
 
-    <!-- Signatures -->
+    <!-- Optional Teacher Answer Key -->
+    {% if paper.show_answer_key %}
+    <div class="mt-5 pt-3 border-top border-dark">
+        <h6 class="fw-bold text-success"><i class="bi bi-key-fill me-1"></i> Answer Key</h6>
+        <div class="small">
+            {% for q in paper.questions_json %}
+                {% if q.correct_option %}
+                <div>Q{{ forloop.counter }}: ({{ q.correct_option }}) {% if q.explanation %}- {{ q.explanation }}{% endif %}</div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Footer Signatures -->
     <div class="d-flex justify-content-between align-items-center mt-5 pt-5 text-center small fw-bold">
         <div>
             <div class="mb-3">...............................</div>
@@ -133,5 +244,18 @@
     </div>
 </div>
 
+<script>
+function changePrnFont(cls) {
+    document.body.className = cls;
+}
+function changePrnCol(col) {
+    const el = document.getElementById('printableContent');
+    if (col === '2') {
+        el.classList.add('column-layout-2');
+    } else {
+        el.classList.remove('column-layout-2');
+    }
+}
+</script>
 </body>
 </html>

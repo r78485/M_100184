@@ -15,6 +15,9 @@ urlpatterns = [
     
     # API endpoints
     path('api/save-paper/', views.api_save_paper, name='api_save_paper'),
+    path('api/create-mcq/', views.api_create_mcq, name='api_create_mcq'),
+    path('api/bulk-create-mcq/', views.api_bulk_create_mcq, name='api_bulk_create_mcq'),
     path('api/ai-generate/', views.api_ai_generate, name='api_ai_generate'),
     path('api/delete-paper/<int:paper_id>/', views.api_delete_paper, name='api_delete_paper'),
 ]
+

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Create Question Paper — NCTB Standard — EduManage ERP{% endblock %}
+{% block title %}Question Paper Builder — NCTB Standard — EduManage ERP{% endblock %}
 
 {% block extra_css %}
 <!-- MathJax for Rendering Math/Science LaTeX Equations -->
@@ -8,7 +8,7 @@
 
 <style>
 /* =========================================================
-   CREATE QUESTION PAPER MODULE — SYSTEM THEME
+   CREATE QUESTION PAPER MODULE — SYSTEM THEME & ENGLISH FONT
    Primary: #3262a8 | Secondary: #7532a8
    ========================================================= */
 
@@ -18,6 +18,10 @@
     --qp-secondary: #7532a8;
     --qp-secondary-dark: #55237b;
     --qp-bg-soft: #f4f6fc;
+}
+
+body {
+    font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
 }
 
 /* Header Banner */
@@ -55,11 +59,11 @@
 /* Builder Canvas Layout */
 .qp-builder-layout {
     display: grid;
-    grid-template-columns: 1fr 420px;
+    grid-template-columns: 1fr 480px;
     gap: 24px;
 }
 
-@media (max-width: 991px) {
+@media (max-width: 1080px) {
     .qp-builder-layout { grid-template-columns: 1fr; }
 }
 
@@ -115,19 +119,6 @@
     box-shadow: 0 4px 14px rgba(117, 50, 168, 0.3);
 }
 
-.btn-qp-outline {
-    background: transparent;
-    border: 1.5px solid var(--qp-primary);
-    color: var(--qp-primary);
-    border-radius: 10px; padding: 8px 18px;
-    font-weight: 600; font-size: 0.88rem;
-    transition: all 0.2s ease;
-}
-.btn-qp-outline:hover {
-    background: rgba(50, 98, 168, 0.08);
-    color: var(--qp-primary-dark);
-}
-
 /* Question Selection Card in Bank */
 .bank-q-card {
     border: 1.5px solid #e2e8f0;
@@ -154,10 +145,10 @@
     border-radius: 14px;
     box-shadow: 0 8px 30px rgba(0,0,0,0.08);
     padding: 24px;
-    min-height: 700px;
+    min-height: 750px;
     position: sticky;
-    top: 90px;
-    max-height: calc(100vh - 120px);
+    top: 85px;
+    max-height: calc(100vh - 110px);
     overflow-y: auto;
 }
 .preview-header-area {
@@ -174,19 +165,42 @@
     margin-top: 10px; padding: 4px 0;
 }
 
+/* Font Family Classes */
+.font-arial { font-family: 'Arial', 'Inter', sans-serif !important; }
+.font-times { font-family: 'Times New Roman', Times, serif !important; }
+.font-roboto { font-family: 'Roboto', sans-serif !important; }
+.font-kalpurush { font-family: 'Kalpurush', 'SolaimanLipi', Arial, sans-serif !important; }
+
+/* 2 Column Layout Style for Board Exam */
+.column-layout-2 {
+    column-count: 2;
+    column-gap: 20px;
+    column-rule: 1px solid #cbd5e1;
+}
+.column-layout-2 .preview-q-row {
+    break-inside: avoid;
+}
+
+/* MCQ Options Grid */
+.mcq-options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 12px;
+    margin-top: 6px;
+    font-size: 0.88rem;
+}
+
 /* Preview Item */
 .preview-q-row {
     padding: 12px;
     border: 1px solid #e2e8f0;
     border-radius: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
     background: #fafafa;
     position: relative;
-    cursor: grab;
     transition: all 0.2s ease;
 }
 .preview-q-row:hover { background: #f1f5f9; border-color: var(--qp-primary); }
-.preview-q-row.dragging { opacity: 0.4; }
 
 /* Subject Math Toolbar */
 .subject-toolbar-btn {
@@ -201,6 +215,23 @@
     transition: all 0.15s ease;
 }
 .subject-toolbar-btn:hover {
+    background: var(--qp-primary);
+    color: #ffffff;
+    border-color: var(--qp-primary);
+}
+
+/* Nav Pills Subtabs for MCQ */
+.mcq-subtab-btn {
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid #cbd5e1;
+    background: #ffffff;
+    color: #475569;
+    cursor: pointer;
+}
+.mcq-subtab-btn.active {
     background: var(--qp-primary);
     color: #ffffff;
     border-color: var(--qp-primary);
@@ -237,13 +268,13 @@
                     <i class="bi bi-file-earmark-spreadsheet-fill text-white"></i>
                 </div>
                 <div>
-                    <h2>Create Question Paper Module</h2>
-                    <p>NCTB কারিকুলাম অনুযায়ী সৃজনশীল, MCQ ও বিষয়ভিত্তিক প্রশ্নপত্র তৈরি ও প্রিন্ট লেআউট</p>
+                    <h2>Question Paper Module (NCTB Standard)</h2>
+                    <p>Create Creative (CQ), MCQ & Subject-based Question Papers with Board Print Layout</p>
                 </div>
             </div>
             <div class="d-flex gap-2">
                 <a href="{% url 'question_paper:history' %}" class="btn btn-light rounded-pill font-weight-bold px-3 py-2">
-                    <i class="bi bi-clock-history me-1"></i> Question Paper History
+                    <i class="bi bi-clock-history me-1"></i> Paper History
                 </a>
                 <a href="{% url 'question_paper:question_bank' %}" class="btn btn-warning rounded-pill text-dark font-weight-bold px-3 py-2">
                     <i class="bi bi-database me-1"></i> Central Question Bank
@@ -252,7 +283,7 @@
         </div>
     </div>
 
-    <!-- Filter Section -->
+    <!-- Filter & Configuration Section -->
     <div class="qp-filter-card no-print">
         <div class="row g-3">
             <div class="col-md-2">
@@ -262,19 +293,19 @@
                     <option value="2025">2025</option>
                 </select>
             </div>
-            <div class="col-md-2">
-                <label class="form-label fw-bold text-dark fs-7 mb-1">Exam</label>
-                <input type="text" class="form-control form-control-sm" id="fltExam" value="বার্ষিক পরীক্ষা — ২০২৬">
+            <div class="col-md-3">
+                <label class="form-label fw-bold text-dark fs-7 mb-1">Exam Name</label>
+                <input type="text" class="form-control form-control-sm" id="fltExam" value="Annual Examination — 2026" oninput="updateHeaderPreview()">
             </div>
             <div class="col-md-2">
-                <label class="form-label fw-bold text-dark fs-7 mb-1">Class</label>
+                <label class="form-label fw-bold text-dark fs-7 mb-1">Class Level</label>
                 <select class="form-select form-select-sm" id="fltClass" onchange="filterQuestions()">
                     {% for c_val, c_name in classes %}
                     <option value="{{ c_val }}" {% if c_val == 'Class 9' %}selected{% endif %}>{{ c_name }}</option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <label class="form-label fw-bold text-dark fs-7 mb-1">Subject</label>
                 <select class="form-select form-select-sm" id="fltSubject" onchange="filterQuestions()">
                     {% for s_val, s_name in subjects %}
@@ -283,20 +314,11 @@
                 </select>
             </div>
             <div class="col-md-2">
-                <label class="form-label fw-bold text-dark fs-7 mb-1">Question Type</label>
+                <label class="form-label fw-bold text-dark fs-7 mb-1">Filter Type</label>
                 <select class="form-select form-select-sm" id="fltType" onchange="filterQuestions()">
-                    <option value="">All Types</option>
+                    <option value="">All Question Types</option>
                     {% for t_val, t_name in question_types %}
                     <option value="{{ t_val }}">{{ t_name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="col-md-2">
-                <label class="form-label fw-bold text-dark fs-7 mb-1">Difficulty</label>
-                <select class="form-select form-select-sm" id="fltDiff" onchange="filterQuestions()">
-                    <option value="">All Levels</option>
-                    {% for d_val, d_name in difficulties %}
-                    <option value="{{ d_val }}">{{ d_name }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -306,21 +328,24 @@
     <!-- Master Builder Layout -->
     <div class="qp-builder-layout">
 
-        <!-- LEFT COLUMN: Question Generators & Builders -->
+        <!-- LEFT COLUMN: Generators & Builders -->
         <div>
 
-            <!-- Panel Mode Selector -->
-            <div class="qp-card p-3 no-print">
+            <!-- Panel Mode Selector Tabs -->
+            <div class="qp-card p-3 no-print mb-3">
                 <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                    <div class="btn-group" role="group">
-                        <button class="btn btn-sm btn-qp-primary" id="btnTabManual" onclick="switchBuilderTab('manual')">
-                            <i class="bi bi-hand-index me-1"></i> Question Bank Select
+                    <div class="btn-group flex-wrap" role="group">
+                        <button class="btn btn-sm btn-qp-primary" id="btnTabMcq" onclick="switchBuilderTab('mcq')">
+                            <i class="bi bi-ui-checks me-1"></i> MCQ Builder System (বহুনির্বাচনী)
                         </button>
                         <button class="btn btn-sm btn-outline-primary" id="btnTabCreative" onclick="switchBuilderTab('creative')">
-                            <i class="bi bi-layers me-1"></i> Creative Question Builder
+                            <i class="bi bi-layers me-1"></i> Creative CQ Builder (সৃজনশীল)
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary" id="btnTabManual" onclick="switchBuilderTab('manual')">
+                            <i class="bi bi-database me-1"></i> Central Question Bank
                         </button>
                         <button class="btn btn-sm btn-outline-primary" id="btnTabSubject" onclick="switchBuilderTab('subject')">
-                            <i class="bi bi-journal-code me-1"></i> Subject Tools (Math/Chem/Phys)
+                            <i class="bi bi-calculator me-1"></i> Math/Chem Editor
                         </button>
                         <button class="btn btn-sm btn-outline-primary" id="btnTabAI" onclick="switchBuilderTab('ai')">
                             <i class="bi bi-stars me-1"></i> AI Question Generator
@@ -329,10 +354,236 @@
                 </div>
             </div>
 
-            <!-- TAB 1: Central Question Bank Selection -->
-            <div class="qp-card" id="tabManual">
+            <!-- =========================================================
+                 TAB 1: DEDICATED MCQ GENERATOR SYSTEM
+                 ========================================================= -->
+            <div class="qp-card" id="tabMcq">
                 <div class="qp-card-header">
-                    <h5 class="qp-card-title"><i class="bi bi-database text-primary"></i> Select Questions from Central Bank</h5>
+                    <h5 class="qp-card-title"><i class="bi bi-ui-checks text-primary"></i> NCTB Standard MCQ Generator System</h5>
+                    <span class="badge bg-primary">Multiple Choice Questions</span>
+                </div>
+
+                <!-- Subtabs for MCQ Types -->
+                <div class="d-flex gap-2 mb-3 border-bottom pb-2">
+                    <button class="mcq-subtab-btn active" id="btnMcqSingle" onclick="switchMcqSubtab('single')">
+                        <i class="bi bi-check-circle me-1"></i> Single Stem MCQ
+                    </button>
+                    <button class="mcq-subtab-btn" id="btnMcqPolynomial" onclick="switchMcqSubtab('polynomial')">
+                        <i class="bi bi-list-check me-1"></i> Composite MCQ (বহুপদী সমাপ্তিসূচক)
+                    </button>
+                    <button class="mcq-subtab-btn" id="btnMcqPassage" onclick="switchMcqSubtab('passage')">
+                        <i class="bi bi-file-text me-1"></i> Stimulus MCQ (উদ্দীপকভিত্তিক)
+                    </button>
+                    <button class="mcq-subtab-btn" id="btnMcqBulk" onclick="switchMcqSubtab('bulk')">
+                        <i class="bi bi-upload me-1"></i> Bulk Text Importer
+                    </button>
+                </div>
+
+                <!-- 1.1 Single MCQ Form -->
+                <form id="mcqSingleForm" onsubmit="handleCreateSingleMcq(event)">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold fs-7">Question Stem / Text (প্রশ্ন)</label>
+                        <input type="text" class="form-control" id="mcqStem" placeholder="e.g. Which process releases oxygen gas in plants?" required>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold fs-7 text-primary">Option (A / ক)</label>
+                            <input type="text" class="form-control form-control-sm" id="mcqOpA" placeholder="Option A" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold fs-7 text-primary">Option (B / খ)</label>
+                            <input type="text" class="form-control form-control-sm" id="mcqOpB" placeholder="Option B" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold fs-7 text-primary">Option (C / গ)</label>
+                            <input type="text" class="form-control form-control-sm" id="mcqOpC" placeholder="Option C" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold fs-7 text-primary">Option (D / ঘ)</label>
+                            <input type="text" class="form-control form-control-sm" id="mcqOpD" placeholder="Option D" required>
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold fs-7 text-success">Correct Option</label>
+                            <select class="form-select form-select-sm" id="mcqCorrect">
+                                <option value="A">A / (ক)</option>
+                                <option value="B">B / (খ)</option>
+                                <option value="C">C / (গ)</option>
+                                <option value="D">D / (ঘ)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold fs-7">Marks</label>
+                            <input type="number" class="form-control form-control-sm" id="mcqMarks" value="1" min="1">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold fs-7">Difficulty</label>
+                            <select class="form-select form-select-sm" id="mcqDiff">
+                                <option value="EASY">Easy</option>
+                                <option value="MEDIUM" selected>Medium</option>
+                                <option value="HARD">Hard</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold fs-7">Answer Explanation (Optional)</label>
+                        <input type="text" class="form-control form-control-sm" id="mcqExpl" placeholder="Explanation for answer key...">
+                    </div>
+
+                    <button type="submit" class="btn btn-qp-primary w-100">
+                        <i class="bi bi-plus-circle me-1"></i> Add Single MCQ Question
+                    </button>
+                </form>
+
+                <!-- 1.2 Polynomial Composite MCQ Form -->
+                <form id="mcqPolyForm" style="display:none;" onsubmit="handleCreatePolyMcq(event)">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold fs-7">Question Stem (উদ্দীপক বা বিষয়বস্তু)</label>
+                        <input type="text" class="form-control" id="polyStem" placeholder="e.g. Regarding photosynthetically active radiation:" required>
+                    </div>
+
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold fs-7">Statement i (বিবৃতি i)</label>
+                        <input type="text" class="form-control form-control-sm" id="polySt1" placeholder="i. Wavelength ranges from 400nm to 700nm" required>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label fw-semibold fs-7">Statement ii (বিবৃতি ii)</label>
+                        <input type="text" class="form-control form-control-sm" id="polySt2" placeholder="ii. Red light is absorbed maximum by chlorophyll" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold fs-7">Statement iii (বিবৃতি iii)</label>
+                        <input type="text" class="form-control form-control-sm" id="polySt3" placeholder="iii. Green light drives photosynthesis fastest" required>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fs-7">Option A</label>
+                            <input type="text" class="form-control form-control-sm" id="polyOpA" value="i & ii">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fs-7">Option B</label>
+                            <input type="text" class="form-control form-control-sm" id="polyOpB" value="i & iii">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fs-7">Option C</label>
+                            <input type="text" class="form-control form-control-sm" id="polyOpC" value="ii & iii">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fs-7">Option D</label>
+                            <input type="text" class="form-control form-control-sm" id="polyOpD" value="i, ii & iii">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold fs-7 text-success">Which of the above is correct? (Correct Answer)</label>
+                        <select class="form-select form-select-sm" id="polyCorrect">
+                            <option value="A">A (i & ii)</option>
+                            <option value="B">B (i & iii)</option>
+                            <option value="C">C (ii & iii)</option>
+                            <option value="D">D (i, ii & iii)</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-qp-secondary w-100">
+                        <i class="bi bi-plus-circle me-1"></i> Add Composite MCQ (বহুপদী)
+                    </button>
+                </form>
+
+                <!-- 1.3 Passage/Stimulus MCQ Form -->
+                <form id="mcqPassageForm" style="display:none;" onsubmit="handleCreatePassageMcq(event)">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold fs-7">Stimulus Passage (উদ্দীপক)</label>
+                        <textarea class="form-control" id="psgPassage" rows="2" placeholder="e.g. Read the following paragraph and answer questions 1 & 2..." required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold fs-7">Question Text</label>
+                        <input type="text" class="form-control" id="psgStem" placeholder="Question based on the above stimulus" required>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6"><input type="text" class="form-control form-control-sm" id="psgOpA" placeholder="Option A" required></div>
+                        <div class="col-md-6"><input type="text" class="form-control form-control-sm" id="psgOpB" placeholder="Option B" required></div>
+                        <div class="col-md-6"><input type="text" class="form-control form-control-sm" id="psgOpC" placeholder="Option C" required></div>
+                        <div class="col-md-6"><input type="text" class="form-control form-control-sm" id="psgOpD" placeholder="Option D" required></div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold fs-7 text-success">Correct Option</label>
+                        <select class="form-select form-select-sm" id="psgCorrect">
+                            <option value="A">A</option><option value="B">B</option><option value="C">C</option><option value="D">D</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-qp-primary w-100">
+                        <i class="bi bi-plus-circle me-1"></i> Add Passage MCQ Question
+                    </button>
+                </form>
+
+                <!-- 1.4 Bulk MCQ Parser -->
+                <div id="mcqBulkForm" style="display:none;">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold fs-7">Paste Bulk MCQ Text</label>
+                        <textarea class="form-control" id="bulkMcqText" rows="6" placeholder="Format:
+Question stem line?
+a) Option 1
+b) Option 2
+c) Option 3
+d) Option 4
+Ans: A
+
+(Separate multiple questions with a blank line)"></textarea>
+                    </div>
+                    <button class="btn btn-success w-100 fw-bold" onclick="handleBulkMcqImport()">
+                        <i class="bi bi-upload me-1"></i> Parse & Import All MCQs to Paper
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- =========================================================
+                 TAB 2: CREATIVE QUESTION BUILDER (CQ - 10 Marks)
+                 ========================================================= -->
+            <div class="qp-card" id="tabCreative" style="display:none;">
+                <div class="qp-card-header">
+                    <h5 class="qp-card-title"><i class="bi bi-layers-fill text-purple"></i> Creative Question Builder (CQ / সৃজনশীল)</h5>
+                    <span class="badge bg-success">10 Marks Standard</span>
+                </div>
+                <form id="creativeForm" onsubmit="addCreativeQuestionToPaper(event)">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold fs-7">Stimulus (উদ্দীপক / Stem Passage / Table)</label>
+                        <textarea class="form-control" id="cqStimulus" rows="3" placeholder="Write the stimulus passage, scenario, or mathematical condition here..." required></textarea>
+                    </div>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold fs-7">Sub-question (a / ক - 1 Mark)</label>
+                            <input type="text" class="form-control form-control-sm" id="cqKa" placeholder="a) Knowledge question (1m)" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold fs-7">Sub-question (b / খ - 2 Marks)</label>
+                            <input type="text" class="form-control form-control-sm" id="cqKha" placeholder="b) Comprehension question (2m)" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold fs-7">Sub-question (c / গ - 3 Marks)</label>
+                            <input type="text" class="form-control form-control-sm" id="cqGa" placeholder="c) Application problem (3m)" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold fs-7">Sub-question (d / ঘ - 4 Marks)</label>
+                            <input type="text" class="form-control form-control-sm" id="cqGha" placeholder="d) Higher order analysis (4m)" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-qp-secondary w-100">
+                        <i class="bi bi-plus-circle me-1"></i> Add Creative Question to Paper (10 Marks)
+                    </button>
+                </form>
+            </div>
+
+            <!-- =========================================================
+                 TAB 3: CENTRAL QUESTION BANK
+                 ========================================================= -->
+            <div class="qp-card" id="tabManual" style="display:none;">
+                <div class="qp-card-header">
+                    <h5 class="qp-card-title"><i class="bi bi-database text-primary"></i> Central Bank Question Selector</h5>
                     <div class="d-flex gap-2">
                         <button class="btn btn-sm btn-outline-secondary" onclick="selectAllQuestions()">Select All</button>
                         <button class="btn btn-sm btn-outline-danger" onclick="clearSelectedQuestions()">Clear All</button>
@@ -347,78 +598,41 @@
                          data-subject="{{ q.subject }}" 
                          data-type="{{ q.question_type }}" 
                          data-diff="{{ q.difficulty }}"
-                         onclick="toggleSelectPaperQ({{ q.id }}, '{{ q.question_text|escapejs }}', {{ q.marks }}, '{{ q.question_type }}')">
+                         onclick="toggleSelectPaperQ({{ q.id }}, '{{ q.question_text|escapejs }}', {{ q.marks }}, '{{ q.question_type }}', '{{ q.option_a|escapejs }}', '{{ q.option_b|escapejs }}', '{{ q.option_c|escapejs }}', '{{ q.option_d|escapejs }}')">
                         <div class="d-flex align-items-center justify-content-between mb-1">
                             <div>
                                 <span class="badge bg-primary me-1">{{ q.get_question_type_display }}</span>
                                 <span class="badge bg-info text-dark me-1">{{ q.get_difficulty_display }}</span>
-                                {% if q.board_standard %}
-                                <span class="badge bg-secondary">{{ q.get_board_standard_display }} {{ q.board_year }}</span>
-                                {% endif %}
                             </div>
                             <span class="fw-bold text-primary">{{ q.marks }} Marks</span>
                         </div>
                         <div class="fw-semibold text-dark fs-7 mb-1">{{ q.question_text|truncatewords:25 }}</div>
-                        {% if q.stimulus_passage %}
-                        <div class="text-muted small italic ms-2 border-start ps-2 mb-1">উদ্দীপক: {{ q.stimulus_passage|truncatewords:15 }}</div>
+                        {% if q.question_type == 'MCQ' and q.option_a %}
+                        <div class="small text-muted">A) {{ q.option_a }} | B) {{ q.option_b }} | C) {{ q.option_c }} | D) {{ q.option_d }}</div>
                         {% endif %}
                     </div>
                     {% empty %}
                     <div class="text-center py-4 text-muted">
                         <i class="bi bi-folder-x fs-1 text-secondary"></i>
-                        <p class="mt-2">কোনো প্রশ্ন পাওয়া যায়নি। উপরে ফিল্টার বদলান অথবা প্রশ্ন যোগ করুন।</p>
+                        <p class="mt-2">No questions found in bank. Add questions using MCQ / CQ generator tabs above.</p>
                     </div>
                     {% endfor %}
                 </div>
             </div>
 
-            <!-- TAB 2: Creative Question Builder (উদ্দীপক + ক/খ/গ/ঘ) -->
-            <div class="qp-card" id="tabCreative" style="display:none;">
-                <div class="qp-card-header">
-                    <h5 class="qp-card-title"><i class="bi bi-layers-fill text-purple"></i> Creative Question Builder (সৃজনশীল)</h5>
-                    <span class="badge bg-success">Total: 10 Marks (Editable)</span>
-                </div>
-                <form id="creativeForm" onsubmit="addCreativeQuestionToPaper(event)">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold">উদ্দীপক (Stimulus / Passage / Table / Image)</label>
-                        <textarea class="form-control" id="cqStimulus" rows="3" placeholder="উদ্দীপকটি এখানে লিখুন..."></textarea>
-                    </div>
-                    <div class="row g-2 mb-3">
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold fs-7">ক নম্বর প্রশ্ন (জ্ঞানমূলক - ১ মার্ক)</label>
-                            <input type="text" class="form-control form-control-sm" id="cqKa" placeholder="ক) ...">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold fs-7">খ নম্বর প্রশ্ন (অনুধাবনমূলক - ২ মার্ক)</label>
-                            <input type="text" class="form-control form-control-sm" id="cqKha" placeholder="খ) ...">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold fs-7">গ নম্বর প্রশ্ন (প্রয়োগমূলক - ৩ মার্ক)</label>
-                            <input type="text" class="form-control form-control-sm" id="cqGa" placeholder="গ) ...">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold fs-7">ঘ নম্বর প্রশ্ন (উচ্চতর দক্ষতা - ৪ মার্ক)</label>
-                            <input type="text" class="form-control form-control-sm" id="cqGha" placeholder="ঘ) ...">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-qp-secondary w-100">
-                        <i class="bi bi-plus-circle me-1"></i> Add Creative Question to Paper
-                    </button>
-                </form>
-            </div>
-
-            <!-- TAB 3: Subject Toolbars (MathJax, Chemistry, Physics, ICT) -->
+            <!-- =========================================================
+                 TAB 4: SUBJECT TOOLBARS (MATH / CHEM / PHYSICS / ICT)
+                 ========================================================= -->
             <div class="qp-card" id="tabSubject" style="display:none;">
                 <div class="qp-card-header">
-                    <h5 class="qp-card-title"><i class="bi bi-calculator-fill text-primary"></i> Subject Formula & Equation Editor</h5>
+                    <h5 class="qp-card-title"><i class="bi bi-calculator-fill text-primary"></i> Math & Science Equation Editor</h5>
                 </div>
                 
-                <!-- Math Toolbar -->
                 <div class="mb-3 p-3 bg-light rounded-3">
-                    <h6 class="fw-bold text-dark mb-2">Math & Physics Formulas (MathJax / LaTeX)</h6>
+                    <h6 class="fw-bold text-dark mb-2">Math & Physics Formulas (LaTeX)</h6>
                     <div class="d-flex flex-wrap gap-1 mb-2">
                         <button class="subject-toolbar-btn" onclick="insertSymbol('\\frac{a}{b}')">Fraction \(\frac{a}{b}\)</button>
-                        <button class="subject-toolbar-btn" onclick="insertSymbol('\\sqrt{x}')">Square Root \(\sqrt{x}\)</button>
+                        <button class="subject-toolbar-btn" onclick="insertSymbol('\\sqrt{x}')">Root \(\sqrt{x}\)</button>
                         <button class="subject-toolbar-btn" onclick="insertSymbol('\\int_{a}^{b}')">Integral \(\int\)</button>
                         <button class="subject-toolbar-btn" onclick="insertSymbol('\\sum_{i=1}^{n}')">Summation \(\sum\)</button>
                         <button class="subject-toolbar-btn" onclick="insertSymbol('x^{2}')">Power \(x^2\)</button>
@@ -426,9 +640,8 @@
                     </div>
                 </div>
 
-                <!-- Chemistry Toolbar -->
                 <div class="mb-3 p-3 bg-light rounded-3">
-                    <h6 class="fw-bold text-dark mb-2">Chemistry Reactions & Formulas</h6>
+                    <h6 class="fw-bold text-dark mb-2">Chemistry Reactions</h6>
                     <div class="d-flex flex-wrap gap-1 mb-2">
                         <button class="subject-toolbar-btn" onclick="insertSymbol('H_2SO_4')">H₂SO₄</button>
                         <button class="subject-toolbar-btn" onclick="insertSymbol('CaCO_3 \\rightarrow CaO + CO_2')">Reaction \(\rightarrow\)</button>
@@ -437,18 +650,20 @@
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Editor Preview</label>
-                    <textarea class="form-control" id="mathEditorText" rows="3" placeholder="LaTeX সমীকরণ লিখুন... e.g. \(x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}\)"></textarea>
+                    <label class="form-label fw-bold">Formula Editor Text</label>
+                    <textarea class="form-control" id="mathEditorText" rows="3" placeholder="Type equation... e.g. \(x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}\)"></textarea>
                     <div class="p-3 border rounded-3 bg-white mt-2" id="mathPreviewBox">
-                        <em>Live MathJax Preview will appear here...</em>
+                        <em>Live MathJax Preview will render here...</em>
                     </div>
                 </div>
                 <button class="btn btn-qp-primary w-100" onclick="addMathQuestionToPaper()">
-                    <i class="bi bi-plus-lg me-1"></i> Add Formula Question to Paper
+                    <i class="bi bi-plus-lg me-1"></i> Add Subject Formula Question to Paper
                 </button>
             </div>
 
-            <!-- TAB 4: AI Question Generator -->
+            <!-- =========================================================
+                 TAB 5: AI QUESTION GENERATOR
+                 ========================================================= -->
             <div class="qp-card" id="tabAI" style="display:none;">
                 <div class="qp-card-header">
                     <h5 class="qp-card-title"><i class="bi bi-stars text-warning"></i> AI Question Generator (NCTB Standard)</h5>
@@ -456,25 +671,33 @@
                 <div class="row g-2 mb-3">
                     <div class="col-md-6">
                         <label class="form-label fw-bold fs-7">Chapter Name</label>
-                        <input type="text" class="form-control form-control-sm" id="aiChapter" value="সংখ্যা পদ্ধতি ও বীজগণিত">
+                        <input type="text" class="form-control form-control-sm" id="aiChapter" value="Algebraic Expressions">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-bold fs-7">Topic</label>
-                        <input type="text" class="form-control form-control-sm" id="aiTopic" value="বীজগণিতীয় রাশিমালা">
+                        <input type="text" class="form-control form-control-sm" id="aiTopic" value="Polynomial Factorization">
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <label class="form-label fw-bold fs-7">Question Type</label>
                         <select class="form-select form-select-sm" id="aiType">
-                            <option value="CREATIVE">Creative Question (সৃজনশীল)</option>
-                            <option value="MCQ">MCQ (বহুনির্বাচনী)</option>
-                            <option value="SHORT">Short Question (সংক্ষিপ্ত)</option>
+                            <option value="CREATIVE">Creative (CQ)</option>
+                            <option value="MCQ">Single MCQ</option>
+                            <option value="MCQ_POLYNOMIAL">Composite MCQ (বহুপদী)</option>
                         </select>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label fw-bold fs-7">Bloom's Taxonomy</label>
-                        <select class="form-select form-select-sm" id="aiBloom">
-                            <option value="APPLY">Application & Analysis (প্রয়োগ ও বিশ্লেষণ)</option>
-                            <option value="KNOWLEDGE">Remember & Knowledge (জ্ঞান ও অনুধাবন)</option>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold fs-7">Language</label>
+                        <select class="form-select form-select-sm" id="aiLang">
+                            <option value="EN" selected>English</option>
+                            <option value="BN">Bangla</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold fs-7">Difficulty</label>
+                        <select class="form-select form-select-sm" id="aiDiff">
+                            <option value="MEDIUM" selected>Medium</option>
+                            <option value="EASY">Easy</option>
+                            <option value="HARD">Hard</option>
                         </select>
                     </div>
                 </div>
@@ -483,40 +706,65 @@
                 </button>
             </div>
 
-            <!-- Paper Settings (Header/Footer Customizer) -->
+            <!-- =========================================================
+                 PAPER CUSTOMIZER & LAYOUT SETTINGS
+                 ========================================================= -->
             <div class="qp-card no-print">
                 <div class="qp-card-header">
-                    <h5 class="qp-card-title"><i class="bi bi-sliders text-secondary"></i> Header, Footer & Instructions Customizer</h5>
+                    <h5 class="qp-card-title"><i class="bi bi-sliders text-secondary"></i> Paper Header, Font & Layout Customizer</h5>
                 </div>
                 <div class="row g-2">
                     <div class="col-md-6">
                         <label class="form-label fw-semibold fs-7">School Name</label>
-                        <input type="text" class="form-control form-control-sm" id="hdrSchool" value="গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়" onchange="updateHeaderPreview()">
+                        <input type="text" class="form-control form-control-sm" id="hdrSchool" value="Gazimahmud Secondary School" oninput="updateHeaderPreview()">
                     </div>
                     <div class="col-md-6">
                         <label class="form-label fw-semibold fs-7">EIIN / Address</label>
-                        <input type="text" class="form-control form-control-sm" id="hdrEiin" value="EIIN: 123456 | স্থাপিত: ১৯৯৫" onchange="updateHeaderPreview()">
+                        <input type="text" class="form-control form-control-sm" id="hdrEiin" value="EIIN: 123456 | Estd: 1995" oninput="updateHeaderPreview()">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-semibold fs-7">Time Allowed</label>
-                        <input type="text" class="form-control form-control-sm" id="hdrTime" value="৩ ঘণ্টা" onchange="updateHeaderPreview()">
+                        <input type="text" class="form-control form-control-sm" id="hdrTime" value="3 Hours" oninput="updateHeaderPreview()">
                     </div>
                     <div class="col-md-4">
                         <label class="form-label fw-semibold fs-7">Full Marks</label>
-                        <input type="number" class="form-control form-control-sm" id="hdrFullMarks" value="100" onchange="updateHeaderPreview()">
+                        <input type="number" class="form-control form-control-sm" id="hdrFullMarks" value="100" oninput="updateHeaderPreview()">
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label fw-semibold fs-7">Numbering Style</label>
+                        <label class="form-label fw-semibold fs-7 text-primary">Font Family (Default English)</label>
+                        <select class="form-select form-select-sm" id="hdrFont" onchange="updatePaperFont()">
+                            <option value="ARIAL" selected>English — Arial / Inter</option>
+                            <option value="TIMES">English — Times New Roman</option>
+                            <option value="ROBOTO">English — Roboto</option>
+                            <option value="KALPURUSH">Bangla — Kalpurush</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold fs-7 text-primary">Numbering Style</label>
                         <select class="form-select form-select-sm" id="hdrNumbering" onchange="renderPaperPreview()">
+                            <option value="ENGLISH" selected>English (1, 2, 3 / a, b, c)</option>
                             <option value="BANGLA">Bangla (১, ২, ৩ / ক, খ, গ)</option>
-                            <option value="ENGLISH">English (1, 2, 3)</option>
                             <option value="ROMAN">Roman (i, ii, iii)</option>
                         </select>
                     </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold fs-7 text-primary">Print Column Layout</label>
+                        <select class="form-select form-select-sm" id="hdrColumns" onchange="updateColumnLayout()">
+                            <option value="1" selected>1 Column (Standard)</option>
+                            <option value="2">2 Columns (NCTB Board Style)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-semibold fs-7 text-secondary">Answer Key</label>
+                        <div class="form-check form-switch mt-1">
+                            <input class="form-check-input" type="checkbox" id="hdrAnswerKey" onchange="renderPaperPreview()">
+                            <label class="form-check-label fs-7" for="hdrAnswerKey">Show Answer Key</label>
+                        </div>
+                    </div>
                     <div class="col-12 mt-2">
                         <label class="form-label fw-semibold fs-7">Exam Instructions</label>
-                        <textarea class="form-control form-control-sm" id="hdrInstructions" rows="2" onchange="updateHeaderPreview()">১. সকল প্রশ্নের মান সমান। প্রয়োজনীয় ক্ষেত্রে ডান পার্শ্বের সংখ্যা প্রশ্নের পূর্ণমান জ্ঞাপন করে।
-২. ক্যালকুলেটর ব্যবহার করার অনুমতি আছে।</textarea>
+                        <textarea class="form-control form-control-sm" id="hdrInstructions" rows="2" oninput="updateHeaderPreview()">1. Figures to the right indicate full marks.
+2. Read questions carefully before answering. Calculator is allowed where necessary.</textarea>
                     </div>
                 </div>
             </div>
@@ -525,56 +773,62 @@
 
         <!-- RIGHT COLUMN: Pixel-Perfect Paper Canvas / Live Preview Sheet -->
         <div>
-            <div class="paper-preview-sheet" id="paperPrintSheet">
+            <div class="paper-preview-sheet font-arial" id="paperPrintSheet">
                 
                 <!-- Printable Header -->
                 <div class="preview-header-area">
-                    <h5 id="pvSchool">গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়</h5>
-                    <div class="small text-muted" id="pvEiin">EIIN: 123456 | স্থাপিত: ১৯৯৫</div>
-                    <h6 class="mt-2" id="pvExam">বার্ষিক পরীক্ষা — ২০২৬</h6>
+                    <h5 id="pvSchool">Gazimahmud Secondary School</h5>
+                    <div class="small text-muted" id="pvEiin">EIIN: 123456 | Estd: 1995</div>
+                    <h6 class="mt-2" id="pvExam">Annual Examination — 2026</h6>
                     <div class="preview-header-meta">
-                        <span id="pvClassSub">শ্রেণি: ৯মি | বিষয়: গণিত</span>
-                        <span id="pvTime">সময়: ৩ ঘণ্টা</span>
-                        <span id="pvMarks">পূর্ণমান: ১০০</span>
+                        <span id="pvClassSub">Class: 9 | Subject: Mathematics</span>
+                        <span id="pvTime">Time: 3 Hours</span>
+                        <span id="pvMarks">Full Marks: 100</span>
                     </div>
                 </div>
 
                 <!-- Instructions Block -->
                 <div class="mb-3 p-2 border-bottom small text-dark italic" id="pvInstructionsBlock">
-                    <strong>বিশেষ দ্রষ্টব্য:</strong> <span id="pvInstructionsText">১. সকল প্রশ্নের মান সমান। প্রয়োজনীয় ক্ষেত্রে ডান পার্শ্বের সংখ্যা প্রশ্নের পূর্ণমান জ্ঞাপন করে।</span>
+                    <strong>N.B.:</strong> <span id="pvInstructionsText">1. Figures to the right indicate full marks. 2. Read questions carefully before answering.</span>
                 </div>
 
                 <!-- Selected Questions Container -->
                 <div id="pvQuestionsList">
                     <div class="text-center py-5 text-muted" id="pvEmptyState">
                         <i class="bi bi-file-earmark-text fs-1 text-secondary"></i>
-                        <p class="mt-2">বামের প্যানেল থেকে প্রশ্ন সিলেক্ট করুন। এখানে রিয়েল-টাইম প্রিভিউ দেখাবে।</p>
+                        <p class="mt-2">Select questions from left builder. Live paper preview will update here in real-time.</p>
                     </div>
                 </div>
 
-                <!-- Footer Signatures (For Print Layout) -->
+                <!-- Answer Key Section (Optional) -->
+                <div id="pvAnswerKeyBlock" style="display:none;" class="mt-4 pt-3 border-top border-secondary">
+                    <h6 class="fw-bold text-success border-bottom pb-1 mb-2"><i class="bi bi-key-fill me-1"></i> Teacher Answer Key</h6>
+                    <div id="pvAnswerKeyList" class="small"></div>
+                </div>
+
+                <!-- Footer Signatures -->
                 <div class="d-flex justify-content-between align-items-center mt-5 pt-4 border-top text-center text-dark font-weight-bold fs-7">
                     <div>
                         <div class="mb-4">...............................</div>
-                        <div>প্রস্তুতকারক signature</div>
+                        <div>Subject Teacher</div>
                     </div>
                     <div>
                         <div class="mb-4">...............................</div>
-                        <div>পরীক্ষা নিয়ন্ত্রক</div>
+                        <div>Exam Controller</div>
                     </div>
                     <div>
                         <div class="mb-4">...............................</div>
-                        <div>প্রধান শিক্ষক signature</div>
+                        <div>Headmaster</div>
                     </div>
                 </div>
             </div>
 
             <!-- Action Controls -->
             <div class="d-flex gap-2 mt-3 no-print">
-                <button class="btn btn-qp-primary flex-fill" onclick="window.print()">
+                <button class="btn btn-qp-primary flex-fill py-2 fw-bold" onclick="window.print()">
                     <i class="bi bi-printer-fill me-1"></i> Print Question Paper
                 </button>
-                <button class="btn btn-qp-secondary flex-fill" onclick="savePaperToBackend()">
+                <button class="btn btn-qp-secondary flex-fill py-2 fw-bold" onclick="savePaperToBackend()">
                     <i class="bi bi-save-fill me-1"></i> Save to Database
                 </button>
             </div>
@@ -590,8 +844,23 @@
 let selectedPaperQuestions = [];
 
 function switchBuilderTab(tabName) {
-    ['manual', 'creative', 'subject', 'ai'].forEach(t => {
-        document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1)).style.display = (t === tabName) ? 'block' : 'none';
+    const tabs = ['mcq', 'creative', 'manual', 'subject', 'ai'];
+    tabs.forEach(t => {
+        const el = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (el) el.style.display = (t === tabName) ? 'block' : 'none';
+        const btn = document.getElementById('btnTab' + t.charAt(0).toUpperCase() + t.slice(1));
+        if (btn) {
+            btn.className = (t === tabName) ? 'btn btn-sm btn-qp-primary' : 'btn btn-sm btn-outline-primary';
+        }
+    });
+}
+
+function switchMcqSubtab(subTab) {
+    ['single', 'polynomial', 'passage', 'bulk'].forEach(st => {
+        const form = document.getElementById('mcq' + st.charAt(0).toUpperCase() + st.slice(1) + 'Form');
+        if (form) form.style.display = (st === subTab) ? 'block' : 'none';
+        const btn = document.getElementById('btnMcq' + st.charAt(0).toUpperCase() + st.slice(1));
+        if (btn) btn.className = (st === subTab) ? 'mcq-subtab-btn active' : 'mcq-subtab-btn';
     });
 }
 
@@ -599,23 +868,17 @@ function filterQuestions() {
     const cls = document.getElementById('fltClass').value;
     const subj = document.getElementById('fltSubject').value;
     const type = document.getElementById('fltType').value;
-    const diff = document.getElementById('fltDiff').value;
 
     document.querySelectorAll('.q-item-card').forEach(card => {
         const matchClass = !cls || card.dataset.class === cls;
         const matchSubj = !subj || card.dataset.subject === subj;
         const matchType = !type || card.dataset.type === type;
-        const matchDiff = !diff || card.dataset.diff === diff;
 
-        if (matchClass && matchSubj && matchType && matchDiff) {
-            card.style.display = 'block';
-        } else {
-            card.style.display = 'none';
-        }
+        card.style.display = (matchClass && matchSubj && matchType) ? 'block' : 'none';
     });
 }
 
-function toggleSelectPaperQ(id, text, marks, type) {
+function toggleSelectPaperQ(id, text, marks, type, opA, opB, opC, opD) {
     const card = document.querySelector(`.q-item-card[data-id="${id}"]`);
     const existingIdx = selectedPaperQuestions.findIndex(q => q.id === id);
 
@@ -627,11 +890,140 @@ function toggleSelectPaperQ(id, text, marks, type) {
             id: id,
             text: text,
             marks: marks,
-            type: type
+            type: type,
+            option_a: opA || '',
+            option_b: opB || '',
+            option_c: opC || '',
+            option_d: opD || ''
         });
         if (card) card.classList.add('selected');
     }
     renderPaperPreview();
+}
+
+function handleCreateSingleMcq(e) {
+    e.preventDefault();
+    const payload = {
+        subject: document.getElementById('fltSubject').value,
+        class_level: document.getElementById('fltClass').value,
+        question_text: document.getElementById('mcqStem').value.trim(),
+        option_a: document.getElementById('mcqOpA').value.trim(),
+        option_b: document.getElementById('mcqOpB').value.trim(),
+        option_c: document.getElementById('mcqOpC').value.trim(),
+        option_d: document.getElementById('mcqOpD').value.trim(),
+        correct_option: document.getElementById('mcqCorrect').value,
+        marks: parseInt(document.getElementById('mcqMarks').value) || 1,
+        difficulty: document.getElementById('mcqDiff').value,
+        explanation: document.getElementById('mcqExpl').value.trim(),
+        mcq_type: 'SINGLE'
+    };
+
+    fetch("{% url 'question_paper:api_create_mcq' %}", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            selectedPaperQuestions.push(data.question);
+            renderPaperPreview();
+            document.getElementById('mcqSingleForm').reset();
+            alert('✅ Single MCQ Question Created & Added to Paper!');
+        }
+    });
+}
+
+function handleCreatePolyMcq(e) {
+    e.preventDefault();
+    const payload = {
+        subject: document.getElementById('fltSubject').value,
+        class_level: document.getElementById('fltClass').value,
+        question_text: document.getElementById('polyStem').value.trim(),
+        statement_i: document.getElementById('polySt1').value.trim(),
+        statement_ii: document.getElementById('polySt2').value.trim(),
+        statement_iii: document.getElementById('polySt3').value.trim(),
+        option_a: document.getElementById('polyOpA').value.trim(),
+        option_b: document.getElementById('polyOpB').value.trim(),
+        option_c: document.getElementById('polyOpC').value.trim(),
+        option_d: document.getElementById('polyOpD').value.trim(),
+        correct_option: document.getElementById('polyCorrect').value,
+        marks: 1,
+        mcq_type: 'POLYNOMIAL'
+    };
+
+    fetch("{% url 'question_paper:api_create_mcq' %}", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            selectedPaperQuestions.push(data.question);
+            renderPaperPreview();
+            document.getElementById('mcqPolyForm').reset();
+            alert('✅ Composite MCQ Created & Added to Paper!');
+        }
+    });
+}
+
+function handleCreatePassageMcq(e) {
+    e.preventDefault();
+    const payload = {
+        subject: document.getElementById('fltSubject').value,
+        class_level: document.getElementById('fltClass').value,
+        stimulus_passage: document.getElementById('psgPassage').value.trim(),
+        question_text: document.getElementById('psgStem').value.trim(),
+        option_a: document.getElementById('psgOpA').value.trim(),
+        option_b: document.getElementById('psgOpB').value.trim(),
+        option_c: document.getElementById('psgOpC').value.trim(),
+        option_d: document.getElementById('psgOpD').value.trim(),
+        correct_option: document.getElementById('psgCorrect').value,
+        marks: 1,
+        mcq_type: 'PASSAGE'
+    };
+
+    fetch("{% url 'question_paper:api_create_mcq' %}", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success') {
+            selectedPaperQuestions.push(data.question);
+            renderPaperPreview();
+            document.getElementById('mcqPassageForm').reset();
+            alert('✅ Passage MCQ Question Created & Added to Paper!');
+        }
+    });
+}
+
+function handleBulkMcqImport() {
+    const rawText = document.getElementById('bulkMcqText').value.trim();
+    if (!rawText) { alert('Please enter bulk MCQ text!'); return; }
+
+    const payload = {
+        raw_text: rawText,
+        subject: document.getElementById('fltSubject').value,
+        class_level: document.getElementById('fltClass').value
+    };
+
+    fetch("{% url 'question_paper:api_bulk_create_mcq' %}", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': '{{ csrf_token }}' },
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.status === 'success' && data.questions.length) {
+            data.questions.forEach(q => selectedPaperQuestions.push(q));
+            renderPaperPreview();
+            document.getElementById('bulkMcqText').value = '';
+            alert('✅ ' + data.message);
+        }
+    });
 }
 
 function addCreativeQuestionToPaper(e) {
@@ -642,7 +1034,7 @@ function addCreativeQuestionToPaper(e) {
     const ga = document.getElementById('cqGa').value.trim();
     const gha = document.getElementById('cqGha').value.trim();
 
-    if (!stim) { alert('উদ্দীপক প্রদান করুন!'); return; }
+    if (!stim) { alert('Stimulus text required!'); return; }
 
     const newQ = {
         id: Date.now(),
@@ -682,7 +1074,7 @@ document.getElementById('mathEditorText')?.addEventListener('input', updateMathP
 
 function updateMathPreview() {
     const box = document.getElementById('mathPreviewBox');
-    box.innerHTML = document.getElementById('mathEditorText').value || '<em>Live MathJax Preview will appear here...</em>';
+    box.innerHTML = document.getElementById('mathEditorText').value || '<em>Live MathJax Preview will render here...</em>';
     if (window.MathJax) {
         MathJax.typesetPromise([box]);
     }
@@ -695,6 +1087,8 @@ function generateAIQuestion() {
         chapter: document.getElementById('aiChapter').value,
         topic: document.getElementById('aiTopic').value,
         question_type: document.getElementById('aiType').value,
+        lang: document.getElementById('aiLang').value,
+        difficulty: document.getElementById('aiDiff').value,
     };
 
     fetch("{% url 'question_paper:api_ai_generate' %}", {
@@ -714,29 +1108,95 @@ function generateAIQuestion() {
     .catch(err => console.error(err));
 }
 
+function updatePaperFont() {
+    const fontVal = document.getElementById('hdrFont').value.toLowerCase();
+    const sheet = document.getElementById('paperPrintSheet');
+    sheet.className = 'paper-preview-sheet font-' + fontVal;
+    if (document.getElementById('hdrColumns').value === '2') {
+        sheet.classList.add('column-layout-2');
+    }
+}
+
+function updateColumnLayout() {
+    const colVal = document.getElementById('hdrColumns').value;
+    const sheet = document.getElementById('paperPrintSheet');
+    if (colVal === '2') {
+        sheet.classList.add('column-layout-2');
+    } else {
+        sheet.classList.remove('column-layout-2');
+    }
+}
+
 function renderPaperPreview() {
     const container = document.getElementById('pvQuestionsList');
     const empty = document.getElementById('pvEmptyState');
+    const numStyle = document.getElementById('hdrNumbering').value;
+    const showAnsKey = document.getElementById('hdrAnswerKey').checked;
 
     if (!selectedPaperQuestions.length) {
         empty.style.display = 'block';
         container.innerHTML = '';
+        document.getElementById('pvAnswerKeyBlock').style.display = 'none';
         return;
     }
     empty.style.display = 'none';
 
     let totalMarks = 0;
+    let answerKeyItems = [];
+
     container.innerHTML = selectedPaperQuestions.map((q, idx) => {
         totalMarks += q.marks;
         const num = idx + 1;
+        
         let bodyHtml = `<div class="fw-bold text-dark mb-1">${num}. ${q.text} <span class="float-end text-primary">(${q.marks})</span></div>`;
 
+        // If Stimulus Passage exists
+        if (q.stimulus_passage) {
+            bodyHtml = `<div class="text-muted small italic border-start ps-2 mb-2 bg-light p-2 rounded">
+                <strong>Stimulus:</strong> ${q.stimulus_passage}
+            </div>` + bodyHtml;
+        }
+
+        // Statements for Polynomial MCQ
+        if (q.mcq_type === 'POLYNOMIAL' || q.statement_i) {
+            bodyHtml += `<div class="ms-3 small text-dark mb-1">
+                ${q.statement_i ? `<div>i. ${q.statement_i}</div>` : ''}
+                ${q.statement_ii ? `<div>ii. ${q.statement_ii}</div>` : ''}
+                ${q.statement_iii ? `<div>iii. ${q.statement_iii}</div>` : ''}
+            </div>`;
+        }
+
+        // MCQ Options Matrix
+        if (q.type === 'MCQ' || q.option_a) {
+            const labelA = (numStyle === 'BANGLA') ? 'ক' : 'A';
+            const labelB = (numStyle === 'BANGLA') ? 'খ' : 'B';
+            const labelC = (numStyle === 'BANGLA') ? 'গ' : 'C';
+            const labelD = (numStyle === 'BANGLA') ? 'ঘ' : 'D';
+
+            bodyHtml += `<div class="mcq-options-grid text-dark">
+                <div><strong>(${labelA})</strong> ${q.option_a || ''}</div>
+                <div><strong>(${labelB})</strong> ${q.option_b || ''}</div>
+                <div><strong>(${labelC})</strong> ${q.option_c || ''}</div>
+                <div><strong>(${labelD})</strong> ${q.option_d || ''}</div>
+            </div>`;
+
+            if (q.correct_option) {
+                answerKeyItems.push(`${num}. (${q.correct_option}) ${q.explanation ? '- ' + q.explanation : ''}`);
+            }
+        }
+
+        // Creative Question (CQ) Sub-questions
         if (q.type === 'CREATIVE' && (q.cqKa || q.cqKha || q.cqGa || q.cqGha)) {
-            bodyHtml += `<div class="ms-3 font-weight-normal small">
-                ${q.cqKa ? `<div>ক) ${q.cqKa} <span class="float-end">(১)</span></div>` : ''}
-                ${q.cqKha ? `<div>খ) ${q.cqKha} <span class="float-end">(২)</span></div>` : ''}
-                ${q.cqGa ? `<div>গ) ${q.cqGa} <span class="float-end">(৩)</span></div>` : ''}
-                ${q.cqGha ? `<div>ঘ) ${q.cqGha} <span class="float-end">(৪)</span></div>` : ''}
+            const kaL = (numStyle === 'BANGLA') ? 'ক' : 'a';
+            const khaL = (numStyle === 'BANGLA') ? 'খ' : 'b';
+            const gaL = (numStyle === 'BANGLA') ? 'গ' : 'c';
+            const ghaL = (numStyle === 'BANGLA') ? 'ঘ' : 'd';
+
+            bodyHtml += `<div class="ms-3 font-weight-normal small mt-2">
+                ${q.cqKa ? `<div class="py-1 border-bottom-light">${kaL}) ${q.cqKa} <span class="float-end fw-bold">(1)</span></div>` : ''}
+                ${q.cqKha ? `<div class="py-1 border-bottom-light">${khaL}) ${q.cqKha} <span class="float-end fw-bold">(2)</span></div>` : ''}
+                ${q.cqGa ? `<div class="py-1 border-bottom-light">${gaL}) ${q.cqGa} <span class="float-end fw-bold">(3)</span></div>` : ''}
+                ${q.cqGha ? `<div class="py-1 border-bottom-light">${ghaL}) ${q.cqGha} <span class="float-end fw-bold">(4)</span></div>` : ''}
             </div>`;
         }
 
@@ -746,7 +1206,16 @@ function renderPaperPreview() {
         </div>`;
     }).join('');
 
-    document.getElementById('pvMarks').textContent = 'পূর্ণমান: ' + totalMarks;
+    document.getElementById('pvMarks').textContent = (numStyle === 'BANGLA') ? 'পূর্ণমান: ' + totalMarks : 'Full Marks: ' + totalMarks;
+
+    // Answer Key Render
+    if (showAnsKey && answerKeyItems.length) {
+        document.getElementById('pvAnswerKeyBlock').style.display = 'block';
+        document.getElementById('pvAnswerKeyList').innerHTML = answerKeyItems.map(item => `<div>${item}</div>`).join('');
+    } else {
+        document.getElementById('pvAnswerKeyBlock').style.display = 'none';
+    }
+
     if (window.MathJax) {
         MathJax.typesetPromise([container]);
     }
@@ -761,8 +1230,12 @@ function updateHeaderPreview() {
     document.getElementById('pvSchool').textContent = document.getElementById('hdrSchool').value;
     document.getElementById('pvEiin').textContent = document.getElementById('hdrEiin').value;
     document.getElementById('pvExam').textContent = document.getElementById('fltExam').value;
-    document.getElementById('pvTime').textContent = 'সময়: ' + document.getElementById('hdrTime').value;
+    document.getElementById('pvTime').textContent = document.getElementById('hdrTime').value;
     document.getElementById('pvInstructionsText').textContent = document.getElementById('hdrInstructions').value;
+    
+    const subSel = document.getElementById('fltSubject');
+    const classSel = document.getElementById('fltClass');
+    document.getElementById('pvClassSub').textContent = `Class: ${classSel.value} | Subject: ${subSel.options[subSel.selectedIndex].text}`;
 }
 
 function savePaperToBackend() {
@@ -775,6 +1248,10 @@ function savePaperToBackend() {
         school_name: document.getElementById('hdrSchool').value,
         eiin_number: document.getElementById('hdrEiin').value,
         instructions: document.getElementById('hdrInstructions').value,
+        font_family: document.getElementById('hdrFont').value,
+        column_layout: document.getElementById('hdrColumns').value,
+        numbering_style: document.getElementById('hdrNumbering').value,
+        show_answer_key: document.getElementById('hdrAnswerKey').checked,
         questions_json: selectedPaperQuestions,
     };
 
@@ -792,5 +1269,8 @@ function savePaperToBackend() {
         }
     });
 }
+
+// Initial setup
+updateHeaderPreview();
 </script>
 {% endblock %}

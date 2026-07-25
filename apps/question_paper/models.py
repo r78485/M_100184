@@ -113,6 +113,16 @@ class QuestionBank(models.Model):
     negative_mark = models.FloatField(default=0.0)
     shuffle_options = models.BooleanField(default=True)
 
+    # MCQ Extended Fields
+    mcq_type = models.CharField(
+        max_length=20, 
+        choices=[('SINGLE', 'সাধারণ বহুনির্বাচনী'), ('POLYNOMIAL', 'বহুপদী সমাপ্তিসূচক'), ('PASSAGE', 'উদ্দীপকভিত্তিক')], 
+        default='SINGLE'
+    )
+    statement_i = models.CharField(max_length=500, blank=True, null=True, verbose_name="বিবৃতি i")
+    statement_ii = models.CharField(max_length=500, blank=True, null=True, verbose_name="বিবৃতি ii")
+    statement_iii = models.CharField(max_length=500, blank=True, null=True, verbose_name="বিবৃতি iii")
+
     # Subject Special Data (MathJax/LaTeX/Chemistry/Physics/ICT code)
     latex_formula = models.TextField(blank=True, null=True, verbose_name="LaTeX / MathJax Formula")
     chemical_equation = models.TextField(blank=True, null=True, verbose_name="Chemical Formula / Equation")
@@ -154,8 +164,21 @@ class QuestionPaperTemplate(models.Model):
 class QuestionPaper(models.Model):
     NUMBERING_CHOICES = [
         ('BANGLA', 'Bangla (১, ২, ৩ / ক, খ, গ)'),
-        ('ENGLISH', 'English (1, 2, 3)'),
+        ('ENGLISH', 'English (1, 2, 3 / a, b, c)'),
         ('ROMAN', 'Roman (i, ii, iii)'),
+    ]
+
+    FONT_CHOICES = [
+        ('ARIAL', 'English - Arial / Inter'),
+        ('TIMES', 'English - Times New Roman'),
+        ('ROBOTO', 'English - Roboto'),
+        ('KALPURUSH', 'Bangla - Kalpurush'),
+        ('SOLAIMANLIPI', 'Bangla - SolaimanLipi'),
+    ]
+
+    COLUMN_CHOICES = [
+        ('1', '1 Column (Full Width Standard)'),
+        ('2', '2 Columns (NCTB Board Exam Style)'),
     ]
     
     PAPER_SIZE_CHOICES = [
@@ -172,14 +195,14 @@ class QuestionPaper(models.Model):
     ]
 
     # Header / Meta
-    title = models.CharField(max_length=255, verbose_name="প্রশ্নপত্রের শিরোনাম / Exam Name", default="বার্ষিক পরীক্ষা — ২০২৬")
+    title = models.CharField(max_length=255, verbose_name="প্রশ্নপত্রের শিরোনাম / Exam Name", default="Annual Examination — 2026")
     academic_year = models.CharField(max_length=10, default="2026")
     class_name = models.CharField(max_length=50, default="Class 9")
     section = models.CharField(max_length=50, default="A", blank=True)
-    subject = models.CharField(max_length=50, default="গণিত")
+    subject = models.CharField(max_length=50, default="Mathematics")
     teacher_name = models.CharField(max_length=200, blank=True, null=True)
     exam_date = models.DateField(blank=True, null=True)
-    time_allowed = models.CharField(max_length=100, default="৩ ঘণ্টা", verbose_name="পরীক্ষার সময়")
+    time_allowed = models.CharField(max_length=100, default="3 Hours", verbose_name="পরীক্ষার সময়")
     
     # Marks Breakdown
     full_marks = models.PositiveIntegerField(default=100)
@@ -189,25 +212,30 @@ class QuestionPaper(models.Model):
     creative_marks = models.PositiveIntegerField(default=70)
     
     # Header Details
-    school_name = models.CharField(max_length=255, default="গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়")
+    school_name = models.CharField(max_length=255, default="Gazimahmud Secondary School")
     school_logo = models.ImageField(upload_to='school_logos/', blank=True, null=True)
     eiin_number = models.CharField(max_length=50, blank=True, null=True, default="EIIN: 123456")
     address = models.CharField(max_length=255, blank=True, null=True)
 
+    # Styling & Layout Options
+    font_family = models.CharField(max_length=30, choices=FONT_CHOICES, default='ARIAL')
+    column_layout = models.CharField(max_length=5, choices=COLUMN_CHOICES, default='1')
+
     # Instructions
     instructions = models.TextField(
-        default="১. সকল প্রশ্নের মান সমান।\n২. প্রয়োজনীয় ক্ষেত্রে ডান পার্শ্বের সংখ্যা প্রশ্নের পূর্ণমান জ্ঞাপন করে।\n৩. ক্যালকুলেটর ব্যবহার অনুমোদিত।"
+        default="1. Figures to the right indicate full marks.\n2. Read questions carefully before answering.\n3. Calculator is allowed where necessary."
     )
     
     # Footer Signatures & QR
-    prepared_by = models.CharField(max_length=100, default="বিষয় শিক্ষক")
-    verified_by = models.CharField(max_length=100, default="পরীক্ষা নিয়ন্ত্রক")
-    approved_by = models.CharField(max_length=100, default="প্রধান শিক্ষক")
+    prepared_by = models.CharField(max_length=100, default="Subject Teacher")
+    verified_by = models.CharField(max_length=100, default="Exam Controller")
+    approved_by = models.CharField(max_length=100, default="Headmaster")
     show_qr_code = models.BooleanField(default=True)
+    show_answer_key = models.BooleanField(default=False)
     
     # Questions & Formatting
     questions_json = models.JSONField(default=list, help_text="Ordered array of question objects, custom marks, numbers")
-    numbering_style = models.CharField(max_length=20, choices=NUMBERING_CHOICES, default='BANGLA')
+    numbering_style = models.CharField(max_length=20, choices=NUMBERING_CHOICES, default='ENGLISH')
     paper_size = models.CharField(max_length=20, choices=PAPER_SIZE_CHOICES, default='A4_PORTRAIT')
     margin_top_mm = models.PositiveIntegerField(default=15)
     margin_bottom_mm = models.PositiveIntegerField(default=15)
@@ -229,3 +257,4 @@ class QuestionPaper(models.Model):
 
     def __str__(self):
         return f"{self.title} - {self.subject} ({self.class_name})"
+

@@ -14,14 +14,12 @@ from .models import (
 )
 
 def ensure_tables_exist():
-    """Ensure database tables for question_paper exist"""
+    """Ensure database tables and columns for question_paper exist"""
     try:
-        from django.db import connection
-        tables = connection.introspection.table_names()
-        if 'question_paper_questionbank' not in tables:
-            call_command('migrate', 'question_paper', verbosity=0)
+        call_command('migrate', 'question_paper', verbosity=0)
     except Exception:
         pass
+
 
 def check_permission(user):
     """Ensure user is authorized (Admin, Principal, Exam Controller, Teacher)"""
@@ -31,12 +29,22 @@ def check_permission(user):
         return True
     return True  # Permissive for development/demo fallback
 
+def seed_initial_sample_questions():
+    """Auto populate initial sample NCTB CQs and MCQs in English and Bangla"""
+    try:
+        if QuestionBank.objects.count() == 0:
+            from seed_question_paper import seed
+            seed()
+    except Exception:
+        pass
+
 @login_required
 def dashboard_view(request):
     if not check_permission(request.user):
         return redirect('dashboard')
         
     ensure_tables_exist()
+    seed_initial_sample_questions()
 
     try:
         total_questions = QuestionBank.objects.count()
@@ -66,6 +74,7 @@ def create_paper_view(request, paper_id=None):
         return redirect('dashboard')
         
     ensure_tables_exist()
+    seed_initial_sample_questions()
 
     paper_instance = None
     chapters = []
@@ -87,6 +96,7 @@ def create_paper_view(request, paper_id=None):
             templates = QuestionPaperTemplate.objects.all()
         except Exception:
             pass
+
 
     context = {
         'paper_instance': paper_instance,
@@ -287,35 +297,180 @@ def api_save_paper(request):
         else:
             paper = QuestionPaper()
 
-        paper.title = data.get('title', 'বার্ষিক পরীক্ষা — ২০২৬')
+        paper.title = data.get('title', 'Annual Examination — 2026')
         paper.academic_year = data.get('academic_year', '2026')
         paper.class_name = data.get('class_name', 'Class 9')
         paper.section = data.get('section', 'A')
-        paper.subject = data.get('subject', 'গণিত')
+        paper.subject = data.get('subject', 'Mathematics')
         paper.teacher_name = data.get('teacher_name', request.user.get_full_name() or request.user.username)
-        paper.time_allowed = data.get('time_allowed', '৩ ঘণ্টা')
+        paper.time_allowed = data.get('time_allowed', '3 Hours')
         paper.full_marks = int(data.get('full_marks', 100))
         paper.pass_marks = int(data.get('pass_marks', 33))
         paper.written_marks = int(data.get('written_marks', 70))
         paper.mcq_marks = int(data.get('mcq_marks', 30))
         paper.creative_marks = int(data.get('creative_marks', 70))
-        paper.school_name = data.get('school_name', 'গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়')
+        paper.school_name = data.get('school_name', 'Gazimahmud Secondary School')
         paper.eiin_number = data.get('eiin_number', 'EIIN: 123456')
         paper.instructions = data.get('instructions', '')
-        paper.prepared_by = data.get('prepared_by', 'বিষয় শিক্ষক')
-        paper.verified_by = data.get('verified_by', 'পরীক্ষা নিয়ন্ত্রক')
-        paper.approved_by = data.get('approved_by', 'প্রধান শিক্ষক')
+        paper.prepared_by = data.get('prepared_by', 'Subject Teacher')
+        paper.verified_by = data.get('verified_by', 'Exam Controller')
+        paper.approved_by = data.get('approved_by', 'Headmaster')
         paper.questions_json = data.get('questions_json', [])
-        paper.numbering_style = data.get('numbering_style', 'BANGLA')
+        paper.numbering_style = data.get('numbering_style', 'ENGLISH')
+        paper.font_family = data.get('font_family', 'ARIAL')
+        paper.column_layout = data.get('column_layout', '1')
         paper.paper_size = data.get('paper_size', 'A4_PORTRAIT')
+        paper.show_answer_key = bool(data.get('show_answer_key', False))
 
         if request.user.is_authenticated:
             paper.created_by = request.user
 
         paper.save()
-        return JsonResponse({'status': 'success', 'paper_id': paper.id, 'message': 'প্রশ্নপত্র সফলভাবে সংরক্ষিত হয়েছে!'})
+        return JsonResponse({'status': 'success', 'paper_id': paper.id, 'message': 'Question Paper saved successfully!'})
     except Exception as e:
         return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+
+@csrf_exempt
+@login_required
+def api_create_mcq(request):
+    """Save a new MCQ question to QuestionBank and return its details"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST method required'}, status=405)
+
+    ensure_tables_exist()
+
+    try:
+        data = json.loads(request.body)
+        mcq_type = data.get('mcq_type', 'SINGLE')
+        
+        q = QuestionBank(
+            subject=data.get('subject', 'MATH'),
+            class_level=data.get('class_level', 'Class 9'),
+            topic=data.get('topic', ''),
+            question_type='MCQ',
+            difficulty=data.get('difficulty', 'MEDIUM'),
+            marks=int(data.get('marks', 1)),
+            question_text=data.get('question_text', ''),
+            mcq_type=mcq_type,
+            statement_i=data.get('statement_i', ''),
+            statement_ii=data.get('statement_ii', ''),
+            statement_iii=data.get('statement_iii', ''),
+            option_a=data.get('option_a', ''),
+            option_b=data.get('option_b', ''),
+            option_c=data.get('option_c', ''),
+            option_d=data.get('option_d', ''),
+            correct_option=data.get('correct_option', 'A'),
+            answer_explanation=data.get('explanation', ''),
+            stimulus_passage=data.get('stimulus_passage', ''),
+            created_by=request.user if request.user.is_authenticated else None,
+        )
+        q.save()
+
+        res_data = {
+            'id': q.id,
+            'type': 'MCQ',
+            'mcq_type': mcq_type,
+            'text': q.question_text,
+            'stimulus_passage': q.stimulus_passage,
+            'statement_i': q.statement_i,
+            'statement_ii': q.statement_ii,
+            'statement_iii': q.statement_iii,
+            'option_a': q.option_a,
+            'option_b': q.option_b,
+            'option_c': q.option_c,
+            'option_d': q.option_d,
+            'correct_option': q.correct_option,
+            'explanation': q.answer_explanation,
+            'marks': q.marks,
+        }
+
+        return JsonResponse({'status': 'success', 'question': res_data, 'message': 'MCQ Question created successfully!'})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
+
+@csrf_exempt
+@login_required
+def api_bulk_create_mcq(request):
+    """Bulk import multiple MCQs from text lines"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST method required'}, status=405)
+
+    ensure_tables_exist()
+
+    try:
+        data = json.loads(request.body)
+        raw_text = data.get('raw_text', '')
+        subject = data.get('subject', 'MATH')
+        class_level = data.get('class_level', 'Class 9')
+
+        if not raw_text.strip():
+            return JsonResponse({'error': 'No text provided'}, status=400)
+
+        # Basic parser for raw text: Question line followed by options
+        blocks = raw_text.strip().split('\n\n')
+        created_questions = []
+
+        for block in blocks:
+            lines = [l.strip() for l in block.split('\n') if l.strip()]
+            if not lines: continue
+
+            q_text = lines[0]
+            op_a, op_b, op_c, op_d = '', '', '', ''
+            corr = 'A'
+
+            for line in lines[1:]:
+                l_lower = line.lower()
+                if l_lower.startswith(('a)', 'a.', '(a)', 'ক)', 'ক.', '(ক)')):
+                    op_a = line.split(')', 1)[-1].split('.', 1)[-1].strip()
+                elif l_lower.startswith(('b)', 'b.', '(b)', 'খ)', 'খ.', '(খ)')):
+                    op_b = line.split(')', 1)[-1].split('.', 1)[-1].strip()
+                elif l_lower.startswith(('c)', 'c.', '(c)', 'গ)', 'গ.', '(গ)')):
+                    op_c = line.split(')', 1)[-1].split('.', 1)[-1].strip()
+                elif l_lower.startswith(('d)', 'd.', '(d)', 'ঘ)', 'ঘ.', '(ঘ)')):
+                    op_d = line.split(')', 1)[-1].split('.', 1)[-1].strip()
+                elif 'ans:' in l_lower or 'answer:' in l_lower or 'উত্তর:' in l_lower:
+                    ans_part = line.split(':')[-1].strip().upper()
+                    if ans_part in ['A', 'B', 'C', 'D', 'ক', 'খ', 'গ', 'ঘ']:
+                        mapping = {'KHA': 'B', 'GA': 'C', 'GHA': 'D', 'ক': 'A', 'খ': 'B', 'গ': 'C', 'ঘ': 'D'}
+                        corr = mapping.get(ans_part, ans_part[0])
+
+            q = QuestionBank.objects.create(
+                subject=subject,
+                class_level=class_level,
+                question_type='MCQ',
+                question_text=q_text,
+                option_a=op_a or 'Option A',
+                option_b=op_b or 'Option B',
+                option_c=op_c or 'Option C',
+                option_d=op_d or 'Option D',
+                correct_option=corr,
+                marks=1,
+                created_by=request.user if request.user.is_authenticated else None,
+            )
+
+            created_questions.append({
+                'id': q.id,
+                'type': 'MCQ',
+                'text': q.question_text,
+                'option_a': q.option_a,
+                'option_b': q.option_b,
+                'option_c': q.option_c,
+                'option_d': q.option_d,
+                'correct_option': q.correct_option,
+                'marks': 1,
+            })
+
+        return JsonResponse({
+            'status': 'success', 
+            'count': len(created_questions), 
+            'questions': created_questions,
+            'message': f'{len(created_questions)} MCQ questions imported successfully!'
+        })
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+
 
 @csrf_exempt
 @login_required
@@ -327,57 +482,136 @@ def api_ai_generate(request):
         data = json.loads(request.body)
         subject = data.get('subject', 'MATH')
         class_level = data.get('class_level', 'Class 9')
-        chapter = data.get('chapter', 'সংখ্যা পদ্ধতি')
-        topic = data.get('topic', 'সাধারন আলোচনা')
+        chapter = data.get('chapter', 'Algebra / Geometry')
+        topic = data.get('topic', 'General Discussion')
         difficulty = data.get('difficulty', 'MEDIUM')
         question_type = data.get('question_type', 'CREATIVE')
-        marks = int(data.get('marks', 10))
+        lang = data.get('lang', 'EN')  # 'EN' or 'BN'
+        marks = int(data.get('marks', 10 if question_type == 'CREATIVE' else 1))
 
         generated = []
         if question_type == 'CREATIVE':
-            sample_stimuli = [
-                f"{chapter} অধ্যায়ের অধীনে একটি আয়তাকার পার্কের দৈর্ঘ্য এবং প্রস্থ যথাক্রমে (x + ৪) মিটার এবং (x - ২) মিটার। পার্কটির ক্ষেত্রফল ২৪ বর্গমিটার।",
-                f"একটি পাত্রে হাইড্রোজেন ও অক্সিজেন গ্যাসের অনুপাত ২:১। উদ্দীপকটি বিশ্লেষণ করে {chapter} সম্পর্কিত গাণিতিক সমস্যাটি সমাধান কর।",
-                f"উদ্দিপক: একটি তথ্যপ্রযুক্তি কোম্পানিতে ২০০ জন কর্মী কর্মরত আছেন। কোম্পানির মাসিক ডেটা অ্যানালিটিক্স ছক পর্যবেক্ষণ কর।",
-            ]
-            stimulus = random.choice(sample_stimuli)
-            
-            q = {
-                'id': random.randint(10000, 99999),
-                'subject': subject,
-                'class_level': class_level,
-                'type': 'Creative',
-                'difficulty': difficulty,
-                'marks': marks,
-                'text': stimulus,
-                'stimulus_passage': stimulus,
-                'q_ka': f'{chapter} কাকে বলে? (১)',
-                'm_ka': 1,
-                'q_kha': f'উদ্দীপকের মূল ধারণা ব্যাখ্যা কর। (২)',
-                'm_kha': 2,
-                'q_ga': f'উদ্দীপকের তথ্যের আলোকে গাণিতিক মান বা পরিমাপ নির্ণয় কর। (৩)',
-                'm_ga': 3,
-                'q_gha': f'উদ্দীপকে বর্ণিত পরিস্থিতির বাস্তব প্রয়োগ এবং যৌক্তিক সিদ্ধান্ত বিশ্লেষণ কর। (৪)',
-                'm_gha': 4,
-            }
+            if lang == 'EN':
+                sample_stimuli = [
+                    f"In chapter '{chapter}', the length and breadth of a rectangular garden are (x + 4) meters and (x - 2) meters respectively. The area of the garden is 24 square meters.",
+                    f"A container has hydrogen and oxygen gas in a 2:1 ratio. Analyze the stimulus to solve the mathematical problem regarding '{topic}'.",
+                    f"Stimulus: A tech company has 200 employees. Observe the monthly data analytics table for '{chapter}'.",
+                ]
+                stimulus = random.choice(sample_stimuli)
+                q = {
+                    'id': random.randint(10000, 99999),
+                    'subject': subject,
+                    'class_level': class_level,
+                    'type': 'CREATIVE',
+                    'difficulty': difficulty,
+                    'marks': 10,
+                    'text': stimulus,
+                    'stimulus_passage': stimulus,
+                    'q_ka': f'Define {topic}.',
+                    'm_ka': 1,
+                    'q_kha': f'Explain the basic principle presented in the stimulus.',
+                    'm_kha': 2,
+                    'q_ga': f'Calculate the mathematical values based on the given information.',
+                    'm_ga': 3,
+                    'q_gha': f'Critically analyze the practical application and draw a logical conclusion.',
+                    'm_gha': 4,
+                }
+            else:
+                sample_stimuli = [
+                    f"{chapter} অধ্যায়ের অধীনে একটি আয়তাকার পার্কের দৈর্ঘ্য এবং প্রস্থ যথাক্রমে (x + ৪) মিটার এবং (x - ২) মিটার। পার্কটির ক্ষেত্রফল ২৪ বর্গমিটার।",
+                    f"একটি পাত্রে হাইড্রোজেন ও অক্সিজেন গ্যাসের অনুপাত ২:১। উদ্দীপকটি বিশ্লেষণ করে {chapter} সম্পর্কিত গাণিতিক সমস্যাটি সমাধান কর।",
+                ]
+                stimulus = random.choice(sample_stimuli)
+                q = {
+                    'id': random.randint(10000, 99999),
+                    'subject': subject,
+                    'class_level': class_level,
+                    'type': 'CREATIVE',
+                    'difficulty': difficulty,
+                    'marks': 10,
+                    'text': stimulus,
+                    'stimulus_passage': stimulus,
+                    'q_ka': f'{chapter} কাকে বলে?',
+                    'm_ka': 1,
+                    'q_kha': f'উদ্দীপকের মূল ধারণা ব্যাখ্যা কর।',
+                    'm_kha': 2,
+                    'q_ga': f'উদ্দীপকের তথ্যের আলোকে গাণিতিক মান নির্ণয় কর।',
+                    'm_ga': 3,
+                    'q_gha': f'উদ্দীপকে বর্ণিত পরিস্থিতির বাস্তব প্রয়োগ এবং যৌক্তিক সিদ্ধান্ত বিশ্লেষণ কর।',
+                    'm_gha': 4,
+                }
             generated.append(q)
-        else:
-            mcq_samples = [
-                {'text': f'{chapter} অধ্যায় অনুযায়ী নিচের কোনটি সঠিক তথ্য?', 'options': 'ক) ১ম উপাদান\nখ) ২য় উপাদান\nগ) ৩য় উপাদান\nঘ) ৪র্থ উপাদান', 'answer': 'খ', 'marks': 1},
-                {'text': f'{topic} এর গাণিতিক সংকেত নিচের কোনটি?', 'options': 'ক) f(x)\nখ) g(x)\nগ) h(x)\nঘ) P(x)', 'answer': 'ক', 'marks': 1},
-                {'text': f'নিচের কোনটি NCTB স্ট্যান্ডার্ড {subject} কারিকুলামভুক্ত?', 'options': 'ক) অপশন A\nখ) অপশন B\nগ) অপশন C\nঘ) অপশন D', 'answer': 'গ', 'marks': 1},
-            ]
+
+        elif question_type == 'MCQ_POLYNOMIAL':
+            if lang == 'EN':
+                q = {
+                    'id': random.randint(10000, 99999),
+                    'subject': subject,
+                    'class_level': class_level,
+                    'type': 'MCQ',
+                    'mcq_type': 'POLYNOMIAL',
+                    'difficulty': difficulty,
+                    'marks': 1,
+                    'text': f"Regarding {chapter} and {topic}:",
+                    'statement_i': "i. First fundamental property holds true",
+                    'statement_ii': "ii. Secondary equation is satisfied",
+                    'statement_iii': "iii. The system remains in dynamic equilibrium",
+                    'option_a': "i and ii",
+                    'option_b': "i and iii",
+                    'option_c': "ii and iii",
+                    'option_d': "i, ii and iii",
+                    'correct_option': "D",
+                    'explanation': "All three conditions hold true according to NCTB standard curriculum.",
+                }
+            else:
+                q = {
+                    'id': random.randint(10000, 99999),
+                    'subject': subject,
+                    'class_level': class_level,
+                    'type': 'MCQ',
+                    'mcq_type': 'POLYNOMIAL',
+                    'difficulty': difficulty,
+                    'marks': 1,
+                    'text': f"{chapter} এবং {topic} এর ক্ষেত্রে:",
+                    'statement_i': "i. প্রথম মৌলিক ধর্ম মেনে চলে",
+                    'statement_ii': "ii. দ্বিতীয় সমীকরণটি সিদ্ধ হয়",
+                    'statement_iii': "iii. ব্যবস্থার সাম্যাবস্থা অক্ষুণ্ণ থাকে",
+                    'option_a': "i ও ii",
+                    'option_b': "i ও iii",
+                    'option_c': "ii ও iii",
+                    'option_d': "i, ii ও iii",
+                    'correct_option': "D",
+                    'explanation': "এনসিটিবি পাঠ্যক্রম অনুযায়ী তিনটি তথ্যই সঠিক।",
+                }
+            generated.append(q)
+
+        else:  # Standard Single MCQ
+            if lang == 'EN':
+                mcq_samples = [
+                    {'text': f'Which of the following is correct regarding {chapter}?', 'option_a': 'Primary Element A', 'option_b': 'Secondary Element B', 'option_c': 'Tertiary Element C', 'option_d': 'Quaternary Element D', 'correct_option': 'B', 'marks': 1},
+                    {'text': f'What is the standard formula symbol for {topic}?', 'option_a': 'f(x)', 'option_b': 'g(x)', 'option_c': 'h(x)', 'option_d': 'P(x)', 'correct_option': 'A', 'marks': 1},
+                    {'text': f'In NCTB {subject} curriculum, which value represents standard atmospheric pressure?', 'option_a': '1.013 x 10^5 Pa', 'option_b': '9.8 ms^-2', 'option_c': '3 x 10^8 ms^-1', 'option_d': '6.022 x 10^23', 'correct_option': 'A', 'marks': 1},
+                ]
+            else:
+                mcq_samples = [
+                    {'text': f'{chapter} অধ্যায় অনুযায়ী নিচের কোনটি সঠিক তথ্য?', 'option_a': '১ম উপাদান A', 'option_b': '২য় উপাদান B', 'option_c': '৩য় উপাদান C', 'option_d': '৪র্থ উপাদান D', 'correct_option': 'B', 'marks': 1},
+                    {'text': f'{topic} এর গাণিতিক সংকেত নিচের কোনটি?', 'option_a': 'f(x)', 'option_b': 'g(x)', 'option_c': 'h(x)', 'option_d': 'P(x)', 'correct_option': 'A', 'marks': 1},
+                ]
             sample = random.choice(mcq_samples)
             q = {
                 'id': random.randint(10000, 99999),
                 'subject': subject,
                 'class_level': class_level,
-                'type': question_type if question_type in ['MCQ', 'Short'] else 'MCQ',
+                'type': 'MCQ',
+                'mcq_type': 'SINGLE',
                 'difficulty': difficulty,
                 'marks': sample['marks'],
                 'text': sample['text'],
-                'options': sample['options'],
-                'answer': sample['answer'],
+                'option_a': sample['option_a'],
+                'option_b': sample['option_b'],
+                'option_c': sample['option_c'],
+                'option_d': sample['option_d'],
+                'correct_option': sample['correct_option'],
             }
             generated.append(q)
 
@@ -393,7 +627,8 @@ def api_delete_paper(request, paper_id):
         try:
             paper = get_object_or_404(QuestionPaper, pk=paper_id)
             paper.delete()
-            return JsonResponse({'status': 'success', 'message': 'প্রশ্নপত্র সফলভাবে মুছে ফেলা হয়েছে!'})
+            return JsonResponse({'status': 'success', 'message': 'Question paper deleted successfully!'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
     return JsonResponse({'error': 'POST method required'}, status=405)
+
