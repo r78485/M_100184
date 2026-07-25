@@ -117,21 +117,34 @@ def testimonial_view(request, student_id=None):
         if not student and student_id != '0':
             adm = StudentAdmission.objects.filter(admission_no=student_id).first()
             if adm:
+                village_val = getattr(adm, 'present_address_detail', '') or getattr(adm, 'permanent_address_detail', '') or "গাইবান্ধা সদর"
+                district_val = getattr(adm, 'present_district', '') or getattr(adm, 'permanent_district', '') or "গাইবান্ধা"
+                upazila_val = getattr(adm, 'present_upazila', '') or getattr(adm, 'permanent_upazila', '') or "গাইবান্ধা সদর"
+                
+                dob_val = "01-01-2010"
+                raw_dob = getattr(adm, 'dob', None) or getattr(adm, 'date_of_birth', None)
+                if raw_dob:
+                    if hasattr(raw_dob, 'strftime'):
+                        dob_val = raw_dob.strftime('%d-%m-%Y')
+                    else:
+                        dob_val = str(raw_dob)
+
                 student = Student.objects.create(
-                    sl_no=adm.admission_no,
-                    student_class=adm.student_class,
-                    roll_no=str(adm.roll_no) if adm.roll_no else "",
-                    name=adm.student_name_en or adm.student_name_bn,
-                    father_name=adm.father_name,
-                    mother_name=adm.mother_name,
-                    village=adm.address or "গাইবান্ধা সদর",
+                    sl_no=adm.admission_no or student_id,
+                    student_class=getattr(adm, 'student_class', '') or getattr(adm, 'desired_class', 'Class 9'),
+                    roll_no=str(getattr(adm, 'roll_no', '')) if getattr(adm, 'roll_no', None) else "",
+                    name=getattr(adm, 'student_name_en', '') or getattr(adm, 'student_name_bn', '') or "Student",
+                    father_name=getattr(adm, 'father_name', '') or "Father Name",
+                    mother_name=getattr(adm, 'mother_name', '') or "Mother Name",
+                    village=village_val,
                     post_office="গাইবান্ধা",
-                    upazila="গাইবান্ধা সদর",
-                    district="গাইবান্ধা",
-                    exam_year=adm.academic_year or "2026",
+                    upazila=upazila_val,
+                    district=district_val,
+                    exam_year=getattr(adm, 'academic_year', '2026') or "2026",
                     gpa="5.00",
-                    dob=adm.date_of_birth.strftime('%d-%m-%Y') if adm.date_of_birth else "01-01-2010"
+                    dob=dob_val
                 )
+
     else:
         student = None
         
