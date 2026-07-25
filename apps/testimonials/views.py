@@ -9,79 +9,81 @@ from django.views.decorators.csrf import csrf_exempt
 from apps.users.models import StudentAdmission
 
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 
 # Dashboard / Search View for Testimonial
 @login_required
 def testimonial_dashboard_view(request):
-
-    class_name = request.GET.get('class_name', '')
-    roll_no = request.GET.get('roll_no', '')
+    class_name = request.GET.get('class_name', '').strip()
+    roll_no = request.GET.get('roll_no', '').strip()
     
-    # Ensure some dummy data exists for testing if DB is empty
-    if StudentAdmission.objects.count() == 0:
-        import datetime
-        StudentAdmission.objects.create(
-            admission_no="ADM-2026-001",
-            student_name_en="Hasibul Islam",
-            student_class="Class 9",
-            section="Science",
-            roll_no=120,
-            academic_year="2026",
-            date_of_birth=datetime.date(2010, 5, 15),
-            father_name="Md. Rafiqul Islam",
-            mother_name="Hasina Begum",
-            guardian_phone="01711000000",
-            address="Ghaibandha Sadar"
-        )
-        StudentAdmission.objects.create(
-            admission_no="ADM-2026-002",
-            student_name_en="Nusrat Jahan",
-            student_class="Class 9",
-            section="Arts",
-            roll_no=121,
-            academic_year="2026",
-            date_of_birth=datetime.date(2011, 2, 20),
-            father_name="Md. Abdur Rahman",
-            mother_name="Farida Yasmin",
-            guardian_phone="01722000000",
-            address="Ghaibandha Sadar"
-        )
-        
-    # Search in the central student database
+    # Query central Student Registry
     admissions = StudentAdmission.objects.all().order_by('-created_at')
     
     if class_name:
-        admissions = admissions.filter(desired_class__icontains=class_name)
+        admissions = admissions.filter(
+            Q(desired_class__icontains=class_name) | Q(desired_class__endswith=class_name)
+        )
+        
     if roll_no:
-        try:
-            admissions = admissions.filter(roll_no=int(roll_no))
-        except ValueError:
-            pass
-            
-    db_classes = StudentAdmission.objects.values_list('desired_class', flat=True).distinct()
+        admissions = admissions.filter(
+            Q(student_name_en__icontains=roll_no) | 
+            Q(student_name_bn__icontains=roll_no) | 
+            Q(father_name__icontains=roll_no) | 
+            Q(admission_no__icontains=roll_no) |
+            Q(roll_no__icontains=roll_no)
+        )
+
+    db_classes = list(StudentAdmission.objects.values_list('desired_class', flat=True).distinct())
+    db_classes += list(Student.objects.values_list('student_class', flat=True).distinct())
     db_classes = [c for c in db_classes if c]
     
     standard_classes = ['Class 6', 'Class 7', 'Class 8', 'Class 9', 'Class 10', 'SSC 2024', 'SSC 2025', 'SSC 2026']
     classes = list(set(standard_classes + db_classes))
     classes.sort()
     
-    # Map to context structure expected by template
     students_list = []
+    seen_ids = set()
+    
     for adm in admissions:
-        # Check if testimonial already generated
-        test_student = Student.objects.filter(sl_no=adm.admission_no).first()
+        adm_id = adm.admission_no or f"ADM-2026-{adm.id:04d}"
+        seen_ids.add(adm_id)
+        test_student = Student.objects.filter(sl_no=adm_id).first()
         
         students_list.append({
-            'sl_no': adm.admission_no,
+            'sl_no': adm_id,
             'token_number': test_student.token_number if test_student else 'TKN-PENDING',
-            'name': adm.student_name_en or adm.student_name_bn,
-            'father_name': adm.father_name,
-            'student_class': adm.student_class,
-            'exam_year': adm.academic_year,
-            'gpa': test_student.gpa if test_student else 'N/A',
+            'name': adm.student_name_en or adm.student_name_bn or "Student",
+            'father_name': adm.father_name or "",
+            'student_class': adm.desired_class or "Class 9",
+            'exam_year': adm.academic_year or "2026",
+            'gpa': test_student.gpa if test_student else '5.00',
             'is_testimonial_printed': test_student.is_testimonial_printed if test_student else False
         })
-    
+        
+    # Also include standalone records from Student table
+    t_students = Student.objects.all()
+    if class_name:
+        t_students = t_students.filter(student_class__icontains=class_name)
+    if roll_no:
+        t_students = t_students.filter(
+            Q(roll_no__icontains=roll_no) | Q(name__icontains=roll_no) | Q(sl_no__icontains=roll_no)
+        )
+        
+    for ts in t_students:
+        if ts.sl_no not in seen_ids:
+            seen_ids.add(ts.sl_no)
+            students_list.append({
+                'sl_no': ts.sl_no,
+                'token_number': ts.token_number,
+                'name': ts.name,
+                'father_name': ts.father_name,
+                'student_class': ts.student_class or "Class 9",
+                'exam_year': ts.exam_year or "2026",
+                'gpa': ts.gpa or "5.00",
+                'is_testimonial_printed': ts.is_testimonial_printed
+            })
+            
     context = {
         'students': students_list,
         'classes': classes,
@@ -96,6 +98,18 @@ from django.views.decorators.clickjacking import xframe_options_exempt
 @xframe_options_exempt
 def testimonial_view(request, student_id=None):
     active_school_name = request.session.get('school_name', 'গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়')
+    active_school_address = request.session.get('school_address', 'গাইবান্ধা সদর, জেলা: গাইবান্ধা')
+    
+    try:
+        from apps.admit_cards.models import SchoolProfile
+        sp = SchoolProfile.objects.first()
+        if sp:
+            if sp.name_bn or sp.name_en:
+                active_school_name = sp.name_bn or sp.name_en
+            if sp.address:
+                active_school_address = sp.address
+    except Exception:
+        pass
     
     institution = InstitutionProfile.objects.first()
     
@@ -103,19 +117,19 @@ def testimonial_view(request, student_id=None):
         class DummyInstitution:
             name_en = "Gazi Mahmud Secondary School"
             name_bn = active_school_name
-            address_bn = "গাইবান্ধা সদর, জেলা: গাইবান্ধা"
+            address_bn = active_school_address
             established_year = "২০১৪"
             logo = None
         institution = DummyInstitution()
-    elif "স্নিগ্ধ" in institution.name_bn:
+    else:
         institution.name_bn = active_school_name
-        institution.name_en = "Gazi Mahmud Secondary School"
+        institution.address_bn = active_school_address
         institution.save()
 
     if student_id:
         student = Student.objects.filter(sl_no=student_id).first()
         if not student and student_id != '0':
-            adm = StudentAdmission.objects.filter(admission_no=student_id).first()
+            adm = StudentAdmission.objects.filter(Q(admission_no=student_id) | Q(id=student_id if student_id.isdigit() else 0)).first()
             if adm:
                 village_val = getattr(adm, 'present_address_detail', '') or getattr(adm, 'permanent_address_detail', '') or "গাইবান্ধা সদর"
                 district_val = getattr(adm, 'present_district', '') or getattr(adm, 'permanent_district', '') or "গাইবান্ধা"
@@ -175,8 +189,10 @@ def testimonial_view(request, student_id=None):
         'institution': institution,
         'clean_exam_year': clean_exam_year,
         'school_name': active_school_name,
+        'school_address': active_school_address,
     }
     return render(request, 'testimonial_template.html', context)
+
 
 
 

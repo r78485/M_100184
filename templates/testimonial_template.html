@@ -345,7 +345,7 @@
                     <h2 class="stub-school-name">{{ institution.name_bn|default:school_name|default:"গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়" }}</h2>
                 </div>
                 <div class="stub-address">
-                    {{ institution.address_bn|default:"গাইবান্ধা সদর, জেলা: গাইবান্ধা" }}<br>
+                    {{ institution.address_bn|default:school_address|default:"গাইবান্ধা সদর, জেলা: গাইবান্ধা" }}<br>
                     স্থাপিত: {{ institution.established_year|default:"২০১৪" }}
                 </div>
             </div>
@@ -423,7 +423,7 @@
                         <div>
                             <h1 class="school-name-main">{{ institution.name_bn|default:school_name|default:"গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়" }}</h1>
                             <div class="school-address-main">
-                                {{ institution.address_bn|default:"গাইবান্ধা সদর, জেলা: গাইবান্ধা" }} &nbsp;|&nbsp; স্থাপিত: {{ institution.established_year|default:"২০১৪" }}
+                                {{ institution.address_bn|default:school_address|default:"গাইবান্ধা সদর, জেলা: গাইবান্ধা" }} &nbsp;|&nbsp; স্থাপিত: {{ institution.established_year|default:"২০১৪" }}
                             </div>
                         </div>
                     </div>
