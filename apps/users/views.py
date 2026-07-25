@@ -644,9 +644,15 @@ def registration_card_dashboard_view(request):
 
 @xframe_options_exempt
 def generate_registration_card(request, student_id):
+    try:
+        from school_management.middleware import auto_repair_student_admission_schema
+        auto_repair_student_admission_schema()
+    except Exception:
+        pass
+
     student = None
     if student_id and student_id != "0":
-        student = StudentAdmission.objects.filter(admission_no=student_id).first()
+        student = StudentAdmission.objects.filter(Q(admission_no=student_id) | Q(id=student_id if student_id.isdigit() else 0)).first()
         
     from apps.admit_cards.models import SchoolProfile
     school_profile = SchoolProfile.objects.first()
@@ -1033,9 +1039,15 @@ def course_certificate_dashboard_view(request):
 
 @xframe_options_exempt
 def generate_course_certificate(request, student_id):
+    try:
+        from school_management.middleware import auto_repair_student_admission_schema
+        auto_repair_student_admission_schema()
+    except Exception:
+        pass
+
     student = None
     if student_id and student_id != "0":
-        student = StudentAdmission.objects.filter(admission_no=student_id).first()
+        student = StudentAdmission.objects.filter(Q(admission_no=student_id) | Q(id=student_id if student_id.isdigit() else 0)).first()
     
     context = {'student': student}
     return render(request, 'course_certificate_template.html', context)

@@ -7,6 +7,7 @@ from django.shortcuts import render, get_object_or_404
 from .models import Student, InstitutionProfile, GradingScale
 
 from apps.users.models import StudentAdmission
+from django.db.models import Q
 from django.views.decorators.clickjacking import xframe_options_exempt
 
 def transcript_dashboard_view(request):
@@ -39,8 +40,33 @@ def transcript_dashboard_view(request):
 
 @xframe_options_exempt
 def generate_transcript(request, student_id):
+    student = None
+    results = []
+
     if student_id and student_id != "0":
-        student = get_object_or_404(Student, student_id=student_id)
+        student = Student.objects.filter(Q(student_id=student_id) | Q(registration_no=student_id)).first()
+        if not student:
+            try:
+                from school_management.middleware import auto_repair_student_admission_schema
+                auto_repair_student_admission_schema()
+            except Exception:
+                pass
+            adm = StudentAdmission.objects.filter(Q(admission_no=student_id) | Q(id=student_id if student_id.isdigit() else 0)).first()
+            if adm:
+                reg_no = f"2026100{adm.roll_no if adm.roll_no else adm.id}"
+                adm_id = adm.admission_no or f"ADM-2026-{adm.id:04d}"
+                student, _ = Student.objects.get_or_create(
+                    student_id=adm_id,
+                    defaults={
+                        'registration_no': reg_no,
+                        'name': adm.student_name_en or adm.student_name_bn or "Student",
+                        'student_class': adm.desired_class or "Class 9",
+                        'section': adm.section or "A",
+                        'dob': adm.dob.strftime('%d-%m-%Y') if getattr(adm, 'dob', None) else "01-01-2010"
+                    }
+                )
+    
+    if student:
         results = student.results.all()
     else:
         # Dummy data for preview
