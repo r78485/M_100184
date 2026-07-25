@@ -3,6 +3,40 @@ from django.db import connection
 
 _MIGRATED = False
 
+def auto_repair_question_paper_schema():
+
+    """Dynamically ensure missing SQLite columns exist for question_paper app"""
+    try:
+        tables = connection.introspection.table_names()
+        if 'question_paper_questionbank' in tables:
+            with connection.cursor() as cursor:
+                cursor.execute("PRAGMA table_info(question_paper_questionbank);")
+                columns = [row[1] for row in cursor.fetchall()]
+
+                if 'mcq_type' not in columns:
+                    cursor.execute("ALTER TABLE question_paper_questionbank ADD COLUMN mcq_type varchar(20) DEFAULT 'SINGLE';")
+                if 'statement_i' not in columns:
+                    cursor.execute("ALTER TABLE question_paper_questionbank ADD COLUMN statement_i varchar(500) NULL;")
+                if 'statement_ii' not in columns:
+                    cursor.execute("ALTER TABLE question_paper_questionbank ADD COLUMN statement_ii varchar(500) NULL;")
+                if 'statement_iii' not in columns:
+                    cursor.execute("ALTER TABLE question_paper_questionbank ADD COLUMN statement_iii varchar(500) NULL;")
+
+        if 'question_paper_questionpaper' in tables:
+            with connection.cursor() as cursor:
+                cursor.execute("PRAGMA table_info(question_paper_questionpaper);")
+                paper_cols = [row[1] for row in cursor.fetchall()]
+
+                if 'font_family' not in paper_cols:
+                    cursor.execute("ALTER TABLE question_paper_questionpaper ADD COLUMN font_family varchar(30) DEFAULT 'ARIAL';")
+                if 'column_layout' not in paper_cols:
+                    cursor.execute("ALTER TABLE question_paper_questionpaper ADD COLUMN column_layout varchar(5) DEFAULT '1';")
+                if 'show_answer_key' not in paper_cols:
+                    cursor.execute("ALTER TABLE question_paper_questionpaper ADD COLUMN show_answer_key bool DEFAULT 0;")
+    except Exception as e:
+        print("Schema auto-repair warning:", e)
+
+
 class AutoMigrateMiddleware:
     """
     Guarantees that database tables (django_session, users_user, question_paper_questionbank, etc.)
@@ -36,4 +70,8 @@ class AutoMigrateMiddleware:
             except Exception as e:
                 print("AutoMigrateMiddleware exception:", e)
 
+        # Auto repair question_paper schema columns if missing
+        auto_repair_question_paper_schema()
+
         return self.get_response(request)
+

@@ -16,10 +16,12 @@ from .models import (
 def ensure_tables_exist():
     """Ensure database tables and all columns for question_paper exist"""
     try:
-        from django.db import connection
-        
         call_command('migrate', 'question_paper', verbosity=0)
+    except Exception as e:
+        print("Migration command warning:", e)
 
+    try:
+        from django.db import connection
         with connection.cursor() as cursor:
             # Check question_paper_questionbank table columns
             cursor.execute("PRAGMA table_info(question_paper_questionbank);")
@@ -46,7 +48,8 @@ def ensure_tables_exist():
                 cursor.execute("ALTER TABLE question_paper_questionpaper ADD COLUMN show_answer_key bool DEFAULT 0;")
 
     except Exception as e:
-        print("ensure_tables_exist exception handled:", e)
+        print("ensure_tables_exist alter exception handled:", e)
+
 
 
 
