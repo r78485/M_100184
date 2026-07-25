@@ -1049,7 +1049,18 @@ def generate_course_certificate(request, student_id):
     if student_id and student_id != "0":
         student = StudentAdmission.objects.filter(Q(admission_no=student_id) | Q(id=student_id if student_id.isdigit() else 0)).first()
     
-    context = {'student': student}
+    gpa_val = '5.00'
+    if student:
+        adm_id = student.admission_no or f"ADM-2026-{student.id:04d}"
+        from apps.testimonials.models import Student as TestimonialStudent
+        t_st = TestimonialStudent.objects.filter(Q(sl_no=adm_id) | Q(roll_no=str(student.roll_no or ''))).first()
+        if t_st and t_st.gpa:
+            gpa_val = t_st.gpa
+
+    context = {
+        'student': student,
+        'gpa': gpa_val
+    }
     return render(request, 'course_certificate_template.html', context)
 
 from django.conf import settings

@@ -179,12 +179,13 @@
         <div class="recipient-name">{{ student.student_name_en|default:student.student_name_bn|default:"Demo Student" }}</div>
 
         <p class="description">
-            This is to certify that the above-named student of <strong>{{ student.student_class|default:"Class 9" }}</strong> has successfully demonstrated outstanding academic behavior and dedication during their tenure. We wish them the absolute best in their future endeavors.
+            This is to certify that <strong>{{ student.student_name_en|default:student.student_name_bn|default:"Demo Student" }}</strong>, Child of <strong>{{ student.father_name|default:"Md. Abdur Rahman" }}</strong> & <strong>{{ student.mother_name|default:"Farida Yasmin" }}</strong> of <strong>{{ student.desired_class|default:student.student_class|default:"Class 9" }}</strong> (Roll No: <strong>{{ student.roll_no|default:"101" }}</strong>), has successfully passed the Academic Examination securing <strong>GPA: {{ gpa|default:"5.00" }}</strong>. We wish them the absolute best in their future academic endeavors.
         </p>
 
-        <div style="font-size: 12px; font-weight: 600; color: #666; margin-bottom: 15px;">PRESENTED ON: <script>document.write(new Date().toLocaleDateString())</script></div>
+        <div style="font-size: 12px; font-weight: 600; color: #666; margin-bottom: 15px;">PRESENTED ON: <script>document.write(new Date().toLocaleDateString('en-GB'))</script></div>
 
-        <div class="school-name">EduManage International School</div>
+        <div class="school-name">Gazi Mahmud Junior High School</div>
+        <div style="font-size: 12px; font-weight: 700; color: #0f766e; margin-bottom: 10px;">গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয় (EIIN: 100184)</div>
 
         <div class="footer-row">
             <div class="signature-block">

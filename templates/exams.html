@@ -1001,13 +1001,13 @@ body.dark-theme .publish-switch { background: rgba(255,255,255,0.06); color: #94
                         <table class="marks-table">
                             <thead>
                                 <tr>
-                                    <th>Rank</th>
-                                    <th>Roll</th>
-                                    <th>Student Name</th>
-                                    <th>Total Marks</th>
-                                    <th>GPA</th>
-                                    <th>Grade</th>
-                                    <th>Status</th>
+                                    <th>মেধাক্রম (Rank)</th>
+                                    <th>রোল নম্বর (Roll)</th>
+                                    <th>শিক্ষার্থীর নাম (Student Name)</th>
+                                    <th>প্রাপ্ত মোট নম্বর (Total Marks)</th>
+                                    <th>জিপিএ (GPA)</th>
+                                    <th>গ্রেড (Grade)</th>
+                                    <th>ফলাফল স্ট্যাটাস (Status)</th>
                                 </tr>
                             </thead>
                             <tbody id="resultSheetBody">
@@ -1020,9 +1020,12 @@ body.dark-theme .publish-switch { background: rgba(255,255,255,0.06); color: #94
                         </table>
                     </div>
 
-                    <div class="d-flex justify-content-end mt-3 no-print">
-                        <button class="btn-exam-outline" onclick="window.print()">
-                            <i class="bi bi-printer me-1"></i> Print Result Sheet
+                    <div class="d-flex justify-content-end gap-2 mt-3 no-print">
+                        <button type="button" class="btn btn-success fw-bold text-white px-4 py-2" style="border-radius: 10px; background: #0f766e; border: none;" onclick="printTestResultSheet()">
+                            <i class="bi bi-printer-fill me-1"></i> রেজাল্ট ও মেধা তালিকা প্রিন্ট করুন / Print Test Result
+                        </button>
+                        <button type="button" class="btn-exam-outline" onclick="window.print()">
+                            <i class="bi bi-printer me-1"></i> Quick Print Page
                         </button>
                     </div>
                 </div>
@@ -2147,8 +2150,8 @@ function loadResultSheet() {
         results.push({ roll: s.roll, name: s.name, total: grandTotal, gpa: avgGPA, hasFail });
     });
 
-    // Sort by total descending
-    results.sort((a, b) => b.total - a.total);
+    // Sort by total marks descending, then GPA descending
+    results.sort((a, b) => (b.total - a.total) || (b.gpa - a.gpa));
 
     const tbody = document.getElementById('resultSheetBody');
     if (tbody) {
@@ -2159,20 +2162,127 @@ function loadResultSheet() {
             else if (i === 1) meritClass = 'merit-silver';
             else if (i === 2) meritClass = 'merit-bronze';
 
+            const rankBengali = getBengaliRank(i + 1);
+
             return `<tr class="${meritClass}">
                 <td>
                     ${i < 3 ? `<i class="bi bi-trophy-fill" style="color:${i===0?'#f59e0b':i===1?'#9ca3af':'#b45309'}; margin-right:4px;"></i>` : ''}
-                    <span class="fw-bold">${i + 1}</span>
+                    <span class="fw-bold text-dark">${rankBengali}</span>
                 </td>
-                <td>${r.roll}</td>
+                <td class="fw-bold">${r.roll}</td>
                 <td class="fw-semibold">${r.name}</td>
-                <td class="fw-bold">${r.total}</td>
+                <td class="fw-bold text-success">${r.total}</td>
                 <td class="fw-bold" style="color:#7c3aed;">${r.gpa.toFixed(2)}</td>
                 <td><span class="grade-badge ${grade.cls}">${grade.letter}</span></td>
-                <td><span class="badge ${r.hasFail ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'} rounded-pill px-3">${r.hasFail ? 'Fail' : 'Pass'}</span></td>
+                <td><span class="badge ${r.hasFail ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success'} rounded-pill px-3">${r.hasFail ? 'অকৃতকার্য (Fail)' : 'উত্তীর্ণ (Pass)'}</span></td>
             </tr>`;
         }).join('');
     }
+}
+
+function getBengaliRank(pos) {
+    const ranks = {
+        1: '১ম (প্রথম)',
+        2: '২য় (দ্বিতীয়)',
+        3: '৩য় (তৃতীয়)',
+        4: '৪র্থ (চতুর্থ)',
+        5: '৫ম (পঞ্চম)',
+        6: '৬ষ্ঠ',
+        7: '৭ম',
+        8: '৮ম',
+        9: '৯ম',
+        10: '১০ম'
+    };
+    return ranks[pos] || `${pos}তম`;
+}
+
+function printTestResultSheet() {
+    const examSelect = document.getElementById('rsExamSelect');
+    const classSelect = document.getElementById('rsClassSelect');
+    const sectionSelect = document.getElementById('rsSectionSelect');
+
+    const examName = examSelect ? (examSelect.options[examSelect.selectedIndex]?.text || 'Test Exam') : 'Test Exam';
+    const clsName = classSelect ? classSelect.value : 'Class 9';
+    const secName = sectionSelect ? sectionSelect.value : 'A';
+
+    const tbody = document.getElementById('resultSheetBody');
+    if (!tbody || !tbody.children.length) {
+        alert('প্রিন্ট করার জন্য কোনো রেজাল্ট পাওয়া যায়নি!');
+        return;
+    }
+
+    const rowsHtml = tbody.innerHTML;
+
+    const printWin = window.open('', '_blank', 'width=900,height=1000');
+    printWin.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Test Result & Merit List Sheet - ${clsName}</title>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+            <style>
+                body { font-family: 'SolaimanLipi', 'Segoe UI', Tahoma, sans-serif; padding: 25px; background: #fff; color: #0f172a; }
+                .sheet-header { text-align: center; border-bottom: 2px solid #0f766e; padding-bottom: 15px; margin-bottom: 20px; }
+                .school-title { font-size: 24px; font-weight: 800; color: #0f766e; margin: 0; }
+                .school-meta { font-size: 13px; color: #475569; margin-top: 3px; font-weight: 600; }
+                .sheet-badge { background: #0f766e; color: #fff; font-size: 15px; font-weight: 700; padding: 4px 20px; border-radius: 20px; display: inline-block; margin-top: 8px; }
+                .info-meta { display: flex; justify-content: space-between; font-weight: 700; font-size: 14px; margin-bottom: 15px; background: #f8fafc; padding: 8px 15px; border-radius: 8px; border: 1px solid #e2e8f0; }
+                .merit-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 13.5px; }
+                .merit-table th { background: #0f766e !important; color: #fff !important; text-align: center; padding: 10px 8px; border: 1px solid #0f766e; font-weight: 700; }
+                .merit-table td { border: 1px solid #cbd5e1; padding: 8px; text-align: center; font-weight: 600; }
+                .merit-gold { background-color: #fefce8 !important; }
+                .merit-silver { background-color: #f8fafc !important; }
+                .merit-bronze { background-color: #fff7ed !important; }
+                .sig-box { display: flex; justify-content: space-between; margin-top: 60px; padding-top: 10px; }
+                .sig-line { width: 180px; text-align: center; border-top: 1.5px solid #334155; font-size: 13px; font-weight: 700; padding-top: 5px; }
+                @media print {
+                    body { padding: 0; }
+                    .no-print { display: none !important; }
+                }
+            </style>
+        </head>
+        <body onload="window.print();">
+            <div class="sheet-header">
+                <h2 class="school-title">গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়</h2>
+                <div class="school-meta">GAZI MAHMUD JUNIOR HIGH SCHOOL | স্থাপিত: ১৯৮৩ | EIIN: ১০০১৮৪</div>
+                <div class="school-meta">বরগুনা সদর, জেলা: বরগুনা | Mobile: 01309100184</div>
+                <div class="sheet-badge">মেধাক্রম ও টেস্ট পরীক্ষার ফলাফল বিবরণী (TEST RESULT & MERIT SHEET)</div>
+            </div>
+
+            <div class="info-meta">
+                <div>পরীক্ষার নাম: <span class="text-primary">${examName}</span></div>
+                <div>শ্রেণী: <span class="text-primary">${clsName}</span></div>
+                <div>শাখা: <span class="text-primary">${secName}</span></div>
+                <div>তারিখ: ${new Date().toLocaleDateString('bn-BD')}</div>
+            </div>
+
+            <table class="merit-table">
+                <thead>
+                    <tr>
+                        <th>মেধাক্রম (Rank)</th>
+                        <th>রোল নম্বর</th>
+                        <th>শিক্ষার্থীর নাম</th>
+                        <th>প্রাপ্ত মোট নম্বর</th>
+                        <th>জিপিএ (GPA)</th>
+                        <th>গ্রেড</th>
+                        <th>ফলাফল স্ট্যাটাস</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rowsHtml}
+                </tbody>
+            </table>
+
+            <div class="sig-box">
+                <div class="sig-line">শ্রেণি শিক্ষকের স্বাক্ষর</div>
+                <div class="sig-line">পরীক্ষা নিয়ন্ত্রকের স্বাক্ষর</div>
+                <div class="sig-line">প্রধান শিক্ষকের স্বাক্ষর</div>
+            </div>
+        </body>
+        </html>
+    `);
+    printWin.document.close();
 }
 
 // ====================================================================

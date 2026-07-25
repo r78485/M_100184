@@ -161,9 +161,10 @@ def testimonial_view(request, student_id=None):
                 pass
             adm = StudentAdmission.objects.filter(Q(admission_no=student_id) | Q(id=student_id if student_id.isdigit() else 0)).first()
             if adm:
-                village_val = getattr(adm, 'present_address_detail', '') or getattr(adm, 'permanent_address_detail', '') or "গাইবান্ধা সদর"
-                district_val = getattr(adm, 'present_district', '') or getattr(adm, 'permanent_district', '') or "গাইবান্ধা"
-                upazila_val = getattr(adm, 'present_upazila', '') or getattr(adm, 'permanent_upazila', '') or "গাইবান্ধা সদর"
+                village_val = getattr(adm, 'present_address_detail', '') or getattr(adm, 'permanent_address_detail', '') or "বরগুনা সদর"
+                district_val = getattr(adm, 'present_district', '') or getattr(adm, 'permanent_district', '') or "বরগুনা"
+                upazila_val = getattr(adm, 'present_upazila', '') or getattr(adm, 'permanent_upazila', '') or "বরগুনা সদর"
+                post_office_val = getattr(adm, 'present_post_office', '') or getattr(adm, 'permanent_post_office', '') or "বরগুনা"
                 
                 dob_val = "01-01-2010"
                 raw_dob = getattr(adm, 'dob', None) or getattr(adm, 'date_of_birth', None)
@@ -173,21 +174,34 @@ def testimonial_view(request, student_id=None):
                     else:
                         dob_val = str(raw_dob)
 
-                student = Student.objects.create(
+                student, _ = Student.objects.get_or_create(
                     sl_no=adm.admission_no or student_id,
-                    student_class=getattr(adm, 'student_class', '') or getattr(adm, 'desired_class', 'Class 9'),
-                    roll_no=str(getattr(adm, 'roll_no', '')) if getattr(adm, 'roll_no', None) else "",
-                    name=getattr(adm, 'student_name_en', '') or getattr(adm, 'student_name_bn', '') or "Student",
-                    father_name=getattr(adm, 'father_name', '') or "Father Name",
-                    mother_name=getattr(adm, 'mother_name', '') or "Mother Name",
-                    village=village_val,
-                    post_office="গাইবান্ধা",
-                    upazila=upazila_val,
-                    district=district_val,
-                    exam_year=getattr(adm, 'academic_year', '2026') or "2026",
-                    gpa="5.00",
-                    dob=dob_val
+                    defaults={
+                        'student_class': getattr(adm, 'student_class', '') or getattr(adm, 'desired_class', 'Class 9'),
+                        'roll_no': str(getattr(adm, 'roll_no', '')) if getattr(adm, 'roll_no', None) else "",
+                        'name': getattr(adm, 'student_name_en', '') or getattr(adm, 'student_name_bn', '') or "Student",
+                        'father_name': getattr(adm, 'father_name', '') or "Father Name",
+                        'mother_name': getattr(adm, 'mother_name', '') or "Mother Name",
+                        'village': village_val,
+                        'post_office': post_office_val,
+                        'upazila': upazila_val,
+                        'district': district_val,
+                        'exam_year': getattr(adm, 'academic_year', '2026') or "2026",
+                        'gpa': "5.00",
+                        'dob': dob_val
+                    }
                 )
+                if student:
+                    # Keep personal info updated from central Students Menu
+                    student.name = getattr(adm, 'student_name_en', '') or getattr(adm, 'student_name_bn', '') or student.name
+                    student.father_name = getattr(adm, 'father_name', '') or student.father_name
+                    student.mother_name = getattr(adm, 'mother_name', '') or student.mother_name
+                    student.student_class = getattr(adm, 'desired_class', '') or student.student_class
+                    if village_val: student.village = village_val
+                    if district_val: student.district = district_val
+                    if upazila_val: student.upazila = upazila_val
+                    if post_office_val: student.post_office = post_office_val
+                    student.save()
 
     else:
         student = None
