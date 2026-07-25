@@ -101,7 +101,8 @@ def account_settings(request):
 @login_required
 def dashboard_router(request):
     """Redirects users to their dedicated custom dashboards based on role profiles"""
-    user_role = request.user.role
+    ensure_database_ready()
+    user_role = getattr(request.user, 'role', '')
     
     if user_role == request.user.Roles.ADMIN or request.user.is_superuser:
         return redirect('admin_dashboard')
@@ -121,12 +122,12 @@ def custom_logout(request):
     return redirect('login')
 
 def ensure_database_ready():
-    """Checks if database tables exist, runs migrate and seeds superusers if missing."""
+    """Checks if core database tables exist, runs migrate and seeds superusers if missing."""
     try:
-        from apps.users.models import User
-        User.objects.first()
-    except Exception:
-        try:
+        from django.db import connection
+        tables = connection.introspection.table_names()
+        required_tables = ['django_session', 'users_user', 'question_paper_questionbank', 'django_content_type']
+        if any(t not in tables for t in required_tables):
             from django.core.management import call_command
             call_command('migrate', interactive=False)
             from apps.users.models import User
@@ -142,8 +143,8 @@ def ensure_database_ready():
                 u.is_superuser = True
                 u.is_active = True
                 u.save()
-        except Exception as e:
-            print("Auto migration note:", e)
+    except Exception as e:
+        print("Auto migration note:", e)
 
 def admin_login_view(request):
     """Custom Admin/Staff only login view"""

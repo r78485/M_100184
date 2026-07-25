@@ -8,19 +8,18 @@ https://docs.djangoproject.com/en/6.0/howto/deployment/wsgi/
 """
 
 import os
-
 from django.core.wsgi import get_wsgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'school_management.settings')
 
-application = get_wsgi_application()
-
-# Run database auto-migration on WSGI startup if sqlite tables are missing
+# Auto-migrate database tables on WSGI startup if core tables (django_session, users_user, question_paper_questionbank) are missing
 try:
-    from apps.users.models import User
-    User.objects.first()
-except Exception as e:
-    try:
+    import django
+    django.setup()
+    from django.db import connection
+    tables = connection.introspection.table_names()
+    required_tables = ['django_session', 'users_user', 'question_paper_questionbank', 'django_content_type']
+    if any(t not in tables for t in required_tables):
         from django.core.management import call_command
         call_command('migrate', interactive=False)
         from apps.users.models import User
@@ -36,6 +35,7 @@ except Exception as e:
             u.is_superuser = True
             u.is_active = True
             u.save()
-    except Exception as ex:
-        print("WSGI auto-migration note:", ex)
+except Exception as ex:
+    print("WSGI auto-migration note:", ex)
 
+application = get_wsgi_application()
