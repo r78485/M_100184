@@ -174,8 +174,10 @@ def testimonial_view(request, student_id=None):
         'student': student,
         'institution': institution,
         'clean_exam_year': clean_exam_year,
+        'school_name': active_school_name,
     }
     return render(request, 'testimonial_template.html', context)
+
 
 
 # PDF View using ReportLab

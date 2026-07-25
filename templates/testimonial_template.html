@@ -335,7 +335,7 @@
             <div class="stub-header">
                 <div style="display: flex; align-items: center; justify-content: center; gap: 6px;">
                     <img src="{% if institution.logo %}{{ institution.logo.url }}{% else %}/static/logo.png{% endif %}" alt="Logo" style="width: 28px; height: 28px; object-fit: contain;" onerror="this.onerror=null;this.src='/static/logo.png';">
-                    <h2 class="stub-school-name">{{ institution.name_bn|default:request.session.school_name|default:"গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়" }}</h2>
+                    <h2 class="stub-school-name">{{ institution.name_bn|default:school_name|default:"গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়" }}</h2>
                 </div>
                 <div class="stub-address">
                     {{ institution.address_bn|default:"গাইবান্ধা সদর, জেলা: গাইবান্ধা" }}<br>
@@ -416,7 +416,7 @@
                             <img src="{% if institution.logo %}{{ institution.logo.url }}{% else %}/static/logo.png{% endif %}" alt="Logo" style="width: 48px; height: 48px; object-fit: contain;" onerror="this.onerror=null;this.src='/static/logo.png';">
                         </div>
                         <div class="cert-header-center">
-                            <h1 class="school-name-main">{{ institution.name_bn|default:request.session.school_name|default:"গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়" }}</h1>
+                            <h1 class="school-name-main">{{ institution.name_bn|default:school_name|default:"গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়" }}</h1>
                             <div class="school-address-main">
                                 {{ institution.address_bn|default:"গাইবান্ধা সদর, জেলা: গাইবান্ধা" }} &nbsp;|&nbsp; স্থাপিত: {{ institution.established_year|default:"২০১৪" }}
                             </div>
@@ -489,7 +489,7 @@
                     <div class="signature-block">
                         <div class="signature-line"></div>
                         <strong style="font-size: 13px;">প্রধান শিক্ষক</strong><br>
-                        <span style="color: #2e7d32; font-size: 12px; font-weight: bold;">{{ institution.name_bn|default:request.session.school_name|default:"গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়" }}</span>
+                        <span style="color: #2e7d32; font-size: 12px; font-weight: bold;">{{ institution.name_bn|default:school_name|default:"গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়" }}</span>
                     </div>
                 </div>
 
