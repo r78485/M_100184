@@ -8,8 +8,12 @@ from django.views.decorators.csrf import csrf_exempt
 
 from apps.users.models import StudentAdmission
 
+from django.contrib.auth.decorators import login_required
+
 # Dashboard / Search View for Testimonial
+@login_required
 def testimonial_dashboard_view(request):
+
     class_name = request.GET.get('class_name', '')
     roll_no = request.GET.get('roll_no', '')
     

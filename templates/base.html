@@ -506,37 +506,38 @@
                 </a>
             </li>
             <li>
-                <a href="#docEngineMenu" data-bs-toggle="collapse" class="{% if request.resolver_match.url_name == 'certificates' %}active{% endif %}" aria-expanded="{% if request.resolver_match.url_name == 'certificates' %}true{% else %}false{% endif %}">
+                <a href="#docEngineMenu" data-bs-toggle="collapse" class="{% if request.resolver_match.url_name in 'certificates,testimonial_dashboard,admit_card_dashboard,transcript_dashboard,registration_card_dashboard,course_certificate_dashboard' %}active{% endif %}" aria-expanded="{% if request.resolver_match.url_name in 'certificates,testimonial_dashboard,admit_card_dashboard,transcript_dashboard,registration_card_dashboard,course_certificate_dashboard' %}true{% else %}false{% endif %}">
                     <i class="bi bi-patch-check"></i> <span style="flex-grow: 1;">{% trans "Document Engine" %}</span> <i class="bi bi-chevron-down ms-auto"></i>
                 </a>
-                <ul class="collapse list-unstyled {% if request.resolver_match.url_name in 'certificates,testimonial_generate,admit_cards_generate_student,generate_transcript' %}show{% endif %}" id="docEngineMenu" style="background: rgba(0,0,0,0.15);">
+                <ul class="collapse list-unstyled {% if request.resolver_match.url_name in 'certificates,testimonial_dashboard,testimonial_generate,admit_card_dashboard,admit_cards_generate_student,transcript_dashboard,generate_transcript,registration_card_dashboard,course_certificate_dashboard' %}show{% endif %}" id="docEngineMenu" style="background: rgba(0,0,0,0.15);">
                     <li>
-                        <a href="{% url 'testimonial_dashboard' %}" style="padding-left: 55px; font-size: 0.85rem;">
+                        <a href="{% url 'testimonial_dashboard' %}" class="{% if request.resolver_match.url_name == 'testimonial_dashboard' %}active text-white fw-bold{% endif %}" style="padding-left: 55px; font-size: 0.85rem;">
                             <i class="bi bi-circle" style="font-size: 0.4rem;"></i> Testimonial (প্রশংসা পত্র)
                         </a>
                     </li>
                     <li>
-                        <a href="{% url 'admit_card_dashboard' %}" style="padding-left: 55px; font-size: 0.85rem;">
+                        <a href="{% url 'admit_card_dashboard' %}" class="{% if request.resolver_match.url_name == 'admit_card_dashboard' %}active text-white fw-bold{% endif %}" style="padding-left: 55px; font-size: 0.85rem;">
                             <i class="bi bi-circle" style="font-size: 0.4rem;"></i> Admit Card
                         </a>
                     </li>
                     <li>
-                        <a href="{% url 'transcript_dashboard' %}" style="padding-left: 55px; font-size: 0.85rem;">
+                        <a href="{% url 'transcript_dashboard' %}" class="{% if request.resolver_match.url_name == 'transcript_dashboard' %}active text-white fw-bold{% endif %}" style="padding-left: 55px; font-size: 0.85rem;">
                             <i class="bi bi-circle" style="font-size: 0.4rem;"></i> Academic Transcript
                         </a>
                     </li>
                     <li>
-                        <a href="{% url 'registration_card_dashboard' %}" style="padding-left: 55px; font-size: 0.85rem;">
+                        <a href="{% url 'registration_card_dashboard' %}" class="{% if request.resolver_match.url_name == 'registration_card_dashboard' %}active text-white fw-bold{% endif %}" style="padding-left: 55px; font-size: 0.85rem;">
                             <i class="bi bi-circle" style="font-size: 0.4rem;"></i> Registration Card
                         </a>
                     </li>
                     <li>
-                        <a href="{% url 'course_certificate_dashboard' %}" style="padding-left: 55px; font-size: 0.85rem;">
+                        <a href="{% url 'course_certificate_dashboard' %}" class="{% if request.resolver_match.url_name == 'course_certificate_dashboard' %}active text-white fw-bold{% endif %}" style="padding-left: 55px; font-size: 0.85rem;">
                             <i class="bi bi-circle" style="font-size: 0.4rem;"></i> Course Certificate
                         </a>
                     </li>
                 </ul>
             </li>
+
             <li>
                 <a href="{% url 'reports' %}" class="{% if request.resolver_match.url_name == 'reports' %}active{% endif %}">
                     <i class="bi bi-graph-up-arrow"></i> {% trans "Reports" %}
