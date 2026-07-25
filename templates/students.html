@@ -974,7 +974,12 @@
         }
     ];
 
+    window.allStudentsCache = [];
+
     function getStudents() {
+        if (window.allStudentsCache && window.allStudentsCache.length > 0) {
+            return window.allStudentsCache;
+        }
         const stored = localStorage.getItem('school_students');
         if (!stored) {
             localStorage.setItem('school_students', JSON.stringify(defaultStudents));
@@ -992,15 +997,18 @@
         .then(res => res.json())
         .then(data => {
             let apiStudents = data.students || [];
-            
             let studentMap = new Map();
-            localStudents.forEach(s => {
-                let key = String(s.db_id || s.id);
+
+            // 1. Load API Students from backend DB
+            apiStudents.forEach(s => {
+                s.db_id = s.id;
+                let key = "id_" + s.id;
                 studentMap.set(key, s);
             });
 
-            apiStudents.forEach(s => {
-                let key = String(s.id);
+            // 2. Load Local Students from browser cache
+            localStudents.forEach(s => {
+                let key = s.db_id ? ("id_" + s.db_id) : (s.id ? ("id_" + s.id) : ("local_" + (s.admNum || Math.random())));
                 let existing = studentMap.get(key);
                 if (existing) {
                     Object.assign(existing, s);
@@ -1013,33 +1021,40 @@
             let rollCounter = 1;
             combined = combined.map(st => {
                 if (st.status === 'Approved' || st.active === true) {
-                    st.roll = rollCounter++;
+                    st.roll = st.roll || rollCounter++;
                 } else {
-                    st.roll = 'Pending';
+                    st.roll = st.roll || 'Pending';
                 }
                 return st;
             });
+
+            window.allStudentsCache = combined;
             localStorage.setItem('school_students', JSON.stringify(combined));
 
             tbody.innerHTML = '';
+            if (combined.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-muted fw-bold">কোনো শিক্ষার্থীর তথ্য পাওয়া যায়নি। / No student records found.</td></tr>';
+                return;
+            }
 
             combined.forEach(st => {
+                const stId = st.db_id || st.id;
                 const isApproved = (st.status === 'Approved' || st.active === true);
                 const statusBadge = isApproved ? 
                     `<span class="badge bg-success-subtle text-success px-2.5 rounded-pill"><i class="bi bi-check-circle me-1"></i>Approved / অনুমোদিত</span>` :
                     `<span class="badge bg-warning-subtle text-warning px-2.5 rounded-pill"><i class="bi bi-hourglass-split me-1"></i>Pending / অপেক্ষমাণ</span>`;
 
                 const approveBtn = (!isApproved || st.status === 'Pending') ?
-                    `<button class="btn btn-sm btn-success me-1 fw-bold" onclick="approveStudent(${st.id})" title="Approve Student Admission"><i class="bi bi-check-circle-fill me-1"></i>Approve</button>` : '';
+                    `<button class="btn btn-sm btn-success me-1 fw-bold" onclick="approveStudent('${stId}')" title="Approve Student Admission"><i class="bi bi-check-circle-fill me-1"></i>Approve</button>` : '';
 
                 const avatarHtml = st.photo_url || st.photo ? 
-                    `<img src="${st.photo_url || st.photo}" class="rounded-circle" style="width:34px; height:34px; object-fit:cover; cursor:pointer;" onclick="viewStudentDetails(${st.id})">` :
-                    `<div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width:34px; height:34px; font-size:0.85rem; cursor:pointer;" onclick="viewStudentDetails(${st.id})">
+                    `<img src="${st.photo_url || st.photo}" class="rounded-circle" style="width:34px; height:34px; object-fit:cover; cursor:pointer;" onclick="viewStudentDetails('${stId}')">` :
+                    `<div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width:34px; height:34px; font-size:0.85rem; cursor:pointer;" onclick="viewStudentDetails('${stId}')">
                         ${(st.name || st.name_bn || st.name_en || 'S').charAt(0).toUpperCase()}
                     </div>`;
 
                 const nameDisplay = `<div>
-                    <span class="fw-semibold text-primary d-block" style="cursor:pointer;" onclick="viewStudentDetails(${st.id})">${st.name || st.name_en || st.name_bn || 'Student'}</span>
+                    <span class="fw-semibold text-primary d-block" style="cursor:pointer;" onclick="viewStudentDetails('${stId}')">${st.name || st.name_en || st.name_bn || 'Student'}</span>
                     ${st.name_bn && st.name_en ? `<small class="text-muted">${st.name_bn}</small>` : ''}
                 </div>`;
 
@@ -1057,10 +1072,10 @@
                         <td>${statusBadge}</td>
                         <td>
                             ${approveBtn}
-                            <button class="btn btn-sm btn-dark text-white me-1 fw-bold" onclick="openStudentIdCard(${st.id})" title="Print Unique ID Card"><i class="bi bi-person-badge me-1"></i>ID Card</button>
-                            <button class="btn btn-sm btn-outline-primary me-1" onclick="editStudent(${st.id})" title="Edit"><i class="bi bi-pencil"></i></button>
-                            <button class="btn btn-sm btn-outline-secondary me-1" onclick="printSingleStudent(${st.id})" title="Print Form"><i class="bi bi-printer"></i></button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent(${st.id})" title="Delete"><i class="bi bi-trash"></i></button>
+                            <button class="btn btn-sm btn-dark text-white me-1 fw-bold" onclick="openStudentIdCard('${stId}')" title="Print Unique ID Card"><i class="bi bi-person-badge me-1"></i>ID Card</button>
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick="editStudent('${stId}')" title="Edit"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-outline-secondary me-1" onclick="printSingleStudent('${stId}')" title="Print Form"><i class="bi bi-printer"></i></button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${stId}')" title="Delete"><i class="bi bi-trash"></i></button>
                         </td>
                     </tr>
                 `;
@@ -1070,19 +1085,20 @@
         .catch(err => {
             tbody.innerHTML = '';
             localStudents.forEach(st => {
+                const stId = st.db_id || st.id;
                 const isApproved = (st.status === 'Approved' || st.active === true);
                 const statusBadge = isApproved ? 
                     `<span class="badge bg-success-subtle text-success px-2.5 rounded-pill"><i class="bi bi-check-circle me-1"></i>Approved / অনুমোদিত</span>` :
                     `<span class="badge bg-warning-subtle text-warning px-2.5 rounded-pill"><i class="bi bi-hourglass-split me-1"></i>Pending / অপেক্ষমাণ</span>`;
 
                 const approveBtn = (!isApproved || st.status === 'Pending') ?
-                    `<button class="btn btn-sm btn-success me-1 fw-bold" onclick="approveStudent(${st.id})" title="Approve Student Admission"><i class="bi bi-check-circle-fill me-1"></i>Approve</button>` : '';
+                    `<button class="btn btn-sm btn-success me-1 fw-bold" onclick="approveStudent('${stId}')" title="Approve Student Admission"><i class="bi bi-check-circle-fill me-1"></i>Approve</button>` : '';
 
                 const row = `
                     <tr class="student-row" data-name="${(st.name || '').toLowerCase()}" data-class="${st.cls || ''}">
                         <td>
                             <div class="d-flex align-items-center gap-2">
-                                <span class="fw-semibold text-primary" style="cursor:pointer;" onclick="viewStudentDetails(${st.id})">${st.name}</span>
+                                <span class="fw-semibold text-primary" style="cursor:pointer;" onclick="viewStudentDetails('${stId}')">${st.name}</span>
                             </div>
                         </td>
                         <td>${st.roll || st.admission_no || '-'}</td>
@@ -1091,10 +1107,10 @@
                         <td>${statusBadge}</td>
                         <td>
                             ${approveBtn}
-                            <button class="btn btn-sm btn-dark text-white me-1 fw-bold" onclick="openStudentIdCard(${st.id})" title="Print Unique ID Card"><i class="bi bi-person-badge me-1"></i>ID Card</button>
-                            <button class="btn btn-sm btn-outline-primary me-1" onclick="editStudent(${st.id})" title="Edit"><i class="bi bi-pencil"></i></button>
-                            <button class="btn btn-sm btn-outline-secondary me-1" onclick="printSingleStudent(${st.id})" title="Print Profile"><i class="bi bi-printer"></i></button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent(${st.id})" title="Delete"><i class="bi bi-trash"></i></button>
+                            <button class="btn btn-sm btn-dark text-white me-1 fw-bold" onclick="openStudentIdCard('${stId}')" title="Print Unique ID Card"><i class="bi bi-person-badge me-1"></i>ID Card</button>
+                            <button class="btn btn-sm btn-outline-primary me-1" onclick="editStudent('${stId}')" title="Edit"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-outline-secondary me-1" onclick="printSingleStudent('${stId}')" title="Print Profile"><i class="bi bi-printer"></i></button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${stId}')" title="Delete"><i class="bi bi-trash"></i></button>
                         </td>
                     </tr>
                 `;
@@ -1112,12 +1128,13 @@
         .then(data => {
             let students = getStudents();
             students = students.map(s => {
-                if (s.id == id) {
+                if (String(s.id) === String(id) || String(s.db_id) === String(id)) {
                     s.status = 'Approved';
                     s.active = true;
                 }
                 return s;
             });
+            window.allStudentsCache = students;
             localStorage.setItem('school_students', JSON.stringify(students));
             alert('শিক্ষার্থীর ভর্তি সফলভাবে অনুমোদিত হয়েছে! / Student admission approved successfully!');
             renderStudents();
@@ -1125,12 +1142,13 @@
         .catch(e => {
             let students = getStudents();
             students = students.map(s => {
-                if (s.id == id) {
+                if (String(s.id) === String(id) || String(s.db_id) === String(id)) {
                     s.status = 'Approved';
                     s.active = true;
                 }
                 return s;
             });
+            window.allStudentsCache = students;
             localStorage.setItem('school_students', JSON.stringify(students));
             alert('শিক্ষার্থীর ভর্তি সফলভাবে অনুমোদিত হয়েছে! / Student admission approved!');
             renderStudents();
@@ -1152,6 +1170,11 @@
         const formData = new FormData(form);
         formData.append('status', 'Approved');
 
+        if (editingStId) {
+            formData.append('db_id', editingStId);
+            formData.append('id', editingStId);
+        }
+
         fetch('/api/save-student/', {
             method: 'POST',
             body: formData,
@@ -1168,7 +1191,8 @@
             const addr = document.getElementById('st_present_address_detail').value;
 
             const newStObj = {
-                id: data.db_id || Date.now(),
+                id: data.db_id || editingStId || Date.now(),
+                db_id: data.db_id || editingStId,
                 name: nameEn || nameBn,
                 name_bn: nameBn,
                 name_en: nameEn,
@@ -1187,7 +1211,17 @@
             };
 
             let students = getStudents();
-            students.push(newStObj);
+            if (editingStId) {
+                students = students.map(s => (String(s.id) === String(editingStId) || String(s.db_id) === String(editingStId)) ? newStObj : s);
+                editingStId = null;
+                const headerTitle = document.querySelector('#add-panel h3');
+                if (headerTitle) {
+                    headerTitle.innerHTML = `<i class="bi bi-person-plus-fill me-2"></i>Register Student Profile`;
+                }
+            } else {
+                students.push(newStObj);
+            }
+            window.allStudentsCache = students;
             localStorage.setItem('school_students', JSON.stringify(students));
 
             form.reset();
@@ -1196,6 +1230,7 @@
             renderStudents();
         })
         .catch(err => {
+            editingStId = null;
             form.reset();
             const successModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('studentSubmissionSuccessModal'));
             successModal.show();
@@ -1206,34 +1241,40 @@
     let editingStId = null;
 
     window.viewStudentDetails = function(id) {
+        const idStr = String(id);
         const students = getStudents();
-        const st = students.find(s => s.id === id);
+        const st = students.find(s => 
+            String(s.id) === idStr || 
+            String(s.db_id) === idStr || 
+            String(s.admission_no) === idStr || 
+            String(s.admNum) === idStr
+        );
         if (st) {
-            document.getElementById('detailStPhoto').src = st.photo || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120";
-            document.getElementById('detailStName').innerText = st.name;
-            document.getElementById('detailStRollClass').innerText = `Roll: ${st.roll} | ${st.cls}`;
-            document.getElementById('detailStStatus').innerText = st.active ? 'Active' : 'Inactive';
-            document.getElementById('detailStStatus').className = `badge ${st.active ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'} rounded-pill px-3 py-1.5 align-self-center mb-3`;
+            document.getElementById('detailStPhoto').src = st.photo_url || st.photo || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120";
+            document.getElementById('detailStName').innerText = st.name || st.name_en || st.name_bn || 'Student';
+            document.getElementById('detailStRollClass').innerText = `Roll: ${st.roll || '-'} | ${st.cls || st.desired_class || 'Class 6'}`;
+            document.getElementById('detailStStatus').innerText = st.active || st.status === 'Approved' ? 'Active' : 'Inactive';
+            document.getElementById('detailStStatus').className = `badge ${st.active || st.status === 'Approved' ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'} rounded-pill px-3 py-1.5 align-self-center mb-3`;
             
-            document.getElementById('detailStAdmNum').innerText = st.admNum || 'N/A';
-            document.getElementById('detailStAdmDate').innerText = st.admDate || 'N/A';
+            document.getElementById('detailStAdmNum').innerText = st.admNum || st.admission_no || 'N/A';
+            document.getElementById('detailStAdmDate').innerText = st.created_at || st.admDate || 'N/A';
             document.getElementById('detailStSection').innerText = st.section || 'N/A';
             document.getElementById('detailStShift').innerText = st.shift || 'N/A';
             document.getElementById('detailStGroup').innerText = st.group || 'N/A';
 
             document.getElementById('detailStDOB').innerText = st.dob || 'N/A';
-            document.getElementById('detailStBirthReg').innerText = st.birthReg || 'N/A';
-            document.getElementById('detailStBlood').innerText = st.blood || 'N/A';
-            document.getElementById('detailStNation').innerText = st.religionNation || 'N/A';
+            document.getElementById('detailStBirthReg').innerText = st.birth_reg_no || st.birthReg || 'N/A';
+            document.getElementById('detailStBlood').innerText = st.blood_group || st.blood || 'N/A';
+            document.getElementById('detailStNation').innerText = st.religionNation || 'Bangladeshi';
             document.getElementById('detailStLang').innerText = st.lang || 'Bengali';
 
-            document.getElementById('detailStFather').innerText = st.father || 'N/A';
-            document.getElementById('detailStMother').innerText = st.mother || 'N/A';
-            document.getElementById('detailStEmerg').innerText = st.emergPhone || 'N/A';
+            document.getElementById('detailStFather').innerText = st.father || st.father_name || 'N/A';
+            document.getElementById('detailStMother').innerText = st.mother || st.mother_name || 'N/A';
+            document.getElementById('detailStEmerg').innerText = st.phone || st.mobile || 'N/A';
             document.getElementById('detailStParentLogin').innerText = st.parentEmail || 'N/A';
 
-            document.getElementById('detailStPresentAddr').innerText = st.presentAddr || 'N/A';
-            document.getElementById('detailStPermAddr').innerText = st.permAddr || 'N/A';
+            document.getElementById('detailStPresentAddr').innerText = st.present_address_detail || st.presentAddr || 'N/A';
+            document.getElementById('detailStPermAddr').innerText = st.permanent_address_detail || st.permAddr || 'N/A';
             
             document.getElementById('detailStPrevSchool').innerText = st.prevSchool || 'N/A';
             document.getElementById('detailStPrevGPA').innerText = st.prevGPA || 'N/A';
@@ -1248,10 +1289,16 @@
     }
 
     window.editStudent = function(id) {
+        const idStr = String(id);
         const students = getStudents();
-        const st = students.find(s => s.id == id || s.db_id == id);
+        const st = students.find(s => 
+            String(s.id) === idStr || 
+            String(s.db_id) === idStr || 
+            String(s.admission_no) === idStr || 
+            String(s.admNum) === idStr
+        );
         if (st) {
-            editingStId = id;
+            editingStId = st.db_id || st.id;
             
             const setVal = (fieldId, val) => {
                 const el = document.getElementById(fieldId);

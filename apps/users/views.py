@@ -432,10 +432,23 @@ def api_save_student(request):
                 'status': data.get('status', 'Approved'),
             }
 
-            student, created = StudentAdmission.objects.update_or_create(
-                admission_no=adm_no,
-                defaults=defaults
-            )
+            student_id = data.get('db_id') or data.get('id')
+            if student_id and str(student_id).isdigit():
+                student = StudentAdmission.objects.filter(id=int(student_id)).first()
+                if student:
+                    for k, v in defaults.items():
+                        setattr(student, k, v)
+                    student.save()
+                else:
+                    student, created = StudentAdmission.objects.update_or_create(
+                        admission_no=adm_no,
+                        defaults=defaults
+                    )
+            else:
+                student, created = StudentAdmission.objects.update_or_create(
+                    admission_no=adm_no,
+                    defaults=defaults
+                )
 
             if photo_file:
                 student.photo = photo_file
