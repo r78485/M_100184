@@ -14,11 +14,40 @@ from .models import (
 )
 
 def ensure_tables_exist():
-    """Ensure database tables and columns for question_paper exist"""
+    """Ensure database tables and all columns for question_paper exist"""
     try:
+        from django.db import connection
+        
         call_command('migrate', 'question_paper', verbosity=0)
-    except Exception:
-        pass
+
+        with connection.cursor() as cursor:
+            # Check question_paper_questionbank table columns
+            cursor.execute("PRAGMA table_info(question_paper_questionbank);")
+            columns = [row[1] for row in cursor.fetchall()]
+
+            if 'mcq_type' not in columns:
+                cursor.execute("ALTER TABLE question_paper_questionbank ADD COLUMN mcq_type varchar(20) DEFAULT 'SINGLE';")
+            if 'statement_i' not in columns:
+                cursor.execute("ALTER TABLE question_paper_questionbank ADD COLUMN statement_i varchar(500) NULL;")
+            if 'statement_ii' not in columns:
+                cursor.execute("ALTER TABLE question_paper_questionbank ADD COLUMN statement_ii varchar(500) NULL;")
+            if 'statement_iii' not in columns:
+                cursor.execute("ALTER TABLE question_paper_questionbank ADD COLUMN statement_iii varchar(500) NULL;")
+
+            # Check question_paper_questionpaper table columns
+            cursor.execute("PRAGMA table_info(question_paper_questionpaper);")
+            paper_cols = [row[1] for row in cursor.fetchall()]
+
+            if 'font_family' not in paper_cols:
+                cursor.execute("ALTER TABLE question_paper_questionpaper ADD COLUMN font_family varchar(30) DEFAULT 'ARIAL';")
+            if 'column_layout' not in paper_cols:
+                cursor.execute("ALTER TABLE question_paper_questionpaper ADD COLUMN column_layout varchar(5) DEFAULT '1';")
+            if 'show_answer_key' not in paper_cols:
+                cursor.execute("ALTER TABLE question_paper_questionpaper ADD COLUMN show_answer_key bool DEFAULT 0;")
+
+    except Exception as e:
+        print("ensure_tables_exist exception handled:", e)
+
 
 
 def check_permission(user):
