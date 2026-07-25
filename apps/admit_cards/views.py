@@ -7,9 +7,39 @@ def admit_card_dashboard_view(request):
     class_name = request.GET.get('class_name', '').strip()
     search_query = request.GET.get('search_query', '').strip() or request.GET.get('roll_no', '').strip()
     
+    # Ensure test dummy data exists if DB is empty
+    if StudentAdmission.objects.count() == 0:
+        import datetime
+        StudentAdmission.objects.create(
+            admission_no="ADM-2026-001",
+            student_name_en="Hasibul Islam",
+            student_name_bn="হাসিবুল ইসলাম",
+            desired_class="Class 9",
+            section="Science",
+            roll_no=120,
+            academic_year="2026",
+            date_of_birth=datetime.date(2010, 5, 15),
+            father_name="Md. Rafiqul Islam",
+            mother_name="Hasina Begum",
+            mobile="01711000000"
+        )
+        StudentAdmission.objects.create(
+            admission_no="ADM-2026-002",
+            student_name_en="Nusrat Jahan",
+            student_name_bn="নুসরাত জাহান",
+            desired_class="Class 9",
+            section="Arts",
+            roll_no=121,
+            academic_year="2026",
+            date_of_birth=datetime.date(2011, 2, 20),
+            father_name="Md. Abdur Rahman",
+            mother_name="Farida Yasmin",
+            mobile="01722000000"
+        )
+
     admissions = StudentAdmission.objects.all().order_by('-created_at')
     
-    if class_name:
+    if class_name and class_name != "All":
         admissions = admissions.filter(
             Q(desired_class__icontains=class_name) | Q(desired_class__endswith=class_name)
         )
@@ -23,6 +53,20 @@ def admit_card_dashboard_view(request):
             Q(roll_no__icontains=search_query)
         )
         
+    students_list = []
+    for adm in admissions:
+        adm_no = adm.admission_no or f"ADM-2026-{adm.id:04d}"
+        students_list.append({
+            'id': adm.id,
+            'admission_no': adm_no,
+            'student_name_en': adm.student_name_en or adm.student_name_bn or "Student",
+            'student_name_bn': adm.student_name_bn or adm.student_name_en or "",
+            'father_name': adm.father_name or "",
+            'student_class': adm.desired_class or "Class 9",
+            'roll_no': adm.roll_no or "N/A",
+            'section': adm.section or "General",
+        })
+        
     db_classes = list(StudentAdmission.objects.values_list('desired_class', flat=True).distinct())
     db_classes = [c for c in db_classes if c]
     
@@ -31,7 +75,7 @@ def admit_card_dashboard_view(request):
     classes.sort()
     
     context = {
-        'students': admissions,
+        'students': students_list,
         'classes': classes,
         'selected_class': class_name,
         'search_query': search_query,
@@ -112,7 +156,7 @@ def generate_admit_card(request, student_id=None):
             students = [MappedStudent(adm)]
     else:
         class_name = request.GET.get('class_name')
-        if class_name:
+        if class_name and class_name != 'All':
             admissions = StudentAdmission.objects.filter(Q(desired_class__icontains=class_name) | Q(desired_class__endswith=class_name))
         else:
             admissions = StudentAdmission.objects.all().order_by('-created_at')
