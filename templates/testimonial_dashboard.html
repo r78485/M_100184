@@ -81,9 +81,12 @@
                                 {% endif %}
                             </td>
                             <td class="text-end pe-4">
-                                <a href="#" onclick="loadPreview('{% url 'testimonial_generate' student.sl_no %}', event)" class="btn btn-sm btn-outline-primary rounded-pill px-3">
-                                    <i class="bi bi-printer me-1"></i> Print Testimonial
+                                <a href="{% url 'testimonial_generate' student.sl_no %}" target="_blank" class="btn btn-sm btn-outline-secondary rounded-pill px-2 me-1" title="Open Full Certificate in New Tab">
+                                    <i class="bi bi-box-arrow-up-right"></i>
                                 </a>
+                                <button type="button" onclick="loadPreview('{% url 'testimonial_generate' student.sl_no %}', event)" class="btn btn-sm btn-primary rounded-pill px-3">
+                                    <i class="bi bi-printer me-1"></i> Print Preview
+                                </button>
                             </td>
                         </tr>
                         {% empty %}
@@ -92,11 +95,10 @@
                                 <div class="mb-3"><i class="bi bi-search fs-1 text-light"></i></div>
                                 <h5>No students found</h5>
                                 <p>Try adjusting your search filters.</p>
-                                <!-- Developer Demo Notice -->
                                 {% if not search_roll and not selected_class %}
                                 <div class="mt-4 p-3 bg-light rounded d-inline-block text-start">
-                                    <small class="d-block text-muted mb-2"><i class="bi bi-info-circle me-1"></i>Developer Note: Database is empty.</small>
-                                    <a href="#" onclick="loadPreview('{% url 'testimonial_generate' '0' %}', event)" class="btn btn-sm btn-secondary">View Dummy Testimonial</a>
+                                    <small class="d-block text-muted mb-2"><i class="bi bi-info-circle me-1"></i>Demo Mode Active:</small>
+                                    <button type="button" onclick="loadPreview('{% url 'testimonial_generate' '0' %}', event)" class="btn btn-sm btn-secondary">View Dummy Testimonial</button>
                                 </div>
                                 {% endif %}
                             </td>
@@ -112,15 +114,28 @@
     <div class="card custom-card mt-4 d-none" id="preview-section">
         <div class="card-header bg-white d-flex justify-content-between align-items-center py-3">
             <h5 class="mb-0 fw-bold" style="color: var(--primary-blue);">
-                <i class="bi bi-printer me-2"></i>Print Preview
+                <i class="bi bi-printer me-2"></i>Print Preview (প্রশংসা পত্র প্রিভিউ)
             </h5>
-            <button type="button" class="btn btn-success" onclick="document.getElementById('preview-frame').contentWindow.print();">
-                <i class="bi bi-printer-fill me-1"></i> Print Now
-            </button>
+            <div class="d-flex gap-2">
+                <a id="open-full-page-btn" href="#" target="_blank" class="btn btn-outline-primary fw-semibold">
+                    <i class="bi bi-box-arrow-up-right me-1"></i> Open Full Page
+                </a>
+                <button type="button" class="btn btn-success fw-semibold" onclick="printIframe();">
+                    <i class="bi bi-printer-fill me-1"></i> Print Now
+                </button>
+            </div>
         </div>
-        <div class="card-body p-0">
+        <div class="card-body p-0 position-relative">
+            <!-- Loading Indicator -->
+            <div id="preview-spinner" class="position-absolute top-50 start-50 translate-middle text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading preview...</span>
+                </div>
+                <div class="mt-2 text-muted fw-semibold" style="font-size: 0.9rem;">প্রশংসা পত্র লোড হচ্ছে...</div>
+            </div>
+            
             <div class="bg-light p-3 text-center" style="min-height: 500px;">
-                <iframe id="preview-frame" src="" style="width: 100%; height: 800px; border: 1px solid #ccc; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1);"></iframe>
+                <iframe id="preview-frame" src="" style="width: 100%; height: 850px; border: 1px solid #ddd; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border-radius: 8px;" onload="document.getElementById('preview-spinner').classList.add('d-none');"></iframe>
             </div>
         </div>
     </div>
@@ -131,14 +146,29 @@
         if(event) event.preventDefault();
         const previewSection = document.getElementById('preview-section');
         const previewFrame = document.getElementById('preview-frame');
+        const openFullPageBtn = document.getElementById('open-full-page-btn');
+        const previewSpinner = document.getElementById('preview-spinner');
+        
+        if (previewSpinner) previewSpinner.classList.remove('d-none');
         
         previewFrame.src = url;
+        if (openFullPageBtn) openFullPageBtn.href = url;
+        
         previewSection.classList.remove('d-none');
         
-        // Scroll to preview smoothly
         setTimeout(() => {
             previewSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }, 100);
+    }
+
+    function printIframe() {
+        const frame = document.getElementById('preview-frame');
+        if (frame && frame.contentWindow) {
+            frame.contentWindow.focus();
+            frame.contentWindow.print();
+        } else {
+            alert('প্রিভিউ পুরোপুরি লোড হওয়া পর্যন্ত অপেক্ষা করুন অথবা "Open Full Page" এ ক্লিক করুন।');
+        }
     }
 </script>
 {% endblock %}
