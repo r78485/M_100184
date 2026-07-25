@@ -846,6 +846,52 @@
     </div>
 </div>
 
+<!-- STUDENT SUBMISSION SUCCESS MODAL (সবুজ ঠিক চিহ্ন সহ পপআপ ডায়লগ বক্স) -->
+<div class="modal fade" id="studentSubmissionSuccessModal" tabindex="-1" aria-labelledby="studentSubmissionSuccessModalLabel" aria-hidden="true" data-bs-backdrop="static">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 20px; overflow: hidden; background: #ffffff;">
+            <div class="modal-body p-4 text-center">
+                <!-- Green Circle Badge with Checkmark -->
+                <div style="width: 86px; height: 86px; background: linear-gradient(135deg, #2e7d32, #4caf50); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 10px auto 20px auto; box-shadow: 0 8px 24px rgba(46, 125, 50, 0.35);">
+                    <i class="bi bi-check-lg" style="font-size: 3rem; font-weight: bold;"></i>
+                </div>
+
+                <!-- Green Check Title -->
+                <h4 class="fw-bold text-success mb-2" style="font-size: 1.35rem; line-height: 1.4;">
+                    নতুন শিক্ষার্থী সফলভাবে অন্তর্ভুক্ত করা হয়েছে!
+                </h4>
+                
+                <!-- Subtitle English -->
+                <p class="text-muted fw-semibold mb-4" style="font-size: 0.95rem;">
+                    Student registered successfully!
+                </p>
+
+                <!-- Status Card -->
+                <div class="bg-light p-3 rounded-3 text-start mb-4 border" style="font-size: 0.9rem;">
+                    <div class="d-flex justify-content-between align-items-center mb-1">
+                        <span class="text-secondary fw-semibold">স্ট্যাটাস (Status):</span>
+                        <span class="badge bg-success-subtle text-success px-2.5 py-1.5 rounded-pill"><i class="bi bi-check-circle-fill me-1"></i>Approved / সচল</span>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-secondary fw-semibold">রেজিস্ট্রি টাইপ:</span>
+                        <span class="fw-bold text-dark">সেন্ট্রাল স্টুডেন্ট ডাটাবেস</span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="d-flex justify-content-center gap-2">
+                    <button type="button" class="btn text-white fw-bold px-4 py-2" style="background: #2e7d32; border-radius: 10px; border: none;" data-bs-dismiss="modal" onclick="const trigger = document.getElementById('all-tab'); if(trigger) { bootstrap.Tab.getOrCreateInstance(trigger).show(); }">
+                        <i class="bi bi-check2-circle me-1"></i> ঠিক আছে / OK
+                    </button>
+                    <button type="button" class="btn btn-outline-success fw-bold px-3 py-2" style="border-radius: 10px;" onclick="openStudentAdmissionSlip()">
+                        <i class="bi bi-file-earmark-pdf me-1"></i> ভর্তি স্লিপ দেখুন
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- HIDDEN PRINT AREA FOR A4 PRINTS -->
 <div id="printArea" class="d-none"></div>
 {% endblock %}
@@ -1144,24 +1190,15 @@
             students.push(newStObj);
             localStorage.setItem('school_students', JSON.stringify(students));
 
-            alert('নতুন শিক্ষার্থী সফলভাবে অন্তর্ভুক্ত করা হয়েছে! / Student registered successfully!');
             form.reset();
-            
-            const trigger = document.getElementById('all-tab');
-            if (trigger) {
-                const tab = new bootstrap.Tab(trigger);
-                tab.show();
-            }
+            const successModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('studentSubmissionSuccessModal'));
+            successModal.show();
             renderStudents();
         })
         .catch(err => {
-            alert('নতুন শিক্ষার্থী অন্তর্ভুক্ত করা হয়েছে! / Student registered!');
             form.reset();
-            const trigger = document.getElementById('all-tab');
-            if (trigger) {
-                const tab = new bootstrap.Tab(trigger);
-                tab.show();
-            }
+            const successModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('studentSubmissionSuccessModal'));
+            successModal.show();
             renderStudents();
         });
     }
