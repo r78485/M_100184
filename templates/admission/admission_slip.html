@@ -412,31 +412,47 @@
         <div class="section-title">২. পিতা-মাতা ও অভিভাবকের তথ্য / Parents & Guardian Information</div>
         <table class="grid-table">
             <tr>
-                <td style="width: 50%;">
+                <td style="width: 25%;">
                     <div class="lbl">পিতার নাম / Father's Name:</div>
                     <div class="val">{{ student.father_name|default:"—" }}</div>
                 </td>
-                <td style="width: 50%;">
+                <td style="width: 25%;">
                     <div class="lbl">পিতার এনআইডি / Father's NID:</div>
                     <div class="val">{{ student.father_nid|default:"—" }}</div>
                 </td>
+                <td style="width: 25%;">
+                    <div class="lbl">পিতার জন্ম তারিখ / Father's DOB:</div>
+                    <div class="val">{{ student.father_dob|date:"d F Y"|default:"—" }}</div>
+                </td>
+                <td style="width: 25%;">
+                    <div class="lbl">পিতার পেশা / Occupation:</div>
+                    <div class="val">{{ student.father_occupation|default:"—" }}</div>
+                </td>
             </tr>
             <tr>
-                <td>
+                <td style="width: 25%;">
                     <div class="lbl">মাতার নাম / Mother's Name:</div>
                     <div class="val">{{ student.mother_name|default:"—" }}</div>
                 </td>
-                <td>
+                <td style="width: 25%;">
                     <div class="lbl">মাতার এনআইডি / Mother's NID:</div>
                     <div class="val">{{ student.mother_nid|default:"—" }}</div>
                 </td>
+                <td style="width: 25%;">
+                    <div class="lbl">মাতার জন্ম তারিখ / Mother's DOB:</div>
+                    <div class="val">{{ student.mother_dob|date:"d F Y"|default:"—" }}</div>
+                </td>
+                <td style="width: 25%;">
+                    <div class="lbl">মাতার পেশা / Occupation:</div>
+                    <div class="val">{{ student.mother_occupation|default:"—" }}</div>
+                </td>
             </tr>
             <tr>
-                <td>
+                <td style="width: 50%;" colspan="2">
                     <div class="lbl">অভিভাবকের নাম / Guardian Name:</div>
                     <div class="val">{{ student.guardian_name|default:"—" }}</div>
                 </td>
-                <td>
+                <td style="width: 50%;" colspan="2">
                     <div class="lbl">অভিভাবকের এনআইডি / Guardian NID:</div>
                     <div class="val">{{ student.guardian_nid|default:"—" }}</div>
                 </td>
@@ -466,25 +482,29 @@
         <div class="section-title">৪. বর্তমান ঠিকানা / Present Address</div>
         <table class="grid-table">
             <tr>
-                <td colspan="4">
+                <td colspan="5">
                     <div class="lbl">বিস্তারিত ঠিকানা / Detail Address:</div>
                     <div class="val">{{ student.present_address_detail|default:"—" }}</div>
                 </td>
             </tr>
             <tr>
-                <td style="width: 25%;">
+                <td style="width: 20%;">
+                    <div class="lbl">ডাকঘর / Post Office:</div>
+                    <div class="val">{{ student.present_post_office|default:"—" }}</div>
+                </td>
+                <td style="width: 20%;">
                     <div class="lbl">বিভাগ / Division:</div>
                     <div class="val">{{ student.present_division|default:"—" }}</div>
                 </td>
-                <td style="width: 25%;">
+                <td style="width: 20%;">
                     <div class="lbl">জেলা / District:</div>
                     <div class="val">{{ student.present_district|default:"—" }}</div>
                 </td>
-                <td style="width: 25%;">
+                <td style="width: 20%;">
                     <div class="lbl">উপজেলা/থানা / Upazila:</div>
                     <div class="val">{{ student.present_upazila|default:"—" }}</div>
                 </td>
-                <td style="width: 25%;">
+                <td style="width: 20%;">
                     <div class="lbl">পোস্ট কোড / Post Code:</div>
                     <div class="val">{{ student.present_post_code|default:"—" }}</div>
                 </td>
@@ -497,25 +517,29 @@
         <div class="section-title">৫. স্থায়ী ঠিকানা / Permanent Address</div>
         <table class="grid-table">
             <tr>
-                <td colspan="4">
+                <td colspan="5">
                     <div class="lbl">বিস্তারিত ঠিকানা / Detail Address:</div>
                     <div class="val">{{ student.permanent_address_detail|default:"—" }}</div>
                 </td>
             </tr>
             <tr>
-                <td style="width: 25%;">
+                <td style="width: 20%;">
+                    <div class="lbl">ডাকঘর / Post Office:</div>
+                    <div class="val">{{ student.permanent_post_office|default:"—" }}</div>
+                </td>
+                <td style="width: 20%;">
                     <div class="lbl">বিভাগ / Division:</div>
                     <div class="val">{{ student.permanent_division|default:"—" }}</div>
                 </td>
-                <td style="width: 25%;">
+                <td style="width: 20%;">
                     <div class="lbl">জেলা / District:</div>
                     <div class="val">{{ student.permanent_district|default:"—" }}</div>
                 </td>
-                <td style="width: 25%;">
+                <td style="width: 20%;">
                     <div class="lbl">উপজেলা/থানা / Upazila:</div>
                     <div class="val">{{ student.permanent_upazila|default:"—" }}</div>
                 </td>
-                <td style="width: 25%;">
+                <td style="width: 20%;">
                     <div class="lbl">পোস্ট কোড / Post Code:</div>
                     <div class="val">{{ student.permanent_post_code|default:"—" }}</div>
                 </td>

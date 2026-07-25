@@ -354,12 +354,28 @@
                                 <input type="text" name="father_nid" id="st_father_nid" class="form-control" required>
                             </div>
                             <div class="col-md-6">
+                                <label class="form-label fw-semibold small">পিতার জন্ম তারিখ / Father's DOB</label>
+                                <input type="date" name="father_dob" id="st_father_dob" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">পিতার পেশা / Father's Occupation</label>
+                                <input type="text" name="father_occupation" id="st_father_occupation" class="form-control" placeholder="যেমন: ব্যবসা / সার্ভিস / শিক্ষকতা / কৃষি">
+                            </div>
+                            <div class="col-md-6">
                                 <label class="form-label fw-semibold small">মাতার নাম / Mother's Name <span class="text-danger">*</span></label>
                                 <input type="text" name="mother_name" id="st_mother_name" class="form-control" required>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold small">মাতার এনআইডি / Mother's NID <span class="text-danger">*</span></label>
                                 <input type="text" name="mother_nid" id="st_mother_nid" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">মাতার জন্ম তারিখ / Mother's DOB</label>
+                                <input type="date" name="mother_dob" id="st_mother_dob" class="form-control">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small">মাতার পেশা / Mother's Occupation</label>
+                                <input type="text" name="mother_occupation" id="st_mother_occupation" class="form-control" placeholder="যেমন: গৃহিণী / সার্ভিস / শিক্ষকতা">
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label fw-semibold small">অভিভাবকের নাম (পিতা-মাতার অনুপস্থিতিতে) / Guardian Name</label>
@@ -405,21 +421,25 @@
                                 <label class="form-label fw-semibold small">বিস্তারিত ঠিকানা / Detail Address <span class="text-danger">*</span></label>
                                 <input type="text" name="present_address_detail" id="st_present_address_detail" class="form-control" placeholder="গ্রাম/মহল্লা, বাসা/রোড নম্বর" required>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold small">ডাকঘর / Post Office <span class="text-danger">*</span></label>
+                                <input type="text" name="present_post_office" id="st_present_post_office" class="form-control" placeholder="ডাকঘরের নাম" required>
+                            </div>
+                            <div class="col-md-4">
                                 <label class="form-label fw-semibold small">বিভাগ / Division <span class="text-danger">*</span></label>
-                                <input type="text" name="present_division" id="st_present_division" class="form-control" required>
+                                <input type="text" name="present_division" id="st_present_division" class="form-control" list="st_bd_divisions_list" placeholder="বিভাগ খুঁজুন..." onchange="updateStDistricts('st_present')" required>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <label class="form-label fw-semibold small">জেলা / District <span class="text-danger">*</span></label>
-                                <input type="text" name="present_district" id="st_present_district" class="form-control" required>
+                                <input type="text" name="present_district" id="st_present_district" class="form-control" list="st_present_districts_list" placeholder="জেলা খুঁজুন..." onchange="updateStUpazilas('st_present')" required>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-6">
                                 <label class="form-label fw-semibold small">উপজেলা/থানা / Upazila <span class="text-danger">*</span></label>
-                                <input type="text" name="present_upazila" id="st_present_upazila" class="form-control" required>
+                                <input type="text" name="present_upazila" id="st_present_upazila" class="form-control" list="st_present_upazilas_list" placeholder="উপজেলা/থানা খুঁজুন..." required>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-6">
                                 <label class="form-label fw-semibold small">পোস্ট কোড / Post Code <span class="text-danger">*</span></label>
-                                <input type="text" name="present_post_code" id="st_present_post_code" class="form-control" required>
+                                <input type="text" name="present_post_code" id="st_present_post_code" class="form-control" placeholder="যেমন: ৮৭০০" required>
                             </div>
                         </div>
                     </div>
@@ -432,21 +452,25 @@
                                 <label class="form-label fw-semibold small">বিস্তারিত ঠিকানা / Detail Address <span class="text-danger">*</span></label>
                                 <input type="text" name="permanent_address_detail" id="st_permanent_address_detail" class="form-control" placeholder="গ্রাম/মহল্লা, বাসা/রোড নম্বর" required>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold small">ডাকঘর / Post Office <span class="text-danger">*</span></label>
+                                <input type="text" name="permanent_post_office" id="st_permanent_post_office" class="form-control" placeholder="ডাকঘরের নাম" required>
+                            </div>
+                            <div class="col-md-4">
                                 <label class="form-label fw-semibold small">বিভাগ / Division <span class="text-danger">*</span></label>
-                                <input type="text" name="permanent_division" id="st_permanent_division" class="form-control" required>
+                                <input type="text" name="permanent_division" id="st_permanent_division" class="form-control" list="st_bd_divisions_list" placeholder="বিভাগ খুঁজুন..." onchange="updateStDistricts('st_permanent')" required>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-4">
                                 <label class="form-label fw-semibold small">জেলা / District <span class="text-danger">*</span></label>
-                                <input type="text" name="permanent_district" id="st_permanent_district" class="form-control" required>
+                                <input type="text" name="permanent_district" id="st_permanent_district" class="form-control" list="st_permanent_districts_list" placeholder="জেলা খুঁজুন..." onchange="updateStUpazilas('st_permanent')" required>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-6">
                                 <label class="form-label fw-semibold small">উপজেলা/থানা / Upazila <span class="text-danger">*</span></label>
-                                <input type="text" name="permanent_upazila" id="st_permanent_upazila" class="form-control" required>
+                                <input type="text" name="permanent_upazila" id="st_permanent_upazila" class="form-control" list="st_permanent_upazilas_list" placeholder="উপজেলা/থানা খুঁজুন..." required>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-6">
                                 <label class="form-label fw-semibold small">পোস্ট কোড / Post Code <span class="text-danger">*</span></label>
-                                <input type="text" name="permanent_post_code" id="st_permanent_post_code" class="form-control" required>
+                                <input type="text" name="permanent_post_code" id="st_permanent_post_code" class="form-control" placeholder="যেমন: ৮৭০০" required>
                             </div>
                         </div>
                     </div>
@@ -894,10 +918,122 @@
 
 <!-- HIDDEN PRINT AREA FOR A4 PRINTS -->
 <div id="printArea" class="d-none"></div>
+<!-- Bangladesh Geo Datalists for Searchable Dropdowns -->
+<datalist id="st_bd_divisions_list">
+    <option value="বরিশাল (Barishal)">
+    <option value="ঢাকা (Dhaka)">
+    <option value="চট্টগ্রাম (Chattogram)">
+    <option value="খুলনা (Khulna)">
+    <option value="রাজশাহী (Rajshahi)">
+    <option value="রংপুর (Rangpur)">
+    <option value="ময়মনসিংহ (Mymensingh)">
+    <option value="সিলেট (Sylhet)">
+</datalist>
+<datalist id="st_present_districts_list"></datalist>
+<datalist id="st_present_upazilas_list"></datalist>
+<datalist id="st_permanent_districts_list"></datalist>
+<datalist id="st_permanent_upazilas_list"></datalist>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
+    const stBdGeoData = {
+        "বরিশাল (Barishal)": {
+            "বরগুনা (Barguna)": ["বরগুনা সদর (Barguna Sadar)", "আমতলী (Amtali)", "বামনা (Bamna)", "বেতাগী (Betagi)", "পাথরঘাটা (Patharghata)", "তালতলী (Taltali)"],
+            "পটুয়াখালী (Patuakhali)": ["পটুয়াখালী সদর (Patuakhali Sadar)", "বাউফল (Bauphal)", "দশমিনা (Dashmina)", "গলাচিপা (Galachipa)", "কলাাপাড়া (Kalapara)", "মির্জাগঞ্জ (Mirzaganj)", "রংগাবালী (Rangabali)", "দুমকি (Dumki)"],
+            "ভোলা (Bhola)": ["ভোলা সদর (Bhola Sadar)", "বোরহানউদ্দিন (Borhanuddin)", "চরফ্যাশন (Char Fasson)", "দৌলতখান (Daulatkhan)", "লালমোহন (Lalmohan)", "মনপুরা (Manpura)", "তজুমদ্দিন (Tazumuddin)"],
+            "পিরোজপুর (Pirojpur)": ["পিরোজপুর সদর (Pirojpur Sadar)", "ভাণ্ডারিয়া (Bhandaria)", "কাউখালী (Kawkhali)", "মঠবাড়িয়া (Mathbaria)", "নাজিরপুর (Nazirpur)", "নেছারাবাদ (Nesarabad)", "জিয়ানগর (Zianagar)"],
+            "ঝালকাঠি (Jhalokati)": ["ঝালকাঠি সদর (Jhalokati Sadar)", "কাঠালিয়া (Kathalia)", "নলছিটি (Nalchity)", "রাজাপুর (Rajapur)"],
+            "বরিশাল (Barishal)": ["বরিশাল সদর (Barishal Sadar)", "আগৈলঝাড়া (Agailjhara)", "বাবুগঞ্জ (Babuganj)", "বাকেরগঞ্জ (Bakerganj)", "বানারীপাড়া (Banaripara)", "গৌরনদী (Gournadi)", "হিজলা (Hizla)", "মেহেন্দিগঞ্জ (Mehendiganj)", "মুলাদী (Muladi)", "উজিরপুর (Wazirpur)"]
+        },
+        "ঢাকা (Dhaka)": {
+            "ঢাকা (Dhaka)": ["ধানমন্ডি (Dhanmondi)", "মিরপুর (Mirpur)", "উত্তরা (Uttara)", "গুলশান (Gulshan)", "সাভার (Savar)", "ধামরাই (Dhamrai)", "কেরানীগঞ্জ (Keraniganj)", "নবাবগঞ্জ (Nawabganj)", "দোহার (Dohar)"],
+            "গাজীপুর (Gazipur)": ["গাজীপুর সদর (Gazipur Sadar)", "কালিয়াকৈর (Kaliakair)", "কাসিমপুর (Kaliganj)", "কাপাসিয়া (Kapasia)", "শ্রীপুর (Sreepur)"],
+            "নারায়ণগঞ্জ (Narayanganj)": ["নারায়ণগঞ্জ সদর (Narayanganj Sadar)", "আড়াইহাজার (Araihazar)", "বন্দর (Bandar)", "রূপগঞ্জ (Rupganj)", "সোনারগাঁ (Sonargaon)"],
+            "মুন্সীগঞ্জ (Munshiganj)": ["মুন্সীগঞ্জ সদর (Munshiganj Sadar)", "শ্রীনগর (Sreenagar)", "সিরাজদিখান (Sirajdikhan)", "লৌহজং (Lohajang)", "টঙ্গিবাড়ী (Tongibari)", "গজারিয়া (Gazaria)"],
+            "ফরিদপুর (Faridpur)": ["ফরিদপুর সদর (Faridpur Sadar)", "বোয়ালমারী (Boalmari)", "আলফাডাঙা (Alfadanga)", "মধুখালী (Madhukhali)", "নগরকান্দা (Nagarkanda)", "সালথা (Saltha)", "সদরপুর (Sadarpur)", "চরভদ্রাসন (Charbhadrasan)", "ভাঙ্গা (Bhanga)"]
+        },
+        "চট্টগ্রাম (Chattogram)": {
+            "চট্টগ্রাম (Chattogram)": ["কোতোয়ালী (Kotwali)", "পাহাড়তলী (Pahartali)", "পাঁচলাইশ (Panchlaish)", "পটিয়া (Patiya)", "হাটহাজারী (Hathazari)", "সীতাকুণ্ড (Sitakunda)", "মিরসরাই (Mirsarai)", "রাঙ্গুনিয়া (Rangunia)", "বাঁশখালী (Banshkhali)"],
+            "কক্সবাজার (Cox's Bazar)": ["কক্সবাজার সদর (Cox's Bazar Sadar)", "চকরিয়া (Chakaria)", "টেকনাফ (Teknaf)", "উখিয়া (Ukhia)", "মহেশখালী (Maheshkhali)", "পেকুয়া (Pekua)", "রামু (Ramu)", "কুতুবদিয়া (Kutubdia)"],
+            "কুমিল্লা (Cumilla)": ["কুমিল্লা সদর (Cumilla Sadar)", "দাউদকান্দি (Daudkandi)", "লাকসাম (Laksam)", "চৌদ্দগ্রাম (Chauddagram)", "দেবীদ্বার (Debidwar)", "চান্দিনা (Chandina)", "মুরাদনগর (Muradnagar)"]
+        },
+        "খুলনা (Khulna)": {
+            "খুলনা (Khulna)": ["খুলনা সদর (Khulna Sadar)", "বটিয়াঘাটা (Batiaghata)", "ডুমুরিয়া (Dumuria)", "ফুলতলা (Fultala)", "দীঘলিয়া (Dighalia)", "রূপসা (Rupsha)", "তেরখাদা (Terokhada)", "পাইকগাছা (Paikgachha)", "কয়রা (Koyra)"],
+            "যশোর (Jashore)": ["যশোর সদর (Jashore Sadar)", "ঝিকরগাছা (Jhikargachha)", "চৌগাছা (Chaugachha)", "শার্শা (Sharsha)", "মণিরামপুর (Manirampur)", "কেশবপুর (Keshabpur)", "বাঘারপাড়া (Bagherpara)", "অভয়নগর (Abhaynagar)"]
+        },
+        "রাজশাহী (Rajshahi)": {
+            "রাজশাহী (Rajshahi)": ["বোয়ালিয়া (Boalia)", "পবা (Paba)", "গোদাগাড়ী (Godagari)", "তানোর (Tanore)", "মোহনপুর (Mohanpur)", "বাগমারা (Bagmara)", "দুর্গাপুর (Durgapur)", "পুটঠিয়া (Puthia)", "চারঘাট (Charghat)", "বাঘা (Bagha)"],
+            "বগুড়া (Bogra)": ["বগুড়া সদর (Bogra Sadar)", "শেরপুর (Sherpur)", "শিবগঞ্জ (Shibganj)", "ধুনট (Dhunat)", "গাবতলী (Gabtali)", "কাহালু (Kahalu)", "নন্দীগ্রাম (Nandigram)", "সারিয়াকান্দি (Sariakandi)", "শাহজাহানপুর (Shajahanpur)", "সোনাতলা (Sonatala)"]
+        },
+        "রংপুর (Rangpur)": {
+            "রংপুর (Rangpur)": ["রংপুর সদর (Rangpur Sadar)", "বদরগঞ্জ (Badarganj)", "গঙ্গাচড়া (Gangachara)", "কাউনিয়া (Kaunia)", "মিঠাপুকুর (Mithapukur)", "পীরগাছা (Pirgachha)", "পীরগঞ্জ (Pirganj)", "তারাগঞ্জ (Taraganj)"]
+        },
+        "ময়মনসিংহ (Mymensingh)": {
+            "ময়মনসিংহ (Mymensingh)": ["ময়মনসিংহ সদর (Mymensingh Sadar)", "মুক্তাগাছা (Muktagachha)", "ফুলবাড়িয়া (Fulbaria)", "ত্রিশাল (Trishal)", "ভালুকা (Bhaluka)", "গফরগাঁও (Gafargaon)", "ঈশ্বরগঞ্জ (Ishwarganj)", "নান্দাইল (Nandail)", "ফুলপুর (Phulpur)", "হালুয়াঘাট (Haluaghat)"]
+        },
+        "সিলেট (Sylhet)": {
+            "সিলেট (Sylhet)": ["সিলেট সদর (Sylhet Sadar)", "গোলাপগঞ্জ (Golapganj)", "বিয়ানীবাজার (Beanibazar)", "জকিগঞ্জ (Zakiganj)", "কানাইঘাট (Kanaighat)", "ফেঞ্চুগঞ্জ (Fenchuganj)", "বালাগঞ্জ (Balaganj)", "বিশ্বনাথ (Bishwanath)", "কোম্পানীগঞ্জ (Kompaniganj)"]
+        }
+    };
+
+    function updateStDistricts(prefix) {
+        const divEl = document.getElementById(prefix + '_division');
+        if (!divEl) return;
+        const divVal = divEl.value.trim();
+        const districtDatalist = document.getElementById(prefix + '_districts_list');
+        if (!districtDatalist) return;
+        districtDatalist.innerHTML = '';
+        
+        let targetDistricts = [];
+        for (let divName in stBdGeoData) {
+            if (divName.includes(divVal) || divVal.includes(divName)) {
+                targetDistricts = Object.keys(stBdGeoData[divName]);
+                break;
+            }
+        }
+        if (targetDistricts.length === 0) {
+            for (let divName in stBdGeoData) {
+                targetDistricts.push(...Object.keys(stBdGeoData[divName]));
+            }
+        }
+        targetDistricts.forEach(dist => {
+            const opt = document.createElement('option');
+            opt.value = dist;
+            districtDatalist.appendChild(opt);
+        });
+    }
+
+    function updateStUpazilas(prefix) {
+        const distEl = document.getElementById(prefix + '_district');
+        if (!distEl) return;
+        const distVal = distEl.value.trim();
+        const upazilaDatalist = document.getElementById(prefix + '_upazilas_list');
+        if (!upazilaDatalist) return;
+        upazilaDatalist.innerHTML = '';
+        
+        let targetUpazilas = [];
+        for (let divName in stBdGeoData) {
+            for (let distName in stBdGeoData[divName]) {
+                if (distName.includes(distVal) || distVal.includes(distName)) {
+                    targetUpazilas.push(...stBdGeoData[divName][distName]);
+                }
+            }
+        }
+        targetUpazilas.forEach(upz => {
+            const opt = document.createElement('option');
+            opt.value = upz;
+            upazilaDatalist.appendChild(opt);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updateStDistricts('st_present');
+        updateStDistricts('st_permanent');
+        updateStUpazilas('st_present');
+        updateStUpazilas('st_permanent');
+    });
     // Student Multi-Step Form Navigation
     window.goToStStep = function(step) {
         document.querySelectorAll('.st-wizard-step').forEach(el => el.classList.add('d-none'));
@@ -1314,18 +1450,24 @@
             setVal('st_re_mobile', st.phone || st.mobile || '');
             setVal('st_father_name', st.father || st.father_name || st.guardian || '');
             setVal('st_father_nid', st.father_nid || '');
+            setVal('st_father_dob', st.father_dob || '');
+            setVal('st_father_occupation', st.father_occupation || '');
             setVal('st_mother_name', st.mother || st.mother_name || '');
             setVal('st_mother_nid', st.mother_nid || '');
+            setVal('st_mother_dob', st.mother_dob || '');
+            setVal('st_mother_occupation', st.mother_occupation || '');
             setVal('st_guardian_name', st.guardian || st.guardian_name || '');
             setVal('st_guardian_nid', st.guardian_nid || '');
             setVal('st_desired_class', st.cls || st.desired_class || 'Class 6');
             setVal('st_version', st.version || 'Bangla');
             setVal('st_present_address_detail', st.presentAddr || st.present_address_detail || '');
+            setVal('st_present_post_office', st.present_post_office || '');
             setVal('st_present_division', st.present_division || '');
             setVal('st_present_district', st.present_district || '');
             setVal('st_present_upazila', st.present_upazila || '');
             setVal('st_present_post_code', st.present_post_code || '');
             setVal('st_permanent_address_detail', st.permAddr || st.permanent_address_detail || '');
+            setVal('st_permanent_post_office', st.permanent_post_office || '');
             setVal('st_permanent_division', st.permanent_division || '');
             setVal('st_permanent_district', st.permanent_district || '');
             setVal('st_permanent_upazila', st.permanent_upazila || '');
