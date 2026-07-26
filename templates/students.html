@@ -229,7 +229,7 @@
             <button class="nav-link active fw-semibold" id="all-tab" data-bs-toggle="tab" data-bs-target="#all-panel"><i class="bi bi-people me-1"></i> All Students</button>
         </li>
         <li class="nav-item">
-            <button class="nav-link fw-semibold" id="add-tab" data-bs-toggle="tab" data-bs-target="#add-panel"><i class="bi bi-person-plus me-1"></i> Add New</button>
+            <button class="nav-link fw-semibold" id="add-tab" data-bs-toggle="tab" data-bs-target="#add-panel" onclick="resetAddStudentForm()"><i class="bi bi-person-plus me-1"></i> Add New</button>
         </li>
         <li class="nav-item">
             <button class="nav-link fw-semibold" id="idcard-tab" data-bs-toggle="tab" data-bs-target="#idcard-panel" onclick="loadIdCardSelector()"><i class="bi bi-card-image me-1"></i> ID Cards</button>
@@ -300,6 +300,7 @@
                 <form id="addStudentBilingualForm" method="POST" enctype="multipart/form-data" onsubmit="saveBilingualStudentProfile(event)">
                     {% csrf_token %}
                     <input type="hidden" name="status" value="Approved">
+                    <input type="hidden" name="db_id" id="st_db_id" value="">
 
                     <!-- Basic Info -->
                     <div class="section-box p-3 mb-4 rounded border" style="background: #f0fdf4; border-color: #bbf7d0 !important;">
@@ -1288,6 +1289,20 @@
         });
     }
 
+    let editingStId = null;
+
+    window.resetAddStudentForm = function() {
+        editingStId = null;
+        const form = document.getElementById('addStudentBilingualForm');
+        if (form) form.reset();
+        const dbIdInput = document.getElementById('st_db_id');
+        if (dbIdInput) dbIdInput.value = '';
+        const headerTitle = document.querySelector('#add-panel h3');
+        if (headerTitle) {
+            headerTitle.innerHTML = `<i class="bi bi-person-plus-fill me-2"></i>বিদ্যালয়ে ভর্তির আবেদন / School Admission Form`;
+        }
+    };
+
     window.saveBilingualStudentProfile = function(event) {
         event.preventDefault();
         const form = document.getElementById('addStudentBilingualForm');
@@ -1300,12 +1315,15 @@
             return;
         }
 
+        const dbIdInput = document.getElementById('st_db_id');
+        const currentDbId = (dbIdInput && dbIdInput.value) ? dbIdInput.value : editingStId;
+
         const formData = new FormData(form);
         formData.append('status', 'Approved');
 
-        if (editingStId) {
-            formData.append('db_id', editingStId);
-            formData.append('id', editingStId);
+        if (currentDbId) {
+            formData.append('db_id', currentDbId);
+            formData.append('id', currentDbId);
         }
 
         fetch('/api/save-student/', {
@@ -1326,9 +1344,10 @@
             const dob = document.getElementById('st_dob').value;
             const addr = document.getElementById('st_present_address_detail').value;
 
+            const savedId = data.db_id || currentDbId || Date.now();
             const newStObj = {
-                id: data.db_id || editingStId || Date.now(),
-                db_id: data.db_id || editingStId,
+                id: savedId,
+                db_id: data.db_id || currentDbId,
                 name: nameEn || nameBn,
                 name_bn: nameBn,
                 name_en: nameEn,
@@ -1347,32 +1366,26 @@
             };
 
             let students = getStudents();
-            if (editingStId) {
-                students = students.map(s => (String(s.id) === String(editingStId) || String(s.db_id) === String(editingStId)) ? newStObj : s);
-                editingStId = null;
-                const headerTitle = document.querySelector('#add-panel h3');
-                if (headerTitle) {
-                    headerTitle.innerHTML = `<i class="bi bi-person-plus-fill me-2"></i>বিদ্যালয়ে ভর্তির আবেদন / School Admission Form`;
-                }
+            if (currentDbId) {
+                students = students.map(s => (String(s.id) === String(currentDbId) || String(s.db_id) === String(currentDbId)) ? newStObj : s);
             } else {
                 students.push(newStObj);
             }
+            resetAddStudentForm();
             window.allStudentsCache = students;
             localStorage.setItem('school_students', JSON.stringify(students));
 
-            form.reset();
             const successModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('studentSubmissionSuccessModal'));
             successModal.show();
             renderStudents();
         })
         .catch(err => {
-            editingStId = null;
-            form.reset();
+            resetAddStudentForm();
             const successModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('studentSubmissionSuccessModal'));
             successModal.show();
             renderStudents();
         });
-    }
+    };
 
     window.approveStudent = function(id) {
         fetch('/api/approve-student/' + id + '/', {
@@ -1409,91 +1422,6 @@
             renderStudents();
         });
     }
-
-    window.saveBilingualStudentProfile = function(event) {
-        event.preventDefault();
-        const form = document.getElementById('addStudentBilingualForm');
-        const mob = document.getElementById('st_mobile').value;
-        const reMob = document.getElementById('st_re_mobile').value;
-
-        if (mob !== reMob) {
-            alert('মোবাইল নম্বর নিশ্চিতকরণ মেলেনি! / Mobile numbers do not match!');
-            document.getElementById('st_re_mobile').focus();
-            return;
-        }
-
-        const formData = new FormData(form);
-        formData.append('status', 'Approved');
-
-        if (editingStId) {
-            formData.append('db_id', editingStId);
-            formData.append('id', editingStId);
-        }
-
-        fetch('/api/save-student/', {
-            method: 'POST',
-            body: formData,
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(res => res.json())
-        .then(data => {
-            const nameBn = document.getElementById('st_name_bn').value;
-            const nameEn = document.getElementById('st_name_en').value;
-            const cls = document.getElementById('st_desired_class').value;
-            const father = document.getElementById('st_father_name').value;
-            const mother = document.getElementById('st_mother_name').value;
-            const dob = document.getElementById('st_dob').value;
-            const addr = document.getElementById('st_present_address_detail').value;
-
-            const newStObj = {
-                id: data.db_id || editingStId || Date.now(),
-                db_id: data.db_id || editingStId,
-                name: nameEn || nameBn,
-                name_bn: nameBn,
-                name_en: nameEn,
-                roll: Math.floor(1000 + Math.random() * 9000),
-                cls: cls,
-                guardian: father || mother,
-                father: father,
-                mother: mother,
-                phone: mob,
-                dob: dob,
-                presentAddr: addr,
-                admNum: data.admission_no || ('ADM-' + Date.now()),
-                section: 'A',
-                active: true,
-                status: 'Approved'
-            };
-
-            let students = getStudents();
-            if (editingStId) {
-                students = students.map(s => (String(s.id) === String(editingStId) || String(s.db_id) === String(editingStId)) ? newStObj : s);
-                editingStId = null;
-                const headerTitle = document.querySelector('#add-panel h3');
-                if (headerTitle) {
-                    headerTitle.innerHTML = `<i class="bi bi-person-plus-fill me-2"></i>Register Student Profile`;
-                }
-            } else {
-                students.push(newStObj);
-            }
-            window.allStudentsCache = students;
-            localStorage.setItem('school_students', JSON.stringify(students));
-
-            form.reset();
-            const successModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('studentSubmissionSuccessModal'));
-            successModal.show();
-            renderStudents();
-        })
-        .catch(err => {
-            editingStId = null;
-            form.reset();
-            const successModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('studentSubmissionSuccessModal'));
-            successModal.show();
-            renderStudents();
-        });
-    }
-
-    let editingStId = null;
 
     window.viewStudentDetails = function(id) {
         const idStr = String(id);
@@ -1554,6 +1482,8 @@
         );
         if (st) {
             editingStId = st.db_id || st.id;
+            const dbIdInput = document.getElementById('st_db_id');
+            if (dbIdInput) dbIdInput.value = editingStId;
             
             const setVal = (fieldId, val) => {
                 const el = document.getElementById(fieldId);
