@@ -1126,7 +1126,6 @@
     }
 
     function renderStudents() {
-        const localStudents = getStudents();
         const tbody = document.getElementById('allStudentsTable');
         if (!tbody) return;
 
@@ -1134,30 +1133,23 @@
         .then(res => res.json())
         .then(data => {
             let apiStudents = data.students || [];
+            let localStudents = getStudents();
             let studentMap = new Map();
 
-            // 1. Load API Students from backend DB first
+            // 1. Add DB students first (authoritative)
             apiStudents.forEach(s => {
                 s.db_id = s.id;
                 let key = "db_" + s.id;
                 studentMap.set(key, s);
             });
 
-            // 2. Load Local Students from browser cache
+            // 2. Add local-only students if created offline without db_id
             localStudents.forEach(s => {
                 if (s.id === 1 && s.name === "David Vance" && apiStudents.length > 0) {
                     return;
                 }
-
-                let key = s.db_id ? ("db_" + s.db_id) : (s.id && !isNaN(s.id) && Number(s.id) < 1000000 ? ("db_" + s.id) : ("local_" + (s.admNum || s.name || Math.random())));
-                let existing = studentMap.get(key);
-                if (existing) {
-                    for (let prop in s) {
-                        if (existing[prop] === undefined || existing[prop] === null || existing[prop] === '') {
-                            existing[prop] = s[prop];
-                        }
-                    }
-                } else {
+                let key = s.db_id ? ("db_" + s.db_id) : ("local_" + (s.admNum || s.id || (s.name ? s.name.replace(/\s+/g, '_') : 'unnamed')));
+                if (!studentMap.has(key)) {
                     studentMap.set(key, s);
                 }
             });
@@ -1165,11 +1157,7 @@
             let combined = Array.from(studentMap.values());
             let rollCounter = 1;
             combined = combined.map(st => {
-                if (st.status === 'Approved' || st.active === true) {
-                    st.roll = st.roll || rollCounter++;
-                } else {
-                    st.roll = st.roll || 'Pending';
-                }
+                st.roll = st.roll || rollCounter++;
                 return st;
             });
 
