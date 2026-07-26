@@ -975,7 +975,157 @@
         },
         "সিলেট (Sylhet)": {
             "সিলেট (Sylhet)": ["সিলেট সদর (Sylhet Sadar)", "গোলাপগঞ্জ (Golapganj)", "বিয়ানীবাজার (Beanibazar)", "জকিগঞ্জ (Zakiganj)", "কানাইঘাট (Kanaighat)", "ফেঞ্চুগঞ্জ (Fenchuganj)", "বালাগঞ্জ (Balaganj)", "বিশ্বনাথ (Bishwanath)", "কোম্পানীগঞ্জ (Kompaniganj)"]
-      function renderStudents() {
+        }
+    };
+
+    function updateStDistricts(prefix) {
+        const divEl = document.getElementById(prefix + '_division');
+        if (!divEl) return;
+        const divVal = divEl.value.trim();
+        const districtDatalist = document.getElementById(prefix + '_districts_list');
+        if (!districtDatalist) return;
+        districtDatalist.innerHTML = '';
+        
+        let targetDistricts = [];
+        for (let divName in stBdGeoData) {
+            if (divName.includes(divVal) || divVal.includes(divName)) {
+                targetDistricts = Object.keys(stBdGeoData[divName]);
+                break;
+            }
+        }
+        if (targetDistricts.length === 0) {
+            for (let divName in stBdGeoData) {
+                targetDistricts.push(...Object.keys(stBdGeoData[divName]));
+            }
+        }
+        targetDistricts.forEach(dist => {
+            const opt = document.createElement('option');
+            opt.value = dist;
+            districtDatalist.appendChild(opt);
+        });
+    }
+
+    function updateStUpazilas(prefix) {
+        const distEl = document.getElementById(prefix + '_district');
+        if (!distEl) return;
+        const distVal = distEl.value.trim();
+        const upazilaDatalist = document.getElementById(prefix + '_upazilas_list');
+        if (!upazilaDatalist) return;
+        upazilaDatalist.innerHTML = '';
+        
+        let targetUpazilas = [];
+        for (let divName in stBdGeoData) {
+            for (let distName in stBdGeoData[divName]) {
+                if (distName.includes(distVal) || distVal.includes(distName)) {
+                    targetUpazilas.push(...stBdGeoData[divName][distName]);
+                }
+            }
+        }
+        targetUpazilas.forEach(upz => {
+            const opt = document.createElement('option');
+            opt.value = upz;
+            upazilaDatalist.appendChild(opt);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updateStDistricts('st_present');
+        updateStDistricts('st_permanent');
+        updateStUpazilas('st_present');
+        updateStUpazilas('st_permanent');
+    });
+
+    // Student Multi-Step Form Navigation
+    window.goToStStep = function(step) {
+        document.querySelectorAll('.st-wizard-step').forEach(el => el.classList.add('d-none'));
+        document.getElementById('st-step-' + step).classList.remove('d-none');
+
+        document.querySelectorAll('#stWizardSteps .nav-link').forEach((btn, idx) => {
+            if (idx + 1 === step) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+    }
+
+    window.previewStPhoto = function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.getElementById('stPhotoPreview');
+                const prompt = document.getElementById('stUploadPrompt');
+                preview.src = e.target.result;
+                preview.classList.remove('d-none');
+                prompt.classList.add('d-none');
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    window.copyStAddress = function() {
+        const check = document.getElementById('stSameAddressCheck');
+        if (check.checked) {
+            document.getElementById('stPermAddr').value = document.getElementById('stPresentAddr').value;
+        } else {
+            document.getElementById('stPermAddr').value = '';
+        }
+    }
+
+    const defaultStudents = [
+        { 
+            id: 1, 
+            name: "David Vance", 
+            roll: 10432, 
+            cls: "Class 8", 
+            guardian: "Robert Vance", 
+            phone: "+1 555-019-923", 
+            active: true, 
+            username: "david.vance", 
+            pass: "12345",
+            photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120",
+            admNum: "ADM-2026-001",
+            admDate: "2026-01-15",
+            section: "Section A",
+            shift: "Morning",
+            group: "General",
+            dob: "2013-05-12",
+            birthReg: "2013920193029193",
+            gender: "Male",
+            blood: "O+",
+            religionNation: "Islam, Bangladeshi",
+            lang: "Bengali",
+            father: "Robert Vance",
+            fatherJob: "Engineer",
+            fatherPhone: "+1 555-019-923",
+            mother: "Claire Vance",
+            motherJob: "Doctor",
+            motherPhone: "+1 555-019-924",
+            emergPhone: "+1 555-019-923",
+            parentEmail: "robert.vance@mail.com",
+            presentAddr: "12 Academy Lane, Dhaka",
+            permAddr: "12 Academy Lane, Dhaka",
+            feeCategory: "Regular",
+            discount: "0"
+        }
+    ];
+
+    window.allStudentsCache = [];
+
+    function getStudents() {
+        if (window.allStudentsCache && window.allStudentsCache.length > 0) {
+            return window.allStudentsCache;
+        }
+        const stored = localStorage.getItem('school_students');
+        if (!stored) {
+            localStorage.setItem('school_students', JSON.stringify(defaultStudents));
+            return defaultStudents;
+        }
+        return JSON.parse(stored);
+    }
+
+    function renderStudents() {
         const localStudents = getStudents();
         const tbody = document.getElementById('allStudentsTable');
         if (!tbody) return;
