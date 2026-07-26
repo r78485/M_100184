@@ -903,11 +903,6 @@
                     </div>
                 </div>
 
-                <!-- Action Buttons -->
-                <div class="d-flex justify-content-center gap-2">
-                    <button type="button" class="btn text-white fw-bold px-4 py-2" style="background: #2e7d32; border-radius: 10px; border: none;" data-bs-dismiss="modal" onclick="const trigger = document.getElementById('all-tab'); if(trigger) { bootstrap.Tab.getOrCreateInstance(trigger).show(); }">
-                        <i class="bi bi-check2-circle me-1"></i> ঠিক আছে / OK
-                    </button>
                     <button type="button" class="btn btn-outline-success fw-bold px-3 py-2" style="border-radius: 10px;" onclick="openStudentAdmissionSlip()">
                         <i class="bi bi-file-earmark-pdf me-1"></i> ভর্তি স্লিপ দেখুন
                     </button>
@@ -942,7 +937,7 @@
     const stBdGeoData = {
         "বরিশাল (Barishal)": {
             "বরগুনা (Barguna)": ["বরগুনা সদর (Barguna Sadar)", "আমতলী (Amtali)", "বামনা (Bamna)", "বেতাগী (Betagi)", "পাথরঘাটা (Patharghata)", "তালতলী (Taltali)"],
-            "পটুয়াখালী (Patuakhali)": ["পটুয়াখালী সদর (Patuakhali Sadar)", "বাউফল (Bauphal)", "দশমিনা (Dashmina)", "গলাচিপা (Galachipa)", "কলাাপাড়া (Kalapara)", "মির্জাগঞ্জ (Mirzaganj)", "রংগাবালী (Rangabali)", "দুমকি (Dumki)"],
+            "পটুয়াখালী (Patuakhali)": ["পটুয়াখালী সদর (Patuakhali Sadar)", "বাউফল (Bauphal)", "দশমিনা (Dashmina)", "গলাচিপা (Galachipa)", "কলাপাড়া (Kalapara)", "মির্জাগঞ্জ (Mirzaganj)", "রংগাবালী (Rangabali)", "দুমকি (Dumki)"],
             "ভোলা (Bhola)": ["ভোলা সদর (Bhola Sadar)", "বোরহানউদ্দিন (Borhanuddin)", "চরফ্যাশন (Char Fasson)", "দৌলতখান (Daulatkhan)", "লালমোহন (Lalmohan)", "মনপুরা (Manpura)", "তজুমদ্দিন (Tazumuddin)"],
             "পিরোজপুর (Pirojpur)": ["পিরোজপুর সদর (Pirojpur Sadar)", "ভাণ্ডারিয়া (Bhandaria)", "কাউখালী (Kawkhali)", "মঠবাড়িয়া (Mathbaria)", "নাজিরপুর (Nazirpur)", "নেছারাবাদ (Nesarabad)", "জিয়ানগর (Zianagar)"],
             "ঝালকাঠি (Jhalokati)": ["ঝালকাঠি সদর (Jhalokati Sadar)", "কাঠালিয়া (Kathalia)", "নলছিটি (Nalchity)", "রাজাপুর (Rajapur)"],
@@ -950,32 +945,32 @@
         },
         "ঢাকা (Dhaka)": {
             "ঢাকা (Dhaka)": ["ধানমন্ডি (Dhanmondi)", "মিরপুর (Mirpur)", "উত্তরা (Uttara)", "গুলশান (Gulshan)", "সাভার (Savar)", "ধামরাই (Dhamrai)", "কেরানীগঞ্জ (Keraniganj)", "নবাবগঞ্জ (Nawabganj)", "দোহার (Dohar)"],
-            "গাজীপুর (Gazipur)": ["গাজীপুর সদর (Gazipur Sadar)", "কালিয়াকৈর (Kaliakair)", "কাসিমপুর (Kaliganj)", "কাপাসিয়া (Kapasia)", "শ্রীপুর (Sreepur)"],
-            "নারায়ণগঞ্জ (Narayanganj)": ["নারায়ণগঞ্জ সদর (Narayanganj Sadar)", "আড়াইহাজার (Araihazar)", "বন্দর (Bandar)", "রূপগঞ্জ (Rupganj)", "সোনারগাঁ (Sonargaon)"],
-            "মুন্সীগঞ্জ (Munshiganj)": ["মুন্সীগঞ্জ সদর (Munshiganj Sadar)", "শ্রীনগর (Sreenagar)", "সিরাজদিখান (Sirajdikhan)", "লৌহজং (Lohajang)", "টঙ্গিবাড়ী (Tongibari)", "গজারিয়া (Gazaria)"],
-            "ফরিদপুর (Faridpur)": ["ফরিদপুর সদর (Faridpur Sadar)", "বোয়ালমারী (Boalmari)", "আলফাডাঙা (Alfadanga)", "মধুখালী (Madhukhali)", "নগরকান্দা (Nagarkanda)", "সালথা (Saltha)", "সদরপুর (Sadarpur)", "চরভদ্রাসন (Charbhadrasan)", "ভাঙ্গা (Bhanga)"]
+            "গাজীপুর (Gazipur)": ["গাজীপুর সদর (Gazipur Sadar)", "কালিয়াকৈর (Kaliakair)", "কাসিমপুর (Kaliganj)", "কাপাসিয়া (Kapasia)", "শ্রীপুর (Sreepur)"],
+            "নারায়ণগঞ্জ (Narayanganj)": ["নারায়ণগঞ্জ সদর (Narayanganj Sadar)", "আড়াইহাজার (Araihazar)", "বন্দর (Bandar)", "রূপগঞ্জ (Rupganj)", "সোনারগাঁ (Sonargaon)"],
+            "মুন্সীগঞ্জ (Munshiganj)": ["মুন্সীগঞ্জ সদর (Munshiganj Sadar)", "শ্রীনগর (Sreenagar)", "সিরাজদিখান (Sirajdikhan)", "লৌহজং (Lohajang)", "টঙ্গিবাড়ী (Tongibari)", "গজারিয়া (Gazaria)"],
+            "ফরিদপুর (Faridpur)": ["ফরিদপুর সদর (Faridpur Sadar)", "বোয়ালমারী (Boalmari)", "আলফাডাঙা (Alfadanga)", "মধুখালী (Madhukhali)", "নগরকান্দা (Nagarkanda)", "সালথা (Saltha)", "সদরপুর (Sadarpur)", "চরভদ্রাসন (Charbhadrasan)", "ভাঙ্গা (Bhanga)"]
         },
         "চট্টগ্রাম (Chattogram)": {
-            "চট্টগ্রাম (Chattogram)": ["কোতোয়ালী (Kotwali)", "পাহাড়তলী (Pahartali)", "পাঁচলাইশ (Panchlaish)", "পটিয়া (Patiya)", "হাটহাজারী (Hathazari)", "সীতাকুণ্ড (Sitakunda)", "মিরসরাই (Mirsarai)", "রাঙ্গুনিয়া (Rangunia)", "বাঁশখালী (Banshkhali)"],
-            "কক্সবাজার (Cox's Bazar)": ["কক্সবাজার সদর (Cox's Bazar Sadar)", "চকরিয়া (Chakaria)", "টেকনাফ (Teknaf)", "উখিয়া (Ukhia)", "মহেশখালী (Maheshkhali)", "পেকুয়া (Pekua)", "রামু (Ramu)", "কুতুবদিয়া (Kutubdia)"],
+            "চট্টগ্রাম (Chattogram)": ["কোতোয়ালী (Kotwali)", "পাহাড়তলী (Pahartali)", "পাঁচলাইশ (Panchlaish)", "পটিয়া (Patiya)", "হাটহাজারী (Hathazari)", "সীতাকুণ্ড (Sitakunda)", "মিরসরাই (Mirsarai)", "রাঙ্গুনিয়া (Rangunia)", "বাঁশখালী (Banshkhali)"],
+            "কক্সবাজার (Cox's Bazar)": ["কক্সবাজার সদর (Cox's Bazar Sadar)", "চকরিয়া (Chakaria)", "টেকনাফ (Teknaf)", "উখিয়া (Ukhia)", "মহেশখালী (Maheshkhali)", "পেকুয়া (Pekua)", "রামু (Ramu)", "কুতুবদিয়া (Kutubdia)"],
             "কুমিল্লা (Cumilla)": ["কুমিল্লা সদর (Cumilla Sadar)", "দাউদকান্দি (Daudkandi)", "লাকসাম (Laksam)", "চৌদ্দগ্রাম (Chauddagram)", "দেবীদ্বার (Debidwar)", "চান্দিনা (Chandina)", "মুরাদনগর (Muradnagar)"]
         },
         "খুলনা (Khulna)": {
-            "খুলনা (Khulna)": ["খুলনা সদর (Khulna Sadar)", "বটিয়াঘাটা (Batiaghata)", "ডুমুরিয়া (Dumuria)", "ফুলতলা (Fultala)", "দীঘলিয়া (Dighalia)", "রূপসা (Rupsha)", "তেরখাদা (Terokhada)", "পাইকগাছা (Paikgachha)", "কয়রা (Koyra)"],
-            "যশোর (Jashore)": ["যশোর সদর (Jashore Sadar)", "ঝিকরগাছা (Jhikargachha)", "চৌগাছা (Chaugachha)", "শার্শা (Sharsha)", "মণিরামপুর (Manirampur)", "কেশবপুর (Keshabpur)", "বাঘারপাড়া (Bagherpara)", "অভয়নগর (Abhaynagar)"]
+            "খুলনা (Khulna)": ["খুলনা সদর (Khulna Sadar)", "বটিয়াঘাটা (Batiaghata)", "ডুমুরিয়া (Dumuria)", "ফুলতলা (Fultala)", "দীঘলিয়া (Dighalia)", "রূপসা (Rupsha)", "তেরখাদা (Terokhada)", "পাইকগাছা (Paikgachha)", "কয়রা (Koyra)"],
+            "যশোর (Jashore)": ["যশোর সদর (Jashore Sadar)", "ঝিকরগাছা (Jhikargachha)", "চৌগাছা (Chaugachha)", "শার্শা (Sharsha)", "মণিরামপুর (Manirampur)", "কেশবপুর (Keshabpur)", "বাঘারপাড়া (Bagherpara)", "অভয়নগর (Abhaynagar)"]
         },
         "রাজশাহী (Rajshahi)": {
-            "রাজশাহী (Rajshahi)": ["বোয়ালিয়া (Boalia)", "পবা (Paba)", "গোদাগাড়ী (Godagari)", "তানোর (Tanore)", "মোহনপুর (Mohanpur)", "বাগমারা (Bagmara)", "দুর্গাপুর (Durgapur)", "পুটঠিয়া (Puthia)", "চারঘাট (Charghat)", "বাঘা (Bagha)"],
-            "বগুড়া (Bogra)": ["বগুড়া সদর (Bogra Sadar)", "শেরপুর (Sherpur)", "শিবগঞ্জ (Shibganj)", "ধুনট (Dhunat)", "গাবতলী (Gabtali)", "কাহালু (Kahalu)", "নন্দীগ্রাম (Nandigram)", "সারিয়াকান্দি (Sariakandi)", "শাহজাহানপুর (Shajahanpur)", "সোনাতলা (Sonatala)"]
+            "রাজশাহী (Rajshahi)": ["বোয়ালিয়া (Boalia)", "পবা (Paba)", "গোদাগাড়ী (Godagari)", "তানোর (Tanore)", "মোহনপুর (Mohanpur)", "বাগমারা (Bagmara)", "দুর্গাপুর (Durgapur)", "পুটঠিয়া (Puthia)", "চারঘাট (Charghat)", "বাঘা (Bagha)"],
+            "বগুড়া (Bogra)": ["বগুড়া সদর (Bogra Sadar)", "শেরপুর (Sherpur)", "শিবগঞ্জ (Shibganj)", "ধুনট (Dhunat)", "গাবতলী (Gabtali)", "কাহালু (Kahalu)", "নন্দীগ্রাম (Nandigram)", "সারিয়াকান্দি (Sariakandi)", "শাহজাহানপুর (Shajahanpur)", "সোনাতলা (Sonatala)"]
         },
         "রংপুর (Rangpur)": {
-            "রংপুর (Rangpur)": ["রংপুর সদর (Rangpur Sadar)", "বদরগঞ্জ (Badarganj)", "গঙ্গাচড়া (Gangachara)", "কাউনিয়া (Kaunia)", "মিঠাপুকুর (Mithapukur)", "পীরগাছা (Pirgachha)", "পীরগঞ্জ (Pirganj)", "তারাগঞ্জ (Taraganj)"]
+            "রংপুর (Rangpur)": ["রংপুর সদর (Rangpur Sadar)", "বদরগঞ্জ (Badarganj)", "গঙ্গাচড়া (Gangachara)", "কাউনিয়া (Kaunia)", "মিঠাপুকুর (Mithapukur)", "পীরগাছা (Pirgachha)", "পীরগঞ্জ (Pirganj)", "তারাগঞ্জ (Taraganj)"]
         },
-        "ময়মনসিংহ (Mymensingh)": {
-            "ময়মনসিংহ (Mymensingh)": ["ময়মনসিংহ সদর (Mymensingh Sadar)", "মুক্তাগাছা (Muktagachha)", "ফুলবাড়িয়া (Fulbaria)", "ত্রিশাল (Trishal)", "ভালুকা (Bhaluka)", "গফরগাঁও (Gafargaon)", "ঈশ্বরগঞ্জ (Ishwarganj)", "নান্দাইল (Nandail)", "ফুলপুর (Phulpur)", "হালুয়াঘাট (Haluaghat)"]
+        "ময়মনসিংহ (Mymensingh)": {
+            "ময়মনসিংহ (Mymensingh)": ["ময়মনসিংহ সদর (Mymensingh Sadar)", "মুক্তাগাছা (Muktagachha)", "ফুলবাড়িয়া (Fulbaria)", "ত্রিশাল (Trishal)", "ভালুকা (Bhaluka)", "গফরগাঁও (Gafargaon)", "ঈশ্বরগঞ্জ (Ishwarganj)", "নান্দাইল (Nandail)", "ফুলপুর (Phulpur)", "হালুয়াঘাট (Haluaghat)"]
         },
         "সিলেট (Sylhet)": {
-            "সিলেট (Sylhet)": ["সিলেট সদর (Sylhet Sadar)", "গোলাপগঞ্জ (Golapganj)", "বিয়ানীবাজার (Beanibazar)", "জকিগঞ্জ (Zakiganj)", "কানাইঘাট (Kanaighat)", "ফেঞ্চুগঞ্জ (Fenchuganj)", "বালাগঞ্জ (Balaganj)", "বিশ্বনাথ (Bishwanath)", "কোম্পানীগঞ্জ (Kompaniganj)"]
+            "সিলেট (Sylhet)": ["সিলেট সদর (Sylhet Sadar)", "গোলাপগঞ্জ (Golapganj)", "বিয়ানীবাজার (Beanibazar)", "জকিগঞ্জ (Zakiganj)", "কানাইঘাট (Kanaighat)", "ফেঞ্চুগঞ্জ (Fenchuganj)", "বালাগঞ্জ (Balaganj)", "বিশ্বনাথ (Bishwanath)", "কোম্পানীগঞ্জ (Kompaniganj)"]
         }
     };
 
@@ -986,7 +981,6 @@
         const districtDatalist = document.getElementById(prefix + '_districts_list');
         if (!districtDatalist) return;
         districtDatalist.innerHTML = '';
-        
         let targetDistricts = [];
         for (let divName in stBdGeoData) {
             if (divName.includes(divVal) || divVal.includes(divName)) {
@@ -1013,7 +1007,6 @@
         const upazilaDatalist = document.getElementById(prefix + '_upazilas_list');
         if (!upazilaDatalist) return;
         upazilaDatalist.innerHTML = '';
-        
         let targetUpazilas = [];
         for (let divName in stBdGeoData) {
             for (let distName in stBdGeoData[divName]) {
@@ -1036,17 +1029,11 @@
         updateStUpazilas('st_permanent');
     });
 
-    // Student Multi-Step Form Navigation
     window.goToStStep = function(step) {
         document.querySelectorAll('.st-wizard-step').forEach(el => el.classList.add('d-none'));
         document.getElementById('st-step-' + step).classList.remove('d-none');
-
         document.querySelectorAll('#stWizardSteps .nav-link').forEach((btn, idx) => {
-            if (idx + 1 === step) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
+            if (idx + 1 === step) { btn.classList.add('active'); } else { btn.classList.remove('active'); }
         });
     }
 
@@ -1068,49 +1055,11 @@
     window.copyStAddress = function() {
         const check = document.getElementById('stSameAddressCheck');
         if (check.checked) {
-            document.getElementById('stPermAddr').value = document.getElementById('stPresentAddr').value;
+            document.getElementById('st_permanent_address_detail').value = document.getElementById('st_present_address_detail').value;
         } else {
-            document.getElementById('stPermAddr').value = '';
+            document.getElementById('st_permanent_address_detail').value = '';
         }
     }
-
-    const defaultStudents = [
-        { 
-            id: 1, 
-            name: "David Vance", 
-            roll: 10432, 
-            cls: "Class 8", 
-            guardian: "Robert Vance", 
-            phone: "+1 555-019-923", 
-            active: true, 
-            username: "david.vance", 
-            pass: "12345",
-            photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120",
-            admNum: "ADM-2026-001",
-            admDate: "2026-01-15",
-            section: "Section A",
-            shift: "Morning",
-            group: "General",
-            dob: "2013-05-12",
-            birthReg: "2013920193029193",
-            gender: "Male",
-            blood: "O+",
-            religionNation: "Islam, Bangladeshi",
-            lang: "Bengali",
-            father: "Robert Vance",
-            fatherJob: "Engineer",
-            fatherPhone: "+1 555-019-923",
-            mother: "Claire Vance",
-            motherJob: "Doctor",
-            motherPhone: "+1 555-019-924",
-            emergPhone: "+1 555-019-923",
-            parentEmail: "robert.vance@mail.com",
-            presentAddr: "12 Academy Lane, Dhaka",
-            permAddr: "12 Academy Lane, Dhaka",
-            feeCategory: "Regular",
-            discount: "0"
-        }
-    ];
 
     window.allStudentsCache = [];
 
@@ -1119,49 +1068,36 @@
             return window.allStudentsCache;
         }
         const stored = localStorage.getItem('school_students');
-        if (!stored) {
-            localStorage.setItem('school_students', JSON.stringify(defaultStudents));
-            return defaultStudents;
-        }
-        return JSON.parse(stored);
+        if (!stored) return [];
+        try { return JSON.parse(stored); } catch(e) { return []; }
     }
 
     function renderStudents() {
         const tbody = document.getElementById('allStudentsTable');
         if (!tbody) return;
 
+        window.allStudentsCache = [];
+
         fetch('/api/students/')
         .then(res => res.json())
         .then(data => {
             let apiStudents = data.students || [];
-            let localStudents = getStudents();
+            let storedRaw = [];
+            try { storedRaw = JSON.parse(localStorage.getItem('school_students') || '[]'); } catch(e) {}
+            let localOnlyStudents = storedRaw.filter(s => !s.db_id);
             let studentMap = new Map();
 
-            // 1. Add DB students first (authoritative)
             apiStudents.forEach(s => {
                 s.db_id = s.id;
-                let key = "db_" + s.id;
-                studentMap.set(key, s);
+                studentMap.set("db_" + s.id, s);
             });
 
-            // 2. Add local-only students if created offline without db_id
-            localStudents.forEach(s => {
-                if (s.id === 1 && s.name === "David Vance" && apiStudents.length > 0) {
-                    return;
-                }
-                let key = s.db_id ? ("db_" + s.db_id) : ("local_" + (s.admNum || s.id || (s.name ? s.name.replace(/\s+/g, '_') : 'unnamed')));
-                if (!studentMap.has(key)) {
-                    studentMap.set(key, s);
-                }
+            localOnlyStudents.forEach(s => {
+                let key = "local_" + (s.admNum || (s.name ? s.name.replace(/\s+/g, '_') : '') + '_' + (s.id || ''));
+                if (!studentMap.has(key)) studentMap.set(key, s);
             });
 
             let combined = Array.from(studentMap.values());
-            let rollCounter = 1;
-            combined = combined.map(st => {
-                st.roll = st.roll || rollCounter++;
-                return st;
-            });
-
             window.allStudentsCache = combined;
             localStorage.setItem('school_students', JSON.stringify(combined));
 
@@ -1217,27 +1153,27 @@
             });
         })
         .catch(err => {
+            // API ব্যর্থ হলে localStorage থেকে fallback data দেখাও
             tbody.innerHTML = '';
-            localStudents.forEach(st => {
+            let fallbackStudents = getStudents();
+            if (fallbackStudents.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-muted fw-bold">সার্ভারের সাথে সংযোগ করা যায়নি। / Cannot connect to server.</td></tr>';
+                return;
+            }
+            fallbackStudents.forEach(st => {
                 const stId = st.db_id || st.id;
                 const isApproved = (st.status === 'Approved' || st.active === true);
                 const statusBadge = isApproved ? 
                     `<span class="badge bg-success-subtle text-success px-2.5 rounded-pill"><i class="bi bi-check-circle me-1"></i>Approved / অনুমোদিত</span>` :
                     `<span class="badge bg-warning-subtle text-warning px-2.5 rounded-pill"><i class="bi bi-hourglass-split me-1"></i>Pending / অপেক্ষমাণ</span>`;
-
                 const approveBtn = (!isApproved || st.status === 'Pending') ?
                     `<button class="btn btn-sm btn-success me-1 fw-bold" onclick="approveStudent('${stId}')" title="Approve Student Admission"><i class="bi bi-check-circle-fill me-1"></i>Approve</button>` : '';
-
                 const row = `
-                    <tr class="student-row" data-name="${(st.name || '').toLowerCase()}" data-class="${st.cls || ''}">
-                        <td>
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="fw-semibold text-primary" style="cursor:pointer;" onclick="viewStudentDetails('${stId}')">${st.name}</span>
-                            </div>
-                        </td>
+                    <tr class="student-row" data-name="${(st.name || '').toLowerCase()}" data-class="${st.cls || st.desired_class || ''}">
+                        <td><span class="fw-semibold text-primary" style="cursor:pointer;" onclick="viewStudentDetails('${stId}')">${st.name || st.name_en || st.name_bn || 'Student'}</span></td>
                         <td>${st.roll || st.admission_no || '-'}</td>
-                        <td><span class="badge bg-light text-dark">${st.cls || 'Class 6'}</span></td>
-                        <td>${st.guardian || 'N/A'}</td>
+                        <td><span class="badge bg-light text-dark">${st.cls || st.desired_class || 'Class 6'}</span></td>
+                        <td>${st.guardian || st.father || 'N/A'}</td>
                         <td>${statusBadge}</td>
                         <td>
                             ${approveBtn}
