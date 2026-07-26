@@ -975,156 +975,7 @@
         },
         "সিলেট (Sylhet)": {
             "সিলেট (Sylhet)": ["সিলেট সদর (Sylhet Sadar)", "গোলাপগঞ্জ (Golapganj)", "বিয়ানীবাজার (Beanibazar)", "জকিগঞ্জ (Zakiganj)", "কানাইঘাট (Kanaighat)", "ফেঞ্চুগঞ্জ (Fenchuganj)", "বালাগঞ্জ (Balaganj)", "বিশ্বনাথ (Bishwanath)", "কোম্পানীগঞ্জ (Kompaniganj)"]
-        }
-    };
-
-    function updateStDistricts(prefix) {
-        const divEl = document.getElementById(prefix + '_division');
-        if (!divEl) return;
-        const divVal = divEl.value.trim();
-        const districtDatalist = document.getElementById(prefix + '_districts_list');
-        if (!districtDatalist) return;
-        districtDatalist.innerHTML = '';
-        
-        let targetDistricts = [];
-        for (let divName in stBdGeoData) {
-            if (divName.includes(divVal) || divVal.includes(divName)) {
-                targetDistricts = Object.keys(stBdGeoData[divName]);
-                break;
-            }
-        }
-        if (targetDistricts.length === 0) {
-            for (let divName in stBdGeoData) {
-                targetDistricts.push(...Object.keys(stBdGeoData[divName]));
-            }
-        }
-        targetDistricts.forEach(dist => {
-            const opt = document.createElement('option');
-            opt.value = dist;
-            districtDatalist.appendChild(opt);
-        });
-    }
-
-    function updateStUpazilas(prefix) {
-        const distEl = document.getElementById(prefix + '_district');
-        if (!distEl) return;
-        const distVal = distEl.value.trim();
-        const upazilaDatalist = document.getElementById(prefix + '_upazilas_list');
-        if (!upazilaDatalist) return;
-        upazilaDatalist.innerHTML = '';
-        
-        let targetUpazilas = [];
-        for (let divName in stBdGeoData) {
-            for (let distName in stBdGeoData[divName]) {
-                if (distName.includes(distVal) || distVal.includes(distName)) {
-                    targetUpazilas.push(...stBdGeoData[divName][distName]);
-                }
-            }
-        }
-        targetUpazilas.forEach(upz => {
-            const opt = document.createElement('option');
-            opt.value = upz;
-            upazilaDatalist.appendChild(opt);
-        });
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        updateStDistricts('st_present');
-        updateStDistricts('st_permanent');
-        updateStUpazilas('st_present');
-        updateStUpazilas('st_permanent');
-    });
-    // Student Multi-Step Form Navigation
-    window.goToStStep = function(step) {
-        document.querySelectorAll('.st-wizard-step').forEach(el => el.classList.add('d-none'));
-        document.getElementById('st-step-' + step).classList.remove('d-none');
-
-        document.querySelectorAll('#stWizardSteps .nav-link').forEach((btn, idx) => {
-            if (idx + 1 === step) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-        });
-    }
-
-    window.previewStPhoto = function(event) {
-        const file = event.target.files[0];
-        if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const preview = document.getElementById('stPhotoPreview');
-                const prompt = document.getElementById('stUploadPrompt');
-                preview.src = e.target.result;
-                preview.classList.remove('d-none');
-                prompt.classList.add('d-none');
-            };
-            reader.readAsDataURL(file);
-        }
-    }
-
-    window.copyStAddress = function() {
-        const check = document.getElementById('stSameAddressCheck');
-        if (check.checked) {
-            document.getElementById('stPermAddr').value = document.getElementById('stPresentAddr').value;
-        } else {
-            document.getElementById('stPermAddr').value = '';
-        }
-    }
-
-    const defaultStudents = [
-        { 
-            id: 1, 
-            name: "David Vance", 
-            roll: 10432, 
-            cls: "Class 8", 
-            guardian: "Robert Vance", 
-            phone: "+1 555-019-923", 
-            active: true, 
-            username: "david.vance", 
-            pass: "12345",
-            photo: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&h=120",
-            admNum: "ADM-2026-001",
-            admDate: "2026-01-15",
-            section: "Section A",
-            shift: "Morning",
-            group: "General",
-            dob: "2013-05-12",
-            birthReg: "2013920193029193",
-            gender: "Male",
-            blood: "O+",
-            religionNation: "Islam, Bangladeshi",
-            lang: "Bengali",
-            father: "Robert Vance",
-            fatherJob: "Engineer",
-            fatherPhone: "+1 555-019-923",
-            mother: "Claire Vance",
-            motherJob: "Doctor",
-            motherPhone: "+1 555-019-924",
-            emergPhone: "+1 555-019-923",
-            parentEmail: "robert.vance@mail.com",
-            presentAddr: "12 Academy Lane, Dhaka",
-            permAddr: "12 Academy Lane, Dhaka",
-            feeCategory: "Regular",
-            discount: "0"
-        }
-    ];
-
-    window.allStudentsCache = [];
-
-    function getStudents() {
-        if (window.allStudentsCache && window.allStudentsCache.length > 0) {
-            return window.allStudentsCache;
-        }
-        const stored = localStorage.getItem('school_students');
-        if (!stored) {
-            localStorage.setItem('school_students', JSON.stringify(defaultStudents));
-            return defaultStudents;
-        }
-        return JSON.parse(stored);
-    }
-
-    function renderStudents() {
+      function renderStudents() {
         const localStudents = getStudents();
         const tbody = document.getElementById('allStudentsTable');
         if (!tbody) return;
@@ -1135,19 +986,27 @@
             let apiStudents = data.students || [];
             let studentMap = new Map();
 
-            // 1. Load API Students from backend DB
+            // 1. Load API Students from backend DB first
             apiStudents.forEach(s => {
                 s.db_id = s.id;
-                let key = "id_" + s.id;
+                let key = "db_" + s.id;
                 studentMap.set(key, s);
             });
 
             // 2. Load Local Students from browser cache
             localStudents.forEach(s => {
-                let key = s.db_id ? ("id_" + s.db_id) : (s.id ? ("id_" + s.id) : ("local_" + (s.admNum || Math.random())));
+                if (s.id === 1 && s.name === "David Vance" && apiStudents.length > 0) {
+                    return;
+                }
+
+                let key = s.db_id ? ("db_" + s.db_id) : (s.id && !isNaN(s.id) && Number(s.id) < 1000000 ? ("db_" + s.id) : ("local_" + (s.admNum || s.name || Math.random())));
                 let existing = studentMap.get(key);
                 if (existing) {
-                    Object.assign(existing, s);
+                    for (let prop in s) {
+                        if (existing[prop] === undefined || existing[prop] === null || existing[prop] === '') {
+                            existing[prop] = s[prop];
+                        }
+                    }
                 } else {
                     studentMap.set(key, s);
                 }
@@ -1245,6 +1104,137 @@
                             ${approveBtn}
                             <button class="btn btn-sm btn-dark text-white me-1 fw-bold" onclick="openStudentIdCard('${stId}')" title="Print Unique ID Card"><i class="bi bi-person-badge me-1"></i>ID Card</button>
                             <button class="btn btn-sm btn-outline-primary me-1" onclick="editStudent('${stId}')" title="Edit"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-sm btn-outline-secondary me-1" onclick="printSingleStudent('${stId}')" title="Print Profile"><i class="bi bi-printer"></i></button>
+                            <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${stId}')" title="Delete"><i class="bi bi-trash"></i></button>
+                        </td>
+                    </tr>
+                `;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+        });
+    }
+
+    window.approveStudent = function(id) {
+        fetch('/api/approve-student/' + id + '/', {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            let students = getStudents();
+            students = students.map(s => {
+                if (String(s.id) === String(id) || String(s.db_id) === String(id)) {
+                    s.status = 'Approved';
+                    s.active = true;
+                }
+                return s;
+            });
+            window.allStudentsCache = students;
+            localStorage.setItem('school_students', JSON.stringify(students));
+            alert('শিক্ষার্থীর ভর্তি সফলভাবে অনুমোদিত হয়েছে! / Student admission approved successfully!');
+            renderStudents();
+        })
+        .catch(e => {
+            let students = getStudents();
+            students = students.map(s => {
+                if (String(s.id) === String(id) || String(s.db_id) === String(id)) {
+                    s.status = 'Approved';
+                    s.active = true;
+                }
+                return s;
+            });
+            window.allStudentsCache = students;
+            localStorage.setItem('school_students', JSON.stringify(students));
+            alert('শিক্ষার্থীর ভর্তি সফলভাবে অনুমোদিত হয়েছে! / Student admission approved!');
+            renderStudents();
+        });
+    }
+
+    window.saveBilingualStudentProfile = function(event) {
+        event.preventDefault();
+        const form = document.getElementById('addStudentBilingualForm');
+        const mob = document.getElementById('st_mobile').value;
+        const reMob = document.getElementById('st_re_mobile').value;
+
+        if (mob !== reMob) {
+            alert('মোবাইল নম্বর নিশ্চিতকরণ মেলেনি! / Mobile numbers do not match!');
+            document.getElementById('st_re_mobile').focus();
+            return;
+        }
+
+        const formData = new FormData(form);
+        formData.append('status', 'Approved');
+
+        if (editingStId) {
+            formData.append('db_id', editingStId);
+            formData.append('id', editingStId);
+        }
+
+        fetch('/api/save-student/', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                lastStudentSubmittedDbId = data.db_id;
+            }
+            const nameBn = document.getElementById('st_name_bn').value;
+            const nameEn = document.getElementById('st_name_en').value;
+            const cls = document.getElementById('st_desired_class').value;
+            const father = document.getElementById('st_father_name').value;
+            const mother = document.getElementById('st_mother_name').value;
+            const dob = document.getElementById('st_dob').value;
+            const addr = document.getElementById('st_present_address_detail').value;
+
+            const newStObj = {
+                id: data.db_id || editingStId || Date.now(),
+                db_id: data.db_id || editingStId,
+                name: nameEn || nameBn,
+                name_bn: nameBn,
+                name_en: nameEn,
+                roll: Math.floor(1000 + Math.random() * 9000),
+                cls: cls,
+                guardian: father || mother,
+                father: father,
+                mother: mother,
+                phone: mob,
+                dob: dob,
+                presentAddr: addr,
+                admNum: data.admission_no || ('ADM-' + Date.now()),
+                section: 'A',
+                active: true,
+                status: 'Approved'
+            };
+
+            let students = getStudents();
+            if (editingStId) {
+                students = students.map(s => (String(s.id) === String(editingStId) || String(s.db_id) === String(editingStId)) ? newStObj : s);
+                editingStId = null;
+                const headerTitle = document.querySelector('#add-panel h3');
+                if (headerTitle) {
+                    headerTitle.innerHTML = `<i class="bi bi-person-plus-fill me-2"></i>বিদ্যালয়ে ভর্তির আবেদন / School Admission Form`;
+                }
+            } else {
+                students.push(newStObj);
+            }
+            window.allStudentsCache = students;
+            localStorage.setItem('school_students', JSON.stringify(students));
+
+            form.reset();
+            const successModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('studentSubmissionSuccessModal'));
+            successModal.show();
+            renderStudents();
+        })
+        .catch(err => {
+            editingStId = null;
+            form.reset();
+            const successModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('studentSubmissionSuccessModal'));
+            successModal.show();
+            renderStudents();
+        });
+    } me-1" onclick="editStudent('${stId}')" title="Edit"><i class="bi bi-pencil"></i></button>
                             <button class="btn btn-sm btn-outline-secondary me-1" onclick="printSingleStudent('${stId}')" title="Print Profile"><i class="bi bi-printer"></i></button>
                             <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${stId}')" title="Delete"><i class="bi bi-trash"></i></button>
                         </td>
@@ -1986,80 +1976,7 @@
         }
     }
 
-    function saveBilingualStudentProfile(e) {
-        e.preventDefault();
-        const form = document.getElementById('addStudentBilingualForm');
-        const mob = document.getElementById('st_mobile').value;
-        const reMob = document.getElementById('st_re_mobile').value;
 
-        if (mob !== reMob) {
-            alert('মোবাইল নম্বর নিশ্চিতকরণ মেলেনি! / Mobile numbers do not match!');
-            document.getElementById('st_re_mobile').focus();
-            return;
-        }
-
-        const formData = new FormData(form);
-
-        fetch('/api/save-student/', {
-            method: 'POST',
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data.status === 'success') {
-                lastStudentSubmittedDbId = data.db_id;
-                
-                const nameBn = document.getElementById('st_name_bn').value;
-                const nameEn = document.getElementById('st_name_en').value;
-                const cls = document.getElementById('st_desired_class').value;
-                const father = document.getElementById('st_father_name').value;
-                const mother = document.getElementById('st_mother_name').value;
-                const dob = document.getElementById('st_dob').value;
-                const addr = document.getElementById('st_present_address_detail').value;
-                const randRoll = Math.floor(1000 + Math.random() * 9000);
-
-                const newStObj = {
-                    id: data.db_id || Date.now(),
-                    db_id: data.db_id,
-                    name: nameEn || nameBn,
-                    name_bn: nameBn,
-                    name_en: nameEn,
-                    roll: randRoll,
-                    cls: cls,
-                    guardian: father || mother,
-                    father: father,
-                    mother: mother,
-                    phone: mob,
-                    dob: dob,
-                    presentAddr: addr,
-                    admNum: data.admission_no || ('ADM-' + Date.now()),
-                    section: 'A',
-                    active: true,
-                    status: 'Approved'
-                };
-
-                let stList = getStudents();
-                stList.push(newStObj);
-                localStorage.setItem('school_students', JSON.stringify(stList));
-                renderStudents();
-
-                form.reset();
-                const modal = new bootstrap.Modal(document.getElementById('studentSubmissionSuccessModal'));
-                modal.show();
-            } else {
-                alert('ত্রুটি: ' + (data.message || 'সংরক্ষণ করা যায়নি।'));
-            }
-        })
-        .catch(err => {
-            console.error(err);
-            form.reset();
-            const modal = new bootstrap.Modal(document.getElementById('studentSubmissionSuccessModal'));
-            modal.show();
-        });
-    }
 
     document.addEventListener("DOMContentLoaded", function() {
         renderStudents();

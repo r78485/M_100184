@@ -453,17 +453,21 @@ def api_save_student(request):
                 if student:
                     for k, v in defaults.items():
                         setattr(student, k, v)
+                    if adm_no:
+                        student.admission_no = adm_no
                     student.save()
                 else:
-                    student, created = StudentAdmission.objects.update_or_create(
-                        admission_no=adm_no,
-                        defaults=defaults
-                    )
+                    import time
+                    if not adm_no or adm_no.strip() == '':
+                        adm_no = f"ADM-{datetime.now().strftime('%Y%m%d%H%M%S')}-{int(time.time()*1000)%1000}"
+                    defaults['admission_no'] = adm_no
+                    student = StudentAdmission.objects.create(**defaults)
             else:
-                student, created = StudentAdmission.objects.update_or_create(
-                    admission_no=adm_no,
-                    defaults=defaults
-                )
+                import time
+                if not adm_no or adm_no.strip() == '':
+                    adm_no = f"ADM-{datetime.now().strftime('%Y%m%d%H%M%S')}-{int(time.time()*1000)%1000}"
+                defaults['admission_no'] = adm_no
+                student = StudentAdmission.objects.create(**defaults)
 
             if photo_file:
                 student.photo = photo_file
