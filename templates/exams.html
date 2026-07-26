@@ -1689,7 +1689,10 @@ function refreshExamStudentRegistry() {
             let local = [];
             try { local = JSON.parse(localStorage.getItem('school_students')) || []; } catch(e){}
             let map = new Map();
-            local.forEach(s => map.set(String(s.db_id || s.id), s));
+            local.forEach((s, idx) => {
+                const k = String(s.db_id || s.id || s.admNum || ('loc_' + idx + '_' + (s.name ? s.name.replace(/\s+/g, '_') : 'st')));
+                map.set(k, s);
+            });
             data.students.forEach(s => map.set(String(s.id), s));
             localStorage.setItem('school_students', JSON.stringify(Array.from(map.values())));
         }

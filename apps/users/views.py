@@ -448,7 +448,7 @@ def api_save_student(request):
             }
 
             student_id = data.get('db_id') or data.get('id')
-            if student_id and str(student_id).isdigit():
+            if student_id and str(student_id).strip().isdigit() and int(student_id) > 0:
                 student = StudentAdmission.objects.filter(id=int(student_id)).first()
                 if student:
                     for k, v in defaults.items():

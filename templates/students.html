@@ -1092,12 +1092,17 @@
                 studentMap.set("db_" + s.id, s);
             });
 
-            localOnlyStudents.forEach(s => {
-                let key = "local_" + (s.admNum || (s.name ? s.name.replace(/\s+/g, '_') : '') + '_' + (s.id || ''));
+            localOnlyStudents.forEach((s, idx) => {
+                let uniqueId = s.id || s.db_id || s.admNum || ('local_' + idx + '_' + (s.name ? s.name.replace(/\s+/g, '_') : 'st'));
+                let key = "local_" + uniqueId;
                 if (!studentMap.has(key)) studentMap.set(key, s);
             });
 
             let combined = Array.from(studentMap.values());
+            let rollCounter = 1;
+            // Object.assign দিয়ে নতুন object — মূল cache object mutate করবেন না
+            combined = combined.map(st => Object.assign({}, st, { roll: st.roll || rollCounter++ }));
+
             window.allStudentsCache = combined;
             localStorage.setItem('school_students', JSON.stringify(combined));
 
@@ -1252,14 +1257,18 @@
         }
 
         const dbIdInput = document.getElementById('st_db_id');
-        const currentDbId = (dbIdInput && dbIdInput.value) ? dbIdInput.value : editingStId;
+        const rawDbId = dbIdInput ? dbIdInput.value : null;
+        const currentDbId = (rawDbId && String(rawDbId).trim() !== '' && !isNaN(rawDbId)) ? rawDbId : ((editingStId && !isNaN(editingStId)) ? editingStId : null);
 
         const formData = new FormData(form);
         formData.append('status', 'Approved');
 
         if (currentDbId) {
-            formData.append('db_id', currentDbId);
-            formData.append('id', currentDbId);
+            formData.set('db_id', currentDbId);
+            formData.set('id', currentDbId);
+        } else {
+            formData.delete('db_id');
+            formData.delete('id');
         }
 
         fetch('/api/save-student/', {
@@ -1269,95 +1278,23 @@
         })
         .then(res => res.json())
         .then(data => {
-            if (data.status === 'success') {
-                lastStudentSubmittedDbId = data.db_id;
-            }
-            const nameBn = document.getElementById('st_name_bn').value;
-            const nameEn = document.getElementById('st_name_en').value;
-            const cls = document.getElementById('st_desired_class').value;
-            const father = document.getElementById('st_father_name').value;
-            const mother = document.getElementById('st_mother_name').value;
-            const dob = document.getElementById('st_dob').value;
-            const addr = document.getElementById('st_present_address_detail').value;
-
-            const savedId = data.db_id || currentDbId || Date.now();
-            const newStObj = {
-                id: savedId,
-                db_id: data.db_id || currentDbId,
-                name: nameEn || nameBn,
-                name_bn: nameBn,
-                name_en: nameEn,
-                roll: Math.floor(1000 + Math.random() * 9000),
-                cls: cls,
-                guardian: father || mother,
-                father: father,
-                mother: mother,
-                phone: mob,
-                dob: dob,
-                presentAddr: addr,
-                admNum: data.admission_no || ('ADM-' + Date.now()),
-                section: 'A',
-                active: true,
-                status: 'Approved'
-            };
-
-            let students = getStudents();
-            if (currentDbId) {
-                students = students.map(s => (String(s.id) === String(currentDbId) || String(s.db_id) === String(currentDbId)) ? newStObj : s);
-            } else {
-                students.push(newStObj);
-            }
+            // DB সফলভাবে save হলে cache clear করে form reset ও renderStudents() call করুন
+            window.allStudentsCache = [];
+            localStorage.removeItem('school_students');
             resetAddStudentForm();
-            window.allStudentsCache = students;
-            localStorage.setItem('school_students', JSON.stringify(students));
 
             const successModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('studentSubmissionSuccessModal'));
-            successModal.show();
+            if (successModal) successModal.show();
             renderStudents();
         })
         .catch(err => {
+            // API failure — form reset করুন কিন্তু success modal দেখাবেন না
+            console.error('Student save error:', err);
             resetAddStudentForm();
-            const successModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('studentSubmissionSuccessModal'));
-            successModal.show();
+            alert('তথ্য সংরক্ষণে সমস্যা হয়েছে। পুনরায় চেষ্টা করুন।\nError saving student. Please try again.');
             renderStudents();
         });
     };
-
-    window.approveStudent = function(id) {
-        fetch('/api/approve-student/' + id + '/', {
-            method: 'POST',
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        })
-        .then(res => res.json())
-        .then(data => {
-            let students = getStudents();
-            students = students.map(s => {
-                if (String(s.id) === String(id) || String(s.db_id) === String(id)) {
-                    s.status = 'Approved';
-                    s.active = true;
-                }
-                return s;
-            });
-            window.allStudentsCache = students;
-            localStorage.setItem('school_students', JSON.stringify(students));
-            alert('শিক্ষার্থীর ভর্তি সফলভাবে অনুমোদিত হয়েছে! / Student admission approved successfully!');
-            renderStudents();
-        })
-        .catch(e => {
-            let students = getStudents();
-            students = students.map(s => {
-                if (String(s.id) === String(id) || String(s.db_id) === String(id)) {
-                    s.status = 'Approved';
-                    s.active = true;
-                }
-                return s;
-            });
-            window.allStudentsCache = students;
-            localStorage.setItem('school_students', JSON.stringify(students));
-            alert('শিক্ষার্থীর ভর্তি সফলভাবে অনুমোদিত হয়েছে! / Student admission approved!');
-            renderStudents();
-        });
-    }
 
     window.viewStudentDetails = function(id) {
         const idStr = String(id);
@@ -1528,15 +1465,16 @@
     function getApprovedOrderedStudents() {
         let students = getStudents();
         let rollCounter = 1;
+        // spread দিয়ে নতুন object তৈরি করুন — মূল cache object mutate করবেন না
         students = students.map(st => {
-            if (st.status === 'Approved' || st.active === true) {
-                st.roll = rollCounter++;
+            const copy = Object.assign({}, st);
+            if (copy.status === 'Approved' || copy.active === true) {
+                copy.roll = rollCounter++;
             } else {
-                st.roll = 'Pending';
+                copy.roll = 'Pending';
             }
-            return st;
+            return copy;
         });
-        localStorage.setItem('school_students', JSON.stringify(students));
         return students;
     }
 
