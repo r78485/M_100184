@@ -1384,15 +1384,6 @@
             successModal.show();
             renderStudents();
         });
-    } me-1" onclick="editStudent('${stId}')" title="Edit"><i class="bi bi-pencil"></i></button>
-                            <button class="btn btn-sm btn-outline-secondary me-1" onclick="printSingleStudent('${stId}')" title="Print Profile"><i class="bi bi-printer"></i></button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${stId}')" title="Delete"><i class="bi bi-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
-                tbody.insertAdjacentHTML('beforeend', row);
-            });
-        });
     }
 
     window.approveStudent = function(id) {
