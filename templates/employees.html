@@ -1496,23 +1496,23 @@
         // === 8. Smart Chip (bottom right, above QR) ===
         drawSmartChip(ctx, 830, 220, 82, 58);
 
-        // === 9. Employee Photo (compact 135px circular frame, left side) ===
-        const photoSize = 135;
-        const photoX = 45;
-        const photoY = 152;
-        const photoCX = photoX + photoSize / 2;
-        const photoCY = photoY + photoSize / 2;
+        // === 9. Employee Photo (centered 150px circular frame) ===
+        const photoSize = 150;
+        const photoCX = CONTENT_W / 2; // 474
+        const photoCY = 210;
+        const photoX = photoCX - photoSize / 2;
+        const photoY = photoCY - photoSize / 2;
 
         // Gold outer ring
         ctx.fillStyle = '#d4af37';
         ctx.beginPath();
-        ctx.arc(photoCX, photoCY, photoSize / 2 + 6, 0, Math.PI * 2);
+        ctx.arc(photoCX, photoCY, photoSize / 2 + 7, 0, Math.PI * 2);
         ctx.fill();
 
         // White inner ring
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
-        ctx.arc(photoCX, photoCY, photoSize / 2 + 2, 0, Math.PI * 2);
+        ctx.arc(photoCX, photoCY, photoSize / 2 + 2.5, 0, Math.PI * 2);
         ctx.fill();
 
         // Photo (clipped circle)
@@ -1529,13 +1529,13 @@
             ctx.fillStyle = av;
             ctx.fillRect(photoX, photoY, photoSize, photoSize);
             ctx.fillStyle = 'rgba(255,255,255,0.15)';
-            ctx.beginPath(); ctx.arc(photoCX, photoCY - 20, 34, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath(); ctx.arc(photoCX, photoCY - 22, 38, 0, Math.PI * 2); ctx.fill();
             ctx.beginPath();
-            ctx.arc(photoCX, photoCY + 46, 45, 0, Math.PI * 2); ctx.fill();
+            ctx.arc(photoCX, photoCY + 50, 50, 0, Math.PI * 2); ctx.fill();
         }
         ctx.restore();
 
-        // === 10. Employee Name & Details ===
+        // === 10. Employee Name & Details (Centered with Photo) ===
         let nameStr = emp.name || 'রুহুল আমিন (Ruhul Amin)';
         if (emp.nameBn && emp.nameEn && emp.nameBn !== emp.nameEn) {
             nameStr = emp.nameBn + ' (' + emp.nameEn + ')';
@@ -1553,36 +1553,38 @@
         const joined = emp.joined || (emp.joinDate ? emp.joinDate.substring(0, 4) : '2023');
         const valid = emp.valid || '2054';
 
-        ctx.textAlign = 'left';
+        ctx.textAlign = 'center';
         ctx.textBaseline = 'alphabetic';
 
-        // Name (large, white)
+        // Name (large white bold serif/sans-serif font, centered)
         ctx.fillStyle = '#FFFFFF';
-        ctx.font = "bold 36px 'Hind Siliguri', 'Inter', 'Kalpurush', sans-serif";
+        ctx.font = "bold 34px 'Hind Siliguri', 'Inter', 'Kalpurush', sans-serif";
         ctx.shadowColor = 'rgba(0,0,0,0.7)';
         ctx.shadowBlur = 5;
-        ctx.fillText(nameStr, 38, 345, 700);
+        ctx.fillText(nameStr, CONTENT_W / 2, 335, 820);
 
-        // Designation (cyan)
+        // Designation (cyan color, centered)
         ctx.fillStyle = '#00d2d3';
         ctx.font = "bold 22px 'Hind Siliguri', 'Inter', sans-serif";
         ctx.shadowColor = 'rgba(0,0,0,0.5)';
         ctx.shadowBlur = 3;
-        ctx.fillText(desigStr, 38, 382, 700);
+        ctx.fillText(desigStr, CONTENT_W / 2, 372, 820);
         ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
 
-        // ID & Department pill box
+        // ID & Department pill box container (centered)
+        const pillW = 650;
+        const pillX = (CONTENT_W - pillW) / 2;
         ctx.fillStyle = '#033040';
         ctx.strokeStyle = '#00d2d3';
         ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.roundRect(38, 400, 640, 44, 8);
+        ctx.roundRect(pillX, 395, pillW, 44, 8);
         ctx.fill(); ctx.stroke();
 
         ctx.textBaseline = 'middle';
         ctx.fillStyle = '#ffffff';
         ctx.font = "bold 18px 'Inter', sans-serif";
-        ctx.fillText('Employee ID: ' + empIdVal + '    |    Department: ' + deptStr, 55, 422, 605);
+        ctx.fillText('Employee ID: ' + empIdVal + '    |    Department: ' + deptStr, CONTENT_W / 2, 417, 620);
 
         // === 11. Bottom Row: Flag + Barcode + QR + Dates ===
         const barcodeNum = String(emp.nid || emp.idCode || emp.id || '05568917881');
