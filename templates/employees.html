@@ -1,8 +1,10 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Employees HR - EduManage ERP{% endblock %}
 
 {% block extra_css %}
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Montserrat:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
     .emp-id-card {
         width: 320px;
@@ -28,20 +30,39 @@
     }
     
     @media print {
+        @page {
+            size: A4 portrait;
+            margin: 10mm;
+        }
         body * {
-            visibility: hidden;
+            visibility: hidden !important;
         }
         #printArea, #printArea * {
-            visibility: visible;
+            visibility: visible !important;
         }
         #printArea {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
+            display: block !important;
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            background: #ffffff !important;
         }
         .no-print {
             display: none !important;
+        }
+        .print-card-box {
+            page-break-inside: avoid;
+            margin-bottom: 25px;
+        }
+        .print-card-img {
+            width: 3.375in !important;
+            height: 2.125in !important;
+            object-fit: contain !important;
+            border: 1px solid #94a3b8 !important;
+            border-radius: 6px !important;
+            display: block !important;
+            margin: 0 auto !important;
         }
     }
 
@@ -69,6 +90,65 @@
     }
     .border-purple {
         border-left-color: var(--secondary-purple) !important;
+    }
+
+    /* Success Popup Modal Dialog Styling */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(15, 23, 42, 0.55);
+        backdrop-filter: blur(4px);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeInOverlay 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .save-success-card {
+        background: #ffffff;
+        width: 330px;
+        max-width: 90vw;
+        border-radius: 20px;
+        padding: 28px 24px;
+        text-align: center;
+        position: relative;
+        animation: popInCard 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+    body.dark-theme .save-success-card {
+        background: #1e293b;
+        color: #f8fafc;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    body.dark-theme .save-success-card h5 {
+        color: #ffffff !important;
+    }
+    body.dark-theme .save-success-card p {
+        color: #94a3b8 !important;
+    }
+    .save-success-card .icon-circle {
+        width: 64px;
+        height: 64px;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        font-size: 2.2rem;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+    }
+    @keyframes fadeInOverlay {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @keyframes popInCard {
+        from { opacity: 0; transform: scale(0.75); }
+        to { opacity: 1; transform: scale(1); }
     }
 </style>
 {% endblock %}
@@ -125,338 +205,295 @@
             </div>
         </div>
 
-        <!-- 2. Add New (Multi-Step Form Wizard) -->
+        <!-- 2. Add New (Add Employee Form) -->
         <div class="tab-pane fade" id="add-emp-panel" role="tabpanel">
-            <div class="card custom-card p-4 no-print">
-                <h4 class="fw-bold mb-4" style="color: var(--primary-blue);"><i class="bi bi-person-plus-fill me-2"></i>Register Employee Profile</h4>
-                
-                <!-- Wizard Progress Indicator -->
-                <ul class="nav nav-pills mb-4 gap-2 bg-light p-2 rounded" id="wizardSteps" style="font-size: 0.85rem;">
-                    <li class="nav-item flex-grow-1 text-center">
-                        <button class="nav-link active w-100 fw-semibold" id="step1-btn" disabled>1. Personal</button>
-                    </li>
-                    <li class="nav-item flex-grow-1 text-center">
-                        <button class="nav-link w-100 fw-semibold" id="step2-btn" disabled>2. Contact</button>
-                    </li>
-                    <li class="nav-item flex-grow-1 text-center">
-                        <button class="nav-link w-100 fw-semibold" id="step3-btn" disabled>3. Academic</button>
-                    </li>
-                    <li class="nav-item flex-grow-1 text-center">
-                        <button class="nav-link w-100 fw-semibold" id="step4-btn" disabled>4. Financial</button>
-                    </li>
-                    <li class="nav-item flex-grow-1 text-center">
-                        <button class="nav-link w-100 fw-semibold" id="step5-btn" disabled>5. System Access</button>
-                    </li>
-                    <li class="nav-item flex-grow-1 text-center">
-                        <button class="nav-link w-100 fw-semibold" id="step6-btn" disabled>6. Documents</button>
-                    </li>
-                </ul>
+            <div class="card custom-card p-4 no-print shadow-sm border-0 rounded-4">
+                <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom">
+                    <div>
+                        <h4 class="fw-bold mb-1" style="color: var(--primary-blue);" id="formTitle">
+                            <i class="bi bi-person-plus-fill me-2"></i>Register Employee Profile
+                        </h4>
+                        <p class="text-muted small mb-0">Fill in basic and background details to add a new employee or staff member.</p>
+                    </div>
+                    <div>
+                        <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-pill"><i class="bi bi-shield-check me-1"></i> HR Module</span>
+                    </div>
+                </div>
 
                 <form id="addEmployeeForm" novalidate onsubmit="saveEmployeeProfile(event)">
                     
-                    <!-- STEP 1: Personal Information -->
-                    <div class="wizard-step" id="step-1">
-                        <h5 class="fw-bold mb-3 text-secondary border-start border-3 border-purple ps-2">1. Personal Information</h5>
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Full Name</label>
-                                <input type="text" class="form-control" id="empFullName" placeholder="Employee Full Name" required>
+                    <!-- SECTION 1: Basic Information -->
+                    <div class="card bg-light border-0 rounded-3 p-3 p-md-4 mb-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-primary rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 28px; height: 28px; font-size: 0.9rem;">1</span>
+                                <h5 class="fw-bold mb-0 text-dark">Basic Information</h5>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Father's / Husband's Name</label>
-                                <input type="text" class="form-control" id="empFatherName" required>
+                            <div class="d-flex gap-2">
+                                <span class="badge bg-danger-subtle text-danger px-2.5 py-1.5 rounded-pill small">Required</span>
+                                <span class="badge bg-info-subtle text-info px-2.5 py-1.5 rounded-pill small">Optional</span>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Mother's Name</label>
-                                <input type="text" class="form-control" id="empMotherName" required>
+                        </div>
+
+                        <div class="row g-3">
+                            <!-- Employee Name * -->
+                            <div class="col-md-6 col-lg-4">
+                                <label class="form-label fw-semibold text-secondary small mb-1">Employee Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-lg fs-6" id="empFullName" placeholder="Name of Employee" required>
                             </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">Date of Birth (DOB)</label>
-                                <input type="date" class="form-control" id="empDOB" required>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">Gender</label>
-                                <select class="form-select" id="empGender" required>
-                                    <option>Male</option>
-                                    <option>Female</option>
-                                    <option>Other</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">Blood Group</label>
-                                <select class="form-select" id="empBlood">
-                                    <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
-                                    <option>O+</option><option>O-</option><option>AB+</option><option>AB-</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">Marital Status</label>
-                                <select class="form-select" id="empMarital">
-                                    <option>Single</option>
-                                    <option>Married</option>
-                                    <option>Divorced</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Nationality & Religion</label>
-                                <input type="text" class="form-control" id="empNationReligion" placeholder="e.g., Bangladeshi, Islam" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">National ID (NID) / Passport</label>
-                                <input type="text" class="form-control" id="empNID" required>
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label fw-semibold">Profile Photo</label>
-                                <div class="dashed-upload" onclick="document.getElementById('empPhotoFile').click()">
-                                    <img id="photoPreview" class="d-none rounded-circle mb-2" style="width: 80px; height: 80px; object-fit: cover;">
-                                    <div id="uploadPrompt">
-                                        <i class="bi bi-cloud-arrow-up fs-2 text-muted"></i>
-                                        <span class="d-block mt-2 small text-muted">Drag & Drop profile picture, or click to upload</span>
+
+                            <!-- Picture -->
+                            <div class="col-md-6 col-lg-4">
+                                <label class="form-label fw-semibold text-secondary small mb-1">Picture</label>
+                                <input type="file" class="form-control form-control-lg fs-6" id="empPhotoFile" accept="image/*" onchange="previewPhoto(event)">
+                                <div class="d-flex align-items-center justify-content-between mt-1">
+                                    <small class="text-muted" style="font-size: 0.75rem;">No file chosen | Max size 100KB</small>
+                                    <div id="photoPreviewContainer" class="d-none ms-2">
+                                        <img id="photoPreview" class="rounded-circle border" style="width: 32px; height: 32px; object-fit: cover;">
                                     </div>
-                                    <input type="file" id="empPhotoFile" class="d-none" onchange="previewPhoto(event)">
+                                </div>
+                            </div>
+
+                            <!-- Mobile No for SMS/WhatsApp -->
+                            <div class="col-md-6 col-lg-4">
+                                <label class="form-label fw-semibold text-secondary small mb-1">Mobile No for SMS/WhatsApp</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white text-muted"><i class="bi bi-telephone"></i></span>
+                                    <input type="tel" class="form-control form-control-lg fs-6" id="empPrimaryPhone" placeholder="e.g +44xxxxxxxxxx">
+                                </div>
+                            </div>
+
+                            <!-- Date of Appointment -->
+                            <div class="col-md-6 col-lg-4">
+                                <label class="form-label fw-semibold text-secondary small mb-1">Date of Appointment</label>
+                                <input type="date" class="form-control form-control-lg fs-6" id="empAppointmentDate">
+                            </div>
+
+                            <!-- Date of Joining * -->
+                            <div class="col-md-6 col-lg-4">
+                                <label class="form-label fw-semibold text-secondary small mb-1">Date of Joining <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control form-control-lg fs-6" id="empJoinDateInput" value="2026-07-26" required>
+                            </div>
+
+                            <!-- Employee Role * -->
+                            <div class="col-md-6 col-lg-4">
+                                <label class="form-label fw-semibold text-secondary small mb-1">Employee Role <span class="text-danger">*</span></label>
+                                <select class="form-select form-select-lg fs-6" id="empDesignationInput" required>
+                                    <option value="" selected disabled>-- Select Role --</option>
+                                    <option value="Senior Teacher">Senior Teacher</option>
+                                    <option value="Assistant Teacher">Assistant Teacher</option>
+                                    <option value="Lecturer">Lecturer</option>
+                                    <option value="Headmaster / Principal">Headmaster / Principal</option>
+                                    <option value="Vice Principal">Vice Principal</option>
+                                    <option value="Accountant">Accountant</option>
+                                    <option value="Office Assistant">Office Assistant</option>
+                                    <option value="IT Officer">IT Officer</option>
+                                    <option value="Librarian">Librarian</option>
+                                    <option value="Lab Assistant">Lab Assistant</option>
+                                    <option value="Driver">Driver</option>
+                                    <option value="Security Guard">Security Guard</option>
+                                    <option value="Cleaner / Staff">Cleaner / Staff</option>
+                                </select>
+                            </div>
+
+                            <!-- Monthly Salary * -->
+                            <div class="col-md-6 col-lg-4">
+                                <label class="form-label fw-semibold text-secondary small mb-1">Monthly Salary <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white text-muted">৳ / $</span>
+                                    <input type="number" class="form-control form-control-lg fs-6" id="empBasicSalary" placeholder="Monthly Salary" required>
                                 </div>
                             </div>
                         </div>
-                        <div class="text-end">
-                            <button type="button" class="btn text-white px-4" style="background-color: var(--primary-blue);" onclick="goToStep(2)">Next Step <i class="bi bi-arrow-right ms-1"></i></button>
-                        </div>
                     </div>
 
-                    <!-- STEP 2: Contact Information -->
-                    <div class="wizard-step d-none" id="step-2">
-                        <h5 class="fw-bold mb-3 text-secondary border-start border-3 border-purple ps-2">2. Contact Information</h5>
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Primary Phone</label>
-                                <input type="tel" class="form-control" id="empPrimaryPhone" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Alternative Phone</label>
-                                <input type="tel" class="form-control" id="empAltPhone">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Email Address</label>
-                                <input type="email" class="form-control" id="empEmailInput" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Present Address</label>
-                                <textarea class="form-control" rows="2" id="empPresentAddr" required></textarea>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <label class="form-label fw-semibold mb-0">Permanent Address</label>
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="sameAddressCheck" onclick="copyAddress()">
-                                        <label class="form-check-label small" for="sameAddressCheck">Same as Present</label>
-                                    </div>
-                                </div>
-                                <textarea class="form-control" rows="2" id="empPermAddr" required></textarea>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Emergency Contact Person</label>
-                                <input type="text" class="form-control" id="empEmergName" placeholder="Full Name" required>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">Relationship</label>
-                                <input type="text" class="form-control" id="empEmergRelation" placeholder="e.g., Spouse, Brother" required>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label fw-semibold">Emergency Phone</label>
-                                <input type="tel" class="form-control" id="empEmergPhone" required>
-                            </div>
+                    <!-- SECTION 2: Other Information -->
+                    <div class="card bg-light border-0 rounded-3 p-3 p-md-4 mb-4">
+                        <div class="d-flex align-items-center gap-2 mb-3 pb-2 border-bottom">
+                            <span class="badge bg-secondary rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 28px; height: 28px; font-size: 0.9rem;">2</span>
+                            <h5 class="fw-bold mb-0 text-dark">Other Information</h5>
                         </div>
-                        <div class="d-flex justify-content-between">
-                            <button type="button" class="btn btn-light px-4" onclick="goToStep(1)"><i class="bi bi-arrow-left me-1"></i> Back</button>
-                            <button type="button" class="btn text-white px-4" style="background-color: var(--primary-blue);" onclick="goToStep(3)">Next Step <i class="bi bi-arrow-right ms-1"></i></button>
-                        </div>
-                    </div>
 
-                    <!-- STEP 3: Professional & Academic Details -->
-                    <div class="wizard-step d-none" id="step-3">
-                        <h5 class="fw-bold mb-3 text-secondary border-start border-3 border-purple ps-2">3. Institutional & Academic Details</h5>
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Employee ID (System Generated)</label>
-                                <input type="text" class="form-control" id="empIdInput" value="EMP-103" readonly>
+                        <div class="row g-3">
+                            <!-- Index Number -->
+                            <div class="col-md-6 col-lg-4">
+                                <label class="form-label fw-semibold text-secondary small mb-1">Index Number</label>
+                                <input type="text" class="form-control form-control-lg fs-6" id="empIndexNo" placeholder="Index Number">
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Designation</label>
-                                <input type="text" class="form-control" id="empDesignationInput" placeholder="e.g., Senior Teacher, Accountant" required>
+
+                            <!-- First MPO -->
+                            <div class="col-md-6 col-lg-4">
+                                <label class="form-label fw-semibold text-secondary small mb-1">First MPO</label>
+                                <input type="date" class="form-control form-control-lg fs-6" id="empFirstMPO" placeholder="First MPO">
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Department</label>
-                                <select class="form-select" id="empDeptInput" required>
-                                    <option>Science</option>
-                                    <option>Arts</option>
-                                    <option>Commerce</option>
-                                    <option>Administration</option>
-                                    <option>Accounts</option>
+
+                            <!-- Pay Code -->
+                            <div class="col-md-6 col-lg-4">
+                                <label class="form-label fw-semibold text-secondary small mb-1">Pay Code</label>
+                                <input type="text" class="form-control form-control-lg fs-6" id="empPayCode" placeholder="Pay Code">
+                            </div>
+
+                            <!-- Father's Name -->
+                            <div class="col-md-6 col-lg-4">
+                                <label class="form-label fw-semibold text-secondary small mb-1">Father's Name</label>
+                                <input type="text" class="form-control form-control-lg fs-6" id="empFatherName" placeholder="Father's Name">
+                            </div>
+
+                            <!-- Mother's Name -->
+                            <div class="col-md-6 col-lg-4">
+                                <label class="form-label fw-semibold text-secondary small mb-1">Mother's Name</label>
+                                <input type="text" class="form-control form-control-lg fs-6" id="empMotherName" placeholder="Mother's Name">
+                            </div>
+
+                            <!-- Spouse Name -->
+                            <div class="col-md-6 col-lg-4">
+                                <label class="form-label fw-semibold text-secondary small mb-1">Spouse Name</label>
+                                <input type="text" class="form-control form-control-lg fs-6" id="empSpouseName" placeholder="Spouse Name">
+                            </div>
+
+                            <!-- National ID -->
+                            <div class="col-md-6 col-lg-4">
+                                <label class="form-label fw-semibold text-secondary small mb-1">National ID</label>
+                                <input type="text" class="form-control form-control-lg fs-6" id="empNID" placeholder="National ID">
+                            </div>
+
+                            <!-- Education -->
+                            <div class="col-md-6 col-lg-4">
+                                <label class="form-label fw-semibold text-secondary small mb-1">Education</label>
+                                <input type="text" class="form-control form-control-lg fs-6" id="empEdu" placeholder="Education">
+                            </div>
+
+                            <!-- Gender -->
+                            <div class="col-md-6 col-lg-4">
+                                <label class="form-label fw-semibold text-secondary small mb-1">Gender</label>
+                                <select class="form-select form-select-lg fs-6" id="empGender">
+                                    <option value="" selected disabled>-- Select --</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
                                 </select>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Date of Joining (DOJ)</label>
-                                <input type="date" class="form-control" id="empJoinDateInput" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Job Type / Status</label>
-                                <select class="form-select" id="empJobType">
-                                    <option>Full-time</option>
-                                    <option>Part-time</option>
-                                    <option>Contractual</option>
-                                    <option>Probationary</option>
+
+                            <!-- Religion -->
+                            <div class="col-md-6 col-lg-4">
+                                <label class="form-label fw-semibold text-secondary small mb-1">Religion</label>
+                                <select class="form-select form-select-lg fs-6" id="empReligion">
+                                    <option value="" selected disabled>-- Select --</option>
+                                    <option value="Islam">Islam</option>
+                                    <option value="Hinduism">Hinduism</option>
+                                    <option value="Christianity">Christianity</option>
+                                    <option value="Buddhism">Buddhism</option>
+                                    <option value="Other">Other</option>
                                 </select>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Highest Educational Qualification</label>
-                                <input type="text" class="form-control" id="empEdu" placeholder="e.g., M.Sc in Mathematics, DU" required>
+
+                            <!-- Blood Group -->
+                            <div class="col-md-6 col-lg-4">
+                                <label class="form-label fw-semibold text-secondary small mb-1">Blood Group</label>
+                                <select class="form-select form-select-lg fs-6" id="empBlood">
+                                    <option value="" selected disabled>-- Select --</option>
+                                    <option value="A+">A+</option>
+                                    <option value="A-">A-</option>
+                                    <option value="B+">B+</option>
+                                    <option value="B-">B-</option>
+                                    <option value="O+">O+</option>
+                                    <option value="O-">O-</option>
+                                    <option value="AB+">AB+</option>
+                                    <option value="AB-">AB-</option>
+                                </select>
                             </div>
+
+                            <!-- Experience -->
+                            <div class="col-md-6 col-lg-4">
+                                <label class="form-label fw-semibold text-secondary small mb-1">Experience</label>
+                                <input type="text" class="form-control form-control-lg fs-6" id="empExp" placeholder="Experience">
+                            </div>
+
+                            <!-- Email Address -->
+                            <div class="col-md-6 col-lg-4">
+                                <label class="form-label fw-semibold text-secondary small mb-1">Email Address</label>
+                                <input type="email" class="form-control form-control-lg fs-6" id="empEmailInput" placeholder="Email Address">
+                            </div>
+
+                            <!-- Date of Birth -->
+                            <div class="col-md-6 col-lg-4">
+                                <label class="form-label fw-semibold text-secondary small mb-1">Date of Birth</label>
+                                <input type="date" class="form-control form-control-lg fs-6" id="empDOB" placeholder="mm/dd/yyyy">
+                            </div>
+
+                            <!-- Home Address -->
                             <div class="col-12">
-                                <label class="form-label fw-semibold">Previous Work Experience (Years / Details)</label>
-                                <textarea class="form-control" rows="2" id="empExp" placeholder="e.g., 5 years at City Secondary School"></textarea>
+                                <label class="form-label fw-semibold text-secondary small mb-1">Home Address</label>
+                                <textarea class="form-control form-control-lg fs-6" rows="2" id="empPresentAddr" placeholder="Home Address"></textarea>
                             </div>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <button type="button" class="btn btn-light px-4" onclick="goToStep(2)"><i class="bi bi-arrow-left me-1"></i> Back</button>
-                            <button type="button" class="btn text-white px-4" style="background-color: var(--primary-blue);" onclick="goToStep(4)">Next Step <i class="bi bi-arrow-right ms-1"></i></button>
                         </div>
                     </div>
 
-                    <!-- STEP 4: Statutory & Financial Details -->
-                    <div class="wizard-step d-none" id="step-4">
-                        <h5 class="fw-bold mb-3 text-secondary border-start border-3 border-purple ps-2">4. Salary & Financial Details</h5>
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Basic Salary ($ / BDT)</label>
-                                <input type="number" class="form-control" id="empBasicSalary" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Tax Identification Number (TIN)</label>
-                                <input type="text" class="form-control" id="empTIN">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Provident Fund (PF) Status</label>
-                                <select class="form-select" id="empPF">
-                                    <option>Yes</option>
-                                    <option>No</option>
-                                </select>
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Bank Name</label>
-                                <input type="text" class="form-control" id="empBankName" placeholder="e.g., Sonali Bank">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Bank Account Number</label>
-                                <input type="text" class="form-control" id="empBankAcc">
-                            </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Branch Name</label>
-                                <input type="text" class="form-control" id="empBankBranch">
-                            </div>
-                            <div class="col-md-12">
-                                <label class="form-label fw-semibold">Mobile Banking Account (Alternative)</label>
-                                <input type="text" class="form-control" id="empMobileBank" placeholder="bKash / Nagad / Rocket Number">
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <button type="button" class="btn btn-light px-4" onclick="goToStep(3)"><i class="bi bi-arrow-left me-1"></i> Back</button>
-                            <button type="button" class="btn text-white px-4" style="background-color: var(--primary-blue);" onclick="goToStep(5)">Next Step <i class="bi bi-arrow-right ms-1"></i></button>
-                        </div>
+                    <!-- Form Action Buttons -->
+                    <div class="d-flex justify-content-end gap-2 pt-2">
+                        <button type="button" class="btn btn-outline-secondary px-4 fw-semibold" onclick="resetEmployeeForm()">
+                            <i class="bi bi-arrow-counterclockwise me-1"></i> Reset
+                        </button>
+                        <button type="submit" class="btn text-white px-5 fw-semibold shadow-sm" style="background: linear-gradient(135deg, var(--primary-blue), var(--secondary-purple)); border: none;">
+                            <i class="bi bi-check-circle me-1"></i> Submit
+                        </button>
                     </div>
-
-                    <!-- STEP 5: System Access & Security -->
-                    <div class="wizard-step d-none" id="step-5">
-                        <h5 class="fw-bold mb-3 text-secondary border-start border-3 border-purple ps-2">5. System Access Credentials</h5>
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Username / Login ID</label>
-                                <input type="text" class="form-control" id="empUsernameInput" placeholder="Auto-generated if blank">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Password / Temporary Password</label>
-                                <input type="password" class="form-control" id="empPass" value="12345" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Role-Based Access (RBAC)</label>
-                                <select class="form-select" id="empRBAC" required>
-                                    <option value="Admin">Admin (Full Control)</option>
-                                    <option value="Teacher" selected>Teacher (Classroom clearance)</option>
-                                    <option value="Staff">Staff (Non-academic registers)</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Account Status</label>
-                                <select class="form-select" id="empStatus">
-                                    <option>Active</option>
-                                    <option>Inactive</option>
-                                    <option>Suspended</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <button type="button" class="btn btn-light px-4" onclick="goToStep(4)"><i class="bi bi-arrow-left me-1"></i> Back</button>
-                            <button type="button" class="btn text-white px-4" style="background-color: var(--primary-blue);" onclick="goToStep(6)">Next Step <i class="bi bi-arrow-right ms-1"></i></button>
-                        </div>
-                    </div>
-
-                    <!-- STEP 6: Document Attachments -->
-                    <div class="wizard-step d-none" id="step-6">
-                        <h5 class="fw-bold mb-3 text-secondary border-start border-3 border-purple ps-2">6. Document Attachments (PDF/Zip)</h5>
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">CV / Resume (PDF)</label>
-                                <input type="file" class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Educational Certificates (Zip/PDF)</label>
-                                <input type="file" class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">NID / Passport Scan copy</label>
-                                <input type="file" class="form-control">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Experience & Release Letter</label>
-                                <input type="file" class="form-control">
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <button type="button" class="btn btn-light px-4" onclick="goToStep(5)"><i class="bi bi-arrow-left me-1"></i> Back</button>
-                            <button type="submit" class="btn text-white px-5" style="background-color: var(--secondary-purple); border: none;">SUBMIT EMPLOYEE PROFILE</button>
-                        </div>
-                    </div>
-
                 </form>
             </div>
         </div>
 
         <!-- 3. Staff ID Cards -->
         <div class="tab-pane fade" id="empid-panel" role="tabpanel">
-            <div class="card custom-card p-4 no-print">
-                <h5 class="fw-bold mb-3">Select Employee to Generate Staff ID Card</h5>
-                <div class="col-md-6 mb-4">
-                    <select class="form-select" id="empIdCardSelector" onchange="generateEmpIdCard()"></select>
+            <div class="card custom-card p-4 no-print shadow-sm border-0 rounded-4">
+                <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom">
+                    <div>
+                        <h4 class="fw-bold mb-1" style="color: var(--primary-blue);">
+                            <i class="bi bi-card-image me-2"></i>Staff ID Card Generator (HD 300 DPI)
+                        </h4>
+                        <p class="text-muted small mb-0">Generate, download & print official front & back staff ID cards with security QR verification.</p>
+                    </div>
+                    <div>
+                        <span class="badge bg-warning-subtle text-dark border border-warning px-3 py-2 rounded-pill fw-semibold">
+                            <i class="bi bi-shield-lock-fill text-warning me-1"></i> Security Protocol Verified
+                        </span>
+                    </div>
                 </div>
+
+                <div class="row g-3 mb-4 align-items-end">
+                    <div class="col-md-5">
+                        <label class="form-label fw-semibold text-secondary small mb-1">Select Staff / Employee <span class="text-danger">*</span></label>
+                        <select class="form-select form-select-lg fs-6" id="empIdCardSelector" onchange="generateEmpIdCard()"></select>
+                    </div>
+                    <div class="col-md-7 d-flex gap-2 justify-content-md-end flex-wrap">
+                        <button type="button" class="btn btn-outline-primary fw-semibold" onclick="downloadIdCardCanvas('front')">
+                            <i class="bi bi-download me-1"></i> Download Front Side (PNG)
+                        </button>
+                        <button type="button" class="btn btn-outline-primary fw-semibold" onclick="downloadIdCardCanvas('back')">
+                            <i class="bi bi-download me-1"></i> Download Back Side (PNG)
+                        </button>
+                        <button type="button" class="btn text-white fw-semibold shadow-sm" style="background: linear-gradient(135deg, var(--primary-blue), var(--secondary-purple));" onclick="triggerPrintIdCards()">
+                            <i class="bi bi-printer me-1"></i> Print Both Sides
+                        </button>
+                    </div>
+                </div>
+
                 <div id="empIdCardResultArea" class="d-none">
-                    <div class="emp-id-card mx-auto mb-4">
-                        <div class="emp-id-card-header">
-                            <h6 class="mb-0 fw-bold">EDUMANAGE STAFF</h6>
-                            <small style="font-size: 0.65rem;">EMPLOYEE ID CARD</small>
-                        </div>
-                        <div class="p-4 text-center">
-                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&h=120" alt="avatar" class="emp-avatar mb-3" id="empIdCardPhoto">
-                            <h5 class="fw-bold mb-1" id="empIdCardName">Jane Doe</h5>
-                            <p class="small text-white-50 mb-3" id="empIdCardDesignation">Teacher</p>
-                            
-                            <div class="bg-white text-dark rounded p-2 mx-auto small text-start" style="width: 220px;">
-                                <div><strong>Dept:</strong> <span id="empIdCardDept">Administration</span></div>
-                                <div><strong>ID Code:</strong> <span id="empIdCardCode">EMP-102</span></div>
-                                <div><strong>Join Date:</strong> <span id="empIdCardJoin">Jan 2021</span></div>
+                    <div class="row justify-content-center g-4 my-2">
+                        <!-- Front Card Preview -->
+                        <div class="col-auto text-center">
+                            <div class="fw-bold text-muted small mb-2 text-uppercase tracking-wide"><i class="bi bi-front me-1"></i> Front Side</div>
+                            <div class="id-card-canvas-wrapper shadow-lg rounded-4 overflow-hidden position-relative" style="width: 440px; max-width: 90vw; border: 3px solid #e2b714; background: #003043;">
+                                <canvas id="idCardFrontCanvas" width="1013" height="638" style="width: 100%; height: auto; display: block;"></canvas>
                             </div>
                         </div>
-                        <div style="background-color: var(--primary-blue); height: 10px;"></div>
-                    </div>
-                    <div class="text-center">
-                        <button class="btn btn-outline-primary" onclick="triggerPrint()"><i class="bi bi-printer me-2"></i>Print Staff ID Card</button>
+
+                        <!-- Back Card Preview -->
+                        <div class="col-auto text-center">
+                            <div class="fw-bold text-muted small mb-2 text-uppercase tracking-wide"><i class="bi bi-back me-1"></i> Back Side</div>
+                            <div class="id-card-canvas-wrapper shadow-lg rounded-4 overflow-hidden position-relative" style="width: 440px; max-width: 90vw; border: 3px solid #e2b714; background: #001d25;">
+                                <canvas id="idCardBackCanvas" width="1013" height="638" style="width: 100%; height: auto; display: block;"></canvas>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -529,13 +566,66 @@
 
 <!-- HIDDEN PRINT AREA FOR A4 PRINTS -->
 <div id="printArea" class="d-none"></div>
+
+<!-- SAVE SUCCESS POPUP DIALOG BOX -->
+<div id="saveSuccessModal" class="modal-overlay d-none" onclick="if(event.target === this) closeSaveSuccessModal()">
+    <div class="save-success-card shadow-lg">
+        <div class="icon-circle mb-3">
+            <i class="bi bi-check-lg"></i>
+        </div>
+        <h5 class="fw-bold mb-2">Success!</h5>
+        <p class="text-secondary small mb-4">Employee profile saved successfully!</p>
+        <button type="button" class="btn btn-success px-4 py-2 rounded-pill fw-semibold shadow-sm w-100" onclick="closeSaveSuccessModal()">
+            <i class="bi bi-check-circle me-1"></i> OK
+        </button>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'vendor/qrcodejs/qrcode.min.js' %}" onerror="this.onerror=null;this.src='https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js';"></script>
 <script>
     const defaultEmployees = [
-        { id: 1, name: "David Henderson", role: "Senior Teacher", dept: "Mathematics", email: "david.h@school.com", joinDate: "2021-01-12", active: true, username: "david.h", pass: "12345" },
-        { id: 2, name: "Sarah Vance", role: "Teacher", dept: "English", email: "sarah.v@school.com", joinDate: "2022-08-10", active: true, username: "sarah.v", pass: "12345" }
+        { 
+            id: "N56889404", 
+            idCode: "N56889404",
+            name: "রুহুল আমিন (Ruhul Amin)", 
+            nameBn: "রুহুল আমিন",
+            nameEn: "Ruhul Amin",
+            role: "Office Assistant", 
+            desigBn: "অফিস সহকারী",
+            desigEn: "Office Assistant",
+            dept: "Admin & Office", 
+            email: "ruhul.amin@school.com", 
+            joinDate: "2023-01-15", 
+            active: true, 
+            username: "ruhul.a", 
+            pass: "12345" 
+        },
+        { 
+            id: 2, 
+            idCode: "T100201",
+            name: "David Henderson", 
+            role: "Senior Teacher", 
+            dept: "Mathematics", 
+            email: "david.h@school.com", 
+            joinDate: "2021-01-12", 
+            active: true, 
+            username: "david.h", 
+            pass: "12345" 
+        },
+        { 
+            id: 3, 
+            idCode: "T100202",
+            name: "Sarah Vance", 
+            role: "Teacher", 
+            dept: "English", 
+            email: "sarah.v@school.com", 
+            joinDate: "2022-08-10", 
+            active: true, 
+            username: "sarah.v", 
+            pass: "12345" 
+        }
     ];
 
     function getEmployees() {
@@ -544,7 +634,13 @@
             localStorage.setItem('school_employees', JSON.stringify(defaultEmployees));
             return defaultEmployees;
         }
-        return JSON.parse(stored);
+        let list = JSON.parse(stored);
+        const exists = list.some(e => e.idCode === "N56889404" || (e.name && e.name.includes("Ruhul Amin")));
+        if (!exists) {
+            list.unshift(defaultEmployees[0]);
+            localStorage.setItem('school_employees', JSON.stringify(list));
+        }
+        return list;
     }
 
     function renderEmployees() {
@@ -587,47 +683,37 @@
         });
     }
 
-    // Multi-Step Form Navigation
-    window.goToStep = function(step) {
-        // Hide all steps
-        document.querySelectorAll('.wizard-step').forEach(el => el.classList.add('d-none'));
-        // Show active step
-        document.getElementById('step-' + step).classList.remove('d-none');
-
-        // Update pills
-        document.querySelectorAll('#wizardSteps .nav-link').forEach((btn, idx) => {
-            if (idx + 1 === step) {
-                btn.classList.add('active');
-            } else {
-                btn.classList.remove('active');
-            }
-        });
-    }
-
-    window.copyAddress = function() {
-        const check = document.getElementById('sameAddressCheck');
-        if (check.checked) {
-            document.getElementById('empPermAddr').value = document.getElementById('empPresentAddr').value;
-        } else {
-            document.getElementById('empPermAddr').value = '';
-        }
-    }
-
     let editingEmpId = null;
 
     window.previewPhoto = function(event) {
         const file = event.target.files[0];
         if (file) {
+            if (file.size > 100 * 1024) {
+                alert("File size exceeds 100KB! Please select a smaller file.");
+                event.target.value = "";
+                return;
+            }
             const reader = new FileReader();
             reader.onload = function(e) {
                 const preview = document.getElementById('photoPreview');
-                const prompt = document.getElementById('uploadPrompt');
-                preview.src = e.target.result;
-                preview.classList.remove('d-none');
-                prompt.classList.add('d-none');
+                const container = document.getElementById('photoPreviewContainer');
+                if (preview) {
+                    preview.src = e.target.result;
+                    if (container) container.classList.remove('d-none');
+                }
             };
             reader.readAsDataURL(file);
         }
+    }
+
+    window.resetEmployeeForm = function() {
+        const form = document.getElementById('addEmployeeForm');
+        if (form) form.reset();
+        editingEmpId = null;
+        const heading = document.getElementById('formTitle');
+        if (heading) heading.innerHTML = `<i class="bi bi-person-plus-fill me-2"></i>Register Employee Profile`;
+        const container = document.getElementById('photoPreviewContainer');
+        if (container) container.classList.add('d-none');
     }
 
     window.editEmployee = function(id) {
@@ -635,68 +721,52 @@
         const emp = employees.find(e => e.id === id);
         if (emp) {
             editingEmpId = id;
+                       // Populate form fields
+            if (document.getElementById('empFullName')) document.getElementById('empFullName').value = emp.name || '';
+            if (document.getElementById('empFatherName')) document.getElementById('empFatherName').value = emp.fatherName || '';
+            if (document.getElementById('empMotherName')) document.getElementById('empMotherName').value = emp.motherName || '';
+            if (document.getElementById('empSpouseName')) document.getElementById('empSpouseName').value = emp.spouseName || '';
+            if (document.getElementById('empDOB')) document.getElementById('empDOB').value = emp.dob || '';
+            if (document.getElementById('empGender')) document.getElementById('empGender').value = emp.gender || '';
+            if (document.getElementById('empBlood')) document.getElementById('empBlood').value = emp.blood || '';
+            if (document.getElementById('empReligion')) document.getElementById('empReligion').value = emp.religion || emp.nationReligion || '';
+            if (document.getElementById('empNID')) document.getElementById('empNID').value = emp.nid || '';
             
-            // Populate all form fields
-            document.getElementById('empFullName').value = emp.name || '';
-            document.getElementById('empFatherName').value = emp.fatherName || '';
-            document.getElementById('empMotherName').value = emp.motherName || '';
-            document.getElementById('empDOB').value = emp.dob || '';
-            document.getElementById('empGender').value = emp.gender || 'Male';
-            document.getElementById('empBlood').value = emp.blood || 'A+';
-            document.getElementById('empMarital').value = emp.marital || 'Single';
-            document.getElementById('empNationReligion').value = emp.nationReligion || '';
-            document.getElementById('empNID').value = emp.nid || '';
-            
-            document.getElementById('empPrimaryPhone').value = emp.primaryPhone || '';
-            document.getElementById('empAltPhone').value = emp.altPhone || '';
-            document.getElementById('empEmailInput').value = emp.email || '';
-            document.getElementById('empPresentAddr').value = emp.presentAddr || '';
-            document.getElementById('empPermAddr').value = emp.permAddr || '';
-            document.getElementById('empEmergName').value = emp.emergName || '';
-            document.getElementById('empEmergRelation').value = emp.emergRelation || '';
-            document.getElementById('empEmergPhone').value = emp.emergPhone || '';
+            if (document.getElementById('empIndexNo')) document.getElementById('empIndexNo').value = emp.indexNo || '';
+            if (document.getElementById('empAppointmentDate')) document.getElementById('empAppointmentDate').value = emp.appointmentDate || '';
+            if (document.getElementById('empFirstMPO')) document.getElementById('empFirstMPO').value = emp.firstMPO || '';
+            if (document.getElementById('empPayCode')) document.getElementById('empPayCode').value = emp.payCode || '';
 
-            document.getElementById('empDesignationInput').value = emp.role || '';
-            document.getElementById('empDeptInput').value = emp.dept || 'Science';
-            document.getElementById('empJoinDateInput').value = emp.joinDate || '';
-            document.getElementById('empJobType').value = emp.jobType || 'Full-time';
-            document.getElementById('empEdu').value = emp.edu || '';
-            document.getElementById('empExp').value = emp.exp || '';
+            if (document.getElementById('empPrimaryPhone')) document.getElementById('empPrimaryPhone').value = emp.primaryPhone || '';
+            if (document.getElementById('empEmailInput')) document.getElementById('empEmailInput').value = emp.email || '';
+            if (document.getElementById('empPresentAddr')) document.getElementById('empPresentAddr').value = emp.presentAddr || '';
 
-            document.getElementById('empBasicSalary').value = emp.basicSalary || '';
-            document.getElementById('empTIN').value = emp.tin || '';
-            document.getElementById('empPF').value = emp.pf || 'Yes';
-            document.getElementById('empBankName').value = emp.bankName || '';
-            document.getElementById('empBankAcc').value = emp.bankAcc || '';
-            document.getElementById('empBankBranch').value = emp.bankBranch || '';
-            document.getElementById('empMobileBank').value = emp.mobileBank || '';
-
-            document.getElementById('empUsernameInput').value = emp.username || '';
-            document.getElementById('empPass').value = emp.pass || '12345';
-            document.getElementById('empRBAC').value = emp.rbac || 'Teacher';
-            document.getElementById('empStatus').value = emp.status || 'Active';
+            if (document.getElementById('empDesignationInput')) document.getElementById('empDesignationInput').value = emp.role || '';
+            if (document.getElementById('empJoinDateInput')) document.getElementById('empJoinDateInput').value = emp.joinDate || '2026-07-26';
+            if (document.getElementById('empEdu')) document.getElementById('empEdu').value = emp.edu || '';
+            if (document.getElementById('empExp')) document.getElementById('empExp').value = emp.exp || '';
+            if (document.getElementById('empBasicSalary')) document.getElementById('empBasicSalary').value = emp.basicSalary || '';
 
             // Show Photo Preview
             const preview = document.getElementById('photoPreview');
-            const prompt = document.getElementById('uploadPrompt');
+            const container = document.getElementById('photoPreviewContainer');
             if (emp.photo) {
-                preview.src = emp.photo;
-                preview.classList.remove('d-none');
-                prompt.classList.add('d-none');
+                if (preview) preview.src = emp.photo;
+                if (container) container.classList.remove('d-none');
             } else {
-                preview.classList.add('d-none');
-                prompt.classList.remove('d-none');
+                if (container) container.classList.add('d-none');
             }
 
             // Change title
-            document.querySelector('#add-emp-panel h4').innerHTML = `<i class="bi bi-pencil-square me-2"></i>Edit Employee Profile`;
+            const heading = document.getElementById('formTitle');
+            if (heading) heading.innerHTML = `<i class="bi bi-pencil-square me-2"></i>Edit Employee Profile`;
             
             // Switch to form tab
             const trigger = document.getElementById('add-emp-tab');
-            bootstrap.Tab.getInstance(trigger).show();
-
-            // Go to Step 1
-            goToStep(1);
+            if (trigger) {
+                var tabInstance = bootstrap.Tab.getOrCreateInstance(trigger);
+                tabInstance.show();
+            }
         }
     }
 
@@ -706,25 +776,38 @@
         const nameInput = document.getElementById('empFullName');
         const name = nameInput ? nameInput.value.trim() : '';
         if (!name) {
-            alert('Employee Full Name is required.');
-            goToStep(1);
+            alert('Employee Name is required.');
             if (nameInput) nameInput.focus();
             return;
         }
 
         const roleInput = document.getElementById('empDesignationInput');
-        const role = (roleInput && roleInput.value.trim()) ? roleInput.value.trim() : 'Teacher';
-        const deptInput = document.getElementById('empDeptInput');
-        const dept = (deptInput && deptInput.value) ? deptInput.value : 'General';
+        const role = (roleInput && roleInput.value.trim()) ? roleInput.value.trim() : '';
+        if (!role) {
+            alert('Employee Role is required.');
+            if (roleInput) roleInput.focus();
+            return;
+        }
+
         const joinDateInput = document.getElementById('empJoinDateInput');
-        const joinDate = (joinDateInput && joinDateInput.value) ? joinDateInput.value : new Date().toISOString().split('T')[0];
+        const joinDate = (joinDateInput && joinDateInput.value) ? joinDateInput.value : '2026-07-26';
+
+        const basicSalaryInput = document.getElementById('empBasicSalary');
+        const basicSalary = (basicSalaryInput && basicSalaryInput.value) ? basicSalaryInput.value : '';
+        if (!basicSalary) {
+            alert('Monthly Salary is required.');
+            if (basicSalaryInput) basicSalaryInput.focus();
+            return;
+        }
+
         const emailInput = document.getElementById('empEmailInput');
         const email = (emailInput && emailInput.value) ? emailInput.value : (name.split(' ')[0].toLowerCase() + '@school.com');
 
-        // Pull photo directly from preview element (synchronous & bulletproof)
+        // Photo handling
         const previewEl = document.getElementById('photoPreview');
-        const photoBase64 = (previewEl && !previewEl.classList.contains('d-none')) ? previewEl.src : null;
-        const defaultPhoto = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%233262a8'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/></svg>";
+        const container = document.getElementById('photoPreviewContainer');
+        const photoBase64 = (previewEl && container && !container.classList.contains('d-none')) ? previewEl.src : null;
+        const defaultPhoto = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230284c7'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/></svg>";
 
         let employees = getEmployees();
         
@@ -734,43 +817,30 @@
                 if (emp.id === editingEmpId) {
                     emp.name = name;
                     emp.role = role;
-                    emp.dept = dept;
+                    emp.dept = emp.dept || 'General';
                     emp.joinDate = joinDate;
                     emp.email = email;
                     
                     emp.fatherName = document.getElementById('empFatherName') ? document.getElementById('empFatherName').value : '';
                     emp.motherName = document.getElementById('empMotherName') ? document.getElementById('empMotherName').value : '';
+                    emp.spouseName = document.getElementById('empSpouseName') ? document.getElementById('empSpouseName').value : '';
                     emp.dob = document.getElementById('empDOB') ? document.getElementById('empDOB').value : '';
-                    emp.gender = document.getElementById('empGender') ? document.getElementById('empGender').value : 'Male';
-                    emp.blood = document.getElementById('empBlood') ? document.getElementById('empBlood').value : 'A+';
-                    emp.marital = document.getElementById('empMarital') ? document.getElementById('empMarital').value : 'Single';
-                    emp.nationReligion = document.getElementById('empNationReligion') ? document.getElementById('empNationReligion').value : '';
+                    emp.gender = document.getElementById('empGender') ? document.getElementById('empGender').value : '';
+                    emp.blood = document.getElementById('empBlood') ? document.getElementById('empBlood').value : '';
+                    emp.religion = document.getElementById('empReligion') ? document.getElementById('empReligion').value : '';
                     emp.nid = document.getElementById('empNID') ? document.getElementById('empNID').value : '';
                     
-                    emp.primaryPhone = document.getElementById('empPrimaryPhone') ? document.getElementById('empPrimaryPhone').value : '';
-                    emp.altPhone = document.getElementById('empAltPhone') ? document.getElementById('empAltPhone').value : '';
-                    emp.presentAddr = document.getElementById('empPresentAddr') ? document.getElementById('empPresentAddr').value : '';
-                    emp.permAddr = document.getElementById('empPermAddr') ? document.getElementById('empPermAddr').value : '';
-                    emp.emergName = document.getElementById('empEmergName') ? document.getElementById('empEmergName').value : '';
-                    emp.emergRelation = document.getElementById('empEmergRelation') ? document.getElementById('empEmergRelation').value : '';
-                    emp.emergPhone = document.getElementById('empEmergPhone') ? document.getElementById('empEmergPhone').value : '';
+                    emp.indexNo = document.getElementById('empIndexNo') ? document.getElementById('empIndexNo').value : '';
+                    emp.appointmentDate = document.getElementById('empAppointmentDate') ? document.getElementById('empAppointmentDate').value : '';
+                    emp.firstMPO = document.getElementById('empFirstMPO') ? document.getElementById('empFirstMPO').value : '';
+                    emp.payCode = document.getElementById('empPayCode') ? document.getElementById('empPayCode').value : '';
 
-                    emp.jobType = document.getElementById('empJobType') ? document.getElementById('empJobType').value : 'Full-time';
+                    emp.primaryPhone = document.getElementById('empPrimaryPhone') ? document.getElementById('empPrimaryPhone').value : '';
+                    emp.presentAddr = document.getElementById('empPresentAddr') ? document.getElementById('empPresentAddr').value : '';
+
                     emp.edu = document.getElementById('empEdu') ? document.getElementById('empEdu').value : '';
                     emp.exp = document.getElementById('empExp') ? document.getElementById('empExp').value : '';
-
-                    emp.basicSalary = document.getElementById('empBasicSalary') ? document.getElementById('empBasicSalary').value : '';
-                    emp.tin = document.getElementById('empTIN') ? document.getElementById('empTIN').value : '';
-                    emp.pf = document.getElementById('empPF') ? document.getElementById('empPF').value : 'Yes';
-                    emp.bankName = document.getElementById('empBankName') ? document.getElementById('empBankName').value : '';
-                    emp.bankAcc = document.getElementById('empBankAcc') ? document.getElementById('empBankAcc').value : '';
-                    emp.bankBranch = document.getElementById('empBankBranch') ? document.getElementById('empBankBranch').value : '';
-                    emp.mobileBank = document.getElementById('empMobileBank') ? document.getElementById('empMobileBank').value : '';
-
-                    emp.username = (document.getElementById('empUsernameInput') && document.getElementById('empUsernameInput').value) || emp.username;
-                    emp.pass = (document.getElementById('empPass') && document.getElementById('empPass').value) || emp.pass;
-                    emp.rbac = document.getElementById('empRBAC') ? document.getElementById('empRBAC').value : 'Teacher';
-                    emp.status = document.getElementById('empStatus') ? document.getElementById('empStatus').value : 'Active';
+                    emp.basicSalary = basicSalary;
 
                     if (photoBase64) {
                         emp.photo = photoBase64;
@@ -779,54 +849,42 @@
                 return emp;
             });
             editingEmpId = null;
-            const heading = document.querySelector('#add-emp-panel h4');
+            const heading = document.getElementById('formTitle');
             if (heading) heading.innerHTML = `<i class="bi bi-person-plus-fill me-2"></i>Register Employee Profile`;
         } else {
             // Add Mode
-            const userIn = document.getElementById('empUsernameInput');
-            const passIn = document.getElementById('empPass');
             const newEmp = {
                 id: Date.now(),
                 name: name,
                 role: role,
-                dept: dept,
+                dept: 'General',
                 email: email,
                 joinDate: joinDate,
                 active: true,
-                username: (userIn && userIn.value) ? userIn.value : name.split(' ')[0].toLowerCase() + Math.floor(Math.random() * 99),
-                pass: (passIn && passIn.value) ? passIn.value : "12345",
+                username: name.split(' ')[0].toLowerCase() + Math.floor(Math.random() * 99),
+                pass: "12345",
                 
                 fatherName: document.getElementById('empFatherName') ? document.getElementById('empFatherName').value : '',
                 motherName: document.getElementById('empMotherName') ? document.getElementById('empMotherName').value : '',
+                spouseName: document.getElementById('empSpouseName') ? document.getElementById('empSpouseName').value : '',
                 dob: document.getElementById('empDOB') ? document.getElementById('empDOB').value : '',
-                gender: document.getElementById('empGender') ? document.getElementById('empGender').value : 'Male',
-                blood: document.getElementById('empBlood') ? document.getElementById('empBlood').value : 'A+',
-                marital: document.getElementById('empMarital') ? document.getElementById('empMarital').value : 'Single',
-                nationReligion: document.getElementById('empNationReligion') ? document.getElementById('empNationReligion').value : '',
+                gender: document.getElementById('empGender') ? document.getElementById('empGender').value : '',
+                blood: document.getElementById('empBlood') ? document.getElementById('empBlood').value : '',
+                religion: document.getElementById('empReligion') ? document.getElementById('empReligion').value : '',
                 nid: document.getElementById('empNID') ? document.getElementById('empNID').value : '',
                 
-                primaryPhone: document.getElementById('empPrimaryPhone') ? document.getElementById('empPrimaryPhone').value : '',
-                altPhone: document.getElementById('empAltPhone') ? document.getElementById('empAltPhone').value : '',
-                presentAddr: document.getElementById('empPresentAddr') ? document.getElementById('empPresentAddr').value : '',
-                permAddr: document.getElementById('empPermAddr') ? document.getElementById('empPermAddr').value : '',
-                emergName: document.getElementById('empEmergName') ? document.getElementById('empEmergName').value : '',
-                emergRelation: document.getElementById('empEmergRelation') ? document.getElementById('empEmergRelation').value : '',
-                emergPhone: document.getElementById('empEmergPhone') ? document.getElementById('empEmergPhone').value : '',
+                indexNo: document.getElementById('empIndexNo') ? document.getElementById('empIndexNo').value : '',
+                appointmentDate: document.getElementById('empAppointmentDate') ? document.getElementById('empAppointmentDate').value : '',
+                firstMPO: document.getElementById('empFirstMPO') ? document.getElementById('empFirstMPO').value : '',
+                payCode: document.getElementById('empPayCode') ? document.getElementById('empPayCode').value : '',
 
-                jobType: document.getElementById('empJobType') ? document.getElementById('empJobType').value : 'Full-time',
+                primaryPhone: document.getElementById('empPrimaryPhone') ? document.getElementById('empPrimaryPhone').value : '',
+                presentAddr: document.getElementById('empPresentAddr') ? document.getElementById('empPresentAddr').value : '',
+
                 edu: document.getElementById('empEdu') ? document.getElementById('empEdu').value : '',
                 exp: document.getElementById('empExp') ? document.getElementById('empExp').value : '',
-
-                basicSalary: document.getElementById('empBasicSalary') ? document.getElementById('empBasicSalary').value : '',
-                tin: document.getElementById('empTIN') ? document.getElementById('empTIN').value : '',
-                pf: document.getElementById('empPF') ? document.getElementById('empPF').value : 'Yes',
-                bankName: document.getElementById('empBankName') ? document.getElementById('empBankName').value : '',
-                bankAcc: document.getElementById('empBankAcc') ? document.getElementById('empBankAcc').value : '',
-                bankBranch: document.getElementById('empBankBranch') ? document.getElementById('empBankBranch').value : '',
-                mobileBank: document.getElementById('empMobileBank') ? document.getElementById('empMobileBank').value : '',
-                
-                rbac: document.getElementById('empRBAC') ? document.getElementById('empRBAC').value : 'Teacher',
-                status: document.getElementById('empStatus') ? document.getElementById('empStatus').value : 'Active',
+                basicSalary: basicSalary,
+                status: 'Active',
                 photo: photoBase64 || defaultPhoto
             };
             employees.push(newEmp);
@@ -834,18 +892,8 @@
 
         localStorage.setItem('school_employees', JSON.stringify(employees));
         
-        // Reset Photo Preview
-        if (previewEl) {
-            previewEl.src = '';
-            previewEl.classList.add('d-none');
-        }
-        const promptEl = document.getElementById('uploadPrompt');
-        if (promptEl) promptEl.classList.remove('d-none');
-
-        // Reset and go to Step 1
-        const form = document.getElementById('addEmployeeForm');
-        if (form) form.reset();
-        goToStep(1);
+        // Reset Form
+        resetEmployeeForm();
 
         renderEmployees();
         if (typeof loadEmpLogins === 'function') loadEmpLogins();
@@ -867,7 +915,21 @@
             }
         }
         
-        alert('Employee profile saved successfully!');
+        showSaveSuccessModal();
+    }
+
+    function showSaveSuccessModal() {
+        const modal = document.getElementById('saveSuccessModal');
+        if (modal) {
+            modal.classList.remove('d-none');
+        }
+    }
+
+    function closeSaveSuccessModal() {
+        const modal = document.getElementById('saveSuccessModal');
+        if (modal) {
+            modal.classList.add('d-none');
+        }
     }
 
     function toggleEmpStatus(id) {
@@ -889,33 +951,1013 @@
         }
     }
 
-    // Staff ID Cards Tab
+    // Staff ID Cards Tab (HD 300 DPI Canvas ID Card Generator)
     function loadEmpIdCardSelector() {
         const employees = getEmployees();
         const select = document.getElementById('empIdCardSelector');
-        select.innerHTML = '<option value="" disabled selected>Select Employee...</option>';
+        if (!select) return;
+
+        select.innerHTML = '<option value="" disabled selected>Select Staff / Employee...</option>';
         employees.forEach(emp => {
-            select.insertAdjacentHTML('beforeend', `<option value="${emp.id}">${emp.name}</option>`);
+            select.insertAdjacentHTML('beforeend', `<option value="${emp.id}">${emp.name} (${emp.role})</option>`);
         });
+
+        if (employees.length > 0) {
+            select.value = employees[0].id;
+            generateEmpIdCard();
+        }
+    }
+
+    // --- HELPER GRAPHICS FUNCTIONS FOR 300 DPI SECURITY ID CARDS ---
+
+    function drawGuillocheTexture(ctx, w, h) {
+        ctx.save();
+        ctx.strokeStyle = "rgba(0, 210, 211, 0.15)";
+        ctx.lineWidth = 1.2;
+        const centerX = w / 2;
+        const centerY = h / 2;
+
+        for (let r = 25; r < 480; r += 22) {
+            ctx.beginPath();
+            for (let angle = 0; angle <= 360; angle += 4) {
+                const rad = (angle * Math.PI) / 180;
+                const distortion = Math.sin(rad * 8) * 16;
+                const x = centerX + (r + distortion) * Math.cos(rad);
+                const y = centerY + (r + distortion) * Math.sin(rad);
+
+                if (angle === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.closePath();
+            ctx.stroke();
+        }
+        ctx.restore();
+    }
+
+    function drawLanyardSlot(ctx, w) {
+        ctx.save();
+        const slotW = 110;
+        const slotH = 18;
+        const slotX = (w - slotW) / 2;
+        const slotY = 16;
+
+        ctx.fillStyle = '#01151a';
+        ctx.strokeStyle = '#00d2d3';
+        ctx.lineWidth = 2;
+
+        ctx.beginPath();
+        ctx.roundRect(slotX, slotY, slotW, slotH, 9);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    function drawBangladeshFlag(ctx, x, y, w, h) {
+        ctx.save();
+        ctx.fillStyle = '#006a4e';
+        ctx.beginPath();
+        ctx.roundRect(x, y, w, h, 4);
+        ctx.fill();
+
+        ctx.fillStyle = '#f42a41';
+        ctx.beginPath();
+        ctx.arc(x + w * 0.44, y + h * 0.5, h * 0.32, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        ctx.restore();
+    }
+
+    function drawSmartChip(ctx, x, y, w, h) {
+        ctx.save();
+        const chipGrad = ctx.createLinearGradient(x, y, x + w, y + h);
+        chipGrad.addColorStop(0, '#ffeaa7');
+        chipGrad.addColorStop(0.5, '#fdcb6e');
+        chipGrad.addColorStop(1, '#e1b12c');
+
+        ctx.fillStyle = chipGrad;
+        ctx.strokeStyle = '#b27b16';
+        ctx.lineWidth = 1.5;
+
+        ctx.beginPath();
+        ctx.roundRect(x, y, w, h, 6);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.strokeStyle = '#7c5409';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x + w * 0.35, y); ctx.lineTo(x + w * 0.35, y + h);
+        ctx.moveTo(x + w * 0.65, y); ctx.lineTo(x + w * 0.65, y + h);
+        ctx.moveTo(x, y + h * 0.5); ctx.lineTo(x + w, y + h * 0.5);
+        ctx.stroke();
+
+        ctx.strokeRect(x + w * 0.35, y + h * 0.25, w * 0.3, h * 0.5);
+        ctx.restore();
+    }
+
+    function drawShieldBadge(ctx, x, y, s) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(0, 48, 67, 0.6)';
+        ctx.strokeStyle = '#00d2d3';
+        ctx.lineWidth = 2.5;
+
+        ctx.beginPath();
+        ctx.moveTo(x + s / 2, y);
+        ctx.lineTo(x + s, y + s * 0.25);
+        ctx.lineTo(x + s, y + s * 0.6);
+        ctx.bezierCurveTo(x + s, y + s * 0.9, x + s / 2, y + s, x + s / 2, y + s);
+        ctx.bezierCurveTo(x + s / 2, y + s, x, y + s * 0.9, x, y + s * 0.6);
+        ctx.lineTo(x, y + s * 0.25);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = "bold " + Math.floor(s * 0.45) + "px sans-serif";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("G", x + s / 2, y + s * 0.52);
+        ctx.restore();
+    }
+
+    function drawHolographicEagleGlobe(ctx, x, y, size) {
+        ctx.save();
+        const holoGrad = ctx.createLinearGradient(x, y, x + size, y + size);
+        holoGrad.addColorStop(0, 'rgba(129, 236, 236, 0.7)');
+        holoGrad.addColorStop(0.25, 'rgba(255, 118, 117, 0.7)');
+        holoGrad.addColorStop(0.5, 'rgba(253, 203, 110, 0.7)');
+        holoGrad.addColorStop(0.75, 'rgba(162, 155, 254, 0.7)');
+        holoGrad.addColorStop(1, 'rgba(0, 210, 211, 0.7)');
+
+        ctx.strokeStyle = holoGrad;
+        ctx.fillStyle = holoGrad;
+        ctx.lineWidth = 2.5;
+
+        const gx = x + size / 2;
+        const gy = y + size * 0.72;
+        const gr = size * 0.22;
+
+        ctx.beginPath(); ctx.arc(gx, gy, gr, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.ellipse(gx, gy, gr, gr * 0.4, 0, 0, Math.PI * 2); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(gx, gy - gr); ctx.lineTo(gx, gy + gr); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(gx - gr, gy); ctx.lineTo(gx + gr, gy); ctx.stroke();
+
+        const ex = gx;
+        const ey = y + size * 0.35;
+
+        ctx.beginPath(); ctx.arc(ex + 3, ey - 20, 6, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.moveTo(ex + 8, ey - 22); ctx.lineTo(ex + 15, ey - 18); ctx.lineTo(ex + 8, ey - 14); ctx.fill();
+
+        ctx.beginPath();
+        ctx.moveTo(ex, ey - 8);
+        ctx.bezierCurveTo(ex - size * 0.25, ey - size * 0.4, ex - size * 0.45, ey - size * 0.35, ex - size * 0.48, ey - size * 0.1);
+        ctx.bezierCurveTo(ex - size * 0.3, ey - size * 0.05, ex - size * 0.15, ey, ex, ey + 8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(ex, ey - 8);
+        ctx.bezierCurveTo(ex + size * 0.25, ey - size * 0.4, ex + size * 0.45, ey - size * 0.35, ex + size * 0.48, ey - size * 0.1);
+        ctx.bezierCurveTo(ex + size * 0.3, ey - size * 0.05, ex + size * 0.15, ey, ex, ey + 8);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.restore();
+    }
+
+    function drawHolographicEmblem(ctx, x, y, size) {
+        drawHolographicEagleGlobe(ctx, x, y, size);
+    }
+
+    // --- HELPER: Code 128 Pattern Generator ---
+    function generateCode128BitString(text) {
+        const str = String(text || '05568917881').trim();
+        const CODE128B_PATTERNS = [
+            "11011001100", "11001101100", "11001100110", "10010011000", "10010001100",
+            "10001001100", "10011001000", "10011000100", "10001100100", "11001001000",
+            "11001000100", "11000100100", "10110011100", "10011011100", "10011001110",
+            "10111001100", "10011101100", "10011100110", "11001110010", "11001011100",
+            "11001001110", "11011100100", "11001110100", "11101101110", "11101001100",
+            "11100101100", "11100100110", "11101100100", "11100110100", "11100110010",
+            "11011011000", "11011000110", "11000110110", "10100011000", "10001011000",
+            "10001000110", "10110001000", "10001101000", "10001100010", "11010001000",
+            "11000101000", "11000100010", "10110111000", "10001110110", "10111011000",
+            "10111000110", "10001110110", "11101110110", "11010001110", "11000101110",
+            "11011101000", "11011100010", "11011101110", "11101011000", "11101000110",
+            "11100010110", "11101101000", "11101100010", "11100011010", "11101111010",
+            "11001000010", "11110001010", "10100110000", "10100001100", "10010110000",
+            "10010000110", "10000101100", "10000100110", "10110010000", "10110000100",
+            "10011010000", "10011000010", "10000110100", "10000110010", "11000010010",
+            "11001010000", "11110110100", "10000011010", "11010000100", "10000101100",
+            "10001011000", "10001001100", "10010010000", "10010001000", "10001001000",
+            "10010010000", "10001001000", "10010010000", "10001001000", "10010010000"
+        ];
+        const START_B = "11010010000";
+        const STOP = "1100011101011";
+
+        let bitStr = START_B;
+        let checksum = 104;
+
+        for (let i = 0; i < str.length; i++) {
+            let code = str.charCodeAt(i) - 32;
+            if (code < 0 || code >= 95) code = 0;
+            const pat = CODE128B_PATTERNS[code % CODE128B_PATTERNS.length];
+            bitStr += pat;
+            checksum += (code * (i + 1));
+        }
+
+        const checkIdx = checksum % 103;
+        bitStr += CODE128B_PATTERNS[checkIdx % CODE128B_PATTERNS.length];
+        bitStr += STOP;
+
+        return bitStr;
+    }
+
+    // --- HELPER: Barcode128 (Horizontal) ---
+    function drawBarcode128(ctx, text, x, y, width, height) {
+        ctx.save();
+        // White background box with subtle shadow
+        ctx.shadowColor = 'rgba(0,0,0,0.25)';
+        ctx.shadowBlur = 6;
+        ctx.shadowOffsetY = 2;
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.roundRect(x, y, width, height, 6);
+        ctx.fill();
+        ctx.shadowColor = 'transparent';
+
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        const padX = 12;
+        const barY = y + 7;
+        const barH = height - 25;
+        const barAreaW = width - (padX * 2);
+
+        const bitStr = generateCode128BitString(text);
+        const moduleW = barAreaW / bitStr.length;
+
+        ctx.fillStyle = '#000000';
+        for (let i = 0; i < bitStr.length; i++) {
+            if (bitStr[i] === '1') {
+                const drawX = Math.round(x + padX + i * moduleW);
+                const drawW = Math.max(1.8, Math.ceil(moduleW * 1.05));
+                ctx.fillRect(drawX, barY, drawW, barH);
+            }
+        }
+
+        // Number text below bars
+        ctx.fillStyle = '#000000';
+        ctx.font = "bold 13px 'Inter', monospace";
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText(text, x + width / 2, y + height - 3);
+        ctx.restore();
+    }
+
+    // --- HELPER: Barcode128 (Vertical, Right Side) ---
+    function drawVerticalBarcode128(ctx, text, x, y, width, height) {
+        ctx.save();
+        // White container with shadow
+        ctx.shadowColor = 'rgba(0,0,0,0.35)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetX = -2;
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.roundRect(x, y, width, height, 7);
+        ctx.fill();
+        ctx.shadowColor = 'transparent';
+
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        const padTop = 12;
+        const padBot = 26;
+        const padLeft = 8;
+        const barAreaH = height - padTop - padBot;
+        const barAreaW = width - (padLeft * 2) - 16;
+
+        const bitStr = generateCode128BitString(text);
+        const moduleH = barAreaH / bitStr.length;
+
+        ctx.fillStyle = '#000000';
+        for (let i = 0; i < bitStr.length; i++) {
+            if (bitStr[i] === '1') {
+                const drawY = Math.round(y + padTop + i * moduleH);
+                const drawH = Math.max(1.5, Math.ceil(moduleH));
+                ctx.fillRect(x + padLeft, drawY, barAreaW, drawH);
+            }
+        }
+
+        // Vertical number text (rotated 90deg, right side inside box)
+        ctx.save();
+        ctx.translate(x + width - 12, y + height / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillStyle = '#000000';
+        ctx.font = "bold 13px 'Montserrat', 'Inter', monospace";
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(text, 0, 0);
+        ctx.restore();
+
+        ctx.restore();
+    }
+
+    // --- HELPER: Metallic Foil Security Strip ---
+    function drawMetallicSecurityStrip(ctx, x, y, width, height) {
+        ctx.save();
+        const grad = ctx.createLinearGradient(x, y, x + width, y);
+        grad.addColorStop(0.00, '#7a5c00');
+        grad.addColorStop(0.10, '#d4af37');
+        grad.addColorStop(0.22, '#fef3a0');
+        grad.addColorStop(0.35, '#c8920a');
+        grad.addColorStop(0.50, '#fffde0');
+        grad.addColorStop(0.65, '#d4af37');
+        grad.addColorStop(0.78, '#fef3a0');
+        grad.addColorStop(0.90, '#b8860b');
+        grad.addColorStop(1.00, '#6b4c00');
+        ctx.fillStyle = grad;
+        ctx.fillRect(x, y, width, height);
+
+        // Diagonal hatch lines for foil weave texture
+        ctx.strokeStyle = 'rgba(0,0,0,0.12)';
+        ctx.lineWidth = 0.8;
+        for (let i = -height; i < width; i += 6) {
+            ctx.beginPath();
+            ctx.moveTo(x + i, y);
+            ctx.lineTo(x + i + height, y + height);
+            ctx.stroke();
+        }
+        ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+        for (let i = width + height; i > 0; i -= 6) {
+            ctx.beginPath();
+            ctx.moveTo(x + i, y);
+            ctx.lineTo(x + i - height, y + height);
+            ctx.stroke();
+        }
+        // Top & bottom bright edge lines
+        ctx.strokeStyle = 'rgba(255,255,255,0.55)';
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(x, y + 0.5); ctx.lineTo(x + width, y + 0.5); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x, y + height - 0.5); ctx.lineTo(x + width, y + height - 0.5); ctx.stroke();
+        ctx.restore();
+    }
+
+    // --- HELPER: Security Protocol Verification Ribbon ---
+    function drawSecurityProtocolRibbon(ctx, x, y, width, height) {
+        ctx.save();
+
+        // Outer dark container
+        ctx.fillStyle = '#01131a';
+        ctx.beginPath();
+        ctx.roundRect(x, y, width, height, 7);
+        ctx.fill();
+
+        // Gold border
+        const borderGrad = ctx.createLinearGradient(x, y, x + width, y + height);
+        borderGrad.addColorStop(0, '#fef3a0');
+        borderGrad.addColorStop(0.4, '#c8920a');
+        borderGrad.addColorStop(1, '#7a5c00');
+        ctx.strokeStyle = borderGrad;
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+
+        // Clip for microtext
+        ctx.save();
+        ctx.beginPath();
+        ctx.roundRect(x + 2, y + 2, width - 4, height - 4, 5);
+        ctx.clip();
+
+        // Microtext pattern (security background text)
+        ctx.fillStyle = 'rgba(212,175,55,0.32)';
+        ctx.font = '5px monospace';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        const micro = 'GZALMNS CZALJRNS GZMJRNS CZALMNS GEMJRNS CZALJRNS GZMJMNS GZMJRNS CZALMNS ';
+        for (let row = 0; row < 8; row++) {
+            ctx.fillText(micro + micro + micro, x + 4, y + 3 + row * 9);
+        }
+        ctx.restore();
+
+        // Center golden label bar
+        const lblX = x + 28, lblY = y + 7, lblW = width - 56, lblH = height - 14;
+        const lblGrad = ctx.createLinearGradient(lblX, lblY, lblX + lblW, lblY + lblH);
+        lblGrad.addColorStop(0.00, '#fef3a0');
+        lblGrad.addColorStop(0.20, '#e6c155');
+        lblGrad.addColorStop(0.50, '#fffde0');
+        lblGrad.addColorStop(0.80, '#c8920a');
+        lblGrad.addColorStop(1.00, '#a07010');
+        ctx.fillStyle = lblGrad;
+        ctx.shadowColor = 'rgba(0,0,0,0.55)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetY = 3;
+        ctx.beginPath();
+        ctx.roundRect(lblX, lblY, lblW, lblH, 5);
+        ctx.fill();
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetY = 0;
+        ctx.strokeStyle = '#5a3c00';
+        ctx.lineWidth = 1.2;
+        ctx.stroke();
+
+        // Text inside golden label
+        ctx.fillStyle = '#1a0e00';
+        ctx.font = "bold 19px 'Montserrat', 'Inter', sans-serif";
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = 'rgba(255,255,200,0.5)';
+        ctx.shadowBlur = 2;
+        ctx.shadowOffsetY = 1;
+        ctx.fillText('SECURITY PROTOCOL VERIFICATION', lblX + lblW / 2, lblY + lblH / 2 + 1);
+        ctx.restore();
+    }
+
+    // ============================================================
+    // --- FRONT SIDE ID CARD DRAWING (Exact match to reference) ---
+    // ============================================================
+    function drawFrontIdCard(ctx, emp, photoImg, logoImg, qrElement) {
+        const WIDTH = 1013;
+        const HEIGHT = 638;
+        const BAR_W = 65;   // right vertical bar width
+        const CONTENT_W = WIDTH - BAR_W; // 948
+
+        ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+        // === 1. Background gradient (deep ocean teal) ===
+        const bg = ctx.createLinearGradient(0, 0, 0, HEIGHT);
+        bg.addColorStop(0.00, '#053f4e');
+        bg.addColorStop(0.45, '#0a6477');
+        bg.addColorStop(1.00, '#032b35');
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+        // === 2. Guilloche security wave texture ===
+        drawGuillocheTexture(ctx, WIDTH, HEIGHT);
+
+        // Security text watermark (diagonal, very subtle)
+        ctx.save();
+        ctx.globalAlpha = 0.06;
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '11px monospace';
+        ctx.textAlign = 'left';
+        for (let row = 0; row < 12; row++) {
+            for (let col = 0; col < 20; col++) {
+                ctx.fillText('SECURITY · AUTHENTIC ID ·', col * 110 - 30, row * 55 - 10);
+            }
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
+
+        // === 3. RIGHT vertical bar ===
+        ctx.fillStyle = '#021a20';
+        ctx.fillRect(CONTENT_W, 0, BAR_W, HEIGHT);
+
+        // Separator lines (cyan left, gold right)
+        ctx.strokeStyle = '#00d2d3';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(CONTENT_W, 0); ctx.lineTo(CONTENT_W, HEIGHT); ctx.stroke();
+        ctx.strokeStyle = '#d4af37';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath(); ctx.moveTo(CONTENT_W + 2, 0); ctx.lineTo(CONTENT_W + 2, HEIGHT); ctx.stroke();
+
+        // Vertical text "STAFF ID CARD" (reads upward like reference image)
+        ctx.save();
+        ctx.translate(CONTENT_W + BAR_W / 2, HEIGHT / 2);
+        ctx.rotate(Math.PI / 2);  // rotate so text reads from bottom-to-top (upward on right side)
+        ctx.fillStyle = '#ffffff';
+        ctx.font = "bold 27px 'Montserrat', sans-serif";
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = 'rgba(0,0,0,0.8)';
+        ctx.shadowBlur = 5;
+        ctx.fillText('STAFF ID CARD', 0, 0);
+        ctx.restore();
+
+        // === 4. Lanyard slot (top center of content area) ===
+        drawLanyardSlot(ctx, CONTENT_W);
+
+        // === 5. Header: Logo + School Name ===
+        // Logo (circle with gold ring if no image)
+        if (logoImg && logoImg.complete && logoImg.naturalWidth > 0) {
+            // Gold ring
+            ctx.fillStyle = '#d4af37';
+            ctx.beginPath(); ctx.arc(82, 75, 49, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath(); ctx.arc(82, 75, 45, 0, Math.PI * 2); ctx.fill();
+            ctx.save();
+            ctx.beginPath(); ctx.arc(82, 75, 44, 0, Math.PI * 2); ctx.clip();
+            ctx.drawImage(logoImg, 38, 31, 88, 88);
+            ctx.restore();
+        } else {
+            ctx.fillStyle = '#d4af37';
+            ctx.beginPath(); ctx.arc(82, 75, 49, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#003546';
+            ctx.beginPath(); ctx.arc(82, 75, 44, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = '#d4af37';
+            ctx.font = "bold 20px 'Montserrat', sans-serif";
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText('GAZ', 82, 75);
+        }
+
+        // School name - Bengali (large, prominent, bold 40px font, lowered position Y=78)
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = "bold 40px 'Hind Siliguri', 'Kalpurush', sans-serif";
+        ctx.shadowColor = 'rgba(0,0,0,0.7)';
+        ctx.shadowBlur = 5;
+        const schoolBn = emp.schoolBn || 'গাজী মাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়';
+        ctx.fillText(schoolBn, 145, 78, 600);
+
+        // School name - English (gold, prominent bold 23px font, lowered position Y=114)
+        ctx.fillStyle = '#e2b714';
+        ctx.font = "bold 23px 'Montserrat', sans-serif";
+        const schoolEn = emp.schoolEn || 'GAZIMAHMUD JR HIGH SCHOOL';
+        ctx.fillText(schoolEn, 145, 114, 600);
+        ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+
+        // === 6. Shield badge (top right of content) ===
+        drawShieldBadge(ctx, 760, 22, 60);
+
+        // === 7. Holographic Eagle+Globe (center right of card) ===
+        drawHolographicEagleGlobe(ctx, 440, 115, 260);
+
+        // === 8. Smart Chip (bottom right, above QR) ===
+        drawSmartChip(ctx, 830, 220, 82, 58);
+
+        // === 9. Employee Photo (compact 135px circular frame, left side) ===
+        const photoSize = 135;
+        const photoX = 45;
+        const photoY = 152;
+        const photoCX = photoX + photoSize / 2;
+        const photoCY = photoY + photoSize / 2;
+
+        // Gold outer ring
+        ctx.fillStyle = '#d4af37';
+        ctx.beginPath();
+        ctx.arc(photoCX, photoCY, photoSize / 2 + 6, 0, Math.PI * 2);
+        ctx.fill();
+
+        // White inner ring
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(photoCX, photoCY, photoSize / 2 + 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Photo (clipped circle)
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(photoCX, photoCY, photoSize / 2, 0, Math.PI * 2);
+        ctx.clip();
+        if (photoImg && photoImg.complete && photoImg.naturalWidth > 0) {
+            ctx.drawImage(photoImg, photoX, photoY, photoSize, photoSize);
+        } else {
+            // Placeholder avatar
+            const av = ctx.createLinearGradient(photoX, photoY, photoX, photoY + photoSize);
+            av.addColorStop(0, '#0a6477'); av.addColorStop(1, '#032b35');
+            ctx.fillStyle = av;
+            ctx.fillRect(photoX, photoY, photoSize, photoSize);
+            ctx.fillStyle = 'rgba(255,255,255,0.15)';
+            ctx.beginPath(); ctx.arc(photoCX, photoCY - 20, 34, 0, Math.PI * 2); ctx.fill();
+            ctx.beginPath();
+            ctx.arc(photoCX, photoCY + 46, 45, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+
+        // === 10. Employee Name & Details ===
+        let nameStr = emp.name || 'রুহুল আমিন (Ruhul Amin)';
+        if (emp.nameBn && emp.nameEn && emp.nameBn !== emp.nameEn) {
+            nameStr = emp.nameBn + ' (' + emp.nameEn + ')';
+        }
+
+        let desigStr = emp.role || 'অফিস সহকারী (Office Assistant)';
+        if (emp.desigBn && emp.desigEn && emp.desigBn !== emp.desigEn) {
+            desigStr = emp.desigBn + ' (' + emp.desigEn + ')';
+        } else if (desigStr === 'Office Assistant' || desigStr === 'office assistant') {
+            desigStr = 'অফিস সহকারী (Office Assistant)';
+        }
+
+        const empIdVal = emp.idCode || (emp.id && String(emp.id).length > 4 ? String(emp.id).substring(0, 9) : 'N56889404');
+        const deptStr = emp.dept || 'Admin & Office';
+        const joined = emp.joined || (emp.joinDate ? emp.joinDate.substring(0, 4) : '2023');
+        const valid = emp.valid || '2054';
+
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'alphabetic';
+
+        // Name (large, white)
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = "bold 36px 'Hind Siliguri', 'Inter', 'Kalpurush', sans-serif";
+        ctx.shadowColor = 'rgba(0,0,0,0.7)';
+        ctx.shadowBlur = 5;
+        ctx.fillText(nameStr, 38, 345, 700);
+
+        // Designation (cyan)
+        ctx.fillStyle = '#00d2d3';
+        ctx.font = "bold 22px 'Hind Siliguri', 'Inter', sans-serif";
+        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        ctx.shadowBlur = 3;
+        ctx.fillText(desigStr, 38, 382, 700);
+        ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+
+        // ID & Department pill box
+        ctx.fillStyle = '#033040';
+        ctx.strokeStyle = '#00d2d3';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.roundRect(38, 400, 640, 44, 8);
+        ctx.fill(); ctx.stroke();
+
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#ffffff';
+        ctx.font = "bold 18px 'Inter', sans-serif";
+        ctx.fillText('Employee ID: ' + empIdVal + '    |    Department: ' + deptStr, 55, 422, 605);
+
+        // === 11. Bottom Row: Flag + Barcode + QR + Dates ===
+        const barcodeNum = String(emp.nid || emp.idCode || emp.id || '05568917881');
+
+        // Bangladesh flag
+        drawBangladeshFlag(ctx, 38, 462, 82, 54);
+
+        // Barcode (horizontal, centered in bottom row)
+        drawBarcode128(ctx, barcodeNum, 225, 460, 385, 62);
+
+        // QR Code box (positioned directly above Joined: XXXX dates)
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = 'rgba(0,0,0,0.35)';
+        ctx.shadowBlur = 8;
+        ctx.beginPath();
+        ctx.roundRect(808, 350, 126, 126, 10);
+        ctx.fill();
+        ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+        if (qrElement) {
+            ctx.drawImage(qrElement, 814, 356, 114, 114);
+        }
+
+        // Joined & Valid dates (right aligned, above barcode)
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = '#ffffff';
+        ctx.font = "600 17px 'Inter', sans-serif";
+        ctx.fillText('Joined: ' + joined, CONTENT_W - 10, 494);
+        ctx.fillStyle = '#e2b714';
+        ctx.font = "bold 17px 'Inter', sans-serif";
+        ctx.fillText('Valid Until: ' + valid, CONTENT_W - 10, 520);
+
+        // === 12. Bottom metallic foil strip ===
+        drawMetallicSecurityStrip(ctx, 0, 530, CONTENT_W, 28);
+    }
+
+    // ============================================================
+    // --- BACK SIDE ID CARD DRAWING (Exact match to reference) ---
+    // ============================================================
+    function drawBackIdCard(ctx, emp, logoImg) {
+        const WIDTH = 1013;
+        const HEIGHT = 638;
+        const BAR_W = 65;    // left vertical bar width
+
+        ctx.clearRect(0, 0, WIDTH, HEIGHT);
+
+        // === 1. Background gradient ===
+        const bg = ctx.createLinearGradient(0, 0, 0, HEIGHT);
+        bg.addColorStop(0.00, '#022d38');
+        bg.addColorStop(0.50, '#05566a');
+        bg.addColorStop(1.00, '#011e26');
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+        // Radial center glow
+        const glow = ctx.createRadialGradient(WIDTH / 2, HEIGHT / 2, 30, WIDTH / 2, HEIGHT / 2, 480);
+        glow.addColorStop(0, 'rgba(0,210,211,0.10)');
+        glow.addColorStop(1, 'rgba(0,0,0,0.30)');
+        ctx.fillStyle = glow;
+        ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+        // === 2. Guilloche security texture ===
+        drawGuillocheTexture(ctx, WIDTH, HEIGHT);
+
+        // Security watermark diagonal text
+        ctx.save();
+        ctx.globalAlpha = 0.05;
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '10px monospace';
+        ctx.textAlign = 'left';
+        for (let row = 0; row < 14; row++) {
+            for (let col = 0; col < 20; col++) {
+                ctx.fillText('SECURITY · AUTHENTIC ID ·', col * 110 - 30, row * 48 - 10);
+            }
+        }
+        ctx.globalAlpha = 1;
+        ctx.restore();
+
+        // === 3. LEFT vertical title bar ===
+        ctx.fillStyle = '#011820';
+        ctx.fillRect(0, 0, BAR_W, HEIGHT);
+
+        // Separator lines (cyan right edge, gold inner)
+        ctx.strokeStyle = '#00d2d3';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(BAR_W, 0); ctx.lineTo(BAR_W, HEIGHT); ctx.stroke();
+        ctx.strokeStyle = '#d4af37';
+        ctx.lineWidth = 0.8;
+        ctx.beginPath(); ctx.moveTo(BAR_W - 2, 0); ctx.lineTo(BAR_W - 2, HEIGHT); ctx.stroke();
+
+        // "STAFF ID CARD" text (reads from bottom-to-top = rotated -90°)
+        ctx.save();
+        ctx.translate(BAR_W / 2, HEIGHT / 2);
+        ctx.rotate(-Math.PI / 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = "bold 27px 'Montserrat', sans-serif";
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = 'rgba(0,0,0,0.8)';
+        ctx.shadowBlur = 5;
+        ctx.fillText('STAFF ID CARD', 0, 0);
+        ctx.restore();
+
+        const CL = BAR_W;          // content left edge
+        const CW = WIDTH - BAR_W;  // content width = 948
+        const CX = CL + CW / 2;   // content center X = 539
+
+        // === 4. Lanyard slot (top center of full card) ===
+        drawLanyardSlot(ctx, WIDTH);
+
+        const joined = emp.joined || (emp.joinDate ? emp.joinDate.substring(0, 4) : '2023');
+        const valid  = emp.valid  || '2054';
+
+        // === 5. Top pill box: "Joined: XXXX | Valid Until: XXXX" ===
+        ctx.save();
+        ctx.fillStyle = '#033848';
+        ctx.shadowColor = 'rgba(0,0,0,0.45)';
+        ctx.shadowBlur = 10;
+        ctx.shadowOffsetY = 3;
+        ctx.beginPath();
+        ctx.roundRect(215, 48, 650, 56, 10);
+        ctx.fill();
+        ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+
+        ctx.strokeStyle = '#00d2d3';
+        ctx.lineWidth = 1.8;
+        ctx.stroke();
+
+        // Center divider
+        ctx.strokeStyle = 'rgba(0,210,211,0.35)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(CX, 54); ctx.lineTo(CX, 98);
+        ctx.stroke();
+
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = "bold 24px 'Montserrat', 'Inter', sans-serif";
+        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        ctx.shadowBlur = 3;
+        ctx.fillText('Joined: ' + joined, 215 + 325 / 2, 76);
+        ctx.fillText('Valid Until: ' + valid, CX + 325 / 2, 76);
+        ctx.restore();
+
+        // === 6. Security Protocol Verification ribbon (centered) ===
+        drawSecurityProtocolRibbon(ctx, 135, 115, 678, 52);
+
+        // === 7. Content Details Text (Perfectly Centered along CX = 539) ===
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'alphabetic';
+
+        // "Valid Unite: XXXX" (large, white, with cyan glow)
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = "bold 28px 'Montserrat', 'Inter', sans-serif";
+        ctx.shadowColor = 'rgba(0,210,211,0.65)';
+        ctx.shadowBlur = 12;
+        ctx.fillText('Valid Unite: ' + valid, CX, 212, 650);
+        ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+
+        // Address
+        const address = emp.presentAddr || emp.address || 'Barguna Sadar, Barguna.';
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = "bold 21px 'Inter', sans-serif";
+        ctx.shadowColor = 'rgba(0,0,0,0.4)'; ctx.shadowBlur = 3;
+        ctx.fillText('Address: ' + address, CX, 258, 650);
+
+        // Mobile
+        const mobile = emp.primaryPhone || emp.mobile || '01705-00194';
+        ctx.fillText('Mobile: ' + mobile, CX, 300, 650);
+
+        // Email
+        const email = emp.email || 'school110184@gmail.com';
+        ctx.fillText('Email: ' + email, CX, 342, 650);
+
+        // Website
+        const website = emp.website || 'www.gazimahmud.edu.bd';
+        ctx.fillText('Website: ' + website, CX, 384, 650);
+        ctx.restore();
+
+        // === 8. Right-side compact vertical barcode ===
+        const barcodeNum = String(emp.nid || emp.idCode || emp.id || '05568917881');
+        drawVerticalBarcode128(ctx, barcodeNum, 870, 150, 94, 280);
+
+        // === 9. Bottom footnote (centered) ===
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'alphabetic';
+
+        ctx.fillStyle = '#FFFFFF';
+        ctx.font = "bold 20px 'Hind Siliguri', 'Kalpurush', sans-serif";
+        ctx.shadowColor = 'rgba(0,0,0,0.55)'; ctx.shadowBlur = 4;
+        ctx.fillText('এই কার্ডটি প্রতিষ্ঠানের সম্পত্তি। পেলে অনুগ্রহ করে কার্ডটি ফেরত দিন।', CX, 485, 750);
+
+        ctx.fillStyle = '#d0dce4';
+        ctx.font = "500 15px 'Inter', sans-serif";
+        ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0;
+        ctx.fillText('(This card is the property of the school. If found, please return it.)', CX, 515, 750);
+        ctx.restore();
+
+        // === 10. Bottom metallic foil strip (full width) ===
+        drawMetallicSecurityStrip(ctx, 0, 535, WIDTH, 28);
     }
 
     function generateEmpIdCard() {
-        const id = document.getElementById('empIdCardSelector').value;
+        const idSelect = document.getElementById('empIdCardSelector');
+        if (!idSelect || !idSelect.value) return;
+        const id = idSelect.value;
         const employees = getEmployees();
         const emp = employees.find(e => e.id == id);
-        if (emp) {
-            document.getElementById('empIdCardName').innerText = emp.name;
-            document.getElementById('empIdCardDesignation').innerText = emp.role;
-            document.getElementById('empIdCardDept').innerText = emp.dept;
-            document.getElementById('empIdCardCode').innerText = 'EMP-' + emp.id.toString().substring(0, 4);
-            document.getElementById('empIdCardJoin').innerText = emp.joinDate;
-            document.getElementById('empIdCardPhoto').src = emp.photo || "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&h=120";
+        if (!emp) return;
 
-            // Load into global Print Area
-            const printArea = document.getElementById('printArea');
-            printArea.innerHTML = document.querySelector('.emp-id-card').outerHTML;
+        const resultArea = document.getElementById('empIdCardResultArea');
+        if (resultArea) resultArea.classList.remove('d-none');
 
-            document.getElementById('empIdCardResultArea').classList.remove('d-none');
+        const frontCanvas = document.getElementById('idCardFrontCanvas');
+        const backCanvas = document.getElementById('idCardBackCanvas');
+        if (!frontCanvas || !backCanvas) return;
+
+        const ctxFront = frontCanvas.getContext('2d');
+        const ctxBack = backCanvas.getContext('2d');
+
+        const photoImg = new Image();
+        photoImg.crossOrigin = "anonymous";
+
+        const logoImg = new Image();
+        logoImg.crossOrigin = "anonymous";
+
+        const drawAll = (qrEl) => {
+            drawFrontIdCard(ctxFront, emp, photoImg, logoImg, qrEl);
+            drawBackIdCard(ctxBack, emp, logoImg);
+        };
+
+        // Create QR Code offscreen
+        const qrContainer = document.createElement('div');
+        qrContainer.style.display = 'none';
+        document.body.appendChild(qrContainer);
+
+        const empIdStr = emp.idCode || (emp.id && String(emp.id).length > 4 ? String(emp.id) : 'N56889404');
+        const joined = emp.joined || (emp.joinDate ? emp.joinDate.substring(0, 4) : '2023');
+        const valid = emp.valid || '2054';
+        const mobile = emp.primaryPhone || emp.mobile || '01705-00194';
+        const email = emp.email || 'school110184@gmail.com';
+        const address = emp.presentAddr || emp.address || 'Barguna Sadar, Barguna.';
+
+        const qrText = [
+            "=== GAZIMAHMUD JR HIGH SCHOOL ===",
+            "OFFICIAL STAFF VERIFICATION PROFILE",
+            "Name: " + (emp.name || 'Ruhul Amin'),
+            "Role/Designation: " + (emp.role || 'Office Assistant'),
+            "Employee ID: " + empIdStr,
+            "Department: " + (emp.dept || 'Admin & Office'),
+            "Joined Year: " + joined,
+            "Valid Until: " + valid,
+            "Mobile: " + mobile,
+            "Email: " + email,
+            "Address: " + address,
+            "NID: " + (emp.nid || '05568917881'),
+            "Status: Authentic Verified Staff Profile"
+        ].join("\n");
+
+        if (typeof QRCode !== 'undefined') {
+            try {
+                new QRCode(qrContainer, {
+                    text: qrText,
+                    width: 140,
+                    height: 140,
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+            } catch(e) {
+                console.warn("QR creation warning:", e);
+            }
+        }
+
+        const renderNow = () => {
+            const qrCanvas = qrContainer.querySelector('canvas');
+            const qrImgEl = qrContainer.querySelector('img');
+            let qrEl = qrCanvas || (qrImgEl && qrImgEl.src ? qrImgEl : null);
+            drawAll(qrEl);
+        };
+
+        // Initial draw
+        renderNow();
+
+        // Re-draw when images load
+        photoImg.onload = renderNow;
+        photoImg.onerror = renderNow;
+        logoImg.onload = renderNow;
+        logoImg.onerror = renderNow;
+
+        setTimeout(() => {
+            renderNow();
+            if (document.body.contains(qrContainer)) {
+                document.body.removeChild(qrContainer);
+            }
+        }, 150);
+
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(renderNow).catch(renderNow);
+        }
+
+        photoImg.src = emp.photo || "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230284c7'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/></svg>";
+        logoImg.onerror = () => {
+            if (!logoImg.src.includes('icon-192x192.png')) {
+                logoImg.src = "/static/icon-192x192.png";
+            }
+        };
+        logoImg.src = "/static/logo.png";
+    }
+
+    function downloadIdCardCanvas(side) {
+        const canvasId = side === 'front' ? 'idCardFrontCanvas' : 'idCardBackCanvas';
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+
+        const select = document.getElementById('empIdCardSelector');
+        const empName = (select && select.options[select.selectedIndex]) ? select.options[select.selectedIndex].text.split('(')[0].trim() : "Staff";
+        
+        const link = document.createElement('a');
+        link.download = `ID_Card_${empName.replace(/[^a-z0-9]/gi, '_')}_${side.toUpperCase()}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    }
+
+    function triggerPrintIdCards() {
+        const frontCanvas = document.getElementById('idCardFrontCanvas');
+        const backCanvas = document.getElementById('idCardBackCanvas');
+        if (!frontCanvas || !backCanvas) {
+            alert("ID Card not ready. Please select an employee first.");
+            return;
+        }
+
+        const printArea = document.getElementById('printArea');
+        if (!printArea) return;
+
+        const frontDataUrl = frontCanvas.toDataURL('image/png');
+        const backDataUrl = backCanvas.toDataURL('image/png');
+
+        printArea.className = 'p-4 bg-white d-block';
+        printArea.innerHTML = `
+            <div class="d-flex flex-column align-items-center justify-content-start gap-4 py-3" style="width: 100%;">
+                <div class="print-card-box text-center">
+                    <p class="fw-bold mb-2 text-dark small no-print">FRONT CARD (300 DPI - 85.6mm x 54mm Standard)</p>
+                    <img src="${frontDataUrl}" id="printFrontImg" class="print-card-img" style="width: 3.375in; height: 2.125in; object-fit: contain; border: 1px solid #cbd5e1; border-radius: 8px; display: block; margin: 0 auto;">
+                </div>
+                <div class="print-card-box text-center">
+                    <p class="fw-bold mb-2 text-dark small no-print">BACK CARD (300 DPI - 85.6mm x 54mm Standard)</p>
+                    <img src="${backDataUrl}" id="printBackImg" class="print-card-img" style="width: 3.375in; height: 2.125in; object-fit: contain; border: 1px solid #cbd5e1; border-radius: 8px; display: block; margin: 0 auto;">
+                </div>
+            </div>
+        `;
+
+        const img1 = document.getElementById('printFrontImg');
+        const img2 = document.getElementById('printBackImg');
+
+        let printed = false;
+        const doPrint = () => {
+            if (printed) return;
+            printed = true;
+            setTimeout(() => {
+                window.print();
+            }, 250);
+        };
+
+        if (img1 && img2) {
+            if (img1.complete && img2.complete) {
+                doPrint();
+            } else {
+                img1.onload = doPrint;
+                img2.onload = doPrint;
+                setTimeout(doPrint, 400);
+            }
+        } else {
+            setTimeout(doPrint, 300);
         }
     }
 
@@ -975,6 +2017,7 @@
 
     document.addEventListener("DOMContentLoaded", function() {
         renderEmployees();
+        loadEmpIdCardSelector();
         // Initialize bootstrap tabs
         const tabTriggerList = [].slice.call(document.querySelectorAll('#employeeTabs button'));
         tabTriggerList.forEach(function (tabTriggerEl) {
