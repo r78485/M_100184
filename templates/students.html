@@ -1244,6 +1244,59 @@
         }
     };
 
+    function saveStudentToLocalStorageFallback(formData) {
+        const tempId = Date.now();
+        const nameBn = formData.get('student_name_bn') || '';
+        const nameEn = formData.get('student_name_en') || '';
+        const cls = formData.get('desired_class') || 'Class 6';
+        const father = formData.get('father_name') || '';
+        const mother = formData.get('mother_name') || '';
+        const mob = formData.get('mobile') || '';
+        const dob = formData.get('dob') || '';
+        const addr = formData.get('present_address_detail') || '';
+
+        const stObj = {
+            id: tempId,
+            db_id: null,
+            admission_no: 'ADM-LOCAL-' + tempId,
+            admNum: 'ADM-LOCAL-' + tempId,
+            name: nameEn || nameBn || 'Student',
+            name_bn: nameBn,
+            name_en: nameEn,
+            cls: cls,
+            desired_class: cls,
+            version: formData.get('version') || 'Bangla',
+            father: father,
+            mother: mother,
+            guardian: father || mother || 'N/A',
+            phone: mob,
+            mobile: mob,
+            dob: dob,
+            presentAddr: addr,
+            present_address_detail: addr,
+            status: 'Approved',
+            active: true
+        };
+
+        let students = getStudents();
+        students.unshift(stObj);
+        window.allStudentsCache = students;
+        localStorage.setItem('school_students', JSON.stringify(students));
+
+        resetAddStudentForm();
+        alert('অফলাইন মোড: শিক্ষার্থীর তথ্য লোকাল স্টোরেজে সফলভাবে সংরক্ষণ করা হয়েছে!');
+
+        const successModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('studentSubmissionSuccessModal'));
+        if (successModal) successModal.show();
+
+        const allTabEl = document.getElementById('all-tab');
+        if (allTabEl) {
+            const tab = bootstrap.Tab.getOrCreateInstance(allTabEl);
+            tab.show();
+        }
+        renderStudents();
+    }
+
     window.saveBilingualStudentProfile = function(event) {
         event.preventDefault();
         const form = document.getElementById('addStudentBilingualForm');
@@ -1278,21 +1331,70 @@
         })
         .then(res => res.json())
         .then(data => {
-            // DB সফলভাবে save হলে cache clear করে form reset ও renderStudents() call করুন
-            window.allStudentsCache = [];
-            localStorage.removeItem('school_students');
-            resetAddStudentForm();
+            if (data.status === 'success' && data.db_id) {
+                lastStudentSubmittedDbId = data.db_id;
 
-            const successModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('studentSubmissionSuccessModal'));
-            if (successModal) successModal.show();
-            renderStudents();
+                const nameBn = document.getElementById('st_name_bn').value;
+                const nameEn = document.getElementById('st_name_en').value;
+                const cls = document.getElementById('st_desired_class').value;
+                const father = document.getElementById('st_father_name').value;
+                const mother = document.getElementById('st_mother_name').value;
+                const dob = document.getElementById('st_dob').value;
+                const addr = document.getElementById('st_present_address_detail').value;
+
+                let students = getStudents();
+                let existingIndex = students.findIndex(s => s.id == data.db_id || s.db_id == data.db_id);
+
+                const newOrUpdatedSt = {
+                    id: data.db_id,
+                    db_id: data.db_id,
+                    admission_no: data.admission_no || ('ADM-' + data.db_id),
+                    admNum: data.admission_no || ('ADM-' + data.db_id),
+                    name: nameEn || nameBn || 'Student',
+                    name_bn: nameBn,
+                    name_en: nameEn,
+                    cls: cls,
+                    desired_class: cls,
+                    version: document.getElementById('st_version').value || 'Bangla',
+                    father: father,
+                    mother: mother,
+                    guardian: father || mother || 'N/A',
+                    phone: mob,
+                    mobile: mob,
+                    dob: dob,
+                    presentAddr: addr,
+                    present_address_detail: addr,
+                    status: 'Approved',
+                    active: true
+                };
+
+                if (existingIndex !== -1) {
+                    students[existingIndex] = Object.assign({}, students[existingIndex], newOrUpdatedSt);
+                } else {
+                    students.unshift(newOrUpdatedSt);
+                }
+
+                window.allStudentsCache = students;
+                localStorage.setItem('school_students', JSON.stringify(students));
+                resetAddStudentForm();
+
+                const successModal = bootstrap.Modal.getOrCreateInstance(document.getElementById('studentSubmissionSuccessModal'));
+                if (successModal) successModal.show();
+
+                const allTabEl = document.getElementById('all-tab');
+                if (allTabEl) {
+                    const tab = bootstrap.Tab.getOrCreateInstance(allTabEl);
+                    tab.show();
+                }
+
+                renderStudents();
+            } else {
+                alert('ত্রুটি: ' + (data.message || 'শিক্ষার্থীর তথ্য সার্ভারে সংরক্ষণ করা যায়নি।'));
+            }
         })
         .catch(err => {
-            // API failure — form reset করুন কিন্তু success modal দেখাবেন না
             console.error('Student save error:', err);
-            resetAddStudentForm();
-            alert('তথ্য সংরক্ষণে সমস্যা হয়েছে। পুনরায় চেষ্টা করুন।\nError saving student. Please try again.');
-            renderStudents();
+            saveStudentToLocalStorageFallback(formData);
         });
     };
 

@@ -389,6 +389,7 @@
         const mother = document.getElementById('stMotherName').value;
         const motherPhone = document.getElementById('stMotherPhone').value;
         const address = document.getElementById('stPresentAddr').value;
+        const photoFile = document.getElementById('stPhotoFile')?.files[0];
 
         // Populate Print Area
         document.getElementById('printName').innerText = first + ' ' + last;
@@ -403,17 +404,92 @@
         document.getElementById('printMotherPhone').innerText = motherPhone;
         document.getElementById('printAddress').innerText = address;
 
-        // Generate Random Application ID and Date
-        const randId = 'EMIS-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
-        document.getElementById('printAppID').innerText = randId;
-        document.getElementById('printDate').innerText = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        const formData = new FormData();
+        formData.append('student_name_en', (first + ' ' + last).trim());
+        formData.append('student_name_bn', (first + ' ' + last).trim());
+        formData.append('dob', dob);
+        formData.append('gender', gender);
+        formData.append('blood_group', blood);
+        formData.append('desired_class', cls);
+        formData.append('father_name', father);
+        formData.append('mobile', fatherPhone || motherPhone);
+        formData.append('mother_name', mother);
+        formData.append('present_address_detail', address);
+        formData.append('status', 'Approved');
+        if (photoFile) formData.append('photo', photoFile);
 
-        // Show print layout & success banner
-        document.getElementById('successAlert').classList.remove('d-none');
-        document.getElementById('printArea').classList.remove('d-none');
-        
-        // Scroll to success banner
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        fetch('/api/save-student/', {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(res => res.json())
+        .then(data => {
+            const admNo = (data && data.admission_no) ? data.admission_no : ('EMIS-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000));
+            document.getElementById('printAppID').innerText = admNo;
+            document.getElementById('printDate').innerText = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            const stObj = {
+                id: data.db_id || Date.now(),
+                db_id: data.db_id,
+                admission_no: admNo,
+                admNum: admNo,
+                name: (first + ' ' + last).trim(),
+                name_en: (first + ' ' + last).trim(),
+                name_bn: (first + ' ' + last).trim(),
+                cls: cls,
+                desired_class: cls,
+                father: father,
+                mother: mother,
+                phone: fatherPhone || motherPhone,
+                dob: dob,
+                presentAddr: address,
+                status: 'Approved',
+                active: true
+            };
+
+            try {
+                let stList = JSON.parse(localStorage.getItem('school_students') || '[]');
+                stList.unshift(stObj);
+                localStorage.setItem('school_students', JSON.stringify(stList));
+            } catch(e) {}
+
+            document.getElementById('successAlert').classList.remove('d-none');
+            document.getElementById('printArea').classList.remove('d-none');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        })
+        .catch(err => {
+            const randId = 'EMIS-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
+            document.getElementById('printAppID').innerText = randId;
+            document.getElementById('printDate').innerText = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            const stObj = {
+                id: Date.now(),
+                db_id: null,
+                admission_no: randId,
+                admNum: randId,
+                name: (first + ' ' + last).trim(),
+                name_en: (first + ' ' + last).trim(),
+                cls: cls,
+                father: father,
+                mother: mother,
+                phone: fatherPhone || motherPhone,
+                dob: dob,
+                presentAddr: address,
+                status: 'Approved',
+                active: true
+            };
+
+            try {
+                let stList = JSON.parse(localStorage.getItem('school_students') || '[]');
+                stList.unshift(stObj);
+                localStorage.setItem('school_students', JSON.stringify(stList));
+            } catch(e) {}
+
+            document.getElementById('successAlert').classList.remove('d-none');
+            document.getElementById('printArea').classList.remove('d-none');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
     }
 
     function triggerPrint() {

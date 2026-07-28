@@ -396,22 +396,87 @@ def api_save_student(request):
             else:
                 data = request.POST.dict()
 
+            photo_file = request.FILES.get('photo')
+            student_id = data.get('db_id') or data.get('id')
+
             dob_val = data.get('dob') or None
-            if not dob_val:
+            if not dob_val or str(dob_val).strip() == '':
                 dob_val = None
 
-            photo_file = request.FILES.get('photo')
-
-            student_name_bn = data.get('student_name_bn') or data.get('name_bn') or data.get('name') or "নতুন শিক্ষার্থী"
-            student_name_en = data.get('student_name_en') or data.get('name_en') or data.get('name') or ""
-            adm_no = data.get('admNum') or data.get('admission_no') or f"ADM-{datetime.now().strftime('%Y%m%d%H%M%S')}"
-
             father_dob_val = data.get('father_dob') or None
+            if not father_dob_val or str(father_dob_val).strip() == '':
+                father_dob_val = None
+
             mother_dob_val = data.get('mother_dob') or None
+            if not mother_dob_val or str(mother_dob_val).strip() == '':
+                mother_dob_val = None
+
+            roll_raw = data.get('roll') or data.get('roll_no')
+            roll_val = None
+            if roll_raw is not None and str(roll_raw).strip().isdigit():
+                roll_val = int(str(roll_raw).strip())
+
+            student_name_bn = data.get('student_name_bn') or data.get('name_bn') or data.get('name')
+            student_name_en = data.get('student_name_en') or data.get('name_en') or data.get('name') or ""
+            adm_no = data.get('admNum') or data.get('admission_no')
+
+            # Checking if this is an update of existing record
+            if student_id and str(student_id).strip().isdigit() and int(student_id) > 0:
+                student = StudentAdmission.objects.filter(id=int(student_id)).first()
+                if student:
+                    if student_name_bn: student.student_name_bn = student_name_bn
+                    if student_name_en: student.student_name_en = student_name_en
+                    if dob_val: student.dob = dob_val
+                    if 'birth_reg_no' in data: student.birth_reg_no = data.get('birth_reg_no')
+                    if 'gender' in data: student.gender = data.get('gender')
+                    if 'mobile' in data or 'phone' in data: student.mobile = data.get('mobile') or data.get('phone')
+                    if 're_mobile' in data: student.re_mobile = data.get('re_mobile')
+                    if 'father_name' in data or 'father' in data: student.father_name = data.get('father_name') or data.get('father')
+                    if 'father_nid' in data: student.father_nid = data.get('father_nid')
+                    if father_dob_val: student.father_dob = father_dob_val
+                    if 'father_occupation' in data: student.father_occupation = data.get('father_occupation')
+                    if 'mother_name' in data or 'mother' in data: student.mother_name = data.get('mother_name') or data.get('mother')
+                    if 'mother_nid' in data: student.mother_nid = data.get('mother_nid')
+                    if mother_dob_val: student.mother_dob = mother_dob_val
+                    if 'mother_occupation' in data: student.mother_occupation = data.get('mother_occupation')
+                    if 'guardian_name' in data or 'guardian' in data: student.guardian_name = data.get('guardian_name') or data.get('guardian')
+                    if 'guardian_nid' in data: student.guardian_nid = data.get('guardian_nid')
+                    if 'desired_class' in data or 'cls' in data: student.desired_class = data.get('desired_class') or data.get('cls')
+                    if 'version' in data: student.version = data.get('version')
+                    if 'present_address_detail' in data or 'presentAddr' in data: student.present_address_detail = data.get('present_address_detail') or data.get('presentAddr')
+                    if 'present_post_office' in data: student.present_post_office = data.get('present_post_office')
+                    if 'present_division' in data: student.present_division = data.get('present_division')
+                    if 'present_district' in data: student.present_district = data.get('present_district')
+                    if 'present_upazila' in data: student.present_upazila = data.get('present_upazila')
+                    if 'present_post_code' in data: student.present_post_code = data.get('present_post_code')
+                    if 'permanent_address_detail' in data or 'permAddr' in data: student.permanent_address_detail = data.get('permanent_address_detail') or data.get('permAddr')
+                    if 'permanent_post_office' in data: student.permanent_post_office = data.get('permanent_post_office')
+                    if 'permanent_division' in data: student.permanent_division = data.get('permanent_division')
+                    if 'permanent_district' in data: student.permanent_district = data.get('permanent_district')
+                    if 'permanent_upazila' in data: student.permanent_upazila = data.get('permanent_upazila')
+                    if 'permanent_post_code' in data: student.permanent_post_code = data.get('permanent_post_code')
+                    if 'section' in data: student.section = data.get('section')
+                    if roll_val is not None: student.roll_no = roll_val
+                    if 'blood' in data or 'blood_group' in data: student.blood_group = data.get('blood') or data.get('blood_group')
+                    if 'status' in data: student.status = data.get('status')
+                    if adm_no: student.admission_no = adm_no
+                    if photo_file: student.photo = photo_file
+                    student.save()
+
+                    return JsonResponse({'status': 'success', 'db_id': student.id, 'admission_no': student.admission_no or f"ADM-{student.id:04d}"})
+
+            # New Student Creation
+            if not student_name_bn:
+                student_name_bn = "নতুন শিক্ষার্থী"
+
+            import time
+            if not adm_no or str(adm_no).strip() == '':
+                adm_no = f"ADM-{datetime.now().strftime('%Y%m%d%H%M%S')}-{int(time.time()*1000)%1000}"
 
             defaults = {
                 'student_name_bn': student_name_bn,
                 'student_name_en': student_name_en,
+                'admission_no': adm_no,
                 'dob': dob_val,
                 'birth_reg_no': data.get('birth_reg_no', ''),
                 'gender': data.get('gender', 'Boy'),
@@ -442,42 +507,21 @@ def api_save_student(request):
                 'permanent_upazila': data.get('permanent_upazila', ''),
                 'permanent_post_code': data.get('permanent_post_code', ''),
                 'section': data.get('section', 'A'),
-                'roll_no': data.get('roll') or None,
-                'blood_group': data.get('blood', ''),
+                'roll_no': roll_val,
+                'blood_group': data.get('blood') or data.get('blood_group') or '',
                 'status': data.get('status', 'Approved'),
             }
 
-            student_id = data.get('db_id') or data.get('id')
-            if student_id and str(student_id).strip().isdigit() and int(student_id) > 0:
-                student = StudentAdmission.objects.filter(id=int(student_id)).first()
-                if student:
-                    for k, v in defaults.items():
-                        setattr(student, k, v)
-                    if adm_no:
-                        student.admission_no = adm_no
-                    student.save()
-                else:
-                    import time
-                    if not adm_no or adm_no.strip() == '':
-                        adm_no = f"ADM-{datetime.now().strftime('%Y%m%d%H%M%S')}-{int(time.time()*1000)%1000}"
-                    defaults['admission_no'] = adm_no
-                    student = StudentAdmission.objects.create(**defaults)
-            else:
-                import time
-                if not adm_no or adm_no.strip() == '':
-                    adm_no = f"ADM-{datetime.now().strftime('%Y%m%d%H%M%S')}-{int(time.time()*1000)%1000}"
-                defaults['admission_no'] = adm_no
-                student = StudentAdmission.objects.create(**defaults)
-
+            student = StudentAdmission.objects.create(**defaults)
             if photo_file:
                 student.photo = photo_file
                 student.save()
 
-            if request.headers.get('x-requested-with') == 'XMLHttpRequest' or request.content_type == 'application/json':
-                return JsonResponse({'status': 'success', 'db_id': student.id, 'admission_no': student.admission_no})
+            return JsonResponse({'status': 'success', 'db_id': student.id, 'admission_no': student.admission_no})
 
-            return redirect('admissions')
         except Exception as e:
+            import traceback
+            print("api_save_student error:", traceback.format_exc())
             return JsonResponse({'status': 'error', 'message': str(e)})
     return JsonResponse({'status': 'invalid method'})
 
