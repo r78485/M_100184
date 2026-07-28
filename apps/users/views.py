@@ -552,8 +552,7 @@ def api_delete_student(request, student_id):
     return JsonResponse({'status': 'invalid method'})
 
 
-@csrf_exempt
-def api_get_employees(request):
+def _ensure_employee_table():
     try:
         from apps.users.models import Employee
         from django.db import connection
@@ -565,6 +564,15 @@ def api_get_employees(request):
             except Exception:
                 from django.core.management import call_command
                 call_command('migrate', interactive=False)
+    except Exception as e:
+        print("_ensure_employee_table note:", e)
+
+
+@csrf_exempt
+def api_get_employees(request):
+    try:
+        _ensure_employee_table()
+        from apps.users.models import Employee
 
         employees = Employee.objects.all().order_by('-created_at')
         if not employees.exists():
@@ -611,6 +619,7 @@ def api_get_employees(request):
 def api_save_employee(request):
     if request.method == 'POST':
         try:
+            _ensure_employee_table()
             from apps.users.models import Employee
             payload = {}
             if request.content_type == 'application/json' or (request.body and request.body.startswith(b'{')):
