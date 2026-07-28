@@ -80,3 +80,6 @@ class ScienceQuestion(models.Model):
     stem_text = models.TextField(help_text="উদ্দীপক / পরীক্ষা বিবরণ")
     image = models.ImageField(upload_to='science_diagrams/', blank=True, null=True)
     question_text = models.TextField()
+
+# Model Aliases for backward compatibility
+Class = ClassRoom

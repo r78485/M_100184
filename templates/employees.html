@@ -32,7 +32,16 @@
     @media print {
         @page {
             size: A4 portrait;
-            margin: 10mm;
+            margin: 5mm;
+        }
+        html, body {
+            height: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: #ffffff !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            overflow: hidden !important;
         }
         body * {
             visibility: hidden !important;
@@ -46,14 +55,33 @@
             left: 0 !important;
             top: 0 !important;
             width: 100% !important;
+            height: 100% !important;
             background: #ffffff !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            overflow: hidden !important;
         }
         .no-print {
             display: none !important;
         }
+        .job-letter-card {
+            box-shadow: none !important;
+            border: 2px solid #0f172a !important;
+            page-break-inside: avoid !important;
+            page-break-after: avoid !important;
+            page-break-before: avoid !important;
+            max-width: 100% !important;
+            width: 100% !important;
+            max-height: 282mm !important;
+            margin: 0 auto !important;
+            padding: 16px 20px !important;
+            background: #ffffff !important;
+            box-sizing: border-border !important;
+            border-radius: 4px !important;
+        }
         .print-card-box {
             page-break-inside: avoid;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
         .print-card-img {
             width: 3.375in !important;
@@ -163,7 +191,7 @@
     <!-- HR Navigation Tabs -->
     <ul class="nav nav-pills mb-4 no-print gap-2 bg-white p-2 rounded shadow-sm" id="employeeTabs" role="tablist" style="border: 1px solid rgba(0,0,0,0.05);">
         <li class="nav-item">
-            <button class="nav-link active fw-semibold" id="all-emp-tab" data-bs-toggle="tab" data-bs-target="#all-emp-panel"><i class="bi bi-people me-1"></i> All Employees</button>
+            <button class="nav-link active fw-semibold" id="all-emp-tab" data-bs-toggle="tab" data-bs-target="#all-emp-panel" onclick="renderEmployees()"><i class="bi bi-people me-1"></i> All Employees</button>
         </li>
         <li class="nav-item">
             <button class="nav-link fw-semibold" id="add-emp-tab" data-bs-toggle="tab" data-bs-target="#add-emp-panel"><i class="bi bi-person-plus me-1"></i> Add New</button>
@@ -198,12 +226,16 @@
                     <table class="table table-hover align-middle mb-0">
                         <thead>
                             <tr>
+                                <th>ID / Index No</th>
                                 <th>Employee</th>
                                 <th>Designation</th>
-                                <th>Department</th>
+                                <th>Date of Birth</th>
+                                <th>Date of Appointment</th>
+                                <th>First MPO</th>
+                                <th>Pay Code</th>
                                 <th>Joining Date</th>
                                 <th>Status</th>
-                                <th>Action</th>
+                                <th class="text-center">Action / Print</th>
                             </tr>
                         </thead>
                         <tbody id="allEmployeesTable">
@@ -229,7 +261,7 @@
                     </div>
                 </div>
 
-                <form id="addEmployeeForm" novalidate onsubmit="saveEmployeeProfile(event)">
+                <form id="addEmployeeForm" novalidate>
                     
                     <!-- SECTION 1: Basic Information -->
                     <div class="card bg-light border-0 rounded-3 p-3 p-md-4 mb-4">
@@ -278,39 +310,63 @@
                                 <input type="date" class="form-control form-control-lg fs-6" id="empAppointmentDate">
                             </div>
 
-                            <!-- Date of Joining * -->
+                            <!-- Date of Joining -->
                             <div class="col-md-6 col-lg-4">
-                                <label class="form-label fw-semibold text-secondary small mb-1">Date of Joining <span class="text-danger">*</span></label>
-                                <input type="date" class="form-control form-control-lg fs-6" id="empJoinDateInput" value="2026-07-26" required>
+                                <label class="form-label fw-semibold text-secondary small mb-1">Date of Joining</label>
+                                <input type="date" class="form-control form-control-lg fs-6" id="empJoinDateInput" value="2026-07-26">
                             </div>
 
-                            <!-- Employee Role * -->
+                            <!-- Employee Role -->
                             <div class="col-md-6 col-lg-4">
-                                <label class="form-label fw-semibold text-secondary small mb-1">Employee Role <span class="text-danger">*</span></label>
-                                <select class="form-select form-select-lg fs-6" id="empDesignationInput" required>
-                                    <option value="" selected disabled>-- Select Role --</option>
-                                    <option value="Senior Teacher">Senior Teacher</option>
-                                    <option value="Assistant Teacher">Assistant Teacher</option>
+                                <label class="form-label fw-semibold text-secondary small mb-1">Employee Role</label>
+                                <select class="form-select form-select-lg fs-6" id="empDesignationInput">
+                                    <option value="" selected>-- Select Role / Designation --</option>
+                                    <option value="Principal">Principal</option>
+                                    <option value="Vice-Principal">Vice-Principal</option>
+                                    <option value="Professor">Professor</option>
+                                    <option value="Associate Professor">Associate Professor</option>
+                                    <option value="Assistant Professor">Assistant Professor</option>
                                     <option value="Lecturer">Lecturer</option>
-                                    <option value="Headmaster / Principal">Headmaster / Principal</option>
-                                    <option value="Vice Principal">Vice Principal</option>
-                                    <option value="Accountant">Accountant</option>
-                                    <option value="Office Assistant">Office Assistant</option>
-                                    <option value="IT Officer">IT Officer</option>
+                                    <option value="Demonstrator">Demonstrator</option>
+                                    <option value="Physical Education Teacher">Physical Education Teacher</option>
                                     <option value="Librarian">Librarian</option>
+                                    <option value="Assistant Librarian">Assistant Librarian</option>
+                                    <option value="Headmaster">Headmaster</option>
+                                    <option value="Headmistress">Headmistress</option>
+                                    <option value="Assistant Headmaster">Assistant Headmaster</option>
+                                    <option value="Assistant Headmistress">Assistant Headmistress</option>
+                                    <option value="Senior Teacher">Senior Teacher</option>
+                                    <option value="Assistant Teacher (English)">Assistant Teacher (English)</option>
+                                    <option value="Assistant Teacher (Mathematics)">Assistant Teacher (Mathematics)</option>
+                                    <option value="Assistant Teacher (Science)">Assistant Teacher (Science)</option>
+                                    <option value="Assistant Teacher (Social Science)">Assistant Teacher (Social Science)</option>
+                                    <option value="Assistant Teacher (Religion)">Assistant Teacher (Religion)</option>
+                                    <option value="Assistant Teacher (ICT)">Assistant Teacher (ICT)</option>
+                                    <option value="Assistant Teacher (Agriculture / Home Science)">Assistant Teacher (Agriculture / Home Science)</option>
+                                    <option value="Assistant Teacher (Physical Education)">Assistant Teacher (Physical Education)</option>
+                                    <option value="Assistant Teacher (Fine Arts)">Assistant Teacher (Fine Arts)</option>
+                                    <option value="Assistant Librarian / Cataloger">Assistant Librarian / Cataloger</option>
+                                    <option value="Head Assistant">Head Assistant</option>
+                                    <option value="Accountant">Accountant</option>
+                                    <option value="Office Assistant-cum-Computer Operator">Office Assistant-cum-Computer Operator</option>
+                                    <option value="Library Assistant">Library Assistant</option>
                                     <option value="Lab Assistant">Lab Assistant</option>
-                                    <option value="Driver">Driver</option>
+                                    <option value="Office Assistant / MLSS">Office Assistant / MLSS</option>
+                                    <option value="Aya">Aya</option>
                                     <option value="Security Guard">Security Guard</option>
-                                    <option value="Cleaner / Staff">Cleaner / Staff</option>
+                                    <option value="Night Guard">Night Guard</option>
+                                    <option value="Cleaner">Cleaner</option>
+                                    <option value="Sweeper">Sweeper</option>
+                                    <option value="Gardener">Gardener</option>
                                 </select>
                             </div>
 
-                            <!-- Monthly Salary * -->
+                            <!-- Monthly Salary -->
                             <div class="col-md-6 col-lg-4">
-                                <label class="form-label fw-semibold text-secondary small mb-1">Monthly Salary <span class="text-danger">*</span></label>
+                                <label class="form-label fw-semibold text-secondary small mb-1">Monthly Salary</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-white text-muted">৳ / $</span>
-                                    <input type="number" class="form-control form-control-lg fs-6" id="empBasicSalary" placeholder="Monthly Salary" required>
+                                    <input type="text" class="form-control form-control-lg fs-6" id="empBasicSalary" placeholder="Monthly Salary">
                                 </div>
                             </div>
                         </div>
@@ -508,41 +564,30 @@
             </div>
         </div>
 
-        <!-- 4. Job Letter -->
+        <!-- 4. Job Letter & Profile Card -->
         <div class="tab-pane fade" id="job-letter-panel" role="tabpanel">
             <div class="card custom-card p-4 no-print">
-                <h5 class="fw-bold mb-3">Generate Job Appointment Letter</h5>
-                <div class="col-md-6 mb-4">
-                    <select class="form-select" id="jobLetterSelector" onchange="generateJobLetter()"></select>
+                <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom flex-wrap gap-2">
+                    <div>
+                        <h5 class="fw-bold mb-1" style="color: var(--primary-blue);">
+                            <i class="bi bi-file-earmark-text me-2"></i>Gazimahmud Lower Secondary School - Job Letter & Profile Card
+                        </h5>
+                        <p class="text-muted small mb-0">Select an employee profile to view and print their official print-proof Job Letter / Profile Card.</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary fw-bold" onclick="printAllEmpJobLetters()"><i class="bi bi-printer me-2"></i>Print All Job Letters</button>
+                    </div>
+                </div>
+
+                <div class="row align-items-center mb-4">
+                    <div class="col-md-6 col-lg-5">
+                        <label class="form-label fw-semibold text-secondary small mb-1">Select Employee Profile <span class="text-danger">*</span></label>
+                        <select class="form-select form-select-lg fs-6" id="jobLetterSelector" onchange="generateJobLetter()"></select>
+                    </div>
                 </div>
                 
-                <div id="jobLetterPreview" class="border p-4 bg-white d-none" style="max-width: 700px; margin: 0 auto; border-radius: 8px;">
-                    <div class="text-center mb-4 pb-3 border-bottom">
-                        <h3 class="fw-bold mb-1" style="color: var(--primary-blue);">EDUMANAGE INTERNATIONAL SCHOOL</h3>
-                        <p class="text-muted small mb-0">123 Academy Lane | Phone: +1 555-019-923</p>
-                    </div>
-                    <div class="mb-4">
-                        <p><strong>Date:</strong> July 19, 2026</p>
-                        <p><strong>To,</strong><br><span id="jobTargetName">Employee Name</span><br>Designation: <span id="jobTargetDesignation">Designation</span></p>
-                    </div>
-                    <h5 class="fw-bold text-center mb-4" style="color: var(--secondary-purple);">APPOINTMENT & JOB OFFER LETTER</h5>
-                    <p>Dear <span id="jobTargetSalutation">Employee</span>,</p>
-                    <p>We are pleased to appoint you to the position of <strong><span id="jobTargetRole">Role</span></strong> in the <strong><span id="jobTargetDept">Dept</span></strong> Department at EduManage International School.</p>
-                    <p>Your joining date is officially recorded as <strong><span id="jobTargetJoin">Join Date</span></strong>. You will report directly to the Principal's administration office for onboarding instructions.</p>
-                    
-                    <div class="row mt-5">
-                        <div class="col-6 text-center">
-                            <div class="border-top mx-auto mt-4" style="width: 150px;"></div>
-                            <small class="text-muted">Principal Signature</small>
-                        </div>
-                        <div class="col-6 text-center">
-                            <div class="border-top mx-auto mt-4" style="width: 150px;"></div>
-                            <small class="text-muted">HR Seal</small>
-                        </div>
-                    </div>
-                    <div class="text-center mt-4">
-                        <button class="btn btn-outline-primary" onclick="triggerPrint()"><i class="bi bi-printer me-2"></i>Print Job Letter</button>
-                    </div>
+                <div id="jobLetterPreview" class="d-none">
+                    <!-- Dynamically populated via generateJobLetter() -->
                 </div>
             </div>
         </div>
@@ -597,39 +642,107 @@
     const defaultEmployees = [
         { 
             id: "N56889404", 
-            idCode: "N56889404",
-            name: "রুহুল আমিন (Ruhul Amin)", 
-            nameBn: "রুহুল আমিন",
-            nameEn: "Ruhul Amin",
+            idCode: "217,255",
+            serialNo: "217,255",
+            registrationId: "217,255",
+            indexNo: "N56889404",
+            nid: "6871132889",
+            nationalId: "6871132889",
+            name: "Md. RUHUL AMIN", 
+            nameBn: "Md. RUHUL AMIN",
+            nameEn: "Md. RUHUL AMIN",
+            fatherName: "Motaher",
+            fatherOrHusbandName: "Motaher",
+            spouseName: "Mst Shemu Akter",
             role: "Office Assistant", 
             desigBn: "অফিস সহকারী",
             desigEn: "Office Assistant",
             dept: "Admin & Office", 
-            email: "ruhul.amin@school.com", 
-            joinDate: "2023-01-15", 
+            email: "islamtalicom.306@gmail.com", 
+            emailAddress: "islamtalicom.306@gmail.com",
+            dob: "1994-07-20",
+            dateOfBirth: "1994-07-20",
+            gender: "Male",
+            religion: "Islam",
+            blood: "A+",
+            bloodGroup: "A+",
+            exp: "3 Years",
+            experience: "3 Years",
+            edu: "B.A (Pass)",
+            education: "B.A (Pass)",
+            primaryPhone: "01719565306",
+            mobileNo: "01719565306",
+            presentAddr: "Gazimahmud, Nishanbaria, Barguna Sadar, Barguna.",
+            homeAddress: "Gazimahmud, Nishanbaria, Barguna Sadar, Barguna.",
+            basicSalary: "12,199",
+            monthlySalary: "12,199",
+            appointmentDate: "2023-12-12",
+            joinDate: "2023-12-12", 
+            dateOfJoining: "2023-12-12",
+            firstMPO: "2024-05-01",
+            firstMpoDate: "2024-05-01",
+            payCode: "20",
             active: true, 
-            username: "ruhul.a", 
+            username: "Ruhul306", 
             pass: "12345" 
         },
         { 
-            id: 2, 
-            idCode: "T100201",
+            id: "T100201", 
+            idCode: "217,256",
+            serialNo: "217,256",
+            registrationId: "217,256",
+            indexNo: "T100201",
+            nid: "9876543210",
+            nationalId: "9876543210",
             name: "David Henderson", 
+            fatherName: "Robert Henderson",
+            spouseName: "Emma Henderson",
             role: "Senior Teacher", 
             dept: "Mathematics", 
             email: "david.h@school.com", 
+            dob: "1985-08-20",
+            gender: "Male",
+            religion: "Christianity",
+            blood: "B+",
+            exp: "5 Years",
+            edu: "M.Sc (Math)",
+            primaryPhone: "01712345678",
+            presentAddr: "College Road, Barguna Sadar, Barguna.",
+            basicSalary: "25,000",
+            appointmentDate: "2020-11-15",
+            firstMPO: "2021-02-01",
+            payCode: "10",
             joinDate: "2021-01-12", 
             active: true, 
             username: "david.h", 
             pass: "12345" 
         },
         { 
-            id: 3, 
-            idCode: "T100202",
+            id: "T100202", 
+            idCode: "217,257",
+            serialNo: "217,257",
+            registrationId: "217,257",
+            indexNo: "T100202",
+            nid: "4567890123",
+            nationalId: "4567890123",
             name: "Sarah Vance", 
+            fatherName: "John Vance",
+            spouseName: "Mark Vance",
             role: "Teacher", 
             dept: "English", 
             email: "sarah.v@school.com", 
+            dob: "1990-11-05",
+            gender: "Female",
+            religion: "Christianity",
+            blood: "O+",
+            exp: "4 Years",
+            edu: "M.A (English)",
+            primaryPhone: "01812345678",
+            presentAddr: "Hospital Road, Barguna Sadar, Barguna.",
+            basicSalary: "22,000",
+            appointmentDate: "2022-07-01",
+            firstMPO: "2022-09-01",
+            payCode: "12",
             joinDate: "2022-08-10", 
             active: true, 
             username: "sarah.v", 
@@ -639,52 +752,112 @@
 
     function getEmployees() {
         const stored = localStorage.getItem('school_employees');
-        if (!stored) {
-            localStorage.setItem('school_employees', JSON.stringify(defaultEmployees));
-            return defaultEmployees;
+        if (stored !== null) {
+            try {
+                const parsed = JSON.parse(stored);
+                if (Array.isArray(parsed)) {
+                    return parsed;
+                }
+            } catch(e) {
+                console.error("Error parsing school_employees", e);
+            }
         }
-        let list = JSON.parse(stored);
-        const exists = list.some(e => e.idCode === "N56889404" || (e.name && e.name.includes("Ruhul Amin")));
-        if (!exists) {
-            list.unshift(defaultEmployees[0]);
-            localStorage.setItem('school_employees', JSON.stringify(list));
-        }
-        return list;
+        localStorage.setItem('school_employees', JSON.stringify(defaultEmployees));
+        return defaultEmployees;
     }
+
+    function fetchEmployeesFromBackend(callback) {
+        fetch('/api/employees/')
+            .then(res => res.json())
+            .then(data => {
+                if (data && data.status === 'success' && Array.isArray(data.employees)) {
+                    localStorage.setItem('school_employees', JSON.stringify(data.employees));
+                    if (typeof renderEmployees === 'function') renderEmployees();
+                    if (typeof loadEmpLogins === 'function') loadEmpLogins();
+                    if (typeof loadEmpIdCardSelector === 'function') loadEmpIdCardSelector();
+                    if (typeof loadJobLetterSelector === 'function') loadJobLetterSelector();
+                    if (typeof callback === 'function') callback(data.employees);
+                }
+            })
+            .catch(err => {
+                console.warn("Backend API fetch note:", err);
+            });
+    }
+
+    window.toggleEmpStatus = function(id) {
+        let employees = getEmployees();
+        employees = employees.map(emp => {
+            if (String(emp.id) === String(id) || emp.id === id) {
+                emp.active = !emp.active;
+                emp.status = emp.active ? 'Active' : 'Inactive';
+            }
+            return emp;
+        });
+        localStorage.setItem('school_employees', JSON.stringify(employees));
+        renderEmployees();
+
+        fetch(`/api/toggle-employee/${encodeURIComponent(id)}/`, { method: 'POST' })
+            .then(res => res.json())
+            .catch(err => console.warn("Status sync note:", err));
+    };
+
+    window.deleteEmployee = function(id) {
+        if (!confirm('Are you sure you want to delete this employee profile?')) return;
+        let employees = getEmployees();
+        employees = employees.filter(emp => String(emp.id) !== String(id) && emp.id !== id);
+        localStorage.setItem('school_employees', JSON.stringify(employees));
+        renderEmployees();
+        if (typeof loadEmpLogins === 'function') loadEmpLogins();
+        if (typeof loadEmpIdCardSelector === 'function') loadEmpIdCardSelector();
+        if (typeof loadJobLetterSelector === 'function') loadJobLetterSelector();
+
+        fetch(`/api/delete-employee/${encodeURIComponent(id)}/`, { method: 'POST' })
+            .then(res => res.json())
+            .catch(err => console.warn("Delete sync note:", err));
+    };
 
     function renderEmployees() {
         const employees = getEmployees();
         const tbody = document.getElementById('allEmployeesTable');
+        if (!tbody) return;
         tbody.innerHTML = '';
 
         employees.forEach(emp => {
+            const empIdDisplay = emp.indexNo || emp.idCode || emp.id;
             const statusBadge = emp.active ? 
-                `<span class="badge bg-success-subtle text-success px-2.5 rounded-pill" style="cursor:pointer;" onclick="toggleEmpStatus(${emp.id})">Active</span>` :
-                `<span class="badge bg-danger-subtle text-danger px-2.5 rounded-pill" style="cursor:pointer;" onclick="toggleEmpStatus(${emp.id})">Inactive</span>`;
+                `<span class="badge bg-success-subtle text-success px-2.5 rounded-pill" style="cursor:pointer;" onclick="toggleEmpStatus('${emp.id}')">Active</span>` :
+                `<span class="badge bg-danger-subtle text-danger px-2.5 rounded-pill" style="cursor:pointer;" onclick="toggleEmpStatus('${emp.id}')">Inactive</span>`;
 
             const row = `
                 <tr>
+                    <td><code class="fw-bold text-primary px-2.5 py-1 bg-primary-subtle rounded border border-primary-subtle">${empIdDisplay}</code></td>
                     <td>
                         <div class="d-flex align-items-center gap-2">
                             ${emp.photo ? 
-                                `<img src="${emp.photo}" class="rounded-circle" style="width:36px; height:36px; object-fit:cover;">` :
-                                `<div class="bg-secondary-subtle rounded-circle d-flex align-items-center justify-content-center fw-semibold text-dark" style="width:36px; height:36px; font-size:0.85rem;">
-                                    ${emp.name.charAt(0)}
+                                `<img src="${emp.photo}" class="rounded-circle border" style="width:36px; height:36px; object-fit:cover;">` :
+                                `<div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width:36px; height:36px; font-size:0.85rem;">
+                                    ${(emp.name || 'E').charAt(0)}
                                 </div>`
                             }
                             <div>
-                                <span class="fw-semibold d-block">${emp.name}</span>
-                                <small class="text-muted">${emp.email}</small>
+                                <span class="fw-semibold d-block text-dark">${emp.name}</span>
+                                <small class="text-muted d-block" style="font-size:0.75rem;">${emp.email || ''}</small>
                             </div>
                         </div>
                     </td>
-                    <td>${emp.role}</td>
-                    <td><span class="badge bg-light text-dark">${emp.dept}</span></td>
-                    <td>${emp.joinDate}</td>
+                    <td><span class="fw-semibold">${emp.role || ''}</span></td>
+                    <td>${emp.dob || emp.dateOfBirth || 'N/A'}</td>
+                    <td>${emp.appointmentDate || 'N/A'}</td>
+                    <td>${emp.firstMPO || 'N/A'}</td>
+                    <td><span class="badge bg-light text-dark border">${emp.payCode || 'N/A'}</span></td>
+                    <td>${emp.joinDate || emp.dateOfJoining || ''}</td>
                     <td>${statusBadge}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary me-1" onclick="editEmployee(${emp.id})"><i class="bi bi-pencil"></i></button>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteEmployee(${emp.id})"><i class="bi bi-trash"></i></button>
+                    <td class="text-center">
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-success" onclick="printSingleEmpJobLetter('${emp.id}')" title="প্রিন্ট করুন Job Letter / Profile Card"><i class="bi bi-printer"></i></button>
+                            <button class="btn btn-outline-primary" onclick="editEmployee('${emp.id}')" title="Edit Profile"><i class="bi bi-pencil"></i></button>
+                            <button class="btn btn-outline-danger" onclick="deleteEmployee('${emp.id}')" title="Delete Profile"><i class="bi bi-trash"></i></button>
+                        </div>
                     </td>
                 </tr>
             `;
@@ -727,34 +900,34 @@
 
     window.editEmployee = function(id) {
         const employees = getEmployees();
-        const emp = employees.find(e => e.id === id);
+        const emp = employees.find(e => String(e.id) === String(id) || e.id === id);
         if (emp) {
-            editingEmpId = id;
-                       // Populate form fields
-            if (document.getElementById('empFullName')) document.getElementById('empFullName').value = emp.name || '';
-            if (document.getElementById('empFatherName')) document.getElementById('empFatherName').value = emp.fatherName || '';
+            editingEmpId = emp.id;
+            // Populate form fields
+            if (document.getElementById('empFullName')) document.getElementById('empFullName').value = emp.name || emp.name_en || '';
+            if (document.getElementById('empFatherName')) document.getElementById('empFatherName').value = emp.fatherName || emp.fatherOrHusbandName || '';
             if (document.getElementById('empMotherName')) document.getElementById('empMotherName').value = emp.motherName || '';
             if (document.getElementById('empSpouseName')) document.getElementById('empSpouseName').value = emp.spouseName || '';
-            if (document.getElementById('empDOB')) document.getElementById('empDOB').value = emp.dob || '';
-            if (document.getElementById('empGender')) document.getElementById('empGender').value = emp.gender || '';
-            if (document.getElementById('empBlood')) document.getElementById('empBlood').value = emp.blood || '';
-            if (document.getElementById('empReligion')) document.getElementById('empReligion').value = emp.religion || emp.nationReligion || '';
-            if (document.getElementById('empNID')) document.getElementById('empNID').value = emp.nid || '';
+            if (document.getElementById('empDOB')) document.getElementById('empDOB').value = emp.dob || emp.dateOfBirth || '';
+            if (document.getElementById('empGender')) document.getElementById('empGender').value = emp.gender || 'Male';
+            if (document.getElementById('empBlood')) document.getElementById('empBlood').value = emp.blood || emp.bloodGroup || 'A+';
+            if (document.getElementById('empReligion')) document.getElementById('empReligion').value = emp.religion || emp.nationReligion || 'Islam';
+            if (document.getElementById('empNID')) document.getElementById('empNID').value = emp.nid || emp.nationalId || '';
             
-            if (document.getElementById('empIndexNo')) document.getElementById('empIndexNo').value = emp.indexNo || '';
+            if (document.getElementById('empIndexNo')) document.getElementById('empIndexNo').value = emp.indexNo || emp.idCode || '';
             if (document.getElementById('empAppointmentDate')) document.getElementById('empAppointmentDate').value = emp.appointmentDate || '';
-            if (document.getElementById('empFirstMPO')) document.getElementById('empFirstMPO').value = emp.firstMPO || '';
-            if (document.getElementById('empPayCode')) document.getElementById('empPayCode').value = emp.payCode || '';
+            if (document.getElementById('empFirstMPO')) document.getElementById('empFirstMPO').value = emp.firstMPO || emp.firstMpoDate || '';
+            if (document.getElementById('empPayCode')) document.getElementById('empPayCode').value = emp.payCode || '20';
 
-            if (document.getElementById('empPrimaryPhone')) document.getElementById('empPrimaryPhone').value = emp.primaryPhone || '';
-            if (document.getElementById('empEmailInput')) document.getElementById('empEmailInput').value = emp.email || '';
-            if (document.getElementById('empPresentAddr')) document.getElementById('empPresentAddr').value = emp.presentAddr || '';
+            if (document.getElementById('empPrimaryPhone')) document.getElementById('empPrimaryPhone').value = emp.primaryPhone || emp.mobileNo || '';
+            if (document.getElementById('empEmailInput')) document.getElementById('empEmailInput').value = emp.email || emp.emailAddress || '';
+            if (document.getElementById('empPresentAddr')) document.getElementById('empPresentAddr').value = emp.presentAddr || emp.homeAddress || '';
 
-            if (document.getElementById('empDesignationInput')) document.getElementById('empDesignationInput').value = emp.role || '';
-            if (document.getElementById('empJoinDateInput')) document.getElementById('empJoinDateInput').value = emp.joinDate || '2026-07-26';
-            if (document.getElementById('empEdu')) document.getElementById('empEdu').value = emp.edu || '';
-            if (document.getElementById('empExp')) document.getElementById('empExp').value = emp.exp || '';
-            if (document.getElementById('empBasicSalary')) document.getElementById('empBasicSalary').value = emp.basicSalary || '';
+            if (document.getElementById('empDesignationInput')) document.getElementById('empDesignationInput').value = emp.role || emp.desigEn || '';
+            if (document.getElementById('empJoinDateInput')) document.getElementById('empJoinDateInput').value = emp.joinDate || emp.dateOfJoining || '2026-07-26';
+            if (document.getElementById('empEdu')) document.getElementById('empEdu').value = emp.edu || emp.education || '';
+            if (document.getElementById('empExp')) document.getElementById('empExp').value = emp.exp || emp.experience || '';
+            if (document.getElementById('empBasicSalary')) document.getElementById('empBasicSalary').value = emp.basicSalary || emp.monthlySalary || '';
 
             // Show Photo Preview
             const preview = document.getElementById('photoPreview');
@@ -779,38 +952,45 @@
         }
     }
 
-    function saveEmployeeProfile(event) {
-        event.preventDefault();
+    window.saveEmployeeProfile = function(event) {
+        if (event && event.preventDefault) event.preventDefault();
         
         const nameInput = document.getElementById('empFullName');
         const name = nameInput ? nameInput.value.trim() : '';
         if (!name) {
             alert('Employee Name is required.');
             if (nameInput) nameInput.focus();
-            return;
+            return false;
         }
 
         const roleInput = document.getElementById('empDesignationInput');
-        const role = (roleInput && roleInput.value.trim()) ? roleInput.value.trim() : '';
-        if (!role) {
-            alert('Employee Role is required.');
-            if (roleInput) roleInput.focus();
-            return;
-        }
+        const role = (roleInput && roleInput.value.trim()) ? roleInput.value.trim() : 'Staff';
 
         const joinDateInput = document.getElementById('empJoinDateInput');
-        const joinDate = (joinDateInput && joinDateInput.value) ? joinDateInput.value : '2026-07-26';
+        const joinDate = (joinDateInput && joinDateInput.value) ? joinDateInput.value : new Date().toISOString().split('T')[0];
 
         const basicSalaryInput = document.getElementById('empBasicSalary');
-        const basicSalary = (basicSalaryInput && basicSalaryInput.value) ? basicSalaryInput.value : '';
-        if (!basicSalary) {
-            alert('Monthly Salary is required.');
-            if (basicSalaryInput) basicSalaryInput.focus();
-            return;
-        }
+        const basicSalary = (basicSalaryInput && basicSalaryInput.value) ? basicSalaryInput.value.trim() : '12,000';
 
         const emailInput = document.getElementById('empEmailInput');
-        const email = (emailInput && emailInput.value) ? emailInput.value : (name.split(' ')[0].toLowerCase() + '@school.com');
+        const email = (emailInput && emailInput.value) ? emailInput.value.trim() : (name.split(' ')[0].toLowerCase() + '@school.com');
+
+        const fatherName = document.getElementById('empFatherName') ? document.getElementById('empFatherName').value.trim() : '';
+        const motherName = document.getElementById('empMotherName') ? document.getElementById('empMotherName').value.trim() : '';
+        const spouseName = document.getElementById('empSpouseName') ? document.getElementById('empSpouseName').value.trim() : '';
+        const dob = document.getElementById('empDOB') ? document.getElementById('empDOB').value : '';
+        const gender = document.getElementById('empGender') ? document.getElementById('empGender').value : 'Male';
+        const blood = document.getElementById('empBlood') ? document.getElementById('empBlood').value : 'A+';
+        const religion = document.getElementById('empReligion') ? document.getElementById('empReligion').value : 'Islam';
+        const nid = document.getElementById('empNID') ? document.getElementById('empNID').value.trim() : '';
+        const indexNo = document.getElementById('empIndexNo') ? document.getElementById('empIndexNo').value.trim() : '';
+        const appointmentDate = document.getElementById('empAppointmentDate') ? document.getElementById('empAppointmentDate').value : '';
+        const firstMPO = document.getElementById('empFirstMPO') ? document.getElementById('empFirstMPO').value : '';
+        const payCode = document.getElementById('empPayCode') ? document.getElementById('empPayCode').value.trim() : '20';
+        const primaryPhone = document.getElementById('empPrimaryPhone') ? document.getElementById('empPrimaryPhone').value.trim() : '';
+        const presentAddr = document.getElementById('empPresentAddr') ? document.getElementById('empPresentAddr').value.trim() : '';
+        const edu = document.getElementById('empEdu') ? document.getElementById('empEdu').value.trim() : '';
+        const exp = document.getElementById('empExp') ? document.getElementById('empExp').value.trim() : '';
 
         // Photo handling
         const previewEl = document.getElementById('photoPreview');
@@ -819,41 +999,58 @@
         const defaultPhoto = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230284c7'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/></svg>";
 
         let employees = getEmployees();
+        let targetEmpData = null;
         
         if (editingEmpId !== null) {
             // Edit Mode
             employees = employees.map(emp => {
-                if (emp.id === editingEmpId) {
+                if (String(emp.id) === String(editingEmpId) || emp.id === editingEmpId) {
                     emp.name = name;
+                    emp.name_en = name;
                     emp.role = role;
-                    emp.dept = emp.dept || 'General';
+                    emp.desigEn = role;
                     emp.joinDate = joinDate;
+                    emp.dateOfJoining = joinDate;
                     emp.email = email;
-                    
-                    emp.fatherName = document.getElementById('empFatherName') ? document.getElementById('empFatherName').value : '';
-                    emp.motherName = document.getElementById('empMotherName') ? document.getElementById('empMotherName').value : '';
-                    emp.spouseName = document.getElementById('empSpouseName') ? document.getElementById('empSpouseName').value : '';
-                    emp.dob = document.getElementById('empDOB') ? document.getElementById('empDOB').value : '';
-                    emp.gender = document.getElementById('empGender') ? document.getElementById('empGender').value : '';
-                    emp.blood = document.getElementById('empBlood') ? document.getElementById('empBlood').value : '';
-                    emp.religion = document.getElementById('empReligion') ? document.getElementById('empReligion').value : '';
-                    emp.nid = document.getElementById('empNID') ? document.getElementById('empNID').value : '';
-                    
-                    emp.indexNo = document.getElementById('empIndexNo') ? document.getElementById('empIndexNo').value : '';
-                    emp.appointmentDate = document.getElementById('empAppointmentDate') ? document.getElementById('empAppointmentDate').value : '';
-                    emp.firstMPO = document.getElementById('empFirstMPO') ? document.getElementById('empFirstMPO').value : '';
-                    emp.payCode = document.getElementById('empPayCode') ? document.getElementById('empPayCode').value : '';
-
-                    emp.primaryPhone = document.getElementById('empPrimaryPhone') ? document.getElementById('empPrimaryPhone').value : '';
-                    emp.presentAddr = document.getElementById('empPresentAddr') ? document.getElementById('empPresentAddr').value : '';
-
-                    emp.edu = document.getElementById('empEdu') ? document.getElementById('empEdu').value : '';
-                    emp.exp = document.getElementById('empExp') ? document.getElementById('empExp').value : '';
+                    emp.emailAddress = email;
+                    emp.fatherName = fatherName;
+                    emp.fatherOrHusbandName = fatherName;
+                    emp.motherName = motherName;
+                    emp.spouseName = spouseName;
+                    emp.dob = dob;
+                    emp.dateOfBirth = dob;
+                    emp.gender = gender;
+                    emp.blood = blood;
+                    emp.bloodGroup = blood;
+                    emp.religion = religion;
+                    emp.nid = nid;
+                    emp.nationalId = nid;
+                    if (indexNo) {
+                        emp.indexNo = indexNo;
+                        emp.idCode = indexNo;
+                        emp.id = indexNo;
+                        emp.serialNo = indexNo;
+                        emp.registrationId = indexNo;
+                    }
+                    emp.appointmentDate = appointmentDate;
+                    emp.firstMPO = firstMPO;
+                    emp.firstMpoDate = firstMPO;
+                    emp.payCode = payCode;
+                    emp.primaryPhone = primaryPhone;
+                    emp.mobileNo = primaryPhone;
+                    emp.presentAddr = presentAddr;
+                    emp.homeAddress = presentAddr;
+                    emp.edu = edu;
+                    emp.education = edu;
+                    emp.exp = exp;
+                    emp.experience = exp;
                     emp.basicSalary = basicSalary;
+                    emp.monthlySalary = basicSalary;
 
                     if (photoBase64) {
                         emp.photo = photoBase64;
                     }
+                    targetEmpData = emp;
                 }
                 return emp;
             });
@@ -862,54 +1059,86 @@
             if (heading) heading.innerHTML = `<i class="bi bi-person-plus-fill me-2"></i>Register Employee Profile`;
         } else {
             // Add Mode
+            const empIdCode = indexNo || ("EMP" + String(Date.now()).slice(-6));
             const newEmp = {
-                id: Date.now(),
+                id: empIdCode,
+                idCode: empIdCode,
+                serialNo: empIdCode,
+                registrationId: empIdCode,
+                indexNo: empIdCode,
+                nid: nid || empIdCode,
+                nationalId: nid || empIdCode,
                 name: name,
+                name_en: name,
                 role: role,
+                desigEn: role,
                 dept: 'General',
                 email: email,
+                emailAddress: email,
                 joinDate: joinDate,
+                dateOfJoining: joinDate,
                 active: true,
                 username: name.split(' ')[0].toLowerCase() + Math.floor(Math.random() * 99),
                 pass: "12345",
-                
-                fatherName: document.getElementById('empFatherName') ? document.getElementById('empFatherName').value : '',
-                motherName: document.getElementById('empMotherName') ? document.getElementById('empMotherName').value : '',
-                spouseName: document.getElementById('empSpouseName') ? document.getElementById('empSpouseName').value : '',
-                dob: document.getElementById('empDOB') ? document.getElementById('empDOB').value : '',
-                gender: document.getElementById('empGender') ? document.getElementById('empGender').value : '',
-                blood: document.getElementById('empBlood') ? document.getElementById('empBlood').value : '',
-                religion: document.getElementById('empReligion') ? document.getElementById('empReligion').value : '',
-                nid: document.getElementById('empNID') ? document.getElementById('empNID').value : '',
-                
-                indexNo: document.getElementById('empIndexNo') ? document.getElementById('empIndexNo').value : '',
-                appointmentDate: document.getElementById('empAppointmentDate') ? document.getElementById('empAppointmentDate').value : '',
-                firstMPO: document.getElementById('empFirstMPO') ? document.getElementById('empFirstMPO').value : '',
-                payCode: document.getElementById('empPayCode') ? document.getElementById('empPayCode').value : '',
-
-                primaryPhone: document.getElementById('empPrimaryPhone') ? document.getElementById('empPrimaryPhone').value : '',
-                presentAddr: document.getElementById('empPresentAddr') ? document.getElementById('empPresentAddr').value : '',
-
-                edu: document.getElementById('empEdu') ? document.getElementById('empEdu').value : '',
-                exp: document.getElementById('empExp') ? document.getElementById('empExp').value : '',
+                fatherName: fatherName,
+                fatherOrHusbandName: fatherName,
+                motherName: motherName,
+                spouseName: spouseName,
+                dob: dob,
+                dateOfBirth: dob,
+                gender: gender,
+                blood: blood,
+                bloodGroup: blood,
+                religion: religion,
+                appointmentDate: appointmentDate,
+                firstMPO: firstMPO,
+                firstMpoDate: firstMPO,
+                payCode: payCode,
+                primaryPhone: primaryPhone,
+                mobileNo: primaryPhone,
+                presentAddr: presentAddr,
+                homeAddress: presentAddr,
+                edu: edu,
+                education: edu,
+                exp: exp,
+                experience: exp,
                 basicSalary: basicSalary,
+                monthlySalary: basicSalary,
                 status: 'Active',
                 photo: photoBase64 || defaultPhoto
             };
-            employees.push(newEmp);
+            targetEmpData = newEmp;
+            employees.unshift(newEmp);
         }
 
         localStorage.setItem('school_employees', JSON.stringify(employees));
+
+        // Sync with Django Server Backend
+        if (targetEmpData) {
+            fetch('/api/save-employee/', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(targetEmpData)
+            })
+            .then(res => res.json())
+            .then(resData => {
+                if (resData && resData.status === 'success') {
+                    fetchEmployeesFromBackend();
+                }
+            })
+            .catch(err => console.warn("API save note:", err));
+        }
         
         // Reset Form
         resetEmployeeForm();
 
+        // Refresh UI components
         renderEmployees();
         if (typeof loadEmpLogins === 'function') loadEmpLogins();
         if (typeof loadEmpIdCardSelector === 'function') loadEmpIdCardSelector();
         if (typeof loadJobLetterSelector === 'function') loadJobLetterSelector();
 
-        // Return to all panel cleanly
+        // Switch to "All Employees" panel cleanly
         const trigger = document.getElementById('all-emp-tab');
         if (trigger) {
             try {
@@ -925,7 +1154,8 @@
         }
         
         showSaveSuccessModal();
-    }
+        return false;
+    };
 
     function showSaveSuccessModal() {
         const modal = document.getElementById('saveSuccessModal');
@@ -944,7 +1174,7 @@
     function toggleEmpStatus(id) {
         let employees = getEmployees();
         employees = employees.map(emp => {
-            if (emp.id === id) emp.active = !emp.active;
+            if (String(emp.id) === String(id) || emp.id === id) emp.active = !emp.active;
             return emp;
         });
         localStorage.setItem('school_employees', JSON.stringify(employees));
@@ -954,7 +1184,7 @@
     function deleteEmployee(id) {
         if (confirm("Delete this employee profile?")) {
             let employees = getEmployees();
-            employees = employees.filter(emp => emp.id !== id);
+            employees = employees.filter(emp => String(emp.id) !== String(id) && emp.id !== id);
             localStorage.setItem('school_employees', JSON.stringify(employees));
             renderEmployees();
         }
@@ -1973,32 +2203,354 @@
     }
 
     // Job Letter Tab
+    // === GAZIMAHMUD LOWER SECONDARY SCHOOL JOB LETTER / PROFILE CARD SYSTEM ===
+
+    function formatDateLong(dateStr) {
+        if (!dateStr) return '';
+        try {
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return dateStr;
+            return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+        } catch(e) { return dateStr; }
+    }
+
+    function formatDateSlash(dateStr) {
+        if (!dateStr) return '';
+        try {
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return dateStr;
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            return `${day}/${month}/${year}`;
+        } catch(e) { return dateStr; }
+    }
+
+    function formatDateDash(dateStr) {
+        if (!dateStr) return '';
+        try {
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return dateStr;
+            const day = String(d.getDate()).padStart(2, '0');
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const year = d.getFullYear();
+            return `${day}-${month}-${year}`;
+        } catch(e) { return dateStr; }
+    }
+
+    function generateBarcodeSvg(text) {
+        const barcodeText = String(text || 'N56889404').trim();
+        const bitStr = generateCode128BitString(barcodeText);
+        const moduleWidth = 1.8;
+        const quietZone = 10;
+        const barcodeW = Math.ceil(bitStr.length * moduleWidth + (quietZone * 2));
+        const barcodeH = 50;
+
+        let rects = '';
+        for (let i = 0; i < bitStr.length; i++) {
+            if (bitStr[i] === '1') {
+                const drawX = (quietZone + i * moduleWidth).toFixed(2);
+                rects += `<rect x="${drawX}" y="4" width="${moduleWidth}" height="32" fill="#000000"/>`;
+            }
+        }
+
+        return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${barcodeW} ${barcodeH}" style="width: 100%; max-width: 165px; height: 46px; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 4px; padding: 2px;">
+            <rect width="100%" height="100%" fill="#ffffff"/>
+            ${rects}
+            <text x="${(barcodeW / 2).toFixed(2)}" y="46" font-family="'Inter', monospace" font-size="9" font-weight="700" text-anchor="middle" fill="#000000">${barcodeText}</text>
+        </svg>`;
+    }
+
+    function generateQrCodeImg(emp) {
+        const empId = emp.indexNo || emp.idCode || emp.id || 'N56889404';
+        const qrData = [
+            "GAZIMAHMUD LOWER SECONDARY SCHOOL",
+            "Name: " + (emp.name || 'Md. RUHUL AMIN'),
+            "Role: " + (emp.role || 'Office Assistant'),
+            "ID: " + empId,
+            "NID: " + (emp.nid || '6871132889'),
+            "Mobile: " + (emp.primaryPhone || '01719565306')
+        ].join("\n");
+
+        const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&color=000000&bgcolor=ffffff&data=" + encodeURIComponent(qrData);
+
+        return `<div class="text-center mt-2">
+            <img src="${qrUrl}" alt="QR Code" class="border border-dark rounded p-1 bg-white shadow-sm" style="width: 68px; height: 68px; object-fit: contain;" onerror="this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 100 100\\'><rect width=\\'100\\' height=\\'100\\' fill=\\'%23fff\\'/><rect x=\\'10\\' y=\\'10\\' width=\\'30\\' height=\\'30\\' fill=\\'%23000\\'/><rect x=\\'60\\' y=\\'10\\' width=\\'30\\' height=\\'30\\' fill=\\'%23000\\'/><rect x=\\'10\\' y=\\'60\\' width=\\'30\\' height=\\'30\\' fill=\\'%23000\\'/><rect x=\\'40\\' y=\\'40\\' width=\\'20\\' height=\\'20\\' fill=\\'%23000\\'/></svg>';">
+            <small class="d-block text-muted mt-1 font-monospace" style="font-size: 8px;">VERIFIED QR</small>
+        </div>`;
+    }
+
+    function generateJobLetterCardHtml(emp) {
+        const photoUrl = emp.photo || "https://via.placeholder.com/150";
+        const serialNo = emp.serialNo || emp.registrationId || emp.idCode || emp.indexNo || "217,255";
+        const regId = emp.registrationId || emp.serialNo || emp.idCode || emp.indexNo || "217,255";
+        const nid = emp.nid || emp.nationalId || "6871132889";
+        const empName = emp.name || emp.name_en || "Md. RUHUL AMIN";
+        const role = emp.role || emp.desigEn || "Office Assistant";
+        const fatherName = emp.fatherName || emp.fatherOrHusbandName || "Motaher";
+        const salary = emp.basicSalary || emp.monthlySalary || "12,199";
+        const joinDateStr = emp.joinDate ? formatDateLong(emp.joinDate) : "12 December, 2023";
+        const username = emp.username || "Ruhul306";
+        const homeAddress = emp.presentAddr || emp.homeAddress || "Gazimahmud, Nishanbaria, Barguna Sadar, Barguna.";
+        
+        const dobStr = emp.dob ? formatDateSlash(emp.dob) : "20/07/1994";
+        const blood = emp.blood || emp.bloodGroup || "A+";
+        const edu = emp.edu || emp.education || "B.A (Pass)";
+        const gender = emp.gender || "Male";
+        const exp = emp.exp || emp.experience || "3 Years";
+        const mobile = emp.primaryPhone || emp.mobileNo || emp.mobile || "01719565306";
+        const religion = emp.religion || "Islam";
+        const email = emp.email || emp.emailAddress || "islamtalicom.306@gmail.com";
+        
+        const spouseName = emp.spouseName || "Mst Shemu Akter";
+        const payCode = emp.payCode || "20";
+        const indexNo = emp.indexNo || emp.idCode || "N56889404";
+        const firstMPOStr = emp.firstMPO ? formatDateDash(emp.firstMPO) : "01-05-2024";
+
+        return `
+        <div class="job-letter-card bg-white p-3 p-md-4 rounded-3 shadow-sm border border-2 border-dark mx-auto text-dark" style="max-width: 780px; font-family: 'Inter', sans-serif; border: 2px solid #0f172a !important;">
+          
+          <!-- Header Section -->
+          <div class="text-center border-bottom pb-3 mb-3">
+            <div class="w-14 h-14 mx-auto mb-1 flex items-center justify-center bg-emerald-700 text-white rounded-full font-bold text-xs text-center p-1 shadow-sm d-inline-flex" style="width:52px; height:52px; background-color: #047857; color: white; border-radius: 50%; justify-content: center; align-items: center; font-weight: bold; font-size: 10px; text-align: center;">
+              GAZIMAHMUD SCHOOL
+            </div>
+            <h2 class="text-xl font-extrabold tracking-wide text-gray-900 mb-0.5 fw-bold fs-4 text-uppercase" style="color: #111827; letter-spacing: 0.5px;">GAZIMAHMUD LOWER SECONDARY SCHOOL</h2>
+            <p class="text-xs text-gray-600 mb-0 small text-muted" style="font-size: 0.75rem;">
+              স্থাপিত-১৯৮৩ খ্রিঃ, EIIN-100184, E-mail: school100184@gmail.com
+            </p>
+            <p class="text-xs text-gray-600 small text-muted mb-1" style="font-size: 0.75rem;">01309100184 | Bangladesh | www.gjhs.net</p>
+            <h3 class="text-lg font-bold text-indigo-800 mt-1 fw-bold text-primary mb-0" style="color: #3730a3; font-size: 1.15rem;">Job Letter / Profile Card</h3>
+          </div>
+
+          <!-- Main Content Section -->
+          <div class="row g-3 mb-3 align-items-start">
+            
+            <!-- Photo, Barcode & QR Code -->
+            <div class="col-4 d-flex flex-column align-items-center text-center">
+              <div class="rounded-3 overflow-hidden border border-2 border-primary mb-2 shadow-sm" style="width: 125px; height: 155px; border: 2.5px solid #2563eb;">
+                <img src="${photoUrl}" alt="Employee Photo" class="w-100 h-100" style="width: 100%; height: 100%; object-fit: cover;">
+              </div>
+              <!-- Code 128 Vector SVG Barcode -->
+              <div class="w-100 text-center my-1 px-1">
+                ${generateBarcodeSvg(indexNo)}
+              </div>
+              <!-- High-Resolution QR Code -->
+              ${generateQrCodeImg(emp)}
+            </div>
+
+            <!-- Basic Profile Info -->
+            <div class="col-8">
+              <div class="row g-2.5" style="font-size: 0.85rem;">
+                <div class="col-6">
+                  <p class="text-xs text-muted mb-0 small" style="color: #6b7280; font-size: 0.72rem;">Serial No</p>
+                  <p class="fw-semibold text-dark mb-0">↳ ${serialNo}</p>
+                </div>
+                <div class="col-6">
+                  <p class="text-xs text-muted mb-0 small" style="color: #6b7280; font-size: 0.72rem;">National ID</p>
+                  <p class="fw-bold text-dark mb-0">↳ ${nid}</p>
+                </div>
+
+                <div class="col-6">
+                  <p class="text-xs text-muted mb-0 small" style="color: #6b7280; font-size: 0.72rem;">Registration/ID</p>
+                  <p class="fw-semibold text-dark mb-0">↳ ${regId}</p>
+                </div>
+                <div class="col-6">
+                  <p class="text-xs text-muted mb-0 small" style="color: #6b7280; font-size: 0.72rem;">Date of Joining</p>
+                  <p class="fw-bold text-dark mb-0">↳ ${joinDateStr}</p>
+                </div>
+
+                <div class="col-6">
+                  <p class="text-xs text-muted mb-0 small" style="color: #6b7280; font-size: 0.72rem;">Name of Employee</p>
+                  <p class="fw-bold text-dark mb-0 fs-6">↳ ${empName}</p>
+                </div>
+                <div class="col-6">
+                  <p class="text-xs text-muted mb-0 small" style="color: #6b7280; font-size: 0.72rem;">Employee Role</p>
+                  <p class="fw-bold text-dark mb-0">↳ ${role}</p>
+                </div>
+
+                <div class="col-6">
+                  <p class="text-xs text-muted mb-0 small" style="color: #6b7280; font-size: 0.72rem;">Father / Husband Name</p>
+                  <p class="fw-bold text-dark mb-0">↳ ${fatherName}</p>
+                </div>
+                <div class="col-6">
+                  <p class="text-xs text-muted mb-0 small" style="color: #6b7280; font-size: 0.72rem;">Monthly Salary</p>
+                  <p class="fw-bold text-dark mb-0">↳ ৳ ${salary}</p>
+                </div>
+
+                <div class="col-12">
+                  <p class="text-xs text-muted mb-0 small" style="color: #6b7280; font-size: 0.72rem;">Username / Password</p>
+                  <p class="fw-semibold text-dark mb-0">↳ ${username}</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Address -->
+            <div class="col-12 border-top pt-2 mt-2">
+              <p class="text-xs text-muted mb-0 small" style="color: #6b7280; font-size: 0.72rem;">Home Address</p>
+              <p class="fw-semibold text-dark mb-0" style="font-size: 0.85rem;">↳ ${homeAddress}</p>
+            </div>
+          </div>
+
+          <!-- Personal Details Section -->
+          <div class="border-top border-bottom py-2.5 my-3">
+            <div class="row g-2.5" style="font-size: 0.825rem;">
+              <div class="col-4">
+                <p class="text-xs text-muted mb-0 small" style="color: #6b7280; font-size: 0.72rem;">Date of Birth</p>
+                <p class="fw-bold text-dark mb-0">↳ ${dobStr}</p>
+              </div>
+              <div class="col-4">
+                <p class="text-xs text-muted mb-0 small" style="color: #6b7280; font-size: 0.72rem;">Blood Group</p>
+                <p class="fw-bold text-dark mb-0">↳ ${blood}</p>
+              </div>
+              <div class="col-4">
+                <p class="text-xs text-muted mb-0 small" style="color: #6b7280; font-size: 0.72rem;">Education</p>
+                <p class="fw-bold text-dark mb-0">↳ ${edu}</p>
+              </div>
+
+              <div class="col-4">
+                <p class="text-xs text-muted mb-0 small" style="color: #6b7280; font-size: 0.72rem;">Gender</p>
+                <p class="fw-bold text-dark mb-0">↳ ${gender}</p>
+              </div>
+              <div class="col-4">
+                <p class="text-xs text-muted mb-0 small" style="color: #6b7280; font-size: 0.72rem;">Experience</p>
+                <p class="fw-bold text-dark mb-0">↳ ${exp}</p>
+              </div>
+              <div class="col-4">
+                <p class="text-xs text-muted mb-0 small" style="color: #6b7280; font-size: 0.72rem;">Mobile No</p>
+                <p class="fw-bold text-dark mb-0">↳ ${mobile}</p>
+              </div>
+
+              <div class="col-4">
+                <p class="text-xs text-muted mb-0 small" style="color: #6b7280; font-size: 0.72rem;">Religion</p>
+                <p class="fw-bold text-dark mb-0">↳ ${religion}</p>
+              </div>
+              <div class="col-8">
+                <p class="text-xs text-muted mb-0 small" style="color: #6b7280; font-size: 0.72rem;">Email Address</p>
+                <p class="fw-bold text-dark mb-0">↳ ${email}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Official/MPO Details -->
+          <div class="row g-2.5 mb-3" style="font-size: 0.825rem;">
+            <div class="col-6">
+              <p class="text-xs text-muted mb-0 small" style="color: #6b7280; font-size: 0.72rem;">Spouse Name</p>
+              <p class="fw-bold text-dark mb-0">↳ ${spouseName}</p>
+            </div>
+            <div class="col-6">
+              <p class="text-xs text-muted mb-0 small" style="color: #6b7280; font-size: 0.72rem;">Pay Code</p>
+              <p class="fw-bold text-dark mb-0">↳ ${payCode}</p>
+            </div>
+
+            <div class="col-6">
+              <p class="text-xs text-muted mb-0 small" style="color: #6b7280; font-size: 0.72rem;">Index No</p>
+              <p class="fw-bold text-dark mb-0">↳ ${indexNo}</p>
+            </div>
+            <div class="col-6">
+              <p class="text-xs text-muted mb-0 small" style="color: #6b7280; font-size: 0.72rem;">First MPO Date</p>
+              <p class="fw-bold text-dark mb-0">↳ ${firstMPOStr}</p>
+            </div>
+          </div>
+
+          <!-- Signatures Footer -->
+          <div class="d-flex justify-content-between mt-3 pt-3 text-center small text-muted border-top">
+            <div>
+              <div style="border-top: 1px dashed #4b5563; width: 130px;" class="mx-auto mb-1"></div>
+              <p class="mb-0 fw-semibold" style="font-size: 0.75rem;">Employee Signature</p>
+            </div>
+            <div>
+              <div style="border-top: 1px dashed #4b5563; width: 130px;" class="mx-auto mb-1"></div>
+              <p class="mb-0 fw-semibold" style="font-size: 0.75rem;">Headmaster / Authority Seal</p>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="mt-3 text-center no-print">
+            <button onclick="window.print()" class="btn btn-primary fw-bold py-2 px-4 rounded-3 shadow-sm">
+              <i class="bi bi-printer me-2"></i>প্রিন্ট করুন / PDF ডাউনলোড
+            </button>
+          </div>
+
+        </div>
+        `;
+    }
+    }
+
+    function printSingleEmpJobLetter(empId) {
+        const employees = getEmployees();
+        const emp = employees.find(e => String(e.id) === String(empId) || e.id === empId);
+        if (!emp) return;
+
+        const printArea = document.getElementById('printArea');
+        if (!printArea) return;
+
+        printArea.className = 'p-4 bg-white d-block';
+        printArea.innerHTML = generateJobLetterCardHtml(emp);
+
+        setTimeout(() => {
+            window.print();
+        }, 150);
+    }
+
+    function printAllEmpJobLetters() {
+        const employees = getEmployees();
+        const printArea = document.getElementById('printArea');
+        if (!printArea) return;
+
+        if (employees.length === 0) {
+            alert("No employee records found.");
+            return;
+        }
+
+        let cardsHtml = employees.map(emp => `
+            <div style="page-break-after: always; margin-bottom: 25px;">
+                ${generateJobLetterCardHtml(emp)}
+            </div>
+        `).join('');
+
+        printArea.className = 'p-4 bg-white d-block';
+        printArea.innerHTML = cardsHtml;
+
+        setTimeout(() => {
+            window.print();
+        }, 200);
+    }
+
+    // Job Letter Tab
     function loadJobLetterSelector() {
         const employees = getEmployees();
         const select = document.getElementById('jobLetterSelector');
-        select.innerHTML = '<option value="" disabled selected>Select Employee...</option>';
+        if (!select) return;
+        select.innerHTML = '<option value="" disabled selected>Select Employee Profile...</option>';
         employees.forEach(emp => {
-            select.insertAdjacentHTML('beforeend', `<option value="${emp.id}">${emp.name}</option>`);
+            select.insertAdjacentHTML('beforeend', `<option value="${emp.id}">${emp.name} (${emp.role})</option>`);
         });
+
+        if (employees.length > 0) {
+            select.value = employees[0].id;
+            generateJobLetter();
+        }
     }
 
     function generateJobLetter() {
-        const id = document.getElementById('jobLetterSelector').value;
+        const select = document.getElementById('jobLetterSelector');
+        if (!select || !select.value) return;
+        const id = select.value;
         const employees = getEmployees();
-        const emp = employees.find(e => e.id == id);
+        const emp = employees.find(e => String(e.id) === String(id) || e.id === id);
         if (emp) {
-            document.getElementById('jobTargetName').innerText = emp.name;
-            document.getElementById('jobTargetDesignation').innerText = emp.role;
-            document.getElementById('jobTargetSalutation').innerText = emp.name;
-            document.getElementById('jobTargetRole').innerText = emp.role;
-            document.getElementById('jobTargetDept').innerText = emp.dept;
-            document.getElementById('jobTargetJoin').innerText = emp.joinDate;
+            const preview = document.getElementById('jobLetterPreview');
+            if (preview) {
+                preview.innerHTML = generateJobLetterCardHtml(emp);
+                preview.classList.remove('d-none');
+            }
 
-            // Load into Print Area
             const printArea = document.getElementById('printArea');
-            printArea.innerHTML = document.getElementById('jobLetterPreview').innerHTML;
-
-            document.getElementById('jobLetterPreview').classList.remove('d-none');
+            if (printArea) {
+                printArea.className = 'p-4 bg-white d-block';
+                printArea.innerHTML = generateJobLetterCardHtml(emp);
+            }
         }
     }
 
@@ -2029,7 +2581,7 @@
 
         let rowsHtml = '';
         if (employees.length === 0) {
-            rowsHtml = '<tr><td colspan="8" class="p-4 text-center text-muted">No employee records found.</td></tr>';
+            rowsHtml = '<tr><td colspan="10" class="p-4 text-center text-muted">No employee records found.</td></tr>';
         } else {
             employees.forEach((emp, idx) => {
                 const statusText = emp.active ? 'Active' : 'Inactive';
@@ -2037,11 +2589,13 @@
                 rowsHtml += `
                     <tr>
                         <td class="text-center"><strong>${idx + 1}</strong></td>
-                        <td class="text-center"><code>${emp.idCode || emp.id}</code></td>
+                        <td class="text-center"><code>${emp.indexNo || emp.idCode || emp.id}</code></td>
                         <td class="fw-bold text-start ps-3">${emp.name_en || emp.name || emp.name_bn}</td>
                         <td>${emp.role || emp.desigEn || emp.desigBn || 'N/A'}</td>
-                        <td><span class="badge bg-light text-dark border">${emp.dept || 'N/A'}</span></td>
-                        <td>${emp.email || 'N/A'}<br/><small class="text-muted">${emp.phone || emp.mobile || ''}</small></td>
+                        <td>${emp.dob || 'N/A'}</td>
+                        <td>${emp.appointmentDate || 'N/A'}</td>
+                        <td>${emp.firstMPO || 'N/A'}</td>
+                        <td>${emp.payCode || 'N/A'}</td>
                         <td>${emp.joinDate || 'N/A'}</td>
                         <td><span class="${statusBadgeClass}">${statusText}</span></td>
                     </tr>
@@ -2066,8 +2620,10 @@
                             <th>ID Code</th>
                             <th class="text-start ps-3">Employee Name</th>
                             <th>Designation</th>
-                            <th>Department</th>
-                            <th>Contact Info</th>
+                            <th>Date of Birth</th>
+                            <th>Date of Appointment</th>
+                            <th>First MPO</th>
+                            <th>Pay Code</th>
                             <th>Joining Date</th>
                             <th>Status</th>
                         </tr>
@@ -2098,7 +2654,19 @@
 
     document.addEventListener("DOMContentLoaded", function() {
         renderEmployees();
+        fetchEmployeesFromBackend();
         loadEmpIdCardSelector();
+        
+        const empForm = document.getElementById('addEmployeeForm');
+        if (empForm) {
+            empForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                if (window.saveEmployeeProfile) {
+                    window.saveEmployeeProfile(e);
+                }
+            });
+        }
+
         // Initialize bootstrap tabs
         const tabTriggerList = [].slice.call(document.querySelectorAll('#employeeTabs button'));
         tabTriggerList.forEach(function (tabTriggerEl) {

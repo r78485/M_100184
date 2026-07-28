@@ -551,6 +551,159 @@ def api_delete_student(request, student_id):
             return JsonResponse({'status': 'error', 'message': str(e)})
     return JsonResponse({'status': 'invalid method'})
 
+
+@csrf_exempt
+def api_get_employees(request):
+    try:
+        from apps.users.models import Employee
+        from django.db import connection
+        tables = connection.introspection.table_names()
+        if 'users_employee' not in tables:
+            try:
+                with connection.schema_editor() as editor:
+                    editor.create_model(Employee)
+            except Exception:
+                from django.core.management import call_command
+                call_command('migrate', interactive=False)
+
+        employees = Employee.objects.all().order_by('-created_at')
+        if not employees.exists():
+            default_emps = [
+                {
+                    'emp_id': "N56889404", 'name': "Md. RUHUL AMIN", 'role': "Office Assistant", 'dept': "Admin & Office",
+                    'email': "islamtalicom.306@gmail.com", 'dob': "1994-07-20", 'gender': "Male", 'religion': "Islam",
+                    'blood': "A+", 'exp': "3 Years", 'edu': "B.A (Pass)", 'primary_phone': "01719565306",
+                    'present_addr': "Gazimahmud, Nishanbaria, Barguna Sadar, Barguna.", 'basic_salary': "12,199",
+                    'appointment_date': "2023-12-12", 'join_date': "2023-12-12", 'first_mpo': "2024-05-01", 'pay_code': "20",
+                    'active': True, 'username': "Ruhul306", 'pass_val': "12345", 'father_name': "Motaher",
+                    'spouse_name': "Mst Shemu Akter", 'index_no': "N56889404", 'nid': "6871132889"
+                },
+                {
+                    'emp_id': "T100201", 'name': "David Henderson", 'role': "Senior Teacher", 'dept': "Mathematics",
+                    'email': "david.h@school.com", 'dob': "1985-08-20", 'gender': "Male", 'religion': "Christianity",
+                    'blood': "B+", 'exp': "5 Years", 'edu': "M.Sc (Math)", 'primary_phone': "01712345678",
+                    'present_addr': "College Road, Barguna Sadar, Barguna.", 'basic_salary': "25,000",
+                    'appointment_date': "2020-11-15", 'join_date': "2021-01-12", 'first_mpo': "2021-02-01", 'pay_code': "10",
+                    'active': True, 'username': "david.h", 'pass_val': "12345", 'father_name': "Robert Henderson",
+                    'spouse_name': "Emma Henderson", 'index_no': "T100201", 'nid': "9876543210"
+                },
+                {
+                    'emp_id': "T100202", 'name': "Sarah Vance", 'role': "Teacher", 'dept': "English",
+                    'email': "sarah.v@school.com", 'dob': "1990-11-05", 'gender': "Female", 'religion': "Christianity",
+                    'blood': "O+", 'exp': "4 Years", 'edu': "M.A (English)", 'primary_phone': "01812345678",
+                    'present_addr': "Hospital Road, Barguna Sadar, Barguna.", 'basic_salary': "22,000",
+                    'appointment_date': "2022-07-01", 'join_date': "2022-08-10", 'first_mpo': "2022-09-01", 'pay_code': "12",
+                    'active': True, 'username': "sarah.v", 'pass_val': "12345", 'father_name': "John Vance",
+                    'spouse_name': "Mark Vance", 'index_no': "T100202", 'nid': "4567890123"
+                }
+            ]
+            for data in default_emps:
+                Employee.objects.create(**data)
+            employees = Employee.objects.all().order_by('-created_at')
+
+        data = [emp.to_dict() for emp in employees]
+        return JsonResponse({'status': 'success', 'employees': data})
+    except Exception as e:
+        return JsonResponse({'status': 'error', 'message': str(e), 'employees': []})
+
+
+@csrf_exempt
+def api_save_employee(request):
+    if request.method == 'POST':
+        try:
+            from apps.users.models import Employee
+            payload = {}
+            if request.content_type == 'application/json' or (request.body and request.body.startswith(b'{')):
+                try:
+                    payload = json.loads(request.body)
+                except Exception:
+                    payload = request.POST.dict()
+            else:
+                payload = request.POST.dict()
+
+            name = payload.get('name') or payload.get('name_en') or ''
+            if not name:
+                return JsonResponse({'status': 'error', 'message': 'Employee Name is required.'})
+
+            emp_id = payload.get('id') or payload.get('indexNo') or payload.get('emp_id')
+            import time
+            if not emp_id:
+                emp_id = "EMP" + str(int(time.time()*1000))[-6:]
+
+            employee = Employee.objects.filter(emp_id=emp_id).first()
+            if not employee:
+                employee = Employee(emp_id=emp_id)
+
+            employee.name = name
+            employee.role = payload.get('role') or payload.get('desigEn') or 'Staff'
+            employee.dept = payload.get('dept') or 'General'
+            employee.email = payload.get('email') or payload.get('emailAddress') or ''
+            employee.join_date = payload.get('joinDate') or payload.get('dateOfJoining') or ''
+            employee.father_name = payload.get('fatherName') or payload.get('fatherOrHusbandName') or ''
+            employee.mother_name = payload.get('motherName') or ''
+            employee.spouse_name = payload.get('spouseName') or ''
+            employee.dob = payload.get('dob') or payload.get('dateOfBirth') or ''
+            employee.gender = payload.get('gender') or 'Male'
+            employee.blood = payload.get('blood') or payload.get('bloodGroup') or 'A+'
+            employee.religion = payload.get('religion') or 'Islam'
+            employee.nid = payload.get('nid') or payload.get('nationalId') or ''
+            employee.index_no = payload.get('indexNo') or emp_id
+            employee.appointment_date = payload.get('appointmentDate') or ''
+            employee.first_mpo = payload.get('firstMPO') or payload.get('firstMpoDate') or ''
+            employee.pay_code = payload.get('payCode') or '20'
+            employee.primary_phone = payload.get('primaryPhone') or payload.get('mobileNo') or ''
+            employee.present_addr = payload.get('presentAddr') or payload.get('homeAddress') or ''
+            employee.edu = payload.get('edu') or payload.get('education') or ''
+            employee.exp = payload.get('exp') or payload.get('experience') or ''
+            employee.basic_salary = payload.get('basicSalary') or payload.get('monthlySalary') or '12,000'
+            
+            photo_val = payload.get('photo')
+            if photo_val and not str(photo_val).startswith('data:image/svg+xml'):
+                employee.photo = photo_val
+            
+            if 'active' in payload:
+                employee.active = bool(payload.get('active'))
+            
+            if not employee.username:
+                employee.username = name.split(' ')[0].lower() + str(int(time.time()) % 100)
+
+            employee.save()
+            return JsonResponse({'status': 'success', 'employee': employee.to_dict()})
+        except Exception as e:
+            import traceback
+            print("api_save_employee error:", traceback.format_exc())
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    return JsonResponse({'status': 'invalid method'})
+
+
+@csrf_exempt
+def api_delete_employee(request, emp_id):
+    if request.method in ['POST', 'DELETE']:
+        try:
+            from apps.users.models import Employee
+            Employee.objects.filter(emp_id=emp_id).delete()
+            return JsonResponse({'status': 'success', 'message': 'Employee deleted successfully!'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    return JsonResponse({'status': 'invalid method'})
+
+
+@csrf_exempt
+def api_toggle_employee_status(request, emp_id):
+    if request.method == 'POST':
+        try:
+            from apps.users.models import Employee
+            emp = Employee.objects.filter(emp_id=emp_id).first()
+            if emp:
+                emp.active = not emp.active
+                emp.save()
+                return JsonResponse({'status': 'success', 'active': emp.active})
+            return JsonResponse({'status': 'error', 'message': 'Employee not found'})
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)})
+    return JsonResponse({'status': 'invalid method'})
+
+
 @login_required
 def generate_result_card(request):
     try:

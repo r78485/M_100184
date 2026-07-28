@@ -117,24 +117,27 @@ def sync_export_data(request):
         return JsonResponse({'error': 'Invalid API Key'}, status=403)
 
     try:
-        from apps.users.models import User, Student, Teacher, Employee, SchoolSettings
-        from apps.academics.models import Class, Section, Subject
-
         export = {}
 
         # Students
-        students = Student.objects.all()
-        export['students'] = json.loads(serializers.serialize('json', students))
+        try:
+            from apps.users.models import StudentAdmission as StudentModel
+            students = StudentModel.objects.all()
+            export['students'] = json.loads(serializers.serialize('json', students))
+        except Exception:
+            export['students'] = []
 
         # Classes
         try:
-            classes = Class.objects.all()
+            from apps.academics.models import ClassRoom as ClassModel
+            classes = ClassModel.objects.all()
             export['classes'] = json.loads(serializers.serialize('json', classes))
         except Exception:
             export['classes'] = []
 
         # Subjects
         try:
+            from apps.academics.models import Subject
             subjects = Subject.objects.all()
             export['subjects'] = json.loads(serializers.serialize('json', subjects))
         except Exception:

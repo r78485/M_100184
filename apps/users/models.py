@@ -120,3 +120,91 @@ class StudentAdmission(models.Model):
         name = self.student_name_bn or self.student_name_en or "Student"
         return f"{name} - {self.desired_class}"
 
+# Model Aliases for backward compatibility
+Student = StudentAdmission
+
+
+class Employee(models.Model):
+    emp_id = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=200)
+    role = models.CharField(max_length=100, blank=True, default="Staff")
+    dept = models.CharField(max_length=100, blank=True, default="General")
+    email = models.CharField(max_length=150, blank=True, default="")
+    join_date = models.CharField(max_length=50, blank=True, default="")
+    active = models.BooleanField(default=True)
+    username = models.CharField(max_length=100, blank=True, default="")
+    pass_val = models.CharField(max_length=100, blank=True, default="12345")
+    father_name = models.CharField(max_length=200, blank=True, default="")
+    mother_name = models.CharField(max_length=200, blank=True, default="")
+    spouse_name = models.CharField(max_length=200, blank=True, default="")
+    dob = models.CharField(max_length=50, blank=True, default="")
+    gender = models.CharField(max_length=20, blank=True, default="Male")
+    blood = models.CharField(max_length=10, blank=True, default="A+")
+    religion = models.CharField(max_length=50, blank=True, default="Islam")
+    nid = models.CharField(max_length=50, blank=True, default="")
+    index_no = models.CharField(max_length=50, blank=True, default="")
+    appointment_date = models.CharField(max_length=50, blank=True, default="")
+    first_mpo = models.CharField(max_length=50, blank=True, default="")
+    pay_code = models.CharField(max_length=20, blank=True, default="20")
+    primary_phone = models.CharField(max_length=30, blank=True, default="")
+    present_addr = models.TextField(blank=True, default="")
+    edu = models.CharField(max_length=200, blank=True, default="")
+    exp = models.CharField(max_length=100, blank=True, default="")
+    basic_salary = models.CharField(max_length=50, blank=True, default="12,000")
+    photo = models.TextField(blank=True, default="")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def to_dict(self):
+        default_photo = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%230284c7'><path d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/></svg>"
+        return {
+            'id': self.emp_id,
+            'idCode': self.emp_id,
+            'serialNo': self.emp_id,
+            'registrationId': self.emp_id,
+            'indexNo': self.index_no or self.emp_id,
+            'nid': self.nid or self.emp_id,
+            'nationalId': self.nid or self.emp_id,
+            'name': self.name,
+            'name_en': self.name,
+            'role': self.role,
+            'desigEn': self.role,
+            'dept': self.dept,
+            'email': self.email,
+            'emailAddress': self.email,
+            'joinDate': self.join_date,
+            'dateOfJoining': self.join_date,
+            'active': self.active,
+            'username': self.username,
+            'pass': self.pass_val,
+            'fatherName': self.father_name,
+            'fatherOrHusbandName': self.father_name,
+            'motherName': self.mother_name,
+            'spouseName': self.spouse_name,
+            'dob': self.dob,
+            'dateOfBirth': self.dob,
+            'gender': self.gender,
+            'blood': self.blood,
+            'bloodGroup': self.blood,
+            'religion': self.religion,
+            'appointmentDate': self.appointment_date,
+            'firstMPO': self.first_mpo,
+            'firstMpoDate': self.first_mpo,
+            'payCode': self.pay_code,
+            'primaryPhone': self.primary_phone,
+            'mobileNo': self.primary_phone,
+            'presentAddr': self.present_addr,
+            'homeAddress': self.present_addr,
+            'edu': self.edu,
+            'education': self.edu,
+            'exp': self.exp,
+            'experience': self.exp,
+            'basicSalary': self.basic_salary,
+            'monthlySalary': self.basic_salary,
+            'status': 'Active' if self.active else 'Inactive',
+            'photo': self.photo or default_photo
+        }
+
+    def __str__(self):
+        return f"{self.name} ({self.role})"
+
+

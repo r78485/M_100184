@@ -79,22 +79,32 @@ def _collect_local_data():
     total = 0
 
     try:
-        from apps.users.models import Student
-        students = Student.objects.all()
+        try:
+            from apps.users.models import StudentAdmission as StudentModel
+        except ImportError:
+            from apps.users.models import Student as StudentModel
+        students = StudentModel.objects.all()
         payload['models']['students'] = json.loads(serializers.serialize('json', students))
         total += len(payload['models']['students'])
     except Exception as e:
         logger.warning(f"Student collect error: {e}")
 
     try:
-        from apps.academics.models import Class, Subject
-        classes = Class.objects.all()
+        try:
+            from apps.academics.models import ClassRoom as ClassModel
+        except ImportError:
+            from apps.academics.models import Class as ClassModel
+        classes = ClassModel.objects.all()
         payload['models']['classes'] = json.loads(serializers.serialize('json', classes))
         total += len(payload['models']['classes'])
 
-        subjects = Subject.objects.all()
-        payload['models']['subjects'] = json.loads(serializers.serialize('json', subjects))
-        total += len(payload['models']['subjects'])
+        try:
+            from apps.academics.models import Subject
+            subjects = Subject.objects.all()
+            payload['models']['subjects'] = json.loads(serializers.serialize('json', subjects))
+            total += len(payload['models']['subjects'])
+        except Exception:
+            pass
     except Exception as e:
         logger.warning(f"Academics collect error: {e}")
 
