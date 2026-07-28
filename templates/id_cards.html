@@ -3,271 +3,332 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>স্টুডেন্ট ইউনিক আইডি কার্ড</title>
+    <title>স্টুডেন্ট ইউনিক আইডি কার্ড — EduManage ERP</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap');
         
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: 'Hind Siliguri', sans-serif;
+            font-family: 'Hind Siliguri', 'Segoe UI', sans-serif;
         }
 
         body {
-            background-color: #f0f2f5;
+            background-color: #f1f5f9;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px;
+            color: #1e293b;
         }
 
-        /* প্রিন্ট বাটন */
+        /* Top Action Bar / Print Button */
+        .print-header {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            margin-bottom: 25px;
+        }
+
+        .print-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0d3b66;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
         .print-btn {
-            background-color: #0d3b66;
+            background: linear-gradient(135deg, #0d3b66 0%, #1e40af 100%);
             color: #fff;
             border: none;
-            padding: 10px 25px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 5px;
+            padding: 10px 22px;
+            font-size: 15px;
+            font-weight: 700;
+            border-radius: 8px;
             cursor: pointer;
-            margin-bottom: 25px;
-            box-shadow: 0 4px 12px rgba(13,59,102,0.3);
-            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(13,59,102,0.25);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
+
         .print-btn:hover {
-            background-color: #0a2d50;
+            background: linear-gradient(135deg, #0a2d50 0%, #1d4ed8 100%);
             transform: translateY(-2px);
         }
 
+        .cards-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 30px;
+            width: 100%;
+            max-width: 900px;
+        }
+
+        /* Pair Wrapper for Front & Back (পাশাপাশি Layout) */
         .card-wrapper {
             display: flex;
-            gap: 30px;
-            flex-wrap: wrap;
+            flex-direction: row;
+            flex-wrap: nowrap;
             justify-content: center;
-            margin-bottom: 40px;
-            page-break-after: always; /* প্রতিটি স্টুডেন্ট কার্ড সেটের পর পেজ ব্রেক */
+            align-items: center;
+            gap: 24px;
+            width: 100%;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
-        .card-wrapper:last-child { page-break-after: auto; }
 
-        /* আইডি কার্ডের মেজারমেন্ট ও ডাবল বর্ডার */
+        /* -------------------------------------------------------------
+           SCREEN VIEW STYLING (310px x 490px Ratio)
+           ------------------------------------------------------------- */
         .id-card {
-            width: 450px;
-            height: 700px;
-            background: #fff;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            width: 310px;
+            height: 490px;
+            background: #ffffff;
+            border-radius: 14px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
             position: relative;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            border: 4px solid #0d3b66; /* ১ম বর্ডার */
-            padding: 3px;
+            border: 3px solid #0d3b66;
+            padding: 2.5px;
+            flex-shrink: 0;
         }
 
         .card-inner {
-            border: 1px solid #d62828; /* ২য় বর্ডার */
-            border-radius: 14px;
+            border: 1px solid #d62828;
+            border-radius: 10px;
             height: 100%;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            background: #fff;
+            background: #ffffff;
         }
 
-        .card-holder-clip {
-            width: 80px;
-            height: 16px;
-            background: #e0e0e0;
-            border-radius: 10px;
-            margin: 10px auto 3px auto;
-            border: 1px solid #ccc;
+        .card-clip {
+            width: 50px;
+            height: 10px;
+            background: #e2e8f0;
+            border-radius: 6px;
+            margin: 6px auto 2px auto;
+            border: 1px solid #cbd5e1;
             flex-shrink: 0;
         }
 
-        .header {
+        .card-header {
             display: flex;
             align-items: center;
-            padding: 5px 15px;
+            padding: 4px 10px;
             flex-shrink: 0;
         }
 
-        .logo {
-            width: 60px;
-            height: 60px;
+        .school-logo {
+            width: 42px;
+            height: 42px;
             object-fit: contain;
         }
 
-        .school-info {
+        .school-logo-svg {
+            width: 42px;
+            height: 42px;
+        }
+
+        .school-text {
             flex: 1;
             text-align: center;
-            padding-left: 5px;
+            padding-left: 4px;
         }
 
-        .school-name {
-            font-size: 19px;
+        .school-name-main {
+            font-size: 14px;
             font-weight: 700;
             color: #0d3b66;
-            line-height: 1.2;
+            line-height: 1.25;
         }
 
-        .school-location {
-            font-size: 12px;
-            color: #555;
+        .school-sub {
+            font-size: 9.5px;
+            color: #475569;
             font-weight: 600;
         }
 
-        .divider-line {
+        .card-divider {
             height: 2px;
             background: #0d3b66;
-            margin: 3px 15px;
+            margin: 2px 10px;
             flex-shrink: 0;
         }
 
-        .card-title {
+        .card-title-badge {
             text-align: center;
-            font-size: 21px;
+            font-size: 13.5px;
             font-weight: 700;
             color: #000;
-            margin: 3px 0 8px 0;
+            margin: 2px 0 4px 0;
             flex-shrink: 0;
         }
 
-        .main-body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 0 25px;
-            flex: 1;
-        }
-
-        .photo-area {
-            width: 130px;
-            height: 155px;
-            margin-bottom: 12px;
-            flex-shrink: 0;
+        .photo-section {
             display: flex;
             justify-content: center;
+            margin-bottom: 4px;
+            flex-shrink: 0;
         }
 
         .student-photo {
-            width: 130px;
-            height: 155px;
-            border: 2px solid #0d3b66;
+            width: 90px;
+            height: 110px;
+            border: 1.5px solid #0d3b66;
             object-fit: cover;
-            border-radius: 8px;
-            background: #f9f9f9;
+            border-radius: 6px;
+            background: #f8fafc;
+        }
+
+        .photo-placeholder {
+            width: 90px;
+            height: 110px;
+            border: 1.5px dashed #94a3b8;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #f1f5f9;
+            font-size: 10px;
+            color: #64748b;
         }
 
         .info-area {
-            width: 100%;
+            width: calc(100% - 16px);
+            margin: 0 auto;
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            font-size: 15px;
-            color: #000;
-            background: #fdfdfd;
-            padding: 8px 15px;
-            border-radius: 8px;
-            border: 1px solid #eee;
+            gap: 2px;
+            font-size: 10.5px;
+            color: #0f172a;
+            background: #fafafa;
+            padding: 5px 8px;
+            border-radius: 6px;
+            border: 1px solid #f1f5f9;
+            flex: 1;
         }
 
         .info-row {
             display: flex;
-            line-height: 1.3;
+            align-items: center;
+            line-height: 1.25;
         }
 
         .info-label {
             font-weight: 700;
-            width: 100px;
-            position: relative;
+            width: 75px;
+            flex-shrink: 0;
         }
 
-        .info-label::after {
-            content: ":";
-            position: absolute;
-            right: 8px;
+        .info-sep {
+            margin-right: 4px;
+            font-weight: 700;
         }
 
         .info-value {
             flex: 1;
             font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .info-value.uid {
             font-family: 'Courier New', Courier, monospace;
             font-weight: bold;
-            font-size: 15px;
+            font-size: 11px;
             color: #d62828;
         }
 
         .gov-banner {
             background: #006a4e;
-            color: #fff;
+            color: #ffffff;
             display: flex;
             align-items: center;
-            padding: 5px 20px;
+            padding: 3px 12px;
             margin-top: auto;
             flex-shrink: 0;
         }
 
-        .gov-logo {
-            width: 28px;
-            height: 28px;
-            background: #fff;
-            border-radius: 50%;
-            padding: 2px;
-            margin-right: 12px;
+        .gov-flag {
+            width: 18px;
+            height: 12px;
+            margin-right: 8px;
+            flex-shrink: 0;
         }
 
         .gov-text {
-            font-size: 15px;
+            font-size: 10px;
             font-weight: 600;
+            letter-spacing: 0.2px;
         }
 
-        .footer {
-            height: 115px;
-            padding: 15px 20px 5px 20px;
+        .card-footer {
+            height: 65px;
+            padding: 6px 12px 3px 12px;
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            background: #fff;
+            align-items: flex-end;
+            background: #ffffff;
             position: relative;
             flex-shrink: 0;
         }
 
-        .signature-area {
+        .sig-area {
             text-align: center;
-            width: 120px;
-            margin-top: 25px;
+            width: 75px;
+            margin-bottom: 2px;
         }
 
-        .signature-line {
+        .sig-line {
             width: 100%;
             height: 1px;
             background: #000;
-            margin-bottom: 3px;
+            margin-bottom: 2px;
         }
 
-        .designation {
-            font-size: 13px;
+        .sig-label {
+            font-size: 9px;
             font-weight: 700;
             color: #000;
         }
 
         .seal-area {
             position: absolute;
-            left: 155px;
-            top: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: 6px;
             z-index: 5;
         }
 
-        .institutional-seal {
-            width: 85px;
-            height: 85px;
-            opacity: 0.9;
+        .seal-img {
+            width: 50px;
+            height: 50px;
             object-fit: contain;
+            opacity: 0.85;
+        }
+
+        .seal-svg-placeholder {
+            width: 50px;
+            height: 50px;
+            opacity: 0.85;
         }
 
         .barcode-area {
@@ -275,305 +336,543 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            margin-top: 10px;
+            margin-bottom: 2px;
         }
 
-        .barcode-placeholder {
-            width: 130px;
-            height: 38px;
-            background: linear-gradient(90deg, 
-                #000 0%, #000 5%, transparent 5%, transparent 8%,
-                #000 8%, #000 15%, transparent 15%, transparent 18%,
-                #000 18%, #000 22%, transparent 22%, transparent 28%,
-                #000 28%, #000 30%, transparent 30%, transparent 35%,
-                #000 35%, #000 45%, transparent 45%, transparent 48%,
-                #000 48%, #000 55%, transparent 55%, transparent 58%,
-                #000 58%, #000 68%, transparent 68%, transparent 72%,
-                #000 72%, #000 85%, transparent 85%, transparent 88%,
-                #000 88%, #000 95%, transparent 95%, transparent 100%);
+        .barcode-img {
+            width: 85px;
+            height: 26px;
+            object-fit: fill;
         }
 
-        .barcode-number {
-            font-size: 11px;
-            margin-top: 2px;
-            letter-spacing: 1px;
+        .barcode-fake {
+            width: 85px;
+            height: 26px;
+            background: repeating-linear-gradient(90deg, #000, #000 2px, #fff 2px, #fff 4px);
         }
 
-        .bottom-security-bar {
-            height: 12px;
+        .barcode-no {
+            font-size: 8px;
+            font-family: monospace;
+            letter-spacing: 0.5px;
+        }
+
+        .security-bar {
+            height: 6px;
             background: linear-gradient(90deg, #0d3b66 0%, #0d3b66 70%, #d62828 70%, #d62828 100%);
             flex-shrink: 0;
         }
 
-        /* Back side */
-        .back-title-area {
+        /* BACK SIDE SPECIFICS */
+        .back-header {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
-            margin: 10px 0 3px 0;
+            gap: 6px;
+            margin: 6px 0 2px 0;
             flex-shrink: 0;
         }
 
-        .back-title-area .logo {
-            width: 40px;
-            height: 40px;
-        }
-
         .back-heading {
-            font-size: 20px;
+            font-size: 13.5px;
             font-weight: 700;
             color: #000;
-            border-bottom: 2px solid #000;
-            padding-bottom: 2px;
+            border-bottom: 1.5px solid #000;
+            padding-bottom: 1px;
         }
 
-        .back-content {
-            padding: 10px 20px;
+        .back-body {
+            padding: 6px 12px;
             flex: 1;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            font-size: 14px;
-            color: #000;
+            gap: 6px;
+            font-size: 9.5px;
+            color: #0f172a;
         }
 
-        .section-title {
+        .back-section-title {
             font-weight: 700;
-            font-size: 15px;
-            margin-bottom: 2px;
+            font-size: 10px;
+            margin-bottom: 1px;
             text-decoration: underline;
+            color: #0d3b66;
         }
 
-        .instruction-list, .contact-sub-list {
+        .back-list {
             list-style: none;
-            padding-left: 5px;
+            padding-left: 2px;
         }
 
-        .instruction-list li, .contact-sub-list li {
-            margin-bottom: 2px;
-            line-height: 1.3;
-            font-weight: 600;
+        .back-list li {
+            margin-bottom: 1.5px;
+            line-height: 1.25;
+            font-weight: 500;
         }
 
-        .hologram-strip {
+        .hologram {
             background: linear-gradient(90deg, #76c7c0 0%, #98ddca 25%, #ffb6b9 50%, #fae3d9 75%, #76c7c0 100%);
-            padding: 3px 20px;
+            padding: 2px 12px;
             display: flex;
             justify-content: space-between;
-            font-size: 10px;
+            font-size: 7.5px;
             font-weight: bold;
-            color: #333;
-            letter-spacing: 1px;
-            border-top: 1px solid #ccc;
-            border-bottom: 1px solid #ccc;
-            opacity: 0.8;
+            color: #1e293b;
+            letter-spacing: 0.5px;
+            border-top: 1px solid #cbd5e1;
+            border-bottom: 1px solid #cbd5e1;
+            opacity: 0.85;
             flex-shrink: 0;
         }
 
         .back-footer {
-            height: 75px;
+            height: 48px;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: #fff;
+            background: #ffffff;
             flex-shrink: 0;
         }
 
-        /* প্রিন্ট মিডিয়া সেটিংস */
+
+        /* -------------------------------------------------------------
+           PRINT LAYOUT STYLING (@media print)
+           Standard CR80 Printable Dimensions (54mm x 86mm) Side-by-Side
+           ------------------------------------------------------------- */
         @media print {
-            .print-btn {
+            *, *:before, *:after {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+
+            @page {
+                size: A4 portrait;
+                margin: 8mm 8mm;
+            }
+
+            html, body {
+                background-color: #ffffff !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                width: 100% !important;
+                height: auto !important;
+            }
+
+            .no-print, .print-header, .print-btn {
                 display: none !important;
             }
-            body {
-                background-color: #fff;
-                padding: 0;
+
+            .cards-container {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                gap: 6mm !important;
+                width: 100% !important;
+                max-width: 100% !important;
             }
+
             .card-wrapper {
-                margin-bottom: 0;
+                display: flex !important;
+                flex-direction: row !important;
+                flex-wrap: nowrap !important;
+                justify-content: center !important;
+                align-items: flex-start !important;
+                gap: 8mm !important;
+                margin-bottom: 6mm !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                width: 100% !important;
+            }
+
+            /* Standard CR80 Vertical Card Print Dimensions */
+            .id-card {
+                width: 54mm !important;
+                height: 86mm !important;
+                min-width: 54mm !important;
+                max-width: 54mm !important;
+                min-height: 86mm !important;
+                max-height: 86mm !important;
+                box-shadow: none !important;
+                border: 2px solid #0d3b66 !important;
+                border-radius: 3.5mm !important;
+                padding: 1mm !important;
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+                overflow: hidden !important;
+                background: #ffffff !important;
+            }
+
+            .card-inner {
+                border: 0.8pt solid #d62828 !important;
+                border-radius: 2.5mm !important;
+                height: 100% !important;
+            }
+
+            .card-clip {
+                width: 10mm !important;
+                height: 2mm !important;
+                margin: 1.5mm auto 1mm auto !important;
+            }
+
+            .card-header {
+                padding: 1mm 2mm !important;
+            }
+
+            .school-logo, .school-logo-svg {
+                width: 9mm !important;
+                height: 9mm !important;
+            }
+
+            .school-name-main {
+                font-size: 7.5pt !important;
+                line-height: 1.1 !important;
+            }
+
+            .school-sub {
+                font-size: 5.5pt !important;
+            }
+
+            .card-divider {
+                height: 1.2pt !important;
+                margin: 1mm 2mm !important;
+            }
+
+            .card-title-badge {
+                font-size: 7.5pt !important;
+                margin: 0.8mm 0 1.2mm 0 !important;
+            }
+
+            .photo-section {
+                margin-bottom: 1mm !important;
+            }
+
+            .student-photo, .photo-placeholder {
+                width: 20mm !important;
+                height: 25mm !important;
+                border-width: 1pt !important;
+            }
+
+            .info-area {
+                width: calc(100% - 2mm) !important;
+                padding: 1mm 1.5mm !important;
+                gap: 0.8pt !important;
+                font-size: 6pt !important;
+                border-width: 0.5pt !important;
+            }
+
+            .info-label {
+                width: 16mm !important;
+                font-size: 6pt !important;
+            }
+
+            .info-sep {
+                margin-right: 1mm !important;
+            }
+
+            .info-value {
+                font-size: 6pt !important;
+            }
+
+            .info-value.uid {
+                font-size: 6.5pt !important;
+            }
+
+            .gov-banner {
+                padding: 1mm 2mm !important;
+            }
+
+            .gov-flag {
+                width: 4mm !important;
+                height: 2.5mm !important;
+                margin-right: 1.5mm !important;
+            }
+
+            .gov-text {
+                font-size: 5.5pt !important;
+            }
+
+            .card-footer {
+                height: 12mm !important;
+                padding: 1mm 2mm 0.5mm 2mm !important;
+            }
+
+            .sig-area {
+                width: 15mm !important;
+            }
+
+            .sig-label {
+                font-size: 5pt !important;
+            }
+
+            .seal-img, .seal-svg-placeholder {
+                width: 9mm !important;
+                height: 9mm !important;
+            }
+
+            .barcode-img, .barcode-fake {
+                width: 18mm !important;
+                height: 5mm !important;
+            }
+
+            .barcode-no {
+                font-size: 5pt !important;
+            }
+
+            .security-bar {
+                height: 1.5mm !important;
+            }
+
+            .back-heading {
+                font-size: 7.5pt !important;
+            }
+
+            .back-body {
+                padding: 1.5mm 2mm !important;
+                gap: 1.5mm !important;
+                font-size: 5.5pt !important;
+            }
+
+            .back-section-title {
+                font-size: 6pt !important;
+            }
+
+            .back-list li {
+                font-size: 5.5pt !important;
+                margin-bottom: 0.5pt !important;
+            }
+
+            .hologram {
+                padding: 0.8mm 2mm !important;
+                font-size: 5pt !important;
+            }
+
+            .back-footer {
+                height: 9mm !important;
             }
         }
     </style>
 </head>
 <body>
 
-    <button class="print-btn" onclick="window.print()">আইডি কার্ড প্রিন্ট করুন</button>
+    <!-- Top Action Bar for Screen -->
+    <div class="print-header no-print">
+        <div class="print-title">
+            <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 9h2a2 2 0 012 2v6a2 2 0 01-2 2H7a2 2 0 01-2-2v-6a2 2 0 012-2h2m2-4h4a2 2 0 012 2v2H9V7a2 2 0 012-2zm0 10v4m4-4v4"></path>
+            </svg>
+            স্টুডেন্ট আইডি কার্ড প্রিন্ট সেন্টার (A4 Printable Cards)
+        </div>
+        <button class="print-btn" onclick="window.print()">
+            <svg width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
+                <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a2 2 0 0 0-2 2v1H2a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v-1a2 2 0 0 0-2-2H5zm1 4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1v-2z"/>
+            </svg>
+            আইডি কার্ড প্রিন্ট করুন (Print Cards)
+        </button>
+    </div>
 
-    {% for student in students %}
-    <div class="card-wrapper">
-        
-        <div class="id-card">
-            <div class="card-inner">
-                <div class="card-holder-clip"></div>
-                
-                <div class="header">
-                    {% if student.logo_url %}
-                    <img src="{{ student.logo_url }}" alt="School Logo" class="logo">
-                    {% else %}
-                    <img src="/static/logo.png" alt="School Logo" class="logo" onerror="this.src='/static/icon-192x192.png'">
-                    {% endif %}
-                    <div class="school-info">
-                        <div class="school-name">{{ student.school_name }}</div>
-                        <div class="school-location">{{ student.school_address }}</div>
-                    </div>
-                </div>
-                
-                <div class="divider-line"></div>
-                <div class="card-title">স্টুডেন্ট ইউনিক আইডি কার্ড</div>
-                
-                <div class="main-body">
-                    <div class="photo-area">
-                        {% if student.photo %}
-                            <img src="{{ student.photo.url }}" alt="Student Photo" class="student-photo">
+    <div class="cards-container">
+        {% for student in students %}
+        <!-- Single Student ID Card Pair: FRONT & BACK (পাশাপাশি) -->
+        <div class="card-wrapper">
+            
+            <!-- 1. FRONT SIDE (১ম পার্ট) -->
+            <div class="id-card">
+                <div class="card-inner">
+                    <div class="card-clip"></div>
+                    
+                    <div class="card-header">
+                        {% if student.logo_url %}
+                            <img src="{{ student.logo_url }}" alt="School Logo" class="school-logo">
                         {% else %}
-                            <img src="/static/logo.png" alt="Student Photo" class="student-photo" style="object-fit:contain; padding:10px; background:#f1f5f9;">
+                            <svg class="school-logo-svg" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="48" fill="#0d3b66" stroke="#d62828" stroke-width="3"/>
+                                <circle cx="50" cy="50" r="36" fill="none" stroke="#fff" stroke-width="1.5"/>
+                                <text x="50" y="42" text-anchor="middle" fill="#fff" font-size="11" font-weight="bold">বিদ্যালয়</text>
+                                <path d="M35 60 L50 45 L65 60 L60 60 L50 50 L40 60 Z" fill="#fff"/>
+                            </svg>
+                        {% endif %}
+                        <div class="school-text">
+                            <div class="school-name-main">{{ student.school_name|default:"গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়" }}</div>
+                            <div class="school-sub">{{ student.school_address|default:"বরগুনা সদর, বরগুনা।" }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-divider"></div>
+                    <div class="card-title-badge">স্টুডেন্ট ইউনিক আইডি কার্ড</div>
+                    
+                    <div class="photo-section">
+                        {% if student.photo %}
+                            <img src="{{ student.photo.url }}" alt="{{ student.name }}" class="student-photo">
+                        {% else %}
+                            <div class="photo-placeholder">
+                                <svg width="28" height="28" fill="#94a3b8" viewBox="0 0 24 24">
+                                    <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>
+                                </svg>
+                                <span>ছবি নেই</span>
+                            </div>
                         {% endif %}
                     </div>
                     
                     <div class="info-area">
                         <div class="info-row">
-                            <div class="info-label">UNIQUE ID</div>
-                            <div class="info-value uid">{{ student.unique_id }}</div>
+                            <span class="info-label">UNIQUE ID</span>
+                            <span class="info-sep">:</span>
+                            <span class="info-value uid">{{ student.unique_id|default:student.barcode_no|default:"—" }}</span>
                         </div>
                         <div class="info-row">
-                            <div class="info-label">শিক্ষার্থীর নাম</div>
-                            <div class="info-value">{{ student.name }}</div>
+                            <span class="info-label">শিক্ষার্থীর নাম</span>
+                            <span class="info-sep">:</span>
+                            <span class="info-value">{{ student.name|default:"—" }}</span>
                         </div>
                         <div class="info-row">
-                            <div class="info-label">শ্রেণী / সেকশন</div>
-                            <div class="info-value">{{ student.student_class }} - {{ student.section }}</div>
+                            <span class="info-label">শ্রেণী / সেকশন</span>
+                            <span class="info-sep">:</span>
+                            <span class="info-value">{{ student.student_class|default:"অষ্টম" }} — {{ student.section|default:"ক" }}</span>
                         </div>
                         <div class="info-row">
-                            <div class="info-label">রোল নং</div>
-                            <div class="info-value">{{ student.roll }}</div>
+                            <span class="info-label">রোল নং</span>
+                            <span class="info-sep">:</span>
+                            <span class="info-value">{{ student.roll|default:"—" }}</span>
                         </div>
                         <div class="info-row">
-                            <div class="info-label">শিক্ষাবর্ষ</div>
-                            <div class="info-value">{{ student.session }}</div>
+                            <span class="info-label">শিক্ষাবর্ষ</span>
+                            <span class="info-sep">:</span>
+                            <span class="info-value">{{ student.session|default:"২০২৬" }}</span>
                         </div>
                         <div class="info-row">
-                            <div class="info-label">রক্তের গ্রুপ</div>
-                            <div class="info-value">{{ student.blood_group }}</div>
+                            <span class="info-label">রক্তের গ্রুপ</span>
+                            <span class="info-sep">:</span>
+                            <span class="info-value">{{ student.blood_group|default:"—" }}</span>
                         </div>
                         <div class="info-row">
-                            <div class="info-label">জন্ম তারিখ</div>
-                            <div class="info-value">{{ student.dob }}</div>
+                            <span class="info-label">জন্ম তারিখ</span>
+                            <span class="info-sep">:</span>
+                            <span class="info-value">{{ student.dob|default:"—" }}</span>
                         </div>
                     </div>
-                </div>
-                
-                <div class="gov-banner">
-                    <div class="gov-logo">
-                        <svg viewBox="0 0 100 100" width="100%" height="100%">
-                            <circle cx="50" cy="50" r="46" fill="#006a4e" stroke="#f42a41" stroke-width="4"/>
-                            <circle cx="50" cy="50" r="22" fill="#f42a41"/>
+                    
+                    <div class="gov-banner">
+                        <svg class="gov-flag" viewBox="0 0 100 60">
+                            <rect width="100" height="60" fill="#006a4e"/>
+                            <circle cx="48" cy="30" r="20" fill="#f42a41"/>
                         </svg>
-                    </div>
-                    <div class="gov-text">বাংলাদেশ শিক্ষা মন্ত্রণালয় অনুমোদিত</div>
-                </div>
-                
-                <div class="footer">
-                    <div class="signature-area">
-                        <div class="signature-line"></div>
-                        <div class="designation">প্রধান শিক্ষক</div>
+                        <div class="gov-text">বাংলাদেশ শিক্ষা মন্ত্রণালয় অনুমোদিত</div>
                     </div>
                     
-                    <div class="seal-area">
-                        <svg class="institutional-seal" viewBox="0 0 100 100">
-                            <circle cx="50" cy="50" r="46" fill="none" stroke="#0d3b66" stroke-width="3"/>
-                            <circle cx="50" cy="50" r="38" fill="none" stroke="#0d3b66" stroke-width="1.5" stroke-dasharray="4,3"/>
-                            <text x="50" y="38" text-anchor="middle" font-size="9" font-weight="bold" fill="#0d3b66">গাজীমাহমুদ</text>
-                            <text x="50" y="50" text-anchor="middle" font-size="8" fill="#0d3b66">বিদ্যালয়</text>
-                            <text x="50" y="62" text-anchor="middle" font-size="8" fill="#d62828">SEAL</text>
-                        </svg>
+                    <div class="card-footer">
+                        <div class="sig-area">
+                            <div class="sig-line"></div>
+                            <div class="sig-label">প্রধান শিক্ষক</div>
+                        </div>
+                        
+                        <div class="seal-area">
+                            {% if student.logo_url %}
+                                <img src="{{ student.logo_url }}" alt="Seal" class="seal-img">
+                            {% else %}
+                                <svg class="seal-svg-placeholder" viewBox="0 0 100 100">
+                                    <circle cx="50" cy="50" r="46" fill="none" stroke="#0d3b66" stroke-width="3"/>
+                                    <circle cx="50" cy="50" r="38" fill="none" stroke="#0d3b66" stroke-width="1.5" stroke-dasharray="4,3"/>
+                                    <text x="50" y="38" text-anchor="middle" font-size="9" font-weight="bold" fill="#0d3b66">গাজীমাহমুদ</text>
+                                    <text x="50" y="50" text-anchor="middle" font-size="8" fill="#0d3b66">বিদ্যালয়</text>
+                                    <text x="50" y="62" text-anchor="middle" font-size="8" fill="#d62828">SEAL</text>
+                                </svg>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="barcode-area">
+                            {% if student.barcode_b64 %}
+                                <img src="data:image/png;base64,{{ student.barcode_b64 }}" alt="Barcode" class="barcode-img">
+                            {% else %}
+                                <div class="barcode-fake"></div>
+                            {% endif %}
+                            <div class="barcode-no">{{ student.barcode_no|default:student.unique_id|default:"—" }}</div>
+                        </div>
                     </div>
                     
-                    <div class="barcode-area">
-                        {% if student.barcode_b64 %}
-                            <img src="data:image/png;base64,{{ student.barcode_b64 }}" style="width:130px; height:38px; object-fit:fill;">
-                        {% else %}
-                            <div class="barcode-placeholder"></div>
-                        {% endif %}
-                        <div class="barcode-number">{{ student.barcode_no }}</div>
-                    </div>
+                    <div class="security-bar"></div>
                 </div>
-                
-                <div class="bottom-security-bar"></div>
             </div>
-        </div>
 
-        <div class="id-card">
-            <div class="card-inner">
-                <div class="card-holder-clip"></div>
-                
-                <div class="back-title-area">
-                    {% if student.logo_url %}
-                    <img src="{{ student.logo_url }}" alt="School Logo" class="logo">
-                    {% else %}
-                    <img src="/static/logo.png" alt="School Logo" class="logo" onerror="this.src='/static/icon-192x192.png'">
-                    {% endif %}
-                    <div class="back-heading">নির্দেশনাবলী ও তথ্য</div>
-                </div>
-                
-                <div class="back-content">
-                    <div>
-                        <div class="section-title">১. কার্ডের নির্দেশনাবলী:</div>
-                        <ul class="instruction-list">
-                            <li>(১) এই কার্ড সর্বদা গলায় ঝুলিয়ে রাখা আবশ্যক।</li>
-                            <li>(২) কার্ডটি হস্তান্তরযোগ্য নয়।</li>
-                            <li>(৩) হারিয়ে গেলে বা নষ্ট হলে অবিলম্বে বিদ্যালয় কর্তৃপক্ষকে জানাতে হবে।</li>
-                            <li>(৪) বিদ্যালয় চলাকালীন কার্ড প্রদর্শন বাধ্যতামূলক।</li>
-                        </ul>
-                    </div>
+            <!-- 2. BACK SIDE (২য় পার্ট) -->
+            <div class="id-card">
+                <div class="card-inner">
+                    <div class="card-clip"></div>
                     
-                    <div>
-                        <div class="section-title">২. অভিভাবকের তথ্য ও যোগাযোগ:</div>
-                        <ul class="contact-sub-list">
-                            <li><strong>(১) পিতার নাম:</strong> {{ student.father_name }}</li>
-                            <li><strong>(২) মাতার নাম:</strong> {{ student.mother_name }}</li>
-                            <li><strong>(৩) মোবাইল নং (জরুরী):</strong> {{ student.parent_mobile }}</li>
-                        </ul>
-                    </div>
-                    
-                    <div>
-                        <div class="section-title">৩. বিদ্যালয়ের ঠিকানা ও যোগাযোগ:</div>
-                        <ul class="contact-sub-list">
-                            <li><strong>{{ student.school_name }}</strong></li>
-                            <li><strong>ঠিকানা:</strong> {{ student.school_address }}</li>
-                            <li><strong>EIIN:</strong> {{ student.eiin }} | <strong>স্থাপিত:</strong> {{ student.established }}</li>
-                            <li><strong>মোবাইল:</strong> {{ student.school_mobile }}</li>
-                            <li><strong>ইমেইল:</strong> {{ student.school_email }}</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <div class="hologram-strip">
-                    <span>SECURITY</span>
-                    <span>GAZI MAHMUD SCHOOL</span>
-                    <span>SECURITY</span>
-                </div>
-                
-                <div class="back-footer">
-                    <div class="barcode-area">
-                        {% if student.barcode_b64 %}
-                            <img src="data:image/png;base64,{{ student.barcode_b64 }}" style="width:130px; height:38px; object-fit:fill;">
+                    <div class="back-header">
+                        {% if student.logo_url %}
+                            <img src="{{ student.logo_url }}" alt="Logo" class="school-logo" style="width:28px; height:28px;">
                         {% else %}
-                            <div class="barcode-placeholder"></div>
+                            <svg class="school-logo-svg" style="width:28px; height:28px;" viewBox="0 0 100 100">
+                                <circle cx="50" cy="50" r="48" fill="#0d3b66" stroke="#d62828" stroke-width="3"/>
+                                <circle cx="50" cy="50" r="36" fill="none" stroke="#fff" stroke-width="1.5"/>
+                                <path d="M35 60 L50 45 L65 60 L60 60 L50 50 L40 60 Z" fill="#fff"/>
+                            </svg>
                         {% endif %}
-                        <div class="barcode-number">{{ student.barcode_no }}</div>
+                        <div class="back-heading">নির্দেশনাবলী ও তথ্য</div>
                     </div>
+                    
+                    <div class="back-body">
+                        <div>
+                            <div class="back-section-title">১. কার্ডের নির্দেশনাবলী:</div>
+                            <ul class="back-list">
+                                <li>(১) এই কার্ড সর্বদা গলায় ঝুলিয়ে রাখা আবশ্যক।</li>
+                                <li>(২) কার্ডটি হস্তান্তরযোগ্য নয়।</li>
+                                <li>(৩) হারিয়ে গেলে অবিলম্বে কর্তৃপক্ষকে জানাতে হবে।</li>
+                                <li>(৪) বিদ্যালয় চলাকালীন কার্ড প্রদর্শন বাধ্যতামূলক।</li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <div class="back-section-title">২. অভিভাবকের তথ্য ও যোগাযোগ:</div>
+                            <ul class="back-list">
+                                <li><strong>পিতার নাম:</strong> {{ student.father_name|default:"—" }}</li>
+                                <li><strong>মাতার নাম:</strong> {{ student.mother_name|default:"—" }}</li>
+                                <li><strong>মোবাইল নং (জরুরী):</strong> {{ student.parent_mobile|default:"—" }}</li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <div class="back-section-title">৩. বিদ্যালয়ের ঠিকানা ও যোগাযোগ:</div>
+                            <ul class="back-list">
+                                <li><strong>{{ student.school_name|default:"গাজীমাহমুদ নিম্ন মাধ্যমিক বিদ্যালয়" }}</strong></li>
+                                <li><strong>ঠিকানা:</strong> {{ student.school_address|default:"বরগুনা সদর, বরগুনা।" }}</li>
+                                <li><strong>EIIN:</strong> {{ student.eiin|default:"100184" }} | <strong>স্থাপিত:</strong> {{ student.established|default:"1983" }}</li>
+                                <li><strong>মোবাইল:</strong> {{ student.school_mobile|default:"017309100184" }}</li>
+                                <li><strong>ইমেইল:</strong> {{ student.school_email|default:"school100184@gmail.com" }}</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="hologram">
+                        <span>SECURITY</span>
+                        <span>GAZI MAHMUD SCHOOL</span>
+                        <span>SECURITY</span>
+                    </div>
+                    
+                    <div class="back-footer">
+                        <div class="barcode-area">
+                            {% if student.barcode_b64 %}
+                                <img src="data:image/png;base64,{{ student.barcode_b64 }}" alt="Barcode" class="barcode-img">
+                            {% else %}
+                                <div class="barcode-fake"></div>
+                            {% endif %}
+                            <div class="barcode-no">{{ student.barcode_no|default:student.unique_id|default:"—" }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="security-bar"></div>
                 </div>
-                
-                <div class="bottom-security-bar"></div>
             </div>
-        </div>
 
+        </div>
+        {% empty %}
+        <div style="text-align:center; padding:50px; font-size:18px; color:#64748b; background:#fff; border-radius:12px; width:100%;">
+            কোনো শিক্ষার্থীর আইডি কার্ডের তথ্য পাওয়া যায়নি।
+        </div>
+        {% endfor %}
     </div>
-    {% empty %}
-    <div style="text-align:center; padding:50px; font-size:18px; color:#555;">
-        কোনো শিক্ষার্থীর তথ্য পাওয়া যায়নি।
-    </div>
-    {% endfor %}
 
 </body>
 </html>
