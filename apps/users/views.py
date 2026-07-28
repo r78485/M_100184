@@ -541,9 +541,12 @@ def api_approve_student(request, student_id):
 def api_delete_student(request, student_id):
     if request.method in ['POST', 'DELETE']:
         try:
-            student = get_object_or_404(StudentAdmission, id=student_id)
-            student.delete()
-            return JsonResponse({'status': 'success', 'message': 'Student profile deleted successfully!'})
+            student = StudentAdmission.objects.filter(id=student_id).first()
+            if student:
+                student.delete()
+                return JsonResponse({'status': 'success', 'message': 'Student profile deleted successfully!'})
+            else:
+                return JsonResponse({'status': 'success', 'message': 'Local student profile removed.'})
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)})
     return JsonResponse({'status': 'invalid method'})
@@ -617,48 +620,50 @@ def api_get_students(request):
         students = StudentAdmission.objects.all().order_by('-created_at')
         data = []
         for s in students:
+            status_val = s.status or 'Approved'
             data.append({
                 'id': s.id,
                 'db_id': s.id,
                 'admission_no': s.admission_no or f"ADM-{s.id:04d}",
-                'name': s.student_name_bn or s.student_name_en,
-                'name_bn': s.student_name_bn,
-                'name_en': s.student_name_en,
-                'cls': s.desired_class,
-                'class': s.desired_class,
-                'desired_class': s.desired_class,
+                'admNum': s.admission_no or f"ADM-{s.id:04d}",
+                'name': s.student_name_bn or s.student_name_en or "Student",
+                'name_bn': s.student_name_bn or "",
+                'name_en': s.student_name_en or "",
+                'cls': s.desired_class or "Class 6",
+                'class': s.desired_class or "Class 6",
+                'desired_class': s.desired_class or "Class 6",
                 'version': s.version or 'Bangla',
                 'section': s.section or 'A',
                 'roll': s.roll_no if s.roll_no else s.id,
-                'phone': s.mobile,
-                're_mobile': s.re_mobile,
-                'father': s.father_name,
-                'father_name': s.father_name,
-                'father_nid': s.father_nid,
+                'phone': s.mobile or s.re_mobile or "",
+                'mobile': s.mobile or s.re_mobile or "",
+                're_mobile': s.re_mobile or "",
+                'father': s.father_name or "",
+                'father_name': s.father_name or "",
+                'father_nid': s.father_nid or "",
                 'father_dob': str(s.father_dob) if s.father_dob else '',
                 'father_occupation': s.father_occupation or '',
-                'mother': s.mother_name,
-                'mother_name': s.mother_name,
-                'mother_nid': s.mother_nid,
+                'mother': s.mother_name or "",
+                'mother_name': s.mother_name or "",
+                'mother_nid': s.mother_nid or "",
                 'mother_dob': str(s.mother_dob) if s.mother_dob else '',
                 'mother_occupation': s.mother_occupation or '',
-                'guardian': s.guardian_name or s.father_name or s.mother_name,
-                'guardian_name': s.guardian_name,
-                'guardian_nid': s.guardian_nid,
+                'guardian': s.guardian_name or s.father_name or s.mother_name or "",
+                'guardian_name': s.guardian_name or "",
+                'guardian_nid': s.guardian_nid or "",
                 'dob': str(s.dob) if s.dob else '',
-                'birth_reg_no': s.birth_reg_no,
-                'gender': s.gender,
-                'present_address_detail': s.present_address_detail,
+                'birth_reg_no': s.birth_reg_no or "",
+                'gender': s.gender or "Boy",
+                'present_address_detail': s.present_address_detail or "",
+                'presentAddr': s.present_address_detail or "",
                 'present_post_office': s.present_post_office or '',
-                'present_division': s.present_division,
-                'present_district': s.present_district,
-                'present_upazila': s.present_upazila,
-                'present_post_code': s.present_post_code,
-                'permanent_address_detail': s.permanent_address_detail,
+                'present_division': s.present_division or "",
+                'present_district': s.present_district or "",
+                'present_upazila': s.present_upazila or "",
+                'present_post_code': s.present_post_code or "",
+                'permanent_address_detail': s.permanent_address_detail or "",
+                'permAddr': s.permanent_address_detail or "",
                 'permanent_post_office': s.permanent_post_office or '',
-                'permanent_division': s.permanent_division,
-                'permanent_district': s.permanent_district,
-                'permanent_upazila': s.permanent_upazila,
                 'permanent_post_code': s.permanent_post_code,
                 'status': s.status or 'Approved',
                 'photo_url': s.photo.url if s.photo else None,

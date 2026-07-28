@@ -40,6 +40,7 @@
             left: 0;
             top: 0;
             width: 100%;
+            display: block !important;
         }
         .no-print {
             display: none !important;
@@ -199,19 +200,23 @@
 
     <!-- Delete Student Confirmation Popup Modal -->
     <div class="modal fade" id="deleteStudentConfirmModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content text-center p-4 border-0 shadow-lg" style="border-radius: 16px; background: #ffffff;">
                 <div class="modal-body p-2">
-                    <div class="mb-3 text-warning">
+                    <div class="mb-3 text-danger">
                         <i class="bi bi-exclamation-triangle-fill" style="font-size: 3.5rem; line-height: 1;"></i>
                     </div>
-                    <p class="fw-bold text-dark mb-4" style="font-size: 0.95rem; line-height: 1.5;">
-                        আপনি কি নিশ্চিতভাবে এই শিক্ষার্থীর তথ্য মুছে ফেলতে চান?<br/>
-                        <span class="text-muted small fw-normal">Are you sure you want to delete this student profile?</span>
+                    <h5 class="fw-bold text-dark mb-2">ডিলেট নিশ্চিতকরণ / Delete Confirmation</h5>
+                    <p class="fw-bold text-dark mb-3" style="font-size: 1rem; line-height: 1.5;">
+                        আপনি কি নিশ্চিতভাবে <span id="deleteStudentNameDisplay" class="text-danger fw-bold"></span>-এর তথ্য মুছে ফেলতে চান?
                     </p>
-                    <div class="d-flex justify-content-center gap-2">
-                        <button type="button" class="btn btn-secondary px-3 py-1.5 fw-bold btn-sm" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" class="btn btn-danger px-3 py-1.5 fw-bold btn-sm" id="btnConfirmDeleteStudent">OK</button>
+                    <p class="text-muted small mb-4">
+                        আপনি নিশ্চিত (Confirm) না করা পর্যন্ত কোনো তথ্য ডিলেট হবে না।<br/>
+                        <span class="fst-italic">No student data will be removed until you explicitly confirm.</span>
+                    </p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <button type="button" class="btn btn-secondary px-4 py-2 fw-bold" data-bs-dismiss="modal"><i class="bi bi-x-circle me-1"></i>বাতিল / Cancel</button>
+                        <button type="button" class="btn btn-danger px-4 py-2 fw-bold" id="btnConfirmDeleteStudent"><i class="bi bi-trash me-1"></i>হ্যাঁ, মুছে ফেলুন / Confirm Delete</button>
                     </div>
                 </div>
             </div>
@@ -912,8 +917,6 @@
     </div>
 </div>
 
-<!-- HIDDEN PRINT AREA FOR A4 PRINTS -->
-<div id="printArea" class="d-none"></div>
 <!-- Bangladesh Geo Datalists for Searchable Dropdowns -->
 <datalist id="st_bd_divisions_list">
     <option value="বরিশাল (Barishal)">
@@ -1064,133 +1067,150 @@
     window.allStudentsCache = [];
 
     function getStudents() {
+        let stored = [];
+        try {
+            stored = JSON.parse(localStorage.getItem('school_students') || '[]');
+        } catch(e) { stored = []; }
+        
+        if (stored && stored.length > 0) {
+            return stored;
+        }
         if (window.allStudentsCache && window.allStudentsCache.length > 0) {
             return window.allStudentsCache;
         }
-        const stored = localStorage.getItem('school_students');
-        if (!stored) return [];
-        try { return JSON.parse(stored); } catch(e) { return []; }
+        return [];
+    }
+
+    function drawStudentRows(studentsList) {
+        const tbody = document.getElementById('allStudentsTable');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        if (!studentsList || studentsList.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-muted fw-bold">কোনো শিক্ষার্থীর তথ্য পাওয়া যায়নি। / No student records found.</td></tr>';
+            return;
+        }
+
+        studentsList.forEach(st => {
+            const stId = st.db_id || st.id;
+            const isApproved = (st.status === 'Approved' || st.active === true);
+            const statusBadge = isApproved ? 
+                `<span class="badge bg-success-subtle text-success px-2.5 rounded-pill"><i class="bi bi-check-circle me-1"></i>Approved / অনুমোদিত</span>` :
+                `<span class="badge bg-warning-subtle text-warning px-2.5 rounded-pill"><i class="bi bi-hourglass-split me-1"></i>Pending / অপেক্ষমাণ</span>`;
+
+            const approveBtn = (!isApproved || st.status === 'Pending') ?
+                `<button class="btn btn-sm btn-success me-1 fw-bold" onclick="approveStudent('${stId}')" title="Approve Student Admission"><i class="bi bi-check-circle-fill me-1"></i>Approve</button>` : '';
+
+            const avatarHtml = st.photo_url || st.photo ? 
+                `<img src="${st.photo_url || st.photo}" class="rounded-circle" style="width:34px; height:34px; object-fit:cover; cursor:pointer;" onclick="viewStudentDetails('${stId}')">` :
+                `<div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width:34px; height:34px; font-size:0.85rem; cursor:pointer;" onclick="viewStudentDetails('${stId}')">
+                    ${(st.name || st.name_bn || st.name_en || 'S').charAt(0).toUpperCase()}
+                </div>`;
+
+            const nameDisplay = `<div>
+                <span class="fw-semibold text-primary d-block" style="cursor:pointer;" onclick="viewStudentDetails('${stId}')">${st.name || st.name_en || st.name_bn || 'Student'}</span>
+                ${st.name_bn && st.name_en && st.name_bn !== st.name_en ? `<small class="text-muted">${st.name_bn}</small>` : ''}
+            </div>`;
+
+            const row = `
+                <tr class="student-row" data-name="${(st.name || '').toLowerCase()} ${(st.name_bn || '').toLowerCase()}" data-class="${st.cls || st.desired_class || ''}" data-status="${st.status || (isApproved ? 'Approved' : 'Pending')}">
+                    <td>
+                        <div class="d-flex align-items-center gap-2">
+                            ${avatarHtml}
+                            ${nameDisplay}
+                        </div>
+                    </td>
+                    <td><strong>${st.roll || '-'}</strong></td>
+                    <td><span class="badge bg-light text-dark border">${st.cls || st.desired_class || 'Class 6'} (${st.version || 'Bangla'})</span></td>
+                    <td>${st.guardian || st.father || 'N/A'}<br><small class="text-muted">${st.phone || st.mobile || ''}</small></td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        ${approveBtn}
+                        <button class="btn btn-sm btn-dark text-white me-1 fw-bold" onclick="openStudentIdCard('${stId}')" title="Print Unique ID Card"><i class="bi bi-person-badge me-1"></i>ID Card</button>
+                        <button class="btn btn-sm btn-outline-primary me-1" onclick="editStudent('${stId}')" title="Edit"><i class="bi bi-pencil"></i></button>
+                        <button class="btn btn-sm btn-outline-secondary me-1" onclick="printSingleStudent('${stId}')" title="Print Form"><i class="bi bi-printer"></i></button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${stId}')" title="Delete"><i class="bi bi-trash"></i></button>
+                    </td>
+                </tr>
+            `;
+            tbody.insertAdjacentHTML('beforeend', row);
+        });
     }
 
     function renderStudents() {
         const tbody = document.getElementById('allStudentsTable');
         if (!tbody) return;
 
-        window.allStudentsCache = [];
+        let storedRaw = [];
+        try {
+            storedRaw = JSON.parse(localStorage.getItem('school_students') || '[]');
+        } catch(e) { storedRaw = []; }
+
+        let studentMap = new Map();
+        storedRaw.forEach((s, idx) => {
+            let uniqueKey = s.db_id ? ("db_" + s.db_id) : (s.id ? ("id_" + s.id) : ("local_" + idx + "_" + (s.admNum || s.admission_no || Math.random())));
+            studentMap.set(uniqueKey, s);
+        });
+
+        let initialStudents = Array.from(studentMap.values());
+        let rollCounter = 1;
+        initialStudents = initialStudents.map(st => Object.assign({}, st, { roll: st.roll || rollCounter++ }));
+        window.allStudentsCache = initialStudents;
+        
+        drawStudentRows(initialStudents);
 
         fetch('/api/students/')
         .then(res => res.json())
         .then(data => {
             let apiStudents = data.students || [];
-            let storedRaw = [];
-            try { storedRaw = JSON.parse(localStorage.getItem('school_students') || '[]'); } catch(e) {}
-            let localOnlyStudents = storedRaw.filter(s => !s.db_id);
-            let studentMap = new Map();
 
-            apiStudents.forEach(s => {
-                s.db_id = s.id;
-                studentMap.set("db_" + s.id, s);
-            });
+            apiStudents.forEach(apiSt => {
+                let dbKey = "db_" + apiSt.id;
+                let existingKey = null;
 
-            localOnlyStudents.forEach((s, idx) => {
-                let uniqueId = s.id || s.db_id || s.admNum || ('local_' + idx + '_' + (s.name ? s.name.replace(/\s+/g, '_') : 'st'));
-                let key = "local_" + uniqueId;
-                if (!studentMap.has(key)) studentMap.set(key, s);
+                for (let [k, v] of studentMap.entries()) {
+                    if (String(v.db_id) === String(apiSt.id) || 
+                        String(v.id) === String(apiSt.id) || 
+                        (v.admission_no && apiSt.admission_no && v.admission_no === apiSt.admission_no) ||
+                        (v.admNum && apiSt.admission_no && v.admNum === apiSt.admission_no)) {
+                        existingKey = k;
+                        break;
+                    }
+                }
+
+                if (existingKey) {
+                    let localObj = studentMap.get(existingKey);
+                    let merged = Object.assign({}, localObj, apiSt, {
+                        db_id: apiSt.id,
+                        id: apiSt.id,
+                        name: apiSt.name || apiSt.name_bn || apiSt.name_en || localObj.name,
+                        cls: apiSt.cls || apiSt.desired_class || localObj.cls,
+                        phone: apiSt.phone || apiSt.mobile || localObj.phone,
+                        status: apiSt.status || localObj.status || 'Approved',
+                        active: (apiSt.status === 'Approved' || localObj.active === true)
+                    });
+                    studentMap.delete(existingKey);
+                    studentMap.set(dbKey, merged);
+                } else {
+                    apiSt.db_id = apiSt.id;
+                    apiSt.active = (apiSt.status === 'Approved');
+                    studentMap.set(dbKey, apiSt);
+                }
             });
 
             let combined = Array.from(studentMap.values());
-            let rollCounter = 1;
-            // Object.assign দিয়ে নতুন object — মূল cache object mutate করবেন না
-            combined = combined.map(st => Object.assign({}, st, { roll: st.roll || rollCounter++ }));
+            let rollCount = 1;
+            combined = combined.map(st => Object.assign({}, st, { roll: st.roll || rollCount++ }));
 
             window.allStudentsCache = combined;
             localStorage.setItem('school_students', JSON.stringify(combined));
 
-            tbody.innerHTML = '';
-            if (combined.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-muted fw-bold">কোনো শিক্ষার্থীর তথ্য পাওয়া যায়নি। / No student records found.</td></tr>';
-                return;
-            }
-
-            combined.forEach(st => {
-                const stId = st.db_id || st.id;
-                const isApproved = (st.status === 'Approved' || st.active === true);
-                const statusBadge = isApproved ? 
-                    `<span class="badge bg-success-subtle text-success px-2.5 rounded-pill"><i class="bi bi-check-circle me-1"></i>Approved / অনুমোদিত</span>` :
-                    `<span class="badge bg-warning-subtle text-warning px-2.5 rounded-pill"><i class="bi bi-hourglass-split me-1"></i>Pending / অপেক্ষমাণ</span>`;
-
-                const approveBtn = (!isApproved || st.status === 'Pending') ?
-                    `<button class="btn btn-sm btn-success me-1 fw-bold" onclick="approveStudent('${stId}')" title="Approve Student Admission"><i class="bi bi-check-circle-fill me-1"></i>Approve</button>` : '';
-
-                const avatarHtml = st.photo_url || st.photo ? 
-                    `<img src="${st.photo_url || st.photo}" class="rounded-circle" style="width:34px; height:34px; object-fit:cover; cursor:pointer;" onclick="viewStudentDetails('${stId}')">` :
-                    `<div class="bg-primary-subtle text-primary rounded-circle d-flex align-items-center justify-content-center fw-bold" style="width:34px; height:34px; font-size:0.85rem; cursor:pointer;" onclick="viewStudentDetails('${stId}')">
-                        ${(st.name || st.name_bn || st.name_en || 'S').charAt(0).toUpperCase()}
-                    </div>`;
-
-                const nameDisplay = `<div>
-                    <span class="fw-semibold text-primary d-block" style="cursor:pointer;" onclick="viewStudentDetails('${stId}')">${st.name || st.name_en || st.name_bn || 'Student'}</span>
-                    ${st.name_bn && st.name_en ? `<small class="text-muted">${st.name_bn}</small>` : ''}
-                </div>`;
-
-                const row = `
-                    <tr class="student-row" data-name="${(st.name || '').toLowerCase()} ${(st.name_bn || '').toLowerCase()}" data-class="${st.cls || st.desired_class || ''}" data-status="${st.status || (isApproved ? 'Approved' : 'Pending')}">
-                        <td>
-                            <div class="d-flex align-items-center gap-2">
-                                ${avatarHtml}
-                                ${nameDisplay}
-                            </div>
-                        </td>
-                        <td><strong>${st.roll}</strong></td>
-                        <td><span class="badge bg-light text-dark border">${st.cls || st.desired_class || 'Class 6'} (${st.version || 'Bangla'})</span></td>
-                        <td>${st.guardian || st.father || 'N/A'}<br><small class="text-muted">${st.phone || st.mobile || ''}</small></td>
-                        <td>${statusBadge}</td>
-                        <td>
-                            ${approveBtn}
-                            <button class="btn btn-sm btn-dark text-white me-1 fw-bold" onclick="openStudentIdCard('${stId}')" title="Print Unique ID Card"><i class="bi bi-person-badge me-1"></i>ID Card</button>
-                            <button class="btn btn-sm btn-outline-primary me-1" onclick="editStudent('${stId}')" title="Edit"><i class="bi bi-pencil"></i></button>
-                            <button class="btn btn-sm btn-outline-secondary me-1" onclick="printSingleStudent('${stId}')" title="Print Form"><i class="bi bi-printer"></i></button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${stId}')" title="Delete"><i class="bi bi-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
-                tbody.insertAdjacentHTML('beforeend', row);
-            });
+            drawStudentRows(combined);
         })
         .catch(err => {
-            // API ব্যর্থ হলে localStorage থেকে fallback data দেখাও
-            tbody.innerHTML = '';
-            let fallbackStudents = getStudents();
-            if (fallbackStudents.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-muted fw-bold">সার্ভারের সাথে সংযোগ করা যায়নি। / Cannot connect to server.</td></tr>';
-                return;
-            }
-            fallbackStudents.forEach(st => {
-                const stId = st.db_id || st.id;
-                const isApproved = (st.status === 'Approved' || st.active === true);
-                const statusBadge = isApproved ? 
-                    `<span class="badge bg-success-subtle text-success px-2.5 rounded-pill"><i class="bi bi-check-circle me-1"></i>Approved / অনুমোদিত</span>` :
-                    `<span class="badge bg-warning-subtle text-warning px-2.5 rounded-pill"><i class="bi bi-hourglass-split me-1"></i>Pending / অপেক্ষমাণ</span>`;
-                const approveBtn = (!isApproved || st.status === 'Pending') ?
-                    `<button class="btn btn-sm btn-success me-1 fw-bold" onclick="approveStudent('${stId}')" title="Approve Student Admission"><i class="bi bi-check-circle-fill me-1"></i>Approve</button>` : '';
-                const row = `
-                    <tr class="student-row" data-name="${(st.name || '').toLowerCase()}" data-class="${st.cls || st.desired_class || ''}">
-                        <td><span class="fw-semibold text-primary" style="cursor:pointer;" onclick="viewStudentDetails('${stId}')">${st.name || st.name_en || st.name_bn || 'Student'}</span></td>
-                        <td>${st.roll || st.admission_no || '-'}</td>
-                        <td><span class="badge bg-light text-dark">${st.cls || st.desired_class || 'Class 6'}</span></td>
-                        <td>${st.guardian || st.father || 'N/A'}</td>
-                        <td>${statusBadge}</td>
-                        <td>
-                            ${approveBtn}
-                            <button class="btn btn-sm btn-dark text-white me-1 fw-bold" onclick="openStudentIdCard('${stId}')" title="Print Unique ID Card"><i class="bi bi-person-badge me-1"></i>ID Card</button>
-                            <button class="btn btn-sm btn-outline-primary me-1" onclick="editStudent('${stId}')" title="Edit"><i class="bi bi-pencil"></i></button>
-                            <button class="btn btn-sm btn-outline-secondary me-1" onclick="printSingleStudent('${stId}')" title="Print Profile"><i class="bi bi-printer"></i></button>
-                            <button class="btn btn-sm btn-outline-danger" onclick="deleteStudent('${stId}')" title="Delete"><i class="bi bi-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
-                tbody.insertAdjacentHTML('beforeend', row);
-            });
+            console.warn("API offline or error, using local data:", err);
+            let fallbackList = Array.from(studentMap.values());
+            drawStudentRows(fallbackList);
         });
     }
 
@@ -1529,11 +1549,50 @@
     let studentIdToDelete = null;
 
     window.deleteStudent = function(id) {
+        if (!id) return;
         studentIdToDelete = id;
+
+        const students = getStudents();
+        const st = students.find(s => String(s.id) === String(id) || String(s.db_id) === String(id));
+        const stName = st ? (st.name || st.name_bn || st.name_en || 'এই শিক্ষার্থী') : 'এই শিক্ষার্থী';
+
+        const nameDisplayEl = document.getElementById('deleteStudentNameDisplay');
+        if (nameDisplayEl) {
+            nameDisplayEl.innerText = stName;
+        }
+
         const modalEl = document.getElementById('deleteStudentConfirmModal');
-        const modal = new bootstrap.Modal(modalEl);
-        modal.show();
+        if (modalEl) {
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        } else {
+            if (confirm(`আপনি কি নিশ্চিতভাবে "${stName}"-এর তথ্য মুছে ফেলতে চান?`)) {
+                confirmDeleteStudentAction(id);
+            }
+        }
     };
+
+    function confirmDeleteStudentAction(id) {
+        if (!id) return;
+
+        let students = getStudents();
+        students = students.filter(st => String(st.id) !== String(id) && String(st.db_id) !== String(id));
+        window.allStudentsCache = students;
+        localStorage.setItem('school_students', JSON.stringify(students));
+
+        if (id && !isNaN(id) && Number(id) > 0) {
+            fetch('/api/delete-student/' + id + '/', {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            })
+            .then(res => res.json())
+            .then(data => console.log('Deleted from DB:', data))
+            .catch(err => console.warn('DB delete error:', err));
+        }
+
+        renderStudents();
+        studentIdToDelete = null;
+    }
 
     function filterStudentsTable() {
         const search = document.getElementById('searchStudent').value.toLowerCase();
@@ -1858,8 +1917,12 @@
         });
     }
 
-    window.printFilteredStudentList = function() {
+    function triggerPrint() {
         loadPrintList();
+        window.print();
+    }
+
+    window.printFilteredStudentList = function() {
         triggerPrint();
     }
 
@@ -1889,28 +1952,11 @@
                 if (!studentIdToDelete) return;
                 const id = studentIdToDelete;
                 const modalEl = document.getElementById('deleteStudentConfirmModal');
-                const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
-                if (modal) modal.hide();
-
-                fetch('/api/delete-student/' + id + '/', {
-                    method: 'POST',
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                })
-                .then(res => res.json())
-                .then(data => {
-                    let students = getStudents();
-                    students = students.filter(st => st.id != id && st.db_id != id);
-                    localStorage.setItem('school_students', JSON.stringify(students));
-                    renderStudents();
-                    studentIdToDelete = null;
-                })
-                .catch(err => {
-                    let students = getStudents();
-                    students = students.filter(st => st.id != id && st.db_id != id);
-                    localStorage.setItem('school_students', JSON.stringify(students));
-                    renderStudents();
-                    studentIdToDelete = null;
-                });
+                if (modalEl) {
+                    const modal = bootstrap.Modal.getInstance(modalEl) || new bootstrap.Modal(modalEl);
+                    if (modal) modal.hide();
+                }
+                confirmDeleteStudentAction(id);
             });
         }
     });
