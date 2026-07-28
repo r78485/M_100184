@@ -1121,15 +1121,21 @@ def generate_course_certificate(request, student_id):
 from django.conf import settings
 import os
 
+def _check_admin_permission(user):
+    user_role = str(getattr(user, 'role', '') or '').upper()
+    return user.is_superuser or user.is_staff or user_role == 'ADMIN'
+
 @login_required
 def backup_database_view(request):
-    if request.user.role != 'ADMIN' and not request.user.is_superuser:
+    if not _check_admin_permission(request.user):
         return HttpResponse('Permission denied', status=403)
     db_path = os.path.join(settings.BASE_DIR, 'db.sqlite3')
     if os.path.exists(db_path):
         with open(db_path, 'rb') as db_file:
-            response = HttpResponse(db_file.read(), content_type='application/x-sqlite3')
-            response['Content-Disposition'] = 'attachment; filename=db_backup.sqlite3'
+            data = db_file.read()
+            response = HttpResponse(data, content_type='application/x-sqlite3')
+            response['Content-Disposition'] = 'attachment; filename="db_backup.sqlite3"'
+            response['Content-Length'] = len(data)
             return response
     return HttpResponse('Database not found', status=404)
 
@@ -1139,7 +1145,7 @@ def restore_database_view(request):
     """
     পিসি থেকে ব্যাকআপ ফাইল (.sqlite3 বা .zip) আপলোড করে ডেটাবেজ পুনরুদ্ধার করা।
     """
-    if request.user.role != 'ADMIN' and not request.user.is_superuser:
+    if not _check_admin_permission(request.user):
         return HttpResponse('Permission denied', status=403)
 
     if request.method != 'POST':
@@ -1221,7 +1227,7 @@ def restore_database_view(request):
 import sys
 @login_required
 def download_full_backup(request):
-    if request.user.role != 'ADMIN' and not request.user.is_superuser:
+    if not _check_admin_permission(request.user):
         return HttpResponse('Permission denied', status=403)
     
     # Import the backup function from auto_backup_drive
@@ -1231,18 +1237,19 @@ def download_full_backup(request):
     
     try:
         zip_path = create_backup_zip()
-        if os.path.exists(zip_path):
+        if zip_path and os.path.exists(zip_path):
             with open(zip_path, 'rb') as zip_file:
                 file_data = zip_file.read()
             
             # Delete the local file after reading to save space
             try:
                 os.remove(zip_path)
-            except:
+            except Exception:
                 pass
             
             response = HttpResponse(file_data, content_type='application/zip')
             response['Content-Disposition'] = f'attachment; filename="{os.path.basename(zip_path)}"'
+            response['Content-Length'] = len(file_data)
             return response
         else:
             return HttpResponse('Failed to create backup file.', status=500)
@@ -1252,7 +1259,7 @@ def download_full_backup(request):
 import subprocess
 @login_required
 def trigger_cloud_backup(request):
-    if request.user.role != 'ADMIN' and not request.user.is_superuser:
+    if not _check_admin_permission(request.user):
         return HttpResponse('Permission denied', status=403)
         
     try:
@@ -1266,7 +1273,7 @@ def trigger_cloud_backup(request):
 @login_required
 def clone_student_admission(request, pk):
     """Clone a student admission record"""
-    if request.user.role != 'ADMIN' and not request.user.is_superuser:
+    if not _check_admin_permission(request.user):
         return HttpResponse('Permission denied', status=403)
     obj = get_object_or_404(StudentAdmission, pk=pk)
     # Clone it

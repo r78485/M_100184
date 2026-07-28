@@ -883,8 +883,9 @@ body.dark-theme .gw-card:hover { background: #1e293b; }
                     </div>
                 </div>
                 <hr class="my-4">
-                <div class="d-flex gap-3">
-                    <a href="{% url 'download_full_backup' %}" class="btn btn-outline-primary"><i class="bi bi-download me-2"></i>{% trans "Download to PC" %}</a>
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'backup_database' %}" class="btn btn-outline-success"><i class="bi bi-database-down me-2"></i>{% trans "Download Database (.sqlite3)" %}</a>
+                    <a href="{% url 'download_full_backup' %}" class="btn btn-outline-primary"><i class="bi bi-file-earmark-zip me-2"></i>{% trans "Download Full Backup (.zip)" %}</a>
                     <form action="{% url 'trigger_backup' %}" method="post" class="mb-0">
                         {% csrf_token %}
                         <button type="submit" class="btn-gs-primary btn"><i class="bi bi-cloud-arrow-up me-2"></i>{% trans "Run Cloud Backup Now" %}</button>

@@ -185,6 +185,15 @@
         <!-- 1. All Employees -->
         <div class="tab-pane fade show active" id="all-emp-panel" role="tabpanel">
             <div class="card custom-card p-4 no-print">
+                <div class="d-flex justify-content-between align-items-center mb-3 pb-3 border-bottom flex-wrap gap-2">
+                    <div>
+                        <h5 class="fw-bold mb-1" style="color: var(--primary-blue);"><i class="bi bi-people me-2"></i>All Employees & Staff Registry</h5>
+                        <p class="text-muted small mb-0">View, search, manage, and print official employee records list.</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-primary fw-bold" onclick="printAllEmployees()"><i class="bi bi-printer me-2"></i>Print Employee List</button>
+                    </div>
+                </div>
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
                         <thead>
@@ -2011,6 +2020,76 @@
                 </tr>
             `);
         });
+    }
+
+    function printAllEmployees() {
+        const employees = getEmployees();
+        const printArea = document.getElementById('printArea');
+        if (!printArea) return;
+
+        let rowsHtml = '';
+        if (employees.length === 0) {
+            rowsHtml = '<tr><td colspan="8" class="p-4 text-center text-muted">No employee records found.</td></tr>';
+        } else {
+            employees.forEach((emp, idx) => {
+                const statusText = emp.active ? 'Active' : 'Inactive';
+                const statusBadgeClass = emp.active ? 'badge bg-success-subtle text-success border border-success-subtle px-2 py-1' : 'badge bg-danger-subtle text-danger border border-danger-subtle px-2 py-1';
+                rowsHtml += `
+                    <tr>
+                        <td class="text-center"><strong>${idx + 1}</strong></td>
+                        <td class="text-center"><code>${emp.idCode || emp.id}</code></td>
+                        <td class="fw-bold text-start ps-3">${emp.name_en || emp.name || emp.name_bn}</td>
+                        <td>${emp.role || emp.desigEn || emp.desigBn || 'N/A'}</td>
+                        <td><span class="badge bg-light text-dark border">${emp.dept || 'N/A'}</span></td>
+                        <td>${emp.email || 'N/A'}<br/><small class="text-muted">${emp.phone || emp.mobile || ''}</small></td>
+                        <td>${emp.joinDate || 'N/A'}</td>
+                        <td><span class="${statusBadgeClass}">${statusText}</span></td>
+                    </tr>
+                `;
+            });
+        }
+
+        const todayStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+        printArea.innerHTML = `
+            <div class="bg-white p-4">
+                <div class="text-center mb-4 pb-3 border-bottom">
+                    <h3 class="fw-bold mb-1" style="color: #0f766e;">GAZI MAHMUD JUNIOR HIGH SCHOOL</h3>
+                    <p class="mb-0 text-muted small fw-semibold">Official Employee & Staff Registry Directory</p>
+                    <small class="text-secondary">Date of Printing: ${todayStr}</small>
+                </div>
+                <h5 class="fw-bold text-center mb-3 text-dark"><i class="bi bi-people me-2"></i>Official Employee & Staff Directory</h5>
+                <table class="table table-bordered align-middle small text-center w-100">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 45px;">SL No</th>
+                            <th>ID Code</th>
+                            <th class="text-start ps-3">Employee Name</th>
+                            <th>Designation</th>
+                            <th>Department</th>
+                            <th>Contact Info</th>
+                            <th>Joining Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${rowsHtml}
+                    </tbody>
+                </table>
+                <div class="d-flex justify-content-between mt-5 pt-4 text-center small text-muted">
+                    <div>
+                        <div style="border-top: 1px dashed #666; width: 160px;" class="mx-auto mb-1"></div>
+                        <p class="mb-0">Prepared By</p>
+                    </div>
+                    <div>
+                        <div style="border-top: 1px dashed #666; width: 160px;" class="mx-auto mb-1"></div>
+                        <p class="mb-0">Headmaster / Admin Officer</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        triggerPrint();
     }
 
     function triggerPrint() {

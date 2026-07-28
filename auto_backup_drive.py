@@ -29,23 +29,30 @@ def create_backup_zip():
     zip_filename = f'system_backup_{timestamp}.zip'
     zip_path = os.path.join(PROJECT_ROOT, zip_filename)
     
-    # Exclude these directories from the backup to save space
-    EXCLUDE_DIRS = {'venv', '__pycache__', '.git', '.vscode', '.idea'}
+    # Exclude these directories from the backup to save space & prevent hanging
+    EXCLUDE_DIRS = {
+        'venv', '.venv', 'env', '__pycache__', '.git', '.vscode', '.idea',
+        'android', 'android_app', 'flutter_app', 'EduManage_Offline_Software',
+        'node_modules', '.gemini', 'brain', 'tmp', 'dist', 'build', 'gradle'
+    }
     
     print(f"Creating full system backup archive: {zip_filename}...")
     with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as backup_zip:
         for foldername, subfolders, filenames in os.walk(PROJECT_ROOT):
             # Modify subfolders in-place to avoid walking into excluded directories
-            subfolders[:] = [d for d in subfolders if d not in EXCLUDE_DIRS]
+            subfolders[:] = [d for d in subfolders if d not in EXCLUDE_DIRS and not d.startswith('.')]
             
             for filename in filenames:
-                # Do not backup the zip file we are currently creating
-                if filename == zip_filename:
+                # Do not backup any zip file or temporary journal/lock files
+                if filename.endswith('.zip') or filename.endswith('-journal') or filename.endswith('-wal') or filename == zip_filename:
                     continue
                 
                 file_path = os.path.join(foldername, filename)
-                arcname = os.path.relpath(file_path, PROJECT_ROOT)
-                backup_zip.write(file_path, arcname=arcname)
+                try:
+                    arcname = os.path.relpath(file_path, PROJECT_ROOT)
+                    backup_zip.write(file_path, arcname=arcname)
+                except Exception as err:
+                    print(f"Skipping file {file_path}: {err}")
                     
     print("Backup archive created successfully.")
     return zip_path
