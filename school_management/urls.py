@@ -34,6 +34,7 @@ urlpatterns = [
     
     # Dashboards (Role-Restricted in views.py)
     path('dashboard/admin/', user_views.admin_dashboard, name='admin_dashboard'),
+    path('api/dashboard/realtime/', user_views.api_dashboard_realtime, name='api_dashboard_realtime'),
     path('dashboard/teacher/', user_views.teacher_dashboard, name='teacher_dashboard'),
     path('dashboard/student/', user_views.student_dashboard, name='student_dashboard'),
     

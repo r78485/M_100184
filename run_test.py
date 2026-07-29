@@ -4,9 +4,10 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'school_management.settings')
 django.setup()
 
-from django.core.management import call_command
-try:
-    call_command('migrate', interactive=False)
-    print("Migrate completed successfully!")
-except Exception as e:
-    print("Migration exception:", e)
+from apps.users.views import get_realtime_dashboard_data
+
+data = get_realtime_dashboard_data()
+print("Realtime Dashboard Data:")
+for k, v in data.items():
+    print(f" - {k}: {v}")
+
