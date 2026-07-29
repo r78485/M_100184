@@ -157,7 +157,7 @@ SUPABASE_KEY = os.environ.get('SUPABASE_KEY', 'sb_publishable_UnTiIPs3X526ipGKjE
 # অফলাইন ↔ অনলাইন সিঙ্ক কনফিগারেশন
 # ──────────────────────────────────────────────────────────────
 # অনলাইন সার্ভারের URL (নেটওয়ার্ক ব্যাকআপ)
-ONLINE_SERVER_URL = os.environ.get('ONLINE_SERVER_URL', 'https://m-100184.onrender.com')
+ONLINE_SERVER_URL = os.environ.get('ONLINE_SERVER_URL', 'https://m-100184-git-main-r78485s-projects.vercel.app')
 
 # সিঙ্ক API কী — উভয় সার্ভারে একই কী থাকতে হবে
 # প্রোডাকশনে অবশ্যই env variable দিয়ে বদলান!

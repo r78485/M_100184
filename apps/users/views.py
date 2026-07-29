@@ -1445,15 +1445,40 @@ def _check_admin_permission(user):
 def backup_database_view(request):
     if not _check_admin_permission(request.user):
         return HttpResponse('Permission denied', status=403)
-    db_path = os.path.join(settings.BASE_DIR, 'db.sqlite3')
-    if os.path.exists(db_path):
-        with open(db_path, 'rb') as db_file:
-            data = db_file.read()
-            response = HttpResponse(data, content_type='application/x-sqlite3')
-            response['Content-Disposition'] = 'attachment; filename="db_backup.sqlite3"'
-            response['Content-Length'] = len(data)
-            return response
-    return HttpResponse('Database not found', status=404)
+    
+    import csv
+    import io
+    from django.apps import apps as django_apps
+
+    buffer = io.StringIO()
+    writer = csv.writer(buffer)
+    
+    excluded_apps = {'contenttypes', 'sessions', 'admin', 'auth'}
+    models = [m for m in django_apps.get_models() if m._meta.app_label not in excluded_apps]
+    
+    for model in models:
+        meta = model._meta
+        writer.writerow([f"=== TABLE: {meta.app_label}.{meta.model_name} ==="])
+        fields = [f.name for f in meta.fields]
+        writer.writerow(fields)
+        
+        try:
+            for obj in model.objects.all():
+                row = []
+                for field in fields:
+                    val = getattr(obj, field, '')
+                    row.append(str(val) if val is not None else '')
+                writer.writerow(row)
+        except Exception as e:
+            writer.writerow([f"Error exporting model {meta.model_name}: {e}"])
+            
+        writer.writerow([])
+        
+    csv_data = buffer.getvalue().encode('utf-8-sig')
+    response = HttpResponse(csv_data, content_type='text/csv; charset=utf-8')
+    response['Content-Disposition'] = 'attachment; filename="database_backup.csv"'
+    response['Content-Length'] = len(csv_data)
+    return response
 
 
 @login_required

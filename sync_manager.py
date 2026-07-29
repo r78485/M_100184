@@ -24,7 +24,7 @@ import urllib.error
 # ──────────────────────────────────────────────
 #  কনফিগারেশন (settings.py থেকেও ওভাররাইড করা যাবে)
 # ──────────────────────────────────────────────
-ONLINE_SERVER_URL = os.environ.get('ONLINE_SERVER_URL', 'https://m-100184.onrender.com')
+ONLINE_SERVER_URL = os.environ.get('ONLINE_SERVER_URL', 'https://m-100184-git-main-r78485s-projects.vercel.app')
 SYNC_API_KEY = os.environ.get('SYNC_API_KEY', 'offline-sync-secret-key-change-me')
 SYNC_INTERVAL_SECONDS = int(os.environ.get('SYNC_INTERVAL_SECONDS', 900))  # ১৫ মিনিট
 SYNC_TIMEOUT_SECONDS = 30
