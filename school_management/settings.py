@@ -144,6 +144,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # ──────────────────────────────────────────────────────────────
+# Supabase কনফিগারেশন
+# ──────────────────────────────────────────────────────────────
+SUPABASE_URL = os.environ.get('SUPABASE_URL', 'https://ivclauhftgpjghvqigaj.supabase.co')
+SUPABASE_KEY = os.environ.get('SUPABASE_KEY', 'sb_publishable_UnTiIPs3X526ipGKjExIqA_zOxdkCI6')
+
+# ──────────────────────────────────────────────────────────────
 # অফলাইন ↔ অনলাইন সিঙ্ক কনফিগারেশন
 # ──────────────────────────────────────────────────────────────
 # অনলাইন সার্ভারের URL (নেটওয়ার্ক ব্যাকআপ)
