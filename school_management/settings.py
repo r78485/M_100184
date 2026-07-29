@@ -83,12 +83,15 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'school_management.wsgi.application'
 
-# Database Setup (Supports PostgreSQL on Railway and fallback to SQLite locally)
+# Database Setup (Supports PostgreSQL on Neon/Supabase/Render/Railway and fallback to /tmp/db.sqlite3 on Vercel)
+IS_VERCEL = 'VERCEL' in os.environ
+DEFAULT_DB_PATH = '/tmp/db.sqlite3' if IS_VERCEL else (BASE_DIR / 'db.sqlite3')
+
 try:
     import dj_database_url
     DATABASES = {
         'default': dj_database_url.config(
-            default=f'sqlite:///{BASE_DIR / "db.sqlite3"}',
+            default=f'sqlite:///{DEFAULT_DB_PATH}',
             conn_max_age=600
         )
     }
@@ -96,7 +99,7 @@ except ImportError:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
+            'NAME': DEFAULT_DB_PATH,
         }
     }
 
@@ -136,7 +139,8 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 if _HAS_WHITENOISE:
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+    WHITENOISE_MANIFEST_STRICT = False
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
