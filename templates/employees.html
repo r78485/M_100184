@@ -1233,19 +1233,24 @@
     function confirmDeleteEmployeeAction() {
         if (!deleteTargetEmpId) return;
         const id = deleteTargetEmpId;
-        let employees = getEmployees();
-        employees = employees.filter(emp => String(emp.id) !== String(id) && emp.id !== id);
-        localStorage.setItem('school_employees', JSON.stringify(employees));
-        renderEmployees();
-        if (typeof loadEmpLogins === 'function') loadEmpLogins();
-        if (typeof loadEmpIdCardSelector === 'function') loadEmpIdCardSelector();
-        if (typeof loadJobLetterSelector === 'function') loadJobLetterSelector();
+        closeDeleteConfirmModal();
+
+        setTimeout(() => {
+            let employees = getEmployees();
+            employees = employees.filter(emp => String(emp.id) !== String(id) && emp.id !== id);
+            localStorage.setItem('school_employees', JSON.stringify(employees));
+            renderEmployees();
+            
+            setTimeout(() => {
+                if (typeof loadEmpLogins === 'function') loadEmpLogins();
+                if (typeof loadEmpIdCardSelector === 'function') loadEmpIdCardSelector();
+                if (typeof loadJobLetterSelector === 'function') loadJobLetterSelector();
+            }, 20);
+        }, 0);
 
         fetch(`/api/delete-employee/${encodeURIComponent(id)}/`, {
             method: 'POST'
         }).catch(err => console.warn('Backend delete note:', err));
-
-        closeDeleteConfirmModal();
     }
 
     // Staff ID Cards Tab (HD 300 DPI Canvas ID Card Generator)
