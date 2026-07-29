@@ -4,8 +4,9 @@ from django.db import connection
 _MIGRATED = False
 
 def auto_repair_question_paper_schema():
-
     """Dynamically ensure missing SQLite columns exist for question_paper app"""
+    if connection.vendor != 'sqlite':
+        return
     try:
         tables = connection.introspection.table_names()
         if 'question_paper_questionbank' in tables:
@@ -39,6 +40,8 @@ def auto_repair_question_paper_schema():
 
 def auto_repair_student_admission_schema():
     """Dynamically ensure missing SQLite columns exist for users_studentadmission table"""
+    if connection.vendor != 'sqlite':
+        return
     try:
         tables = connection.introspection.table_names()
         if 'users_studentadmission' in tables:
@@ -64,6 +67,8 @@ def auto_repair_student_admission_schema():
 
 def auto_repair_school_profile_schema():
     """Dynamically ensure missing SQLite columns exist for admit_cards_schoolprofile & transcripts_institutionprofile table"""
+    if connection.vendor != 'sqlite':
+        return
     try:
         tables = connection.introspection.table_names()
         if 'admit_cards_schoolprofile' in tables:
@@ -83,6 +88,7 @@ def auto_repair_school_profile_schema():
                     cursor.execute("ALTER TABLE transcripts_institutionprofile ADD COLUMN seal varchar(100) NULL;")
     except Exception as e:
         print("SchoolProfile schema auto-repair warning:", e)
+
 
 
 class AutoMigrateMiddleware:
