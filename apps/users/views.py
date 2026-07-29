@@ -1,8 +1,16 @@
 from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 import io
 import base64
 from .models import StudentAdmission
+
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, Image as RLImage
+from reportlab.lib.units import inch
+import qrcode
 
 from django.http import HttpResponse, JsonResponse
 from django.utils import timezone
@@ -1006,21 +1014,21 @@ def generate_registration_card(request, student_id):
 
     # Populate dynamic data from student if available, else dummy
     student_data = {
-        "reg_no": student.admission_no if student else "2315172208",
-        "roll_no": str(student.roll_no) if student and student.roll_no else "300513",
-        "birth_reg_no": "20100610740102181",
-        "session": student.academic_year if student else "2023",
-        "name": student.student_name_en if student else "Mithila",
-        "father_name": student.father_name if student else "Mazibur Rahman Howlader",
-        "mother_name": student.mother_name if student else "Jesmin Begum",
-        "dob": str(student.date_of_birth) if student else "19/04/2010",
+        "reg_no": (getattr(student, 'admission_no', None) or "2315172208"),
+        "roll_no": str(getattr(student, 'roll_no', None) or (student.id if student else "300513")),
+        "birth_reg_no": (getattr(student, 'birth_reg_no', None) or "20100610740102181"),
+        "session": (getattr(student, 'academic_year', None) or "2026"),
+        "name": (getattr(student, 'student_name_en', None) or getattr(student, 'student_name_bn', None) or "Student"),
+        "father_name": (getattr(student, 'father_name', None) or "Father Name"),
+        "mother_name": (getattr(student, 'mother_name', None) or "Mother Name"),
+        "dob": (student.dob.strftime('%d/%m/%Y') if (student and getattr(student, 'dob', None)) else "19/04/2010"),
         "dob_words": "Nineteenth April Two Thousand Ten",
-        "class": f"CLASS {student.student_class}" if student else "CLASS VIII",
-        "class_roll": str(student.roll_no) if student and student.roll_no else "0005",
-        "section": student.section if student else "A",
+        "class": f"CLASS {getattr(student, 'desired_class', None) or 'VIII'}",
+        "class_roll": str(getattr(student, 'roll_no', None) or (student.id if student else "0005")),
+        "section": (getattr(student, 'section', None) or "A"),
         "shift": "Day",
-        "medium": "Bangla",
-        "sex": "Female",
+        "medium": (getattr(student, 'version', None) or "Bangla"),
+        "sex": (getattr(student, 'gender', None) or "Female"),
     }
     
     # Draw BBCR SL.No in background top left
@@ -1034,11 +1042,6 @@ def generate_registration_card(request, student_id):
         canvas.rect(20, 20, width - 40, height - 40)
         canvas.rect(24, 24, width - 48, height - 48)
 
-        # Draw BBCR SL No above QR Code
-        canvas.setFont("Helvetica-Bold", 8)
-        canvas.setFillColor(colors.black)
-        canvas.drawString(30, height - 35, "BBCR SL.No : 2023300513")
-
         # 2. Side security lines
         canvas.setStrokeColor(colors.HexColor("#81c784"))
         canvas.setLineWidth(0.5)
@@ -1051,15 +1054,14 @@ def generate_registration_card(request, student_id):
         path.rect(25, 25, width - 50, height - 50)
         canvas.clipPath(path, stroke=0, fill=0)
 
-        # 3. Logo Watermark (Center)
+        # 3. Logo Watermark (Center - Very Light/Faint Background)
         try:
             import os
             from django.conf import settings
             logo_path = os.path.join(settings.BASE_DIR, 'static', 'logo.png')
             if os.path.exists(logo_path):
-                # We attempt to set alpha to 0.1 for transparency in newer reportlab
                 try:
-                    canvas.setFillAlpha(0.1)
+                    canvas.setFillAlpha(0.04)
                 except Exception:
                     pass
                 canvas.drawImage(logo_path, (width - 300)/2, (height - 300)/2, width=300, height=300, mask='auto')
@@ -1070,26 +1072,38 @@ def generate_registration_card(request, student_id):
         except Exception:
             pass
 
-        # 4. Background repeating watermark (Inst Name + EIIN)
-        canvas.setFont("Helvetica-Bold", 12)
-        canvas.setFillColor(colors.HexColor("#f0f4f1")) # Very light grey/green
+        # 4. Background repeating watermark (Very Faint Text)
+        canvas.setFont("Helvetica-Bold", 10)
+        canvas.setFillColor(colors.HexColor("#f4f7f4")) # Extremely light background tint
         
         inst_name = institution_info.get("name", "Institution")
         eiin = institution_info.get("eiin", "")
         watermark_text = f"{inst_name} (EIIN: {eiin})   " * 3
 
+        canvas.saveState()
         canvas.rotate(35)
         for x in range(-200, int(width) + 600, 250):
             for y in range(-400, int(height) + 400, 50):
                 canvas.drawString(x, y, watermark_text)
+        canvas.restoreState()
                 
-        # 5. Pattern as security watermark
-        canvas.setFillColor(colors.HexColor("#e8f5e9")) # Light green pattern
+        # 5. Faint pattern security watermark
+        canvas.setStrokeColor(colors.HexColor("#f0f7f0")) # Faint light green pattern
+        canvas.setLineWidth(0.3)
         for x in range(-200, int(width) + 600, 150):
             for y in range(-400, int(height) + 400, 150):
                 canvas.circle(x, y, 20, fill=0, stroke=1)
                 canvas.circle(x, y, 15, fill=0, stroke=1)
 
+        # Fully restore state so rotation/clipping is cleared
+        canvas.restoreState()
+
+        # 6. Draw BBCR SL.No ON TOP OF ALL WATERMARKS (Crisp, Sharp, Solid Dark Color)
+        reg_number = student_data.get('reg_no', '2023300513')
+        canvas.saveState()
+        canvas.setFont("Helvetica-Bold", 10)
+        canvas.setFillColor(colors.HexColor("#000000"))
+        canvas.drawString(32, height - 38, f"BBCR SL.No : {reg_number}")
         canvas.restoreState()
 
     subjects = [
@@ -1107,7 +1121,7 @@ def generate_registration_card(request, student_id):
         pagesize=A4,
         rightMargin=36,
         leftMargin=36,
-        topMargin=36,
+        topMargin=48,
         bottomMargin=36,
     )
 
@@ -1159,9 +1173,10 @@ def generate_registration_card(request, student_id):
     value_style = ParagraphStyle(
         "ValueStyle",
         parent=styles["Normal"],
-        fontName="Helvetica-Oblique",
-        fontSize=10,
+        fontName="Helvetica-Bold",
+        fontSize=10.5,
         leading=14,
+        textColor=colors.HexColor("#000000"),
     )
 
     qr_data = f"Reg:{student_data['reg_no']}|Name:{student_data['name']}|EIIN:{institution_info['eiin']}"
@@ -1178,11 +1193,30 @@ def generate_registration_card(request, student_id):
     header_text_content = f"<b>Registration Card</b><br/><br/><b>{student_data['class']}</b>"
     header_text = Paragraph(header_text_content, title_style)
 
+    import os
+    from django.conf import settings
+
+    photo_element = None
+    if student and getattr(student, 'photo', None):
+        try:
+            photo_file = student.photo
+            if hasattr(photo_file, 'path') and os.path.exists(photo_file.path):
+                photo_element = RLImage(photo_file.path, width=1.1 * inch, height=1.3 * inch)
+            elif hasattr(photo_file, 'name') and photo_file.name:
+                full_p = os.path.join(settings.MEDIA_ROOT, photo_file.name)
+                if os.path.exists(full_p):
+                    photo_element = RLImage(full_p, width=1.1 * inch, height=1.3 * inch)
+        except Exception as pe:
+            print("Registration Card photo load exception:", pe)
+
+    if not photo_element:
+        photo_element = Paragraph("<font size=8 color='#2e7d32'><b>PASSPORT<br/>PHOTO</b></font>", sig_style)
+
     header_table_data = [
         [
             qr_img,
             header_text,
-            " [ Student Photo ] ",
+            photo_element,
         ] 
     ]
     header_table = Table(header_table_data, colWidths=[1.3 * inch, 4.3 * inch, 1.3 * inch])
@@ -1191,6 +1225,7 @@ def generate_registration_card(request, student_id):
             [
                 ("ALIGN", (0, 0), (-1, -1), "CENTER"),
                 ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("BOX", (2, 0), (2, 0), 1, colors.HexColor("#1b5e20")),
             ]
         )
     )

@@ -8,6 +8,7 @@ class InstitutionProfile(models.Model):
     eiin = models.CharField(max_length=20, default="100184")
     board_or_authority = models.CharField(max_length=255, default="Directorate of Secondary and Higher Education")
     logo = models.ImageField(upload_to='institution/', null=True, blank=True)
+    seal = models.ImageField(upload_to='seals/', null=True, blank=True)
     principal_signature = models.ImageField(upload_to='signatures/', null=True, blank=True)
     controller_signature = models.ImageField(upload_to='signatures/', null=True, blank=True)
 

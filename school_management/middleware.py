@@ -63,7 +63,7 @@ def auto_repair_student_admission_schema():
 
 
 def auto_repair_school_profile_schema():
-    """Dynamically ensure missing SQLite columns exist for admit_cards_schoolprofile table"""
+    """Dynamically ensure missing SQLite columns exist for admit_cards_schoolprofile & transcripts_institutionprofile table"""
     try:
         tables = connection.introspection.table_names()
         if 'admit_cards_schoolprofile' in tables:
@@ -73,6 +73,14 @@ def auto_repair_school_profile_schema():
 
                 if 'seal' not in columns:
                     cursor.execute("ALTER TABLE admit_cards_schoolprofile ADD COLUMN seal varchar(100) NULL;")
+
+        if 'transcripts_institutionprofile' in tables:
+            with connection.cursor() as cursor:
+                cursor.execute("PRAGMA table_info(transcripts_institutionprofile);")
+                t_cols = [row[1] for row in cursor.fetchall()]
+
+                if 'seal' not in t_cols:
+                    cursor.execute("ALTER TABLE transcripts_institutionprofile ADD COLUMN seal varchar(100) NULL;")
     except Exception as e:
         print("SchoolProfile schema auto-repair warning:", e)
 

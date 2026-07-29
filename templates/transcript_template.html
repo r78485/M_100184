@@ -93,59 +93,68 @@
             <div class="inner-border flex flex-col justify-between">
                 
                 <div class="watermark-bg serif-font">
-                    {{ institution.name_en }}<br>
+                    <span class="watermark-bg-title">{% if school_profile and school_profile.name_en %}{{ school_profile.name_en }}{% else %}{{ institution.name_en }}{% endif %}</span><br>
                     <span class="text-2xl opacity-60">OFFICIAL ACADEMIC TRANSCRIPT</span>
                 </div>
 
                 <div class="relative z-10">
                     <div class="flex justify-between items-start border-b-2 border-[#0f2c59] pb-3">
-                        <div class="w-20 h-20 flex items-center justify-center">
-                            {% if institution.logo %}
-                                <img src="{{ institution.logo.url }}" alt="Logo" class="max-h-full object-contain">
-                            {% else %}
-                                <div class="w-16 h-16 rounded-full bg-blue-900 text-white flex items-center justify-center font-bold text-xl">
-                                    EDU
-                                </div>
-                            {% endif %}
+                        <div class="w-20 h-20 flex items-center justify-center p-1 shrink-0">
+                            <img src="{% if school_profile and school_profile.logo %}{{ school_profile.logo.url }}{% elif institution and institution.logo %}{{ institution.logo.url }}{% else %}/static/logo.png{% endif %}" 
+                                 alt="School Logo" 
+                                 class="max-h-full max-w-full object-contain school-logo-img"
+                                 onerror="this.onerror=null; this.src='/static/logo.png';">
                         </div>
 
-                        <div class="text-center flex-1 px-2">
-                            <h1 class="serif-font text-2xl font-extrabold text-[#0f2c59] tracking-wide uppercase">
-                                {{ institution.name_en }}
+                        <div class="text-center flex-1 px-3">
+                            <h1 class="serif-font font-extrabold text-[#0f2c59] tracking-wide uppercase school-name-en" style="font-size: 1.3rem; line-height: 1.25;">
+                                {% if school_profile and school_profile.name_en %}{{ school_profile.name_en }}{% else %}{{ institution.name_en }}{% endif %}
                             </h1>
-                            <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            {% if school_profile and school_profile.name_bn %}
+                                <p class="text-xs font-bold text-blue-900 tracking-wide mt-0.5 school-name-bn">
+                                    {{ school_profile.name_bn }}
+                                </p>
+                            {% elif institution and institution.name_bn %}
+                                <p class="text-xs font-bold text-blue-900 tracking-wide mt-0.5 school-name-bn">
+                                    {{ institution.name_bn }}
+                                </p>
+                            {% endif %}
+                            <p class="text-[11px] font-semibold text-gray-600 uppercase tracking-wider mt-0.5">
                                 {{ institution.board_or_authority }}
                             </p>
-                            <p class="text-[11px] text-gray-500">EIIN: {{ institution.eiin }}</p>
-                            <div class="inline-block bg-[#0f2c59] text-white text-sm font-bold px-4 py-1 rounded-full mt-2 uppercase tracking-widest">
+                            <p class="text-[10.5px] text-gray-500 font-semibold school-eiin">
+                                EIIN: {% if school_profile and school_profile.eiin %}{{ school_profile.eiin }}{% else %}{{ institution.eiin }}{% endif %}
+                                {% if school_profile and school_profile.address %} | {{ school_profile.address }}{% endif %}
+                            </p>
+                            <div class="inline-block bg-[#0f2c59] text-white text-xs font-bold px-4 py-0.5 rounded-full mt-1 uppercase tracking-widest border border-amber-400 shadow-sm">
                                 ACADEMIC TRANSCRIPT
                             </div>
                         </div>
 
-                        <div class="w-36 text-[9px] border border-gray-400 rounded p-1 bg-white/80">
-                            <div class="font-bold text-center border-b pb-0.5 mb-0.5 text-gray-800">GRADING SYSTEM</div>
-                            <table class="w-full text-center">
+                        <div class="w-28 text-[8px] border border-gray-400 rounded p-0.5 bg-white/90 shadow-sm leading-tight shrink-0">
+                            <div class="font-bold text-center border-b pb-0.5 mb-0.5 text-gray-800 tracking-tighter">GRADING SYSTEM</div>
+                            <table class="w-full text-center leading-none">
                                 <thead>
                                     <tr class="border-b text-gray-600">
-                                        <th>Range</th>
-                                        <th>Grade</th>
-                                        <th>Point</th>
+                                        <th class="py-0.5">Range</th>
+                                        <th class="py-0.5">Grade</th>
+                                        <th class="py-0.5">Point</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for scale in grading_scales %}
-                                    <tr>
-                                        <td>{{ scale.mark_from }}-{{ scale.mark_to }}%</td>
-                                        <td class="font-bold">{{ scale.letter_grade }}</td>
-                                        <td>{{ scale.grade_point }}</td>
+                                    <tr class="border-b border-gray-100 last:border-0">
+                                        <td class="py-0.5">{{ scale.mark_from }}-{{ scale.mark_to }}%</td>
+                                        <td class="font-bold py-0.5">{{ scale.letter_grade }}</td>
+                                        <td class="py-0.5">{{ scale.grade_point }}</td>
                                     </tr>
                                     {% empty %}
-                                    <tr><td colspan="3">80-100% | A+ | 5.00</td></tr>
-                                    <tr><td colspan="3">70-79%  | A  | 4.00</td></tr>
-                                    <tr><td colspan="3">60-69%  | A- | 3.50</td></tr>
-                                    <tr><td colspan="3">50-59%  | B  | 3.00</td></tr>
-                                    <tr><td colspan="3">40-49%  | C  | 2.00</td></tr>
-                                    <tr><td colspan="3">00-39%  | F  | 0.00</td></tr>
+                                    <tr><td colspan="3" class="py-0.5">80-100% | A+ | 5.00</td></tr>
+                                    <tr><td colspan="3" class="py-0.5">70-79% | A | 4.00</td></tr>
+                                    <tr><td colspan="3" class="py-0.5">60-69% | A- | 3.50</td></tr>
+                                    <tr><td colspan="3" class="py-0.5">50-59% | B | 3.00</td></tr>
+                                    <tr><td colspan="3" class="py-0.5">40-49% | C | 2.00</td></tr>
+                                    <tr><td colspan="3" class="py-0.5">00-39% | F | 0.00</td></tr>
                                     {% endfor %}
                                 </tbody>
                             </table>
@@ -161,7 +170,7 @@
 
                     <div class="grid grid-cols-2 gap-x-6 gap-y-1.5 text-xs bg-gray-50/80 p-3 rounded-lg border border-gray-200 mb-4">
                         <div><span class="font-bold text-gray-700">Student Name :</span> <span class="uppercase font-semibold">{{ student.full_name }}</span></div>
-                        <div><span class="font-bold text-gray-700">Student ID :</span> <span class="font-mono font-bold">{{ student.student_id }}</span></div>
+                        <div><span class="font-bold text-gray-700">Student ID :</span> <span class="font-mono font-bold text-blue-900">{{ student.student_id }}</span></div>
                         <div><span class="font-bold text-gray-700">Father's Name :</span> {{ student.father_name }}</div>
                         <div><span class="font-bold text-gray-700">Roll No :</span> {{ student.roll_no }}</div>
                         <div><span class="font-bold text-gray-700">Mother's Name :</span> {{ student.mother_name }}</div>
@@ -195,7 +204,10 @@
 
                     <div class="mt-4 flex justify-between items-center bg-blue-50/60 p-3 rounded-lg border border-blue-200">
                         <div class="flex items-center gap-3">
-                            <img src="data:image/png;base64,{{ barcode }}" alt="Barcode" class="h-10">
+                            <div class="text-center">
+                                <img src="data:image/png;base64,{{ barcode }}" alt="Student ID Barcode" class="h-10 mx-auto">
+                                <span class="text-[10px] font-mono font-bold text-gray-800 block mt-0.5">{{ student.student_id }}</span>
+                            </div>
                         </div>
                         <div class="text-right">
                             <span class="text-xs font-bold text-gray-600 uppercase mr-2">Grade Point Average (GPA):</span>
@@ -210,33 +222,57 @@
                     <div class="flex justify-between items-end">
                         
                         <div class="text-center">
-                            <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" class="w-16 h-16 mx-auto">
-                            <p class="text-[9px] font-semibold text-gray-500 mt-1">Scan to Verify</p>
+                            <a href="{{ verify_url }}" target="_blank" title="Scan or click to view official transcript">
+                                <img src="data:image/png;base64,{{ qr_code }}" alt="QR Code" class="w-16 h-16 mx-auto border border-gray-300 rounded p-0.5 shadow-sm hover:scale-105 transition-transform">
+                            </a>
+                            <p class="text-[9px] font-semibold text-gray-500 mt-1">Scan to Verify Transcript</p>
                         </div>
 
                         <div class="text-center w-40">
-                            {% if institution.controller_signature %}
-                                <img src="{{ institution.controller_signature.url }}" class="h-8 mx-auto mb-1 object-contain">
-                            {% else %}
-                                <div class="h-8"></div>
-                            {% endif %}
+                            <div class="h-10 flex items-end justify-center mb-1">
+                                {% if school_profile and school_profile.controller_signature %}
+                                    <img src="{{ school_profile.controller_signature.url }}" class="max-h-10 object-contain">
+                                {% elif institution and institution.controller_signature %}
+                                    <img src="{{ institution.controller_signature.url }}" class="max-h-10 object-contain">
+                                {% else %}
+                                    <span class="font-serif italic text-xs text-blue-900 font-semibold opacity-70">Prepared By</span>
+                                {% endif %}
+                            </div>
                             <div class="border-t border-gray-800 text-[11px] font-bold text-gray-800 pt-0.5">
                                 Prepared By
                             </div>
                         </div>
 
-                        <div class="text-center w-24">
-                            <div class="w-16 h-16 border-2 border-dashed border-gray-300 rounded-full mx-auto flex items-center justify-center text-[8px] text-gray-400 font-bold uppercase">
-                                Official Seal
+                        <div class="text-center w-28">
+                            <div class="h-16 flex items-center justify-center mb-1 seal-area-container">
+                                {% if school_profile and school_profile.seal %}
+                                    <img src="{{ school_profile.seal.url }}" alt="Institutional Seal" class="h-16 w-16 object-contain">
+                                {% elif institution and institution.seal %}
+                                    <img src="{{ institution.seal.url }}" alt="Institutional Seal" class="h-16 w-16 object-contain">
+                                {% else %}
+                                    <div class="w-16 h-16 border-2 border-dashed border-red-400 rounded-full flex flex-col items-center justify-center p-1 text-center bg-red-50/30">
+                                        <span class="text-[8px] font-bold text-red-600 uppercase leading-none">OFFICIAL</span>
+                                        <span class="text-[7px] font-extrabold text-red-700 uppercase leading-tight">SEAL</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="text-[10px] font-bold text-gray-700">
+                                Institutional Seal
                             </div>
                         </div>
 
                         <div class="text-center w-44">
-                            {% if institution.principal_signature %}
-                                <img src="{{ institution.principal_signature.url }}" class="h-8 mx-auto mb-1 object-contain">
-                            {% else %}
-                                <div class="h-8"></div>
-                            {% endif %}
+                            <div class="h-10 flex items-end justify-center mb-1 headmaster-sig-container">
+                                {% if institution and institution.principal_signature %}
+                                    <img src="{{ institution.principal_signature.url }}" class="max-h-10 object-contain">
+                                {% elif school_profile and school_profile.controller_signature %}
+                                    <img src="{{ school_profile.controller_signature.url }}" class="max-h-10 object-contain">
+                                {% elif institution and institution.controller_signature %}
+                                    <img src="{{ institution.controller_signature.url }}" class="max-h-10 object-contain">
+                                {% else %}
+                                    <span class="font-serif italic text-xs text-blue-900 font-semibold opacity-70">Headmaster / Principal</span>
+                                {% endif %}
+                            </div>
                             <div class="border-t border-gray-800 text-[11px] font-bold text-gray-800 pt-0.5">
                                 Controller of Examinations / Headmaster
                             </div>
@@ -249,5 +285,44 @@
         </div>
     </div>
 
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        try {
+            const stored = localStorage.getItem('gs_institute_profile');
+            if (stored) {
+                const profile = JSON.parse(stored);
+                if (profile.name_en) {
+                    document.querySelectorAll('.school-name-en').forEach(el => el.innerText = profile.name_en);
+                    const wm = document.querySelector('.watermark-bg-title');
+                    if (wm) wm.innerText = profile.name_en;
+                }
+                if (profile.name_bn) {
+                    document.querySelectorAll('.school-name-bn').forEach(el => el.innerText = profile.name_bn);
+                }
+                if (profile.eiin) {
+                    document.querySelectorAll('.school-eiin').forEach(el => el.innerText = 'EIIN: ' + profile.eiin + (profile.address ? ' | ' + profile.address : ''));
+                }
+                if (profile.logoSrc) {
+                    document.querySelectorAll('.school-logo-img').forEach(el => {
+                        el.src = profile.logoSrc;
+                        el.style.display = 'block';
+                    });
+                }
+                if (profile.sealSrc) {
+                    document.querySelectorAll('.seal-area-container').forEach(el => {
+                        el.innerHTML = '<img src="' + profile.sealSrc + '" alt="Institutional Seal" class="h-16 w-16 mx-auto object-contain">';
+                    });
+                }
+                if (profile.sigSrc) {
+                    document.querySelectorAll('.headmaster-sig-container').forEach(el => {
+                        el.innerHTML = '<img src="' + profile.sigSrc + '" alt="Signature" class="max-h-10 mx-auto mb-1 object-contain">';
+                    });
+                }
+            }
+        } catch(e) {
+            console.warn('Profile sync warning:', e);
+        }
+    });
+    </script>
 </body>
 </html>

@@ -388,11 +388,7 @@
 
             <!-- GROUP 2: ACADEMIC -->
             <li class="menu-header">{% trans "Academic & Students" %}</li>
-            <li>
-                <a href="{% url 'admissions' %}" class="{% if request.resolver_match.url_name == 'admissions' %}active{% endif %}">
-                    <i class="bi bi-person-plus"></i> {% trans "Admissions" %}
-                </a>
-            </li>
+
             <li>
                 <a href="{% url 'classes' %}" class="{% if request.resolver_match.url_name == 'classes' %}active{% endif %}">
                     <i class="bi bi-building"></i> {% trans "Classes & Sections" %}
