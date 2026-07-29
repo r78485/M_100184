@@ -123,6 +123,7 @@
                     <!-- Form -->
                     <form method="POST" id="loginForm" class="space-y-4" onsubmit="triggerLoading()">
                         {% csrf_token %}
+                        {% if request.GET.next %}<input type="hidden" name="next" value="{{ request.GET.next }}">{% endif %}
                         
                         <!-- Username / Email -->
                         <div>

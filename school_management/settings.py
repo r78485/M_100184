@@ -14,7 +14,31 @@ SECRET_KEY = 'django-insecure-replace-this-in-production'
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
-CSRF_TRUSTED_ORIGINS = ['https://*.railway.app', 'https://*.up.railway.app', 'https://*.onrender.com', 'https://m-100184.onrender.com', 'https://*.vercel.app']
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.railway.app',
+    'https://*.up.railway.app',
+    'https://*.onrender.com',
+    'https://m-100184.onrender.com',
+    'https://*.vercel.app',
+    'https://m-100184.vercel.app',
+    'https://m-100184-git-main-r78485s-projects.vercel.app',
+    'https://m-100184-iu0elnwgc-r78485s-projects.vercel.app',
+    'http://*.vercel.app',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+]
+
+# Vercel Serverless HTTPS reverse proxy support
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True
+
+# Session & CSRF Cookies compatibility across Vercel proxy
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+
 
 # Application definition
 INSTALLED_APPS = [
@@ -85,7 +109,18 @@ WSGI_APPLICATION = 'school_management.wsgi.application'
 
 # Database Setup (Supports PostgreSQL on Neon/Supabase/Render/Railway and fallback to /tmp/db.sqlite3 on Vercel)
 IS_VERCEL = 'VERCEL' in os.environ
-DEFAULT_DB_PATH = '/tmp/db.sqlite3' if IS_VERCEL else (BASE_DIR / 'db.sqlite3')
+if IS_VERCEL:
+    DEFAULT_DB_PATH = '/tmp/db.sqlite3'
+    import shutil
+    _bundled_db = BASE_DIR / 'db.sqlite3'
+    if _bundled_db.exists() and not os.path.exists(DEFAULT_DB_PATH):
+        try:
+            shutil.copy2(str(_bundled_db), DEFAULT_DB_PATH)
+        except Exception as _e:
+            print("Vercel DB copy note:", _e)
+else:
+    DEFAULT_DB_PATH = BASE_DIR / 'db.sqlite3'
+
 
 try:
     import dj_database_url
