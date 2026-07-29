@@ -971,8 +971,15 @@ def api_get_students(request):
 from django.views.decorators.clickjacking import xframe_options_exempt
 
 def registration_card_dashboard_view(request):
+    try:
+        from school_management.middleware import auto_repair_student_admission_schema
+        auto_repair_student_admission_schema()
+    except Exception:
+        pass
+
     class_name = request.GET.get('class_name', '')
     admissions = StudentAdmission.objects.all().order_by('-created_at')
+
     
     if class_name:
         admissions = admissions.filter(desired_class__icontains=class_name)
@@ -1395,8 +1402,15 @@ def generate_registration_card(request, student_id):
     return response
 
 def course_certificate_dashboard_view(request):
+    try:
+        from school_management.middleware import auto_repair_student_admission_schema
+        auto_repair_student_admission_schema()
+    except Exception:
+        pass
+
     class_name = request.GET.get('class_name', '')
     admissions = StudentAdmission.objects.all().order_by('-created_at')
+
     
     if class_name:
         admissions = admissions.filter(desired_class__icontains=class_name)

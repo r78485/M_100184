@@ -61,8 +61,71 @@ def auto_repair_student_admission_schema():
                     cursor.execute("ALTER TABLE users_studentadmission ADD COLUMN present_post_office varchar(100) DEFAULT '';")
                 if 'permanent_post_office' not in columns:
                     cursor.execute("ALTER TABLE users_studentadmission ADD COLUMN permanent_post_office varchar(100) DEFAULT '';")
+        ensure_default_students()
     except Exception as e:
         print("StudentAdmission schema auto-repair warning:", e)
+
+
+def ensure_default_students():
+    try:
+        from apps.users.models import StudentAdmission
+        if StudentAdmission.objects.count() == 0:
+            import datetime
+            default_students = [
+                {
+                    'student_name_bn': "মোঃ রাহাত হোসেন", 'student_name_en': "Md. Rahat Hossain",
+                    'admission_no': "ADM-2026-0101", 'dob': datetime.date(2009, 5, 14), 'gender': "Boy",
+                    'mobile': "01719565306", 'father_name': "মোঃ মোতাহার হোসেন", 'mother_name': "মোছাঃ শামিমা আক্তার",
+                    'desired_class': "Class 10", 'version': "Bangla", 'section': "A", 'roll_no': 101, 'status': "Approved"
+                },
+                {
+                    'student_name_bn': "হাসিবুল ইসলাম", 'student_name_en': "Hasibul Islam",
+                    'admission_no': "ADM-2026-0102", 'dob': datetime.date(2010, 5, 15), 'gender': "Boy",
+                    'mobile': "01711000000", 'father_name': "মোঃ রফিকুল ইসলাম", 'mother_name': "হাসিনা বেগম",
+                    'desired_class': "Class 9", 'version': "Bangla", 'section': "A", 'roll_no': 102, 'status': "Approved"
+                },
+                {
+                    'student_name_bn': "ফাতেমা আক্তার তামান্না", 'student_name_en': "Fatema Akter Tamanna",
+                    'admission_no': "ADM-2026-0103", 'dob': datetime.date(2010, 8, 20), 'gender': "Girl",
+                    'mobile': "01711223344", 'father_name': "মোঃ রফিকুল ইসলাম", 'mother_name': "নাজমা বেগম",
+                    'desired_class': "Class 9", 'version': "Bangla", 'section': "B", 'roll_no': 103, 'status': "Approved"
+                },
+                {
+                    'student_name_bn': "সাদমান সাকিব", 'student_name_en': "Sadman Sakib",
+                    'admission_no': "ADM-2026-0104", 'dob': datetime.date(2011, 3, 10), 'gender': "Boy",
+                    'mobile': "01811223344", 'father_name': "কামরুল হাসান", 'mother_name': "সালমা আক্তার",
+                    'desired_class': "Class 8", 'version': "Bangla", 'section': "A", 'roll_no': 104, 'status': "Approved"
+                },
+                {
+                    'student_name_bn': "নুসরাত জাহান লিয়া", 'student_name_en': "Nusrat Jahan Lia",
+                    'admission_no': "ADM-2026-0105", 'dob': datetime.date(2012, 11, 25), 'gender': "Girl",
+                    'mobile': "01911223344", 'father_name': "আবদুল ওহাব", 'mother_name': "মরিয়ম বিবি",
+                    'desired_class': "Class 7", 'version': "Bangla", 'section': "A", 'roll_no': 105, 'status': "Approved"
+                },
+                {
+                    'student_name_bn': "তানভীর আহমেদ রিয়াদ", 'student_name_en': "Tanvir Ahmed Riyad",
+                    'admission_no': "ADM-2026-0106", 'dob': datetime.date(2013, 1, 15), 'gender': "Boy",
+                    'mobile': "01511223344", 'father_name': "শহিদুল ইসলাম", 'mother_name': "রেহানা পারভীন",
+                    'desired_class': "Class 6", 'version': "Bangla", 'section': "A", 'roll_no': 106, 'status': "Approved"
+                },
+                {
+                    'student_name_bn': "মেহেদী হাসান শুভ", 'student_name_en': "Mehedi Hasan Shuvo",
+                    'admission_no': "ADM-2026-0107", 'dob': datetime.date(2008, 9, 12), 'gender': "Boy",
+                    'mobile': "01611223344", 'father_name': "আব্দুর রহিম", 'mother_name': "খাদিজা বেগম",
+                    'desired_class': "SSC 2026", 'version': "Bangla", 'section': "Science", 'roll_no': 107, 'status': "Approved"
+                },
+                {
+                    'student_name_bn': "আফরোজা সুলতানা জেরিন", 'student_name_en': "Afroza Sultana Jerin",
+                    'admission_no': "ADM-2026-0108", 'dob': datetime.date(2008, 12, 5), 'gender': "Girl",
+                    'mobile': "01722334455", 'father_name': "মোঃ সোলাইমান", 'mother_name': "রুমা আক্তার",
+                    'desired_class': "SSC 2026", 'version': "Bangla", 'section': "Humanities", 'roll_no': 108, 'status': "Approved"
+                },
+            ]
+            for s_data in default_students:
+                StudentAdmission.objects.create(**s_data)
+    except Exception as e:
+        print("ensure_default_students warning:", e)
+
 
 
 def auto_repair_school_profile_schema():
