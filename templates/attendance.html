@@ -1,100 +1,154 @@
 {% extends 'base.html' %}
 
-{% block title %}Digital Attendance - EduManage ERP{% endblock %}
+{% block title %}Digital & Manual Attendance System - EduManage ERP{% endblock %}
 
 {% block content %}
 <div class="container-fluid p-0">
-    <div class="mb-4 d-flex justify-content-between align-items-center">
+    <!-- Header Title Bar -->
+    <div class="mb-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
         <div>
-            <h2 class="fw-bold mb-1" style="color: var(--primary-blue);"><i class="bi bi-fingerprint me-2"></i>Digital Attendance System</h2>
-            <p class="text-muted">Smart Biometric/RFID simulation with automatic holiday filtering logic.</p>
+            <h2 class="fw-bold mb-1" style="color: var(--primary-blue);">
+                <i class="bi bi-fingerprint me-2"></i>Digital &amp; Manual Attendance System
+            </h2>
+            <p class="text-muted mb-0">
+                Biometric, Face Scan &amp; Name-Based Manual Attendance with Government Friday/Saturday Weekly Holiday Logic
+            </p>
         </div>
-        <div>
-            <button class="btn btn-outline-primary me-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#biometricConfigModal"><i class="bi bi-gear me-1"></i> Biometric Config</button>
-            <button class="btn btn-outline-info me-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#faceIdModal"><i class="bi bi-person-bounding-box me-1"></i> Face ID Scan</button>
-            <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#punchCardModal"><i class="bi bi-card-heading me-1"></i> Generate Punch Card</button>
+        <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-primary shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#manualAttendanceModal">
+                <i class="bi bi-pencil-square me-1"></i> Manual Attendance &amp; Leave
+            </button>
+            <button class="btn btn-outline-info shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#faceIdModal">
+                <i class="bi bi-person-bounding-box me-1"></i> Face ID Scan
+            </button>
+            <button class="btn btn-outline-primary shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#biometricConfigModal">
+                <i class="bi bi-gear me-1"></i> Biometric Setup
+            </button>
+            <button class="btn btn-outline-success shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#punchCardModal">
+                <i class="bi bi-card-heading me-1"></i> Punch Card
+            </button>
         </div>
     </div>
 
+    <!-- Government Weekly Holiday Notice Banner -->
+    <div class="alert alert-info d-flex align-items-center justify-content-between rounded-3 shadow-sm mb-4" role="alert" style="background:#e0f2fe; border: 1px solid #7dd3fc; color:#0369a1;">
+        <div class="d-flex align-items-center gap-2">
+            <i class="bi bi-calendar-week-fill fs-4 text-primary"></i>
+            <div>
+                <strong>Government Weekly Holiday Policy:</strong> Every <strong>Friday</strong> and <strong>Saturday</strong> are automatically designated as official weekly holidays.
+            </div>
+        </div>
+        <span class="badge bg-primary px-3 py-2 fs-6">Fri &amp; Sat Weekly Holiday</span>
+    </div>
+
     <div class="row g-4 mb-4">
-        <!-- Scanner Terminal Simulation -->
+        <!-- Scanner Terminal Simulation (With Live Name Search) -->
         <div class="col-lg-4">
             <div class="card custom-card p-4 h-100" style="border-top: 4px solid var(--primary-blue);">
-                <h5 class="fw-bold mb-4 text-center"><i class="bi bi-upc-scan me-2"></i>Device Terminal Simulator</h5>
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-upc-scan me-2 text-primary"></i>Biometric &amp; Face Terminal</h5>
+                    <span class="badge bg-success"><i class="bi bi-circle-fill me-1" style="font-size: 8px;"></i>Online</span>
+                </div>
                 
+                <!-- Name Search Input -->
                 <div class="mb-3">
-                    <label class="form-label fw-semibold text-secondary">Select User (Simulated ID)</label>
-                    <select class="form-select" id="simUser">
-                        <option value="S-501">S-501 - Arif Rahman (Student)</option>
-                        <option value="T-101">T-101 - Dr. Rafiqul Islam (Teacher)</option>
-                        <option value="ST-201">ST-201 - Kamal De (Staff)</option>
+                    <label class="form-label fw-semibold text-secondary small">
+                        <i class="bi bi-search me-1"></i>Search User by Name or ID
+                    </label>
+                    <div class="input-group input-group-sm mb-2">
+                        <span class="input-group-text bg-light"><i class="bi bi-person-search"></i></span>
+                        <input type="text" class="form-control" id="simUserSearch" 
+                               placeholder="Type student or staff name (e.g., Arif, Rafiqul)..." 
+                               oninput="filterUserOptions('simUserSearch', 'simUser')">
+                    </div>
+                    <select class="form-select" id="simUser" size="4" style="border-radius: 8px;">
+                        <!-- JS populated -->
                     </select>
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label fw-semibold text-secondary">Auth Method</label>
-                    <select class="form-select" id="simMethod">
+                    <label class="form-label fw-semibold text-secondary small">Auth Method</label>
+                    <select class="form-select form-select-sm" id="simMethod">
                         <option value="Biometric">Biometric (Fingerprint)</option>
-                        <option value="Face_Recognition">Face Recognition</option>
-                        <option value="Punch_Card">Punch Card (RFID)</option>
+                        <option value="Face_Recognition">Face Recognition (Face Scan)</option>
+                        <option value="Punch_Card">Punch Card (RFID Smart Card)</option>
                     </select>
                 </div>
 
-                <div class="mb-4">
-                    <label class="form-label fw-semibold text-secondary">Simulated Timestamp</label>
-                    <input type="datetime-local" class="form-control" id="simTime" value="2026-07-22T08:45">
-                    <small class="text-muted d-block mt-1">Change date to a Friday or 2026-02-21 to test Holiday logic.</small>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold text-secondary small">Timestamp (Date &amp; Time)</label>
+                    <input type="datetime-local" class="form-control form-control-sm" id="simTime" onchange="checkSimDateHoliday()">
+                    <small class="text-muted d-block mt-1" id="holidayHint">Select Friday or Saturday to test automatic weekly holiday logic.</small>
                 </div>
 
-                <button class="btn btn-primary w-100 fw-bold py-2 shadow-sm" onclick="handleScan()">
-                    <i class="bi bi-person-bounding-box me-2"></i> SCAN & VERIFY
+                <!-- Live Holiday Check Alert -->
+                <div id="simHolidayStatus" class="small mb-3 p-2 rounded d-none"></div>
+
+                <button class="btn btn-primary w-100 fw-bold py-2 shadow-sm mt-auto" onclick="handleScan()">
+                    <i class="bi bi-check-circle-fill me-2"></i> Scan &amp; Verify
                 </button>
             </div>
         </div>
 
-        <!-- Attendance Logs & Reports -->
+        <!-- Live Attendance Logs & Reports -->
         <div class="col-lg-8">
             <div class="card custom-card p-4 h-100">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="fw-bold mb-0">Live Attendance Logs</h5>
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                     <div>
-                        <button class="btn btn-sm btn-outline-secondary me-2" onclick="system.attendanceLogs = []; renderLogs();"><i class="bi bi-trash"></i> Clear</button>
-                        <button class="btn btn-sm btn-dark" onclick="window.print()"><i class="bi bi-printer"></i> Print Report</button>
+                        <h5 class="fw-bold mb-0">Live Attendance Register Logs</h5>
+                        <small class="text-muted">Real-time daily attendance logs and holiday activity</small>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-sm btn-outline-danger" onclick="system.attendanceLogs = []; renderLogs();">
+                            <i class="bi bi-trash me-1"></i> Clear Logs
+                        </button>
+                        <button class="btn btn-sm btn-dark" onclick="window.print()">
+                            <i class="bi bi-printer me-1"></i> Print Report
+                        </button>
                     </div>
                 </div>
 
-                <!-- Filters -->
-                <ul class="nav nav-pills mb-3" id="roleFilters">
-                    <li class="nav-item">
-                        <button class="nav-link active py-1 px-3" data-role="All" onclick="setFilter('All', this)">All Records</button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link py-1 px-3" data-role="Student" onclick="setFilter('Student', this)">Students</button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link py-1 px-3" data-role="Teacher" onclick="setFilter('Teacher', this)">Teachers</button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link py-1 px-3" data-role="Staff" onclick="setFilter('Staff', this)">Staff</button>
-                    </li>
-                </ul>
+                <!-- Role Filter Tabs -->
+                <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                    <ul class="nav nav-pills" id="roleFilters">
+                        <li class="nav-item">
+                            <button class="nav-link active py-1 px-3" data-role="All" onclick="setFilter('All', this)">All Records</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link py-1 px-3" data-role="Student" onclick="setFilter('Student', this)">Students</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link py-1 px-3" data-role="Teacher" onclick="setFilter('Teacher', this)">Teachers</button>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link py-1 px-3" data-role="Staff" onclick="setFilter('Staff', this)">Staff</button>
+                        </li>
+                    </ul>
 
-                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                    <table class="table table-hover align-middle">
+                    <!-- Quick Table Search -->
+                    <div class="input-group input-group-sm" style="width: 220px;">
+                        <span class="input-group-text bg-white"><i class="bi bi-search text-muted"></i></span>
+                        <input type="text" id="logTableSearch" class="form-control" placeholder="Search in logs..." oninput="renderLogs()">
+                    </div>
+                </div>
+
+                <!-- Attendance Table -->
+                <div class="table-responsive" style="max-height: 420px; overflow-y: auto;">
+                    <table class="table table-hover align-middle mb-0">
                         <thead class="table-light sticky-top">
                             <tr>
                                 <th>Date</th>
                                 <th>Time</th>
                                 <th>ID</th>
                                 <th>Name</th>
-                                <th>Role</th>
+                                <th>Role / Class</th>
                                 <th>Method</th>
                                 <th>Status</th>
-                                <th>Note</th>
+                                <th>Notes / Holiday Reason</th>
                             </tr>
                         </thead>
                         <tbody id="logsBody">
-                            <tr><td colspan="8" class="text-center text-muted py-4">No attendance records yet.</td></tr>
+                            <tr><td colspan="8" class="text-center text-muted py-4">No attendance records logged yet.</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -103,15 +157,148 @@
     </div>
 </div>
 
-<!-- Biometric Config Modal -->
+<!-- ══════════════════════════════════════════════
+     1. Manual Attendance & Leave Modal
+     ══════════════════════════════════════════════ -->
+<div class="modal fade" id="manualAttendanceModal" tabindex="-1" aria-labelledby="manualAttendanceModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header text-white" style="background: linear-gradient(135deg, #1e3a8a, #0284c7);">
+                <h5 class="modal-title fw-bold" id="manualAttendanceModalLabel">
+                    <i class="bi bi-pencil-square me-2"></i>Manual Attendance &amp; Leave Register
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <!-- Selection Header -->
+                <div class="row g-3 bg-light p-3 rounded-3 mb-3 border align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold text-dark small">Attendance Date</label>
+                        <input type="date" class="form-control" id="manualDate" onchange="updateManualHolidayStatus()">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold text-dark small">Class / Group</label>
+                        <select class="form-select" id="manualClassGroup" onchange="renderManualAttendanceList()">
+                            <option value="Class 9">Class 9</option>
+                            <option value="Class 10">Class 10</option>
+                            <option value="Class 8">Class 8</option>
+                            <option value="Class 7">Class 7</option>
+                            <option value="Class 6">Class 6</option>
+                            <option value="Teachers">Teachers</option>
+                            <option value="Staff">Staff</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label fw-bold text-dark small">Filter List by Name / Roll</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                            <input type="text" id="manualSearchInput" class="form-control" placeholder="Type name or roll..." oninput="renderManualAttendanceList()">
+                        </div>
+                    </div>
+                    <div class="col-md-2 text-end">
+                        <button class="btn btn-sm btn-outline-success me-1" onclick="markAllManualStatus('Present')">Mark All Present</button>
+                        <button class="btn btn-sm btn-outline-danger" onclick="markAllManualStatus('Absent')">Mark All Absent</button>
+                    </div>
+                </div>
+
+                <!-- Live Holiday Banner in Modal -->
+                <div id="manualHolidayBanner" class="alert alert-warning d-none py-2 mb-3 align-items-center gap-2">
+                    <i class="bi bi-exclamation-triangle-fill fs-5 text-warning"></i>
+                    <div>
+                        <strong id="manualHolidayTitle">Government Weekly Holiday!</strong>
+                        <span id="manualHolidayDetail" class="small">This date falls on an official weekly holiday.</span>
+                    </div>
+                </div>
+
+                <!-- Student / Staff Attendance List -->
+                <div class="table-responsive" style="max-height: 380px; overflow-y: auto;">
+                    <table class="table table-bordered align-middle mb-0">
+                        <thead class="table-primary sticky-top">
+                            <tr>
+                                <th style="width: 90px;">ID / Roll</th>
+                                <th style="width: 220px;">Name</th>
+                                <th style="width: 120px;">Category</th>
+                                <th style="width: 320px;" class="text-center">Select Attendance Status</th>
+                                <th>Leave Reason / Remarks</th>
+                            </tr>
+                        </thead>
+                        <tbody id="manualAttendanceBody">
+                            <!-- Populated dynamically by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success px-4 fw-bold" onclick="saveManualAttendance()">
+                    <i class="bi bi-save me-1"></i> Save Attendance
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     2. Face ID Verification Modal (With Live Name Search)
+     ══════════════════════════════════════════════ -->
+<div class="modal fade" id="faceIdModal" tabindex="-1" aria-labelledby="faceIdModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header text-white" style="background: linear-gradient(135deg, #0284c7, #0d9488);">
+                <h5 class="modal-title fw-bold" id="faceIdModalLabel">
+                    <i class="bi bi-person-bounding-box me-2"></i>Face ID Verification
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-4">
+                <div class="position-relative d-inline-block mb-3">
+                    <div class="border border-info border-4 rounded-circle overflow-hidden p-1 shadow-sm" style="width: 180px; height: 180px; position: relative; margin: 0 auto;">
+                        <div style="width: 100%; height: 100%; border-radius: 50%; background: url('https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png') center/cover; opacity: 0.85;" id="faceFeed"></div>
+                        <div id="scanLine" style="position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: rgba(14, 165, 233, 0.9); box-shadow: 0 0 12px rgba(14, 165, 233, 1); display: none;"></div>
+                    </div>
+                </div>
+
+                <!-- Name Search Input for Face ID -->
+                <div class="mb-3 text-start mx-auto" style="max-width: 320px;">
+                    <label class="form-label fw-semibold text-secondary small">
+                        <i class="bi bi-search me-1"></i>Search User by Name
+                    </label>
+                    <div class="input-group input-group-sm mb-2">
+                        <span class="input-group-text bg-light"><i class="bi bi-person-check"></i></span>
+                        <input type="text" class="form-control" id="faceUserSearch" 
+                               placeholder="Type name..." 
+                               oninput="filterUserOptions('faceUserSearch', 'faceUser')">
+                    </div>
+                    <select class="form-select form-select-sm" id="faceUser">
+                        <!-- JS populated -->
+                    </select>
+                </div>
+
+                <h6 id="faceStatus" class="text-muted mt-2 fw-semibold">Ready to scan face...</h6>
+            </div>
+            <div class="modal-footer justify-content-center bg-light">
+                <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-info text-white px-4 fw-bold" id="btnStartFaceScan" onclick="startFaceScan()">
+                    <i class="bi bi-camera me-2"></i> Start Face Scan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     3. Biometric Device Configuration Modal
+     ══════════════════════════════════════════════ -->
 <div class="modal fade" id="biometricConfigModal" tabindex="-1" aria-labelledby="biometricConfigModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header border-bottom-0">
-                <h5 class="modal-title fw-bold text-primary" id="biometricConfigModalLabel"><i class="bi bi-gear me-2"></i>Biometric Configuration</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header text-white" style="background: linear-gradient(135deg, #4f46e5, #0284c7);">
+                <h5 class="modal-title fw-bold" id="biometricConfigModalLabel">
+                    <i class="bi bi-gear me-2"></i>Biometric Device Configuration
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body p-4">
                 <form id="biometricConfigForm">
                     <div class="mb-3">
                         <label class="form-label fw-semibold text-secondary">Device IP Address / COM Port</label>
@@ -125,9 +312,9 @@
                         <label class="form-label fw-semibold text-secondary">Device Model</label>
                         <select class="form-select">
                             <option>Generic Biometric Device (USB/Network)</option>
-                            <option>ZKTeco K40 / uFace</option>
+                            <option selected>ZKTeco K40 / uFace 800</option>
                             <option>Hikvision DS-K1T804</option>
-                            <option>Suprema BioStation</option>
+                            <option>Suprema BioStation 3</option>
                             <option>Virdi AC-2100</option>
                         </select>
                     </div>
@@ -140,86 +327,62 @@
                     </div>
                 </form>
             </div>
-            <div class="modal-footer border-top-0">
+            <div class="modal-footer bg-light">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="saveBiometricConfig()">Save Configuration</button>
+                <button type="button" class="btn btn-primary fw-bold" onclick="saveBiometricConfig()">Save Configuration</button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Punch Card Modal -->
+<!-- ══════════════════════════════════════════════
+     4. Punch Card Generator Modal
+     ══════════════════════════════════════════════ -->
 <div class="modal fade" id="punchCardModal" tabindex="-1" aria-labelledby="punchCardModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header border-bottom-0">
-                <h5 class="modal-title fw-bold text-primary" id="punchCardModalLabel"><i class="bi bi-card-heading me-2"></i>Generate Punch Card</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header text-white" style="background: linear-gradient(135deg, #16a34a, #059669);">
+                <h5 class="modal-title fw-bold" id="punchCardModalLabel">
+                    <i class="bi bi-card-heading me-2"></i>Digital Punch Card Generator
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label class="form-label fw-semibold text-secondary">Select User</label>
-                    <select class="form-select" id="punchCardUser">
-                        <option value="S-501">S-501 - Arif Rahman (Student)</option>
-                        <option value="T-101">T-101 - Dr. Rafiqul Islam (Teacher)</option>
-                        <option value="ST-201">ST-201 - Kamal De (Staff)</option>
+            <div class="modal-body p-4 text-center">
+                <div class="mb-3 text-start mx-auto" style="max-width: 320px;">
+                    <label class="form-label fw-semibold text-secondary small">
+                        <i class="bi bi-search me-1"></i>Select User by Name
+                    </label>
+                    <div class="input-group input-group-sm mb-2">
+                        <span class="input-group-text bg-light"><i class="bi bi-person"></i></span>
+                        <input type="text" class="form-control" id="punchUserSearch" 
+                               placeholder="Type name..." 
+                               oninput="filterUserOptions('punchUserSearch', 'punchCardUser')">
+                    </div>
+                    <select class="form-select form-select-sm" id="punchCardUser">
+                        <!-- JS populated -->
                     </select>
                 </div>
                 
-                <div class="text-center mt-4 mb-2" id="punchCardPreview" style="display: none;">
-                    <div class="card p-3 border-dark d-inline-block shadow-sm" style="width: 250px; background-color: #f8f9fa;">
-                        <h6 class="fw-bold mb-1">EduManage ERP</h6>
-                        <small class="text-muted d-block mb-3">Digital Punch Card</small>
-                        <img src="" id="punchCardQr" alt="QR Code" class="mb-3">
-                        <h5 class="fw-bold mb-0 text-primary" id="punchCardName">Name</h5>
-                        <p class="mb-0 text-muted" id="punchCardId">ID</p>
+                <div class="text-center mt-3 mb-2" id="punchCardPreview" style="display: none;">
+                    <div class="card p-3 border-dark d-inline-block shadow-sm" style="width: 260px; background-color: #f8f9fa; border-radius: 12px;">
+                        <h6 class="fw-bold mb-1 text-primary">Gazi Mahmud Secondary School</h6>
+                        <small class="text-muted d-block mb-3">Digital Attendance Card</small>
+                        <img src="" id="punchCardQr" alt="QR Code" class="mb-3 border p-1 rounded bg-white">
+                        <h6 class="fw-bold mb-0 text-dark" id="punchCardName">Name</h6>
+                        <p class="mb-0 text-muted small" id="punchCardId">ID</p>
                     </div>
                 </div>
             </div>
-            <div class="modal-footer border-top-0">
+            <div class="modal-footer bg-light">
                 <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" onclick="generatePunchCard()"><i class="bi bi-magic me-1"></i> Generate Card</button>
+                <button type="button" class="btn btn-success fw-bold" onclick="generatePunchCard()">
+                    <i class="bi bi-magic me-1"></i> Generate Card
+                </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Face ID Modal -->
-<div class="modal fade" id="faceIdModal" tabindex="-1" aria-labelledby="faceIdModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header border-bottom-0">
-                <h5 class="modal-title fw-bold text-primary" id="faceIdModalLabel"><i class="bi bi-person-bounding-box me-2"></i>Face ID Verification</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body text-center">
-                <div class="position-relative d-inline-block mb-3 mt-2">
-                    <div class="border border-primary border-4 rounded-circle overflow-hidden p-1" style="width: 180px; height: 180px; position: relative; margin: 0 auto;">
-                        <!-- Simulated Camera Feed -->
-                        <div style="width: 100%; height: 100%; border-radius: 50%; background: url('https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png') center/cover; opacity: 0.8;" id="faceFeed"></div>
-                        <!-- Scanning line animation -->
-                        <div id="scanLine" style="position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: rgba(0, 255, 0, 0.7); box-shadow: 0 0 10px rgba(0, 255, 0, 0.8); display: none;"></div>
-                    </div>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label fw-semibold text-secondary">Select User for Face Auth</label>
-                    <select class="form-select mx-auto" id="faceUser" style="max-width: 250px;">
-                        <option value="S-501">S-501 - Arif Rahman (Student)</option>
-                        <option value="T-101">T-101 - Dr. Rafiqul Islam (Teacher)</option>
-                        <option value="ST-201">ST-201 - Kamal De (Staff)</option>
-                    </select>
-                </div>
-                <h6 id="faceStatus" class="text-muted mt-2">Ready to scan...</h6>
-            </div>
-            <div class="modal-footer border-top-0 justify-content-center">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary px-4" id="btnStartFaceScan" onclick="startFaceScan()"><i class="bi bi-camera me-2"></i> Start Scan</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Print Styles -->
 <style>
     @media print {
         body * {
@@ -234,7 +397,7 @@
             top: 0;
             width: 100%;
         }
-        .nav-pills, .btn {
+        .nav-pills, .btn, .input-group {
             display: none !important;
         }
         .table-responsive {
@@ -248,55 +411,59 @@
 {% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    // --- Python Logic Translated to JS ---
+    // ══════════════════════════════════════════════
+    // Digital Attendance Core Logic & Registry
+    // ══════════════════════════════════════════════
     class DigitalAttendanceSystem {
         constructor(instituteName) {
             this.instituteName = instituteName;
             this.users = {};
             this.publicHolidays = [
-                "2026-02-21", // শহীদ দিবস
-                "2026-03-26", // স্বাধীনতা দিবস
-                "2026-12-16"  // বিজয় দিবস
+                "2026-02-21", // Language Martyrs' Day
+                "2026-03-26", // Independence Day
+                "2026-04-14", // Bengali New Year
+                "2026-05-01", // May Day
+                "2026-12-16"  // Victory Day
             ];
             this.attendanceLogs = [];
         }
 
-        registerUser(userId, name, role, deviceId) {
+        registerUser(userId, name, role, classGroup, deviceId) {
             this.users[userId] = {
+                id: userId,
                 name: name,
                 role: role,
+                classGroup: classGroup || 'General',
                 deviceId: deviceId || `BIO_${userId}`
             };
         }
 
-        isHoliday(checkDateObj, role) {
+        /**
+         * Government Weekly Holiday check logic:
+         * Friday and Saturday are Government Weekly Holidays for all.
+         */
+        isHoliday(checkDateObj) {
             const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
             const dayName = days[checkDateObj.getDay()];
             
-            // Format YYYY-MM-DD safely handling timezones
-            const tzOffset = checkDateObj.getTimezoneOffset() * 60000; // offset in milliseconds
+            const tzOffset = checkDateObj.getTimezoneOffset() * 60000;
             const localISOTime = (new Date(checkDateObj.getTime() - tzOffset)).toISOString().slice(0, -1);
             const dateStr = localISOTime.split('T')[0];
 
-            // Student: Fri & Sat
-            if (role === 'Student' && (dayName === 'Friday' || dayName === 'Saturday')) {
-                return { onHoliday: true, reason: `সাপ্তাহিক ছুটি (${dayName})` };
-            }
-
-            // Teacher/Staff: Only Fri
-            if (['Teacher', 'Staff'].includes(role) && dayName === 'Friday') {
-                return { onHoliday: true, reason: `সাপ্তাহিক ছুটি (${dayName})` };
+            // Government Weekly Holiday: Friday & Saturday
+            if (dayName === 'Friday' || dayName === 'Saturday') {
+                return { onHoliday: true, reason: `Weekly Holiday (${dayName})`, isWeekly: true };
             }
 
             // Public Holidays
             if (this.publicHolidays.includes(dateStr)) {
-                return { onHoliday: true, reason: "সরকারী ছুটি" };
+                return { onHoliday: true, reason: "Government Public Holiday", isWeekly: false };
             }
 
-            return { onHoliday: false, reason: null };
+            return { onHoliday: false, reason: null, isWeekly: false };
         }
 
-        markAttendance(userId, authMethod, timestampStr) {
+        markAttendance(userId, authMethod, timestampStr, statusOverride = null, customNote = '') {
             if (!this.users[userId]) {
                 console.error(`Error: User ${userId} not registered!`);
                 return false;
@@ -304,17 +471,18 @@
 
             const user = this.users[userId];
             const currentDateTime = new Date(timestampStr);
-            const { onHoliday, reason } = this.isHoliday(currentDateTime, user.role);
+            const { onHoliday, reason } = this.isHoliday(currentDateTime);
 
-            let status = "Present";
-            let note = `Verified via ${authMethod.replace('_', ' ')}`;
+            let status = statusOverride || "Present";
+            let note = customNote || `Verified via ${authMethod.replace('_', ' ')}`;
 
-            if (onHoliday) {
+            if (onHoliday && !statusOverride) {
                 status = "Holiday";
-                note = `ছুটি: ${reason}`;
+                note = `Holiday: ${reason}`;
+            } else if (status === 'Leave') {
+                note = customNote ? `Approved Leave: ${customNote}` : 'Approved Casual Leave';
             }
 
-            // Formatting
             const tzOffset = currentDateTime.getTimezoneOffset() * 60000;
             const localISOTime = (new Date(currentDateTime.getTime() - tzOffset)).toISOString().slice(0, -1);
             const dateStr = localISOTime.split('T')[0];
@@ -326,12 +494,16 @@
             hours = hours ? hours : 12; 
             const timeStr = `${hours}:${mins} ${ampm}`;
 
+            // Remove previous record for same user on same date if re-marked
+            this.attendanceLogs = this.attendanceLogs.filter(log => !(log.id === userId && log.date === dateStr));
+
             this.attendanceLogs.push({
                 date: dateStr,
                 time: timeStr,
                 id: userId,
                 name: user.name,
                 role: user.role,
+                classGroup: user.classGroup,
                 method: authMethod,
                 status: status,
                 note: note
@@ -341,53 +513,147 @@
         }
     }
 
-    // --- UI Integration ---
-    const system = new DigitalAttendanceSystem("আইডিয়াল স্কুল অ্যান্ড কলেজ");
-    
-    // Register Default Users
-    system.registerUser("T-101", "ড. রফিকুল ইসলাম", "Teacher", "FACE_001");
-    system.registerUser("S-501", "আরিফ রহমান", "Student", "CARD_8821");
-    system.registerUser("ST-201", "কমল দে", "Staff", "BIO_FINGER_01");
+    const system = new DigitalAttendanceSystem("Gazi Mahmud Secondary School");
+
+    // Dynamic Database Users loaded from Django Backend (StudentAdmission + Employee models)
+    const dbUsersRaw = '{{ db_users_json|escapejs }}';
+    let initialUsers = [];
+    if (dbUsersRaw && dbUsersRaw !== 'None' && dbUsersRaw !== '') {
+        try {
+            initialUsers = JSON.parse(dbUsersRaw);
+        } catch (e) {
+            console.error("Error parsing DB users:", e);
+        }
+    }
+
+    // Fallback demo users if database is empty
+    if (!initialUsers || initialUsers.length === 0) {
+        initialUsers = [
+            { id: "S-501", name: "Arif Rahman", role: "Student", classGroup: "Class 9" },
+            { id: "S-502", name: "Nusrat Jahan", role: "Student", classGroup: "Class 9" },
+            { id: "T-101", name: "Dr. Rafiqul Islam", role: "Teacher", classGroup: "Teachers" },
+            { id: "ST-201", name: "Kamal De", role: "Staff", classGroup: "Staff" }
+        ];
+    }
+
+    initialUsers.forEach(u => system.registerUser(u.id, u.name, u.role, u.classGroup || u.group));
 
     let currentFilter = 'All';
+    let manualStatuses = {}; // Temporary state for manual attendance grid
+
+    function populateClassGroupDropdown() {
+        const sel = document.getElementById('manualClassGroup');
+        if (!sel) return;
+
+        const currentVal = sel.value;
+        const groups = new Set();
+        Object.values(system.users).forEach(u => {
+            if (u.classGroup) groups.add(u.classGroup);
+        });
+
+        if (groups.size === 0) return;
+
+        sel.innerHTML = '';
+        Array.from(groups).sort().forEach(grp => {
+            const opt = document.createElement('option');
+            opt.value = grp;
+            opt.textContent = grp;
+            sel.appendChild(opt);
+        });
+
+        if (currentVal && Array.from(groups).includes(currentVal)) {
+            sel.value = currentVal;
+        } else if (sel.options.length > 0) {
+            sel.selectedIndex = 0;
+        }
+    }
+
+    // ══════════════════════════════════════════════
+    // Helper Functions & Name Search Filter
+    // ══════════════════════════════════════════════
+    function populateUserSelects() {
+        const selectIds = ['simUser', 'faceUser', 'punchCardUser'];
+        selectIds.forEach(id => {
+            const sel = document.getElementById(id);
+            if (!sel) return;
+            sel.innerHTML = '';
+            Object.values(system.users).forEach(u => {
+                const opt = document.createElement('option');
+                opt.value = u.id;
+                opt.textContent = `${u.id} - ${u.name} (${u.role})`;
+                sel.appendChild(opt);
+            });
+            if (sel.options.length > 0) sel.selectedIndex = 0;
+        });
+    }
+
+    function filterUserOptions(inputId, selectId) {
+        const query = document.getElementById(inputId).value.toLowerCase();
+        const sel = document.getElementById(selectId);
+        sel.innerHTML = '';
+
+        Object.values(system.users).forEach(u => {
+            const matchName = u.name.toLowerCase().includes(query);
+            const matchId = u.id.toLowerCase().includes(query);
+            const matchRole = u.role.toLowerCase().includes(query);
+            if (matchName || matchId || matchRole) {
+                const opt = document.createElement('option');
+                opt.value = u.id;
+                opt.textContent = `${u.id} - ${u.name} (${u.role})`;
+                sel.appendChild(opt);
+            }
+        });
+
+        if (sel.options.length > 0) {
+            sel.selectedIndex = 0;
+        }
+    }
 
     function setFilter(role, btnElement) {
         currentFilter = role;
-        
-        // Update nav-pills active state
-        document.querySelectorAll('#roleFilters .nav-link').forEach(btn => {
-            btn.classList.remove('active');
-        });
+        document.querySelectorAll('#roleFilters .nav-link').forEach(btn => btn.classList.remove('active'));
         btnElement.classList.add('active');
-
         renderLogs();
     }
 
     function renderLogs() {
         const tbody = document.getElementById('logsBody');
+        const searchVal = (document.getElementById('logTableSearch').value || '').toLowerCase();
         
-        // Filter logic
-        const filteredLogs = currentFilter === 'All' 
+        let filteredLogs = currentFilter === 'All' 
             ? system.attendanceLogs 
             : system.attendanceLogs.filter(log => log.role === currentFilter);
 
+        if (searchVal) {
+            filteredLogs = filteredLogs.filter(log => 
+                log.name.toLowerCase().includes(searchVal) || 
+                log.id.toLowerCase().includes(searchVal) ||
+                log.status.toLowerCase().includes(searchVal)
+            );
+        }
+
         if (filteredLogs.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">No records found for ${currentFilter}.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">No attendance records found.</td></tr>`;
             return;
         }
 
         let html = '';
         filteredLogs.forEach(log => {
-            const badgeClass = log.status === 'Present' ? 'bg-success' : 'bg-warning text-dark';
+            let badgeClass = 'bg-success';
+            if (log.status === 'Absent') badgeClass = 'bg-danger';
+            else if (log.status === 'Late') badgeClass = 'bg-warning text-dark';
+            else if (log.status === 'Leave') badgeClass = 'bg-primary';
+            else if (log.status === 'Holiday') badgeClass = 'bg-secondary';
+
             const roleBadge = log.role === 'Teacher' ? 'primary' : (log.role === 'Student' ? 'info' : 'secondary');
 
             html += `
                 <tr>
                     <td class="fw-semibold">${log.date}</td>
                     <td>${log.time}</td>
-                    <td class="fw-bold">${log.id}</td>
+                    <td class="fw-bold text-dark">${log.id}</td>
                     <td>${log.name}</td>
-                    <td><span class="badge bg-${roleBadge} bg-opacity-10 text-${roleBadge}">${log.role}</span></td>
+                    <td><span class="badge bg-${roleBadge} bg-opacity-10 text-${roleBadge}">${log.role} (${log.classGroup})</span></td>
                     <td><small class="text-muted"><i class="bi bi-shield-check me-1"></i>${log.method.replace('_', ' ')}</small></td>
                     <td><span class="badge ${badgeClass}">${log.status}</span></td>
                     <td><small>${log.note}</small></td>
@@ -398,73 +664,200 @@
         tbody.innerHTML = html;
     }
 
+    function checkSimDateHoliday() {
+        const simTimeVal = document.getElementById('simTime').value;
+        const statusDiv = document.getElementById('simHolidayStatus');
+        if (!simTimeVal) return;
+
+        const d = new Date(simTimeVal);
+        const { onHoliday, reason, isWeekly } = system.isHoliday(d);
+
+        if (onHoliday) {
+            statusDiv.classList.remove('d-none', 'bg-light', 'text-dark');
+            statusDiv.className = `small mb-3 p-2 rounded ${isWeekly ? 'bg-warning bg-opacity-25 text-dark border border-warning' : 'bg-info bg-opacity-25 text-dark border border-info'}`;
+            statusDiv.innerHTML = `<i class="bi bi-calendar-x me-1 fw-bold"></i><strong>${reason}</strong>`;
+        } else {
+            statusDiv.classList.add('d-none');
+        }
+    }
+
     function handleScan() {
         const userId = document.getElementById('simUser').value;
         const method = document.getElementById('simMethod').value;
         const timestampStr = document.getElementById('simTime').value;
 
+        if (!userId) {
+            Swal.fire("Error", "Please select a user.", "error");
+            return;
+        }
         if (!timestampStr) {
             Swal.fire("Error", "Please select a valid date and time.", "error");
             return;
         }
 
-        // Mark Attendance
         const success = system.markAttendance(userId, method, timestampStr);
 
         if (success) {
             const logEntry = system.attendanceLogs[system.attendanceLogs.length - 1];
-            
-            // Show Success Notification
             if (logEntry.status === 'Holiday') {
                 Swal.fire({
                     icon: 'info',
-                    title: 'Holiday Detected!',
+                    title: 'Weekly Holiday Detected!',
                     text: `${logEntry.name} - ${logEntry.note}`,
-                    timer: 2000,
+                    timer: 2200,
                     showConfirmButton: false
                 });
             } else {
                 Swal.fire({
                     icon: 'success',
-                    title: 'Scan Successful',
-                    text: `${logEntry.name} verified via ${method.replace('_', ' ')}`,
+                    title: 'Scan & Verification Successful',
+                    text: `${logEntry.name} (${method.replace('_', ' ')})`,
                     timer: 1500,
                     showConfirmButton: false
                 });
             }
-
             renderLogs();
         }
     }
 
-    // Run test scenario automatically on load
-    document.addEventListener('DOMContentLoaded', () => {
-        // Run some test cases from the Python file
-        const normal_day = "2026-07-22T08:45"; // Wednesday
-        system.markAttendance("T-101", "Face_Recognition", normal_day);
-        system.markAttendance("S-501", "Punch_Card", normal_day);
-        system.markAttendance("ST-201", "Biometric", normal_day);
+    // ══════════════════════════════════════════════
+    // Manual Attendance Logic
+    // ══════════════════════════════════════════════
+    function updateManualHolidayStatus() {
+        const dateVal = document.getElementById('manualDate').value;
+        const banner = document.getElementById('manualHolidayBanner');
+        const title = document.getElementById('manualHolidayTitle');
+        const detail = document.getElementById('manualHolidayDetail');
 
-        const saturday = "2026-07-25T09:00"; // Saturday
-        system.markAttendance("S-501", "Punch_Card", saturday);
-        system.markAttendance("T-101", "Face_Recognition", saturday);
+        if (!dateVal) return;
+        const d = new Date(dateVal);
+        const { onHoliday, reason, isWeekly } = system.isHoliday(d);
 
-        const govt_holiday = "2026-02-21T09:15"; // Public Holiday
-        system.markAttendance("S-501", "Punch_Card", govt_holiday);
+        if (onHoliday) {
+            banner.classList.remove('d-none');
+            title.textContent = isWeekly ? 'Government Weekly Holiday!' : 'Public Holiday!';
+            detail.textContent = reason;
+        } else {
+            banner.classList.add('d-none');
+        }
+    }
+
+    function renderManualAttendanceList() {
+        const classGroup = document.getElementById('manualClassGroup').value;
+        const searchQuery = (document.getElementById('manualSearchInput').value || '').toLowerCase();
+        const tbody = document.getElementById('manualAttendanceBody');
+
+        let targetUsers = searchQuery
+            ? Object.values(system.users).filter(u => 
+                u.name.toLowerCase().includes(searchQuery) || 
+                u.id.toLowerCase().includes(searchQuery) ||
+                (u.roll && u.roll.toLowerCase().includes(searchQuery))
+              )
+            : Object.values(system.users).filter(u => u.classGroup === classGroup);
+
+        if (targetUsers.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">No users found in this category.</td></tr>`;
+            return;
+        }
+
+        let html = '';
+        targetUsers.forEach(user => {
+            const currentStatus = manualStatuses[user.id] || 'Present';
+
+            html += `
+                <tr>
+                    <td class="fw-bold">${user.id}</td>
+                    <td class="fw-semibold text-dark">${user.name}</td>
+                    <td><span class="badge bg-secondary bg-opacity-10 text-secondary">${user.role}</span></td>
+                    <td class="text-center">
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button type="button" class="btn ${currentStatus === 'Present' ? 'btn-success' : 'btn-outline-success'}" 
+                                    onclick="setIndividualManualStatus('${user.id}', 'Present')">🟢 Present</button>
+                            <button type="button" class="btn ${currentStatus === 'Absent' ? 'btn-danger' : 'btn-outline-danger'}" 
+                                    onclick="setIndividualManualStatus('${user.id}', 'Absent')">🔴 Absent</button>
+                            <button type="button" class="btn ${currentStatus === 'Late' ? 'btn-warning text-dark' : 'btn-outline-warning'}" 
+                                    onclick="setIndividualManualStatus('${user.id}', 'Late')">🟡 Late</button>
+                            <button type="button" class="btn ${currentStatus === 'Leave' ? 'btn-primary' : 'btn-outline-primary'}" 
+                                    onclick="setIndividualManualStatus('${user.id}', 'Leave')">🔵 Leave</button>
+                        </div>
+                    </td>
+                    <td>
+                        <input type="text" id="manualReason_${user.id}" 
+                               class="form-control form-control-sm" 
+                               placeholder="${currentStatus === 'Leave' ? 'Reason for leave (e.g., Illness)...' : 'Remarks (Optional)...'}">
+                    </td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html;
+    }
+
+    function setIndividualManualStatus(userId, status) {
+        manualStatuses[userId] = status;
+        renderManualAttendanceList();
+    }
+
+    function markAllManualStatus(status) {
+        const classGroup = document.getElementById('manualClassGroup').value;
+        const targetUsers = Object.values(system.users).filter(u => u.classGroup === classGroup || (classGroup === 'Class 9' && u.role === 'Student'));
+        targetUsers.forEach(u => {
+            manualStatuses[u.id] = status;
+        });
+        renderManualAttendanceList();
+    }
+
+    function saveManualAttendance() {
+        const dateVal = document.getElementById('manualDate').value;
+        if (!dateVal) {
+            Swal.fire("Error", "Please select an attendance date.", "error");
+            return;
+        }
+
+        const classGroup = document.getElementById('manualClassGroup').value;
+        const targetUsers = Object.values(system.users).filter(u => u.classGroup === classGroup || (classGroup === 'Class 9' && u.role === 'Student'));
+
+        let countPresent = 0, countAbsent = 0, countLeave = 0, countLate = 0;
+
+        targetUsers.forEach(user => {
+            const status = manualStatuses[user.id] || 'Present';
+            const reasonInput = document.getElementById(`manualReason_${user.id}`);
+            const reason = reasonInput ? reasonInput.value : '';
+
+            system.markAttendance(user.id, 'Manual', `${dateVal}T09:00`, status, reason);
+
+            if (status === 'Present') countPresent++;
+            else if (status === 'Absent') countAbsent++;
+            else if (status === 'Leave') countLeave++;
+            else if (status === 'Late') countLate++;
+        });
 
         renderLogs();
-    });
 
-    // New features logic
+        const modalEl = document.getElementById('manualAttendanceModal');
+        const modal = bootstrap.Modal.getInstance(modalEl);
+        if (modal) modal.hide();
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Manual Attendance Saved!',
+            html: `Present: <strong>${countPresent}</strong> | Absent: <strong>${countAbsent}</strong> | Leave: <strong>${countLeave}</strong> | Late: <strong>${countLate}</strong>`,
+            timer: 3000,
+            showConfirmButton: true
+        });
+    }
+
+    // ══════════════════════════════════════════════
+    // Additional Modals Initialization & Action Handlers
+    // ══════════════════════════════════════════════
     function saveBiometricConfig() {
         Swal.fire({
             icon: 'success',
             title: 'Configuration Saved',
-            text: 'Biometric device settings have been updated and pinged successfully.',
+            text: 'Biometric fingerprint device settings updated successfully.',
             timer: 2000,
             showConfirmButton: false
         });
-        // Assuming bootstrap is available in base.html
         const modalEl = document.getElementById('biometricConfigModal');
         const modal = bootstrap.Modal.getInstance(modalEl);
         if (modal) modal.hide();
@@ -472,12 +865,12 @@
 
     function generatePunchCard() {
         const userSelect = document.getElementById('punchCardUser');
-        const userName = userSelect.options[userSelect.selectedIndex].text.split(' - ')[1].split(' (')[0];
-        const userId = userSelect.value;
-        
-        document.getElementById('punchCardName').textContent = userName;
-        document.getElementById('punchCardId').textContent = userId;
-        document.getElementById('punchCardQr').src = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=PUNCH_${userId}`;
+        if (!userSelect.value) return;
+        const userObj = system.users[userSelect.value];
+
+        document.getElementById('punchCardName').textContent = userObj.name;
+        document.getElementById('punchCardId').textContent = `${userObj.id} (${userObj.role})`;
+        document.getElementById('punchCardQr').src = `https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=PUNCH_${userObj.id}`;
         
         document.getElementById('punchCardPreview').style.display = 'block';
     }
@@ -487,9 +880,15 @@
         const faceStatus = document.getElementById('faceStatus');
         const btn = document.getElementById('btnStartFaceScan');
         const userId = document.getElementById('faceUser').value;
-        const currentDateTime = new Date();
-        const tzOffset = currentDateTime.getTimezoneOffset() * 60000;
-        const localISOTime = (new Date(currentDateTime.getTime() - tzOffset)).toISOString().slice(0, 16);
+
+        if (!userId) {
+            Swal.fire("Error", "Please select a user for face scan.", "error");
+            return;
+        }
+
+        const now = new Date();
+        const tzOffset = now.getTimezoneOffset() * 60000;
+        const localISOTime = (new Date(now.getTime() - tzOffset)).toISOString().slice(0, 16);
 
         btn.disabled = true;
         scanLine.style.display = 'block';
@@ -509,10 +908,9 @@
         setTimeout(() => {
             clearInterval(scanAnim);
             scanLine.style.display = 'none';
-            faceStatus.textContent = 'Face Verified Successfully!';
+            faceStatus.textContent = 'Face ID Verified Successfully!';
             faceStatus.className = 'text-success mt-2 fw-bold';
             
-            // Mark attendance using Face Recognition
             system.markAttendance(userId, 'Face_Recognition', localISOTime);
             renderLogs();
 
@@ -521,22 +919,49 @@
                 const modal = bootstrap.Modal.getInstance(modalEl);
                 if (modal) modal.hide();
                 
-                // Reset UI
                 btn.disabled = false;
-                faceStatus.textContent = 'Ready to scan...';
+                faceStatus.textContent = 'Ready to scan face...';
                 faceStatus.className = 'text-muted mt-2';
                 
                 Swal.fire({
                     icon: 'success',
-                    title: 'Face Verified',
-                    text: 'Attendance logged via Face ID.',
-                    timer: 1500,
+                    title: 'Face Verification Complete!',
+                    text: `Attendance logged for ${system.users[userId].name}.`,
+                    timer: 1800,
                     showConfirmButton: false
                 });
-            }, 1000);
+            }, 800);
             
-        }, 2500);
+        }, 2200);
     }
 
+    // Initialize Default States on DOM Load
+    document.addEventListener('DOMContentLoaded', () => {
+        const now = new Date();
+        const tzOffset = now.getTimezoneOffset() * 60000;
+        const todayISO = (new Date(now.getTime() - tzOffset)).toISOString().slice(0, 10);
+        const datetimeISO = (new Date(now.getTime() - tzOffset)).toISOString().slice(0, 16);
+
+        document.getElementById('simTime').value = datetimeISO;
+        document.getElementById('manualDate').value = todayISO;
+
+        populateUserSelects();
+        populateClassGroupDropdown();
+        renderManualAttendanceList();
+
+        // Load initial records safely
+        const sampleUsers = Object.keys(system.users);
+        if (sampleUsers.length > 0) {
+            const normal_day = "2026-07-22T08:45"; // Wednesday
+            system.markAttendance(sampleUsers[0], "Face_Recognition", normal_day);
+            if (sampleUsers.length > 1) {
+                system.markAttendance(sampleUsers[1], "Biometric", normal_day);
+            }
+        }
+
+        renderLogs();
+        checkSimDateHoliday();
+        updateManualHolidayStatus();
+    });
 </script>
 {% endblock %}

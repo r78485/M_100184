@@ -6,6 +6,7 @@ class SchoolProfile(models.Model):
     eiin = models.CharField(max_length=50)
     address = models.CharField(max_length=255, verbose_name="ঠিকানা", blank=True, null=True)
     logo = models.ImageField(upload_to='logos/')
+    seal = models.ImageField(upload_to='seals/', null=True, blank=True, verbose_name="প্রতিষ্ঠানের সিল (Round Seal)")
     controller_signature = models.ImageField(upload_to='signatures/', null=True, blank=True)
 
     def __str__(self):

@@ -105,13 +105,20 @@
         <!-- Footer: Signature | Seal | Barcode -->
         <div class="card-footer">
             <div class="sig-area">
+                {% if school_profile and school_profile.controller_signature %}
+                    <img src="{{ school_profile.controller_signature.url }}" alt="Signature" class="sig-img" style="max-height: 28px; max-width: 90px; object-fit: contain; margin-bottom: 2px;">
+                {% elif student and student.sig_url %}
+                    <img src="{{ student.sig_url }}" alt="Signature" class="sig-img" style="max-height: 28px; max-width: 90px; object-fit: contain; margin-bottom: 2px;">
+                {% endif %}
                 <div class="sig-line"></div>
                 <div class="sig-label">প্রধান শিক্ষক</div>
             </div>
 
             <div class="seal-area">
-                {% if school_profile and school_profile.logo %}
-                    <img src="{{ school_profile.logo.url }}" alt="Seal" class="seal-img">
+                {% if school_profile and school_profile.seal %}
+                    <img src="{{ school_profile.seal.url }}" alt="Seal" class="seal-img">
+                {% elif student and student.seal_url %}
+                    <img src="{{ student.seal_url }}" alt="Seal" class="seal-img">
                 {% else %}
                     <!-- Official Seal SVG Placeholder -->
                     <svg class="seal-svg-placeholder" viewBox="0 0 100 100">

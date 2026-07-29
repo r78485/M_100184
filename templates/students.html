@@ -394,11 +394,11 @@
                         </div>
                     </div>
 
-                    <!-- Class & Version Selection -->
+                    <!-- Class, Roll & Version Selection -->
                     <div class="section-box p-3 mb-4 rounded border" style="background: #f0fdf4; border-color: #bbf7d0 !important;">
-                        <div class="section-title fw-bold pb-2 mb-3 border-bottom" style="color: #166534; border-color: #bbf7d0 !important; font-size: 16px;">৩. শ্রেণী ও ভার্সন নির্বাচন / Class & Version Selection</div>
+                        <div class="section-title fw-bold pb-2 mb-3 border-bottom" style="color: #166534; border-color: #bbf7d0 !important; font-size: 16px;">৩. শ্রেণী, রোল নম্বর ও ভার্সন নির্বাচন / Class, Roll Number & Version Selection</div>
                         <div class="row g-3">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="form-label fw-semibold small">শ্রেণী / Desired Class <span class="text-danger">*</span></label>
                                 <select name="desired_class" id="st_desired_class" class="form-select" required>
                                     <option value="">শ্রেণী নির্বাচন করুন / Select Class</option>
@@ -409,7 +409,11 @@
                                     <option value="Class 10">দশম শ্রেণী / Class 10</option>
                                 </select>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold small">রোল নম্বর / Roll Number</label>
+                                <input type="number" name="roll_no" id="st_roll_no" class="form-control" placeholder="যেমন: 1, 2, 3..." min="1">
+                            </div>
+                            <div class="col-md-4">
                                 <label class="form-label fw-semibold small">ভার্সন / Version <span class="text-danger">*</span></label>
                                 <select name="version" id="st_version" class="form-select" required>
                                     <option value="Bangla">বাংলা ভার্সন / Bangla Version</option>
@@ -1258,6 +1262,8 @@
         if (form) form.reset();
         const dbIdInput = document.getElementById('st_db_id');
         if (dbIdInput) dbIdInput.value = '';
+        const rollInput = document.getElementById('st_roll_no');
+        if (rollInput) rollInput.value = '';
         const headerTitle = document.querySelector('#add-panel h3');
         if (headerTitle) {
             headerTitle.innerHTML = `<i class="bi bi-person-plus-fill me-2"></i>বিদ্যালয়ে ভর্তির আবেদন / School Admission Form`;
@@ -1269,6 +1275,7 @@
         const nameBn = formData.get('student_name_bn') || '';
         const nameEn = formData.get('student_name_en') || '';
         const cls = formData.get('desired_class') || 'Class 6';
+        const rollVal = formData.get('roll_no') || '';
         const father = formData.get('father_name') || '';
         const mother = formData.get('mother_name') || '';
         const mob = formData.get('mobile') || '';
@@ -1283,6 +1290,8 @@
             name: nameEn || nameBn || 'Student',
             name_bn: nameBn,
             name_en: nameEn,
+            roll: rollVal || '—',
+            roll_no: rollVal || null,
             cls: cls,
             desired_class: cls,
             version: formData.get('version') || 'Bangla',
@@ -1357,6 +1366,7 @@
                 const nameBn = document.getElementById('st_name_bn').value;
                 const nameEn = document.getElementById('st_name_en').value;
                 const cls = document.getElementById('st_desired_class').value;
+                const rollVal = document.getElementById('st_roll_no') ? document.getElementById('st_roll_no').value : '';
                 const father = document.getElementById('st_father_name').value;
                 const mother = document.getElementById('st_mother_name').value;
                 const dob = document.getElementById('st_dob').value;
@@ -1373,6 +1383,8 @@
                     name: nameEn || nameBn || 'Student',
                     name_bn: nameBn,
                     name_en: nameEn,
+                    roll: rollVal || '—',
+                    roll_no: rollVal || null,
                     cls: cls,
                     desired_class: cls,
                     version: document.getElementById('st_version').value || 'Bangla',
@@ -1503,6 +1515,7 @@
             setVal('st_guardian_name', st.guardian || st.guardian_name || '');
             setVal('st_guardian_nid', st.guardian_nid || '');
             setVal('st_desired_class', st.cls || st.desired_class || 'Class 6');
+            setVal('st_roll_no', st.roll || st.roll_no || '');
             setVal('st_version', st.version || 'Bangla');
             setVal('st_present_address_detail', st.presentAddr || st.present_address_detail || '');
             setVal('st_present_post_office', st.present_post_office || '');

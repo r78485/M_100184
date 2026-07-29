@@ -836,18 +836,15 @@
     };
 
     window.deleteEmployee = function(id) {
-        if (!confirm('Are you sure you want to delete this employee profile?')) return;
-        let employees = getEmployees();
-        employees = employees.filter(emp => String(emp.id) !== String(id) && emp.id !== id);
-        localStorage.setItem('school_employees', JSON.stringify(employees));
-        renderEmployees();
-        if (typeof loadEmpLogins === 'function') loadEmpLogins();
-        if (typeof loadEmpIdCardSelector === 'function') loadEmpIdCardSelector();
-        if (typeof loadJobLetterSelector === 'function') loadJobLetterSelector();
-
-        fetch(`/api/delete-employee/${encodeURIComponent(id)}/`, { method: 'POST' })
-            .then(res => res.json())
-            .catch(err => console.warn("Delete sync note:", err));
+        deleteTargetEmpId = id;
+        const modal = document.getElementById('deleteConfirmModal');
+        if (modal) {
+            modal.classList.remove('d-none');
+        } else {
+            if (confirm('Are you sure you want to delete this employee profile?')) {
+                confirmDeleteEmployeeAction();
+            }
+        }
     };
 
     function renderEmployees() {
@@ -1196,7 +1193,6 @@
         if (modal) {
             modal.classList.remove('d-none');
         }
-        alert("✅ কর্মচারীর তথ্য সফলভাবে সংরক্ষণ করা হয়েছে!\n(Employee profile saved successfully!)");
     }
 
     function closeSaveSuccessModal() {
@@ -1241,8 +1237,11 @@
         employees = employees.filter(emp => String(emp.id) !== String(id) && emp.id !== id);
         localStorage.setItem('school_employees', JSON.stringify(employees));
         renderEmployees();
+        if (typeof loadEmpLogins === 'function') loadEmpLogins();
+        if (typeof loadEmpIdCardSelector === 'function') loadEmpIdCardSelector();
+        if (typeof loadJobLetterSelector === 'function') loadJobLetterSelector();
 
-        fetch(`/api/delete-employee/${id}/`, {
+        fetch(`/api/delete-employee/${encodeURIComponent(id)}/`, {
             method: 'POST'
         }).catch(err => console.warn('Backend delete note:', err));
 

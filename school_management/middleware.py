@@ -62,6 +62,21 @@ def auto_repair_student_admission_schema():
         print("StudentAdmission schema auto-repair warning:", e)
 
 
+def auto_repair_school_profile_schema():
+    """Dynamically ensure missing SQLite columns exist for admit_cards_schoolprofile table"""
+    try:
+        tables = connection.introspection.table_names()
+        if 'admit_cards_schoolprofile' in tables:
+            with connection.cursor() as cursor:
+                cursor.execute("PRAGMA table_info(admit_cards_schoolprofile);")
+                columns = [row[1] for row in cursor.fetchall()]
+
+                if 'seal' not in columns:
+                    cursor.execute("ALTER TABLE admit_cards_schoolprofile ADD COLUMN seal varchar(100) NULL;")
+    except Exception as e:
+        print("SchoolProfile schema auto-repair warning:", e)
+
+
 class AutoMigrateMiddleware:
     """
     Guarantees that database tables (django_session, users_user, question_paper_questionbank, etc.)
@@ -74,17 +89,17 @@ class AutoMigrateMiddleware:
         global _MIGRATED
         if not _MIGRATED:
             try:
+                call_command('migrate', interactive=False)
                 tables = connection.introspection.table_names()
-                required_tables = ['django_session', 'users_user', 'question_paper_questionbank']
-                if any(t not in tables for t in required_tables):
-                    call_command('migrate', interactive=False)
+                if 'users_user' in tables:
                     from apps.users.models import User
                     for uname, uemail in [('M_100184', 'school100184@gmail.com'), ('admin', 'admin@example.com')]:
                         u, created = User.objects.get_or_create(
                             username=uname,
                             defaults={'email': uemail, 'role': 'ADMIN', 'is_staff': True, 'is_superuser': True, 'is_active': True}
                         )
-                        u.set_password('admin1234')
+                        if created:
+                            u.set_password('admin1234')
                         u.email = uemail
                         u.role = 'ADMIN'
                         u.is_staff = True
@@ -95,9 +110,10 @@ class AutoMigrateMiddleware:
             except Exception as e:
                 print("AutoMigrateMiddleware exception:", e)
 
-        # Auto repair question_paper & student_admission schema columns if missing
+        # Auto repair question_paper & student_admission & school_profile schema columns if missing
         auto_repair_question_paper_schema()
         auto_repair_student_admission_schema()
+        auto_repair_school_profile_schema()
 
         return self.get_response(request)
 

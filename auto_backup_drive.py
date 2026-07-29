@@ -2,9 +2,6 @@ import os
 import shutil
 import zipfile
 import datetime
-from googleapiclient.discovery import build
-from google.oauth2 import service_account
-from googleapiclient.http import MediaFileUpload
 
 # --- Configuration ---
 # Path to the service account JSON key file (You must create this in Google Cloud Console)
@@ -58,6 +55,12 @@ def create_backup_zip():
     return zip_path
 
 def authenticate_gdrive():
+    try:
+        from googleapiclient.discovery import build
+        from google.oauth2 import service_account
+    except ImportError:
+        raise ImportError("google-api-python-client is required for Google Drive backup.")
+
     print("Authenticating with Google Drive API...")
     if not os.path.exists(SERVICE_ACCOUNT_FILE):
         raise FileNotFoundError(f"Credentials file '{SERVICE_ACCOUNT_FILE}' not found. Please create a Service Account in Google Cloud and save the JSON key here.")
@@ -67,6 +70,11 @@ def authenticate_gdrive():
     return build('drive', 'v3', credentials=creds)
 
 def upload_to_drive(service, file_path):
+    try:
+        from googleapiclient.http import MediaFileUpload
+    except ImportError:
+        raise ImportError("google-api-python-client is required for Google Drive backup.")
+
     print(f"Uploading {os.path.basename(file_path)} to Google Drive...")
     file_metadata = {'name': os.path.basename(file_path)}
     if DRIVE_FOLDER_ID:

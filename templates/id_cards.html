@@ -485,7 +485,7 @@
                 width: 100% !important;
             }
 
-            /* Standard CR80 Vertical Card Print Dimensions */
+            /* Standard CR80 Vertical Card Print Dimensions (54mm x 86mm) */
             .id-card {
                 width: 54mm !important;
                 height: 86mm !important;
@@ -496,7 +496,7 @@
                 box-shadow: none !important;
                 border: 2px solid #0d3b66 !important;
                 border-radius: 3.5mm !important;
-                padding: 1mm !important;
+                padding: 0.8mm !important;
                 page-break-inside: avoid !important;
                 break-inside: avoid !important;
                 overflow: hidden !important;
@@ -507,148 +507,213 @@
                 border: 0.8pt solid #d62828 !important;
                 border-radius: 2.5mm !important;
                 height: 100% !important;
+                display: flex !important;
+                flex-direction: column !important;
+                overflow: hidden !important;
+                background: #ffffff !important;
+                position: relative !important;
             }
 
             .card-clip {
-                width: 10mm !important;
-                height: 2mm !important;
-                margin: 1.5mm auto 1mm auto !important;
+                width: 9mm !important;
+                height: 1.5mm !important;
+                margin: 1mm auto 0.5mm auto !important;
+                flex-shrink: 0 !important;
             }
 
             .card-header {
-                padding: 1mm 2mm !important;
+                padding: 0.5mm 1.5mm !important;
+                flex-shrink: 0 !important;
             }
 
             .school-logo, .school-logo-svg {
-                width: 9mm !important;
-                height: 9mm !important;
+                width: 7.5mm !important;
+                height: 7.5mm !important;
             }
 
             .school-name-main {
-                font-size: 7.5pt !important;
+                font-size: 6.8pt !important;
                 line-height: 1.1 !important;
             }
 
             .school-sub {
-                font-size: 5.5pt !important;
+                font-size: 5pt !important;
+                line-height: 1 !important;
             }
 
             .card-divider {
-                height: 1.2pt !important;
-                margin: 1mm 2mm !important;
+                height: 1pt !important;
+                margin: 0.5mm 1.5mm !important;
+                flex-shrink: 0 !important;
             }
 
             .card-title-badge {
-                font-size: 7.5pt !important;
-                margin: 0.8mm 0 1.2mm 0 !important;
+                font-size: 6.8pt !important;
+                margin: 0.3mm 0 0.5mm 0 !important;
+                flex-shrink: 0 !important;
             }
 
             .photo-section {
-                margin-bottom: 1mm !important;
+                margin-bottom: 0.5mm !important;
+                flex-shrink: 0 !important;
             }
 
             .student-photo, .photo-placeholder {
-                width: 20mm !important;
-                height: 25mm !important;
-                border-width: 1pt !important;
+                width: 17.5mm !important;
+                height: 22mm !important;
+                border-width: 0.8pt !important;
             }
 
             .info-area {
                 width: calc(100% - 2mm) !important;
-                padding: 1mm 1.5mm !important;
-                gap: 0.8pt !important;
-                font-size: 6pt !important;
+                padding: 0.5mm 1.2mm !important;
+                gap: 0.3pt !important;
+                font-size: 5.2pt !important;
                 border-width: 0.5pt !important;
+                border-radius: 1.5mm !important;
+                flex: 1 !important;
+                overflow: hidden !important;
+            }
+
+            .info-row {
+                line-height: 1.15 !important;
             }
 
             .info-label {
-                width: 16mm !important;
-                font-size: 6pt !important;
+                width: 14.5mm !important;
+                font-size: 5.2pt !important;
             }
 
             .info-sep {
-                margin-right: 1mm !important;
+                margin-right: 0.5mm !important;
             }
 
             .info-value {
-                font-size: 6pt !important;
+                font-size: 5.2pt !important;
             }
 
             .info-value.uid {
-                font-size: 6.5pt !important;
+                font-size: 5.5pt !important;
             }
 
             .gov-banner {
-                padding: 1mm 2mm !important;
+                padding: 0.5mm 1.5mm !important;
+                margin-top: auto !important;
+                flex-shrink: 0 !important;
             }
 
             .gov-flag {
-                width: 4mm !important;
-                height: 2.5mm !important;
-                margin-right: 1.5mm !important;
+                width: 3.5mm !important;
+                height: 2.2mm !important;
+                margin-right: 1mm !important;
             }
 
             .gov-text {
-                font-size: 5.5pt !important;
+                font-size: 4.8pt !important;
             }
 
             .card-footer {
-                height: 12mm !important;
-                padding: 1mm 2mm 0.5mm 2mm !important;
+                height: 9.5mm !important;
+                padding: 0.5mm 1.5mm 0.3mm 1.5mm !important;
+                flex-shrink: 0 !important;
             }
 
             .sig-area {
-                width: 15mm !important;
+                width: 13mm !important;
+                margin-bottom: 0 !important;
+            }
+
+            .sig-line {
+                margin-bottom: 1px !important;
             }
 
             .sig-label {
-                font-size: 5pt !important;
+                font-size: 4.5pt !important;
+            }
+
+            .sig-img {
+                max-height: 3.8mm !important;
+                max-width: 12mm !important;
+                object-fit: contain !important;
+                margin-bottom: 0.5px !important;
+            }
+
+            .seal-area {
+                bottom: 0.8mm !important;
             }
 
             .seal-img, .seal-svg-placeholder {
-                width: 9mm !important;
-                height: 9mm !important;
+                width: 7.2mm !important;
+                height: 7.2mm !important;
+            }
+
+            .barcode-area {
+                margin-bottom: 0 !important;
             }
 
             .barcode-img, .barcode-fake {
-                width: 18mm !important;
-                height: 5mm !important;
+                width: 15mm !important;
+                height: 4mm !important;
             }
 
             .barcode-no {
-                font-size: 5pt !important;
+                font-size: 4.5pt !important;
+                line-height: 1 !important;
             }
 
             .security-bar {
-                height: 1.5mm !important;
+                height: 1.2mm !important;
+                flex-shrink: 0 !important;
+            }
+
+            .back-header {
+                margin: 0.8mm 0 0.4mm 0 !important;
+                gap: 1mm !important;
+                flex-shrink: 0 !important;
             }
 
             .back-heading {
-                font-size: 7.5pt !important;
+                font-size: 6.8pt !important;
+                padding-bottom: 0.5pt !important;
             }
 
             .back-body {
-                padding: 1.5mm 2mm !important;
-                gap: 1.5mm !important;
-                font-size: 5.5pt !important;
+                padding: 0.8mm 1.5mm !important;
+                gap: 0.6mm !important;
+                font-size: 4.8pt !important;
+                flex: 1 !important;
+                overflow: hidden !important;
             }
 
             .back-section-title {
-                font-size: 6pt !important;
+                font-size: 5.2pt !important;
+                margin-bottom: 0.3pt !important;
             }
 
             .back-list li {
-                font-size: 5.5pt !important;
-                margin-bottom: 0.5pt !important;
+                font-size: 4.8pt !important;
+                margin-bottom: 0.2pt !important;
+                line-height: 1.15 !important;
             }
 
             .hologram {
-                padding: 0.8mm 2mm !important;
-                font-size: 5pt !important;
+                padding: 0.5mm 1.5mm !important;
+                font-size: 4.5pt !important;
+                flex-shrink: 0 !important;
             }
 
             .back-footer {
-                height: 9mm !important;
+                height: 7.5mm !important;
+                flex-shrink: 0 !important;
+            }
+
+            .back-footer .barcode-img, .back-footer .barcode-fake {
+                width: 15mm !important;
+                height: 3.8mm !important;
+            }
+
+            .back-footer .barcode-no {
+                font-size: 4.5pt !important;
             }
         }
     </style>
@@ -763,13 +828,16 @@
                     
                     <div class="card-footer">
                         <div class="sig-area">
+                            {% if student.sig_url %}
+                                <img src="{{ student.sig_url }}" alt="Signature" class="sig-img" style="max-height: 28px; max-width: 90px; object-fit: contain; margin-bottom: 2px;">
+                            {% endif %}
                             <div class="sig-line"></div>
                             <div class="sig-label">প্রধান শিক্ষক</div>
                         </div>
                         
                         <div class="seal-area">
-                            {% if student.logo_url %}
-                                <img src="{{ student.logo_url }}" alt="Seal" class="seal-img">
+                            {% if student.seal_url %}
+                                <img src="{{ student.seal_url }}" alt="Seal" class="seal-img">
                             {% else %}
                                 <svg class="seal-svg-placeholder" viewBox="0 0 100 100">
                                     <circle cx="50" cy="50" r="46" fill="none" stroke="#0d3b66" stroke-width="3"/>
@@ -874,5 +942,60 @@
         {% endfor %}
     </div>
 
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        try {
+            const stored = localStorage.getItem('gs_institute_profile');
+            if (stored) {
+                const profile = JSON.parse(stored);
+
+                // 1. Update Institutional Round Seal
+                if (profile.sealSrc) {
+                    document.querySelectorAll('.seal-area').forEach(function(sealEl) {
+                        sealEl.innerHTML = '<img src="' + profile.sealSrc + '" alt="Seal" class="seal-img">';
+                    });
+                }
+
+                // 2. Update Headmaster Signature Scan
+                if (profile.sigSrc) {
+                    document.querySelectorAll('.sig-area').forEach(function(sigEl) {
+                        const label = sigEl.querySelector('.sig-label');
+                        const labelText = label ? label.innerText : 'প্রধান শিক্ষক';
+                        sigEl.innerHTML = '<img src="' + profile.sigSrc + '" alt="Signature" class="sig-img" style="max-height:28px; max-width:90px; object-fit:contain; margin-bottom:2px;"><div class="sig-line"></div><div class="sig-label">' + labelText + '</div>';
+                    });
+                }
+
+                // 3. Update School Logo (Monogram)
+                if (profile.logoSrc) {
+                    document.querySelectorAll('.school-logo').forEach(function(imgEl) {
+                        imgEl.src = profile.logoSrc;
+                    });
+                }
+
+                // 4. Update School Name
+                if (profile.nameBn || profile.nameEn) {
+                    const sName = profile.nameBn || profile.nameEn;
+                    document.querySelectorAll('.school-name-main').forEach(function(el) {
+                        el.innerText = sName;
+                    });
+                    document.querySelectorAll('.back-list strong').forEach(function(el) {
+                        if (el.innerText.includes('বিদ্যালয়') || el.innerText.includes('School')) {
+                            el.innerText = sName;
+                        }
+                    });
+                }
+
+                // 5. Update School Address
+                if (profile.address) {
+                    document.querySelectorAll('.school-sub').forEach(function(el) {
+                        el.innerText = profile.address;
+                    });
+                }
+            }
+        } catch(e) {
+            console.error("Error updating ID card from stored institute profile:", e);
+        }
+    });
+    </script>
 </body>
 </html>

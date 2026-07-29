@@ -72,7 +72,7 @@
             </div>
 
             <!-- ══════════════════════════════════════════════
-                 ডেটাবেজ ব্যাকআপ ও পুনরুদ্ধার সেকশন
+                 Database Backup & Restore Section
                  ══════════════════════════════════════════════ -->
             <div class="card custom-card p-4">
                 <div class="d-flex align-items-center gap-2 mb-4">
@@ -81,60 +81,60 @@
                         <i class="bi bi-database-fill text-white fs-6"></i>
                     </div>
                     <div>
-                        <h5 class="fw-bold mb-0">ডেটাবেজ ব্যাকআপ ও পুনরুদ্ধার</h5>
-                        <small class="text-muted">Database Backup &amp; Restore</small>
+                        <h5 class="fw-bold mb-0">Database Backup &amp; Restore</h5>
+                        <small class="text-muted">Safeguard and restore system data and media</small>
                     </div>
                 </div>
 
                 <div class="row g-3">
 
-                    <!-- ── ডাউনলোড ব্লক ── -->
+                    <!-- ── Download Block ── -->
                     <div class="col-md-6">
                         <div class="h-100 rounded-3 p-4" style="background:#f0fdf4;border:1.5px solid #bbf7d0;">
                             <div class="d-flex align-items-center gap-2 mb-3">
                                 <i class="bi bi-cloud-arrow-down-fill fs-4 text-success"></i>
-                                <h6 class="fw-bold mb-0 text-success">ব্যাকআপ ডাউনলোড</h6>
+                                <h6 class="fw-bold mb-0 text-success">Download Backup</h6>
                             </div>
                             <p class="text-muted small mb-3">
-                                বর্তমান ডেটাবেজ পিসিতে ডাউনলোড করে সংরক্ষণ করুন।
-                                <br><span class="fw-semibold text-dark">ফাইলের আকার: {{ db_size_mb }} MB</span>
+                                Download and save your database or full system backup archive locally.
+                                <br><span class="fw-semibold text-dark">Database Size: {{ db_size_mb }} MB</span>
                             </p>
                             <div class="d-flex flex-column gap-2">
                                 <a href="{% url 'backup_database' %}"
                                    class="btn btn-sm fw-semibold"
                                    style="background:#16a34a;color:#fff;border:none;border-radius:8px;">
-                                    <i class="bi bi-download me-1"></i> db_backup.sqlite3 ডাউনলোড
+                                    <i class="bi bi-download me-1"></i> Download Database (.sqlite3)
                                 </a>
                                 <a href="{% url 'download_full_backup' %}"
                                    class="btn btn-sm fw-semibold"
                                    style="background:#0284c7;color:#fff;border:none;border-radius:8px;">
-                                    <i class="bi bi-file-earmark-zip me-1"></i> পূর্ণ ব্যাকআপ (.zip) ডাউনলোড
+                                    <i class="bi bi-file-earmark-zip me-1"></i> Download Full Backup (.zip)
                                 </a>
                             </div>
                         </div>
                     </div>
 
-                    <!-- ── আপলোড / পুনরুদ্ধার ব্লক ── -->
+                    <!-- ── Upload / Restore Block ── -->
                     <div class="col-md-6">
                         <div class="h-100 rounded-3 p-4" style="background:#fff7ed;border:1.5px solid #fed7aa;">
                             <div class="d-flex align-items-center gap-2 mb-3">
                                 <i class="bi bi-cloud-arrow-up-fill fs-4 text-warning"></i>
-                                <h6 class="fw-bold mb-0 text-warning">ব্যাকআপ থেকে পুনরুদ্ধার</h6>
+                                <h6 class="fw-bold mb-0 text-warning">Restore from Backup</h6>
                             </div>
                             <p class="text-muted small mb-3">
-                                পিসি থেকে ব্যাকআপ ফাইল আপলোড করে ডেটা ফিরিয়ে আনুন।
-                                <br><span class="text-danger small fw-semibold">⚠️ বিদ্যমান ডেটা মুছে যাবে!</span>
+                                Upload a backup file from your PC to restore database and media files.
+                                <br><span class="text-danger small fw-semibold">⚠️ Existing data will be overwritten!</span>
                             </p>
                             <form method="POST" action="{% url 'restore_database' %}" enctype="multipart/form-data"
                                   onsubmit="return confirmRestore()">
                                 {% csrf_token %}
                                 <div class="mb-2">
-                                    <label class="form-label small fw-semibold text-dark">ফাইল নির্বাচন করুন</label>
+                                    <label class="form-label small fw-semibold text-dark">Select Backup File</label>
                                     <input type="file" name="backup_file" id="backup_file_input"
                                            class="form-control form-control-sm"
                                            accept=".sqlite3,.db,.zip" required
                                            onchange="showFileName(this)">
-                                    <div class="form-text text-muted">গ্রহণযোগ্য: .sqlite3 অথবা .zip</div>
+                                    <div class="form-text text-muted">Supported formats: .sqlite3 or .zip</div>
                                 </div>
                                 <div id="file-name-display" class="small text-primary mb-2 d-none">
                                     <i class="bi bi-file-earmark-check me-1"></i>
@@ -143,28 +143,27 @@
                                 <button type="submit" id="restore-btn"
                                         class="btn btn-sm fw-semibold w-100"
                                         style="background:#d97706;color:#fff;border:none;border-radius:8px;">
-                                    <i class="bi bi-arrow-counterclockwise me-1"></i> ডেটা পুনরুদ্ধার করুন
+                                    <i class="bi bi-arrow-counterclockwise me-1"></i> Restore Database
                                 </button>
                             </form>
                         </div>
                     </div>
 
-                    <!-- নোট -->
+                    <!-- Information Note -->
                     <div class="col-12">
                         <div class="d-flex align-items-start gap-2 p-3 rounded-2"
                              style="background:#eff6ff;border:1px solid #bfdbfe;">
                             <i class="bi bi-info-circle-fill text-primary mt-1"></i>
                             <div class="small text-primary-emphasis">
-                                <strong>পুনরুদ্ধারের আগে জানুন:</strong> ফাইল আপলোড করার আগে বর্তমান ডেটার একটি ব্যাকআপ স্বয়ংক্রিয়ভাবে
-                                <code>db_backup_before_restore.sqlite3</code> নামে সংরক্ষিত হবে।
-                                পুনরুদ্ধার ব্যর্থ হলে সেটি ব্যবহার করা হবে।
+                                <strong>Safety Information:</strong> Before restoring, a copy of your current database will be automatically saved as
+                                <code>db_backup_before_restore.sqlite3</code> as a fallback safety measure.
                             </div>
                         </div>
                     </div>
 
                 </div>
             </div>
-            <!-- ── ব্যাকআপ সেকশন শেষ ── -->
+            <!-- ── End Backup Section ── -->
 
         </div>
 
@@ -191,27 +190,27 @@
                 </div>
             </div>
 
-            <!-- Backup সারসংক্ষেপ -->
+            <!-- Data Protection Summary -->
             <div class="card custom-card p-4">
                 <h6 class="fw-bold mb-3">
-                    <i class="bi bi-shield-lock-fill text-success me-2"></i>ডেটা সুরক্ষা তথ্য
+                    <i class="bi bi-shield-lock-fill text-success me-2"></i>Data Protection Info
                 </h6>
                 <ul class="list-unstyled small text-muted mb-0 space-y-2">
                     <li class="mb-2">
                         <i class="bi bi-check-circle-fill text-success me-1"></i>
-                        লোকাল ডেটাবেজ সাইজ: <strong class="text-dark">{{ db_size_mb }} MB</strong>
+                        Local DB Size: <strong class="text-dark">{{ db_size_mb }} MB</strong>
                     </li>
                     <li class="mb-2">
                         <i class="bi bi-check-circle-fill text-success me-1"></i>
-                        অটো ব্যাকআপ অনলাইনে প্রতি ১৫ মিনিটে
+                        Auto cloud backup sync every 15 mins
                     </li>
                     <li class="mb-2">
                         <i class="bi bi-check-circle-fill text-success me-1"></i>
-                        পুনরুদ্ধারে আগের ডেটা স্বয়ংক্রিয় সংরক্ষিত
+                        Automatic safety backup before restore
                     </li>
                     <li>
                         <i class="bi bi-cloud-check-fill text-primary me-1"></i>
-                        অনলাইন: <a href="https://m-100184.onrender.com" target="_blank" class="text-primary small">m-100184.onrender.com</a>
+                        Online: <a href="https://m-100184.onrender.com" target="_blank" class="text-primary small">m-100184.onrender.com</a>
                     </li>
                 </ul>
             </div>
@@ -223,16 +222,16 @@
 function confirmRestore() {
     const fileInput = document.getElementById('backup_file_input');
     if (!fileInput.files.length) {
-        alert('অনুগ্রহ করে একটি ফাইল নির্বাচন করুন।');
+        alert('Please select a backup file.');
         return false;
     }
     const fname = fileInput.files[0].name;
     return confirm(
-        '⚠️ সতর্কতা!\n\n' +
-        'ফাইল: ' + fname + '\n\n' +
-        'এই ফাইল দিয়ে পুনরুদ্ধার করলে বিদ্যমান সকল ডেটা প্রতিস্থাপিত হবে।\n' +
-        'আগের ডেটা স্বয়ংক্রিয়ভাবে ব্যাকআপ হবে।\n\n' +
-        'নিশ্চিতভাবে পুনরুদ্ধার করতে চান?'
+        '⚠️ WARNING!\n\n' +
+        'Selected File: ' + fname + '\n\n' +
+        'Restoring from this file will overwrite current database records.\n' +
+        'A safety backup of your existing data will be saved automatically.\n\n' +
+        'Are you sure you want to proceed with restore?'
     );
 }
 

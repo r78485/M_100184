@@ -74,7 +74,7 @@ urlpatterns = [
     path('finance/store/', login_required(TemplateView.as_view(template_name='store.html')), name='store'),
     
     # Daily Operations
-    path('operations/attendance/', login_required(TemplateView.as_view(template_name='attendance.html')), name='attendance'),
+    path('operations/attendance/', user_views.attendance_view, name='attendance'),
     path('operations/timetable/', login_required(TemplateView.as_view(template_name='timetable.html')), name='timetable'),
     path('operations/homework/', login_required(TemplateView.as_view(template_name='homework.html')), name='homework'),
     path('operations/behaviour/', login_required(TemplateView.as_view(template_name='behaviour.html')), name='behaviour'),

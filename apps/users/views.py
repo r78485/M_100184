@@ -290,6 +290,8 @@ def _format_id_card_student(student, school_profile=None):
     school_mobile = getattr(school_profile, 'mobile', '') if (school_profile and getattr(school_profile, 'mobile', None)) else "017309100184"
     school_email = getattr(school_profile, 'email', '') if (school_profile and getattr(school_profile, 'email', None)) else "school100184@gmail.com"
     logo_url = school_profile.logo.url if (school_profile and hasattr(school_profile, 'logo') and school_profile.logo) else '/static/logo.png'
+    seal_url = school_profile.seal.url if (school_profile and hasattr(school_profile, 'seal') and school_profile.seal) else ''
+    sig_url = school_profile.controller_signature.url if (school_profile and hasattr(school_profile, 'controller_signature') and school_profile.controller_signature) else ''
 
     adm_no = student.admission_no or f"ADM-2026-{student.id:04d}"
 
@@ -311,6 +313,8 @@ def _format_id_card_student(student, school_profile=None):
         'school_mobile': school_mobile,
         'school_email': school_email,
         'logo_url': logo_url,
+        'seal_url': seal_url,
+        'sig_url': sig_url,
         'unique_id': adm_no,
         'barcode_no': adm_no,
         'barcode_b64': barcode_b64,
@@ -1305,7 +1309,7 @@ def backup_database_view(request):
 @login_required
 def restore_database_view(request):
     """
-    পিসি থেকে ব্যাকআপ ফাইল (.sqlite3 বা .zip) আপলোড করে ডেটাবেজ পুনরুদ্ধার করা।
+    Restore database and media from uploaded backup file (.sqlite3 or .zip).
     """
     if not _check_admin_permission(request.user):
         return HttpResponse('Permission denied', status=403)
@@ -1315,7 +1319,7 @@ def restore_database_view(request):
 
     uploaded = request.FILES.get('backup_file')
     if not uploaded:
-        request.session['restore_message'] = 'কোনো ফাইল নির্বাচন করা হয়নি।'
+        request.session['restore_message'] = 'No backup file was selected.'
         request.session['restore_status'] = 'error'
         return redirect('account_settings')
 
@@ -1324,63 +1328,73 @@ def restore_database_view(request):
     backup_path = os.path.join(settings.BASE_DIR, 'db_backup_before_restore.sqlite3')
 
     try:
-        # ── বিদ্যমান DB-এর ব্যাকআপ রাখা ──
+        # Create a safety backup of existing DB before restoring
         if os.path.exists(db_path):
             import shutil
             shutil.copy2(db_path, backup_path)
 
+        from django.db import connection
+
         if fname.endswith('.sqlite3') or fname.endswith('.db'):
-            # সরাসরি SQLite ফাইল
             file_data = uploaded.read()
-            # SQLite magic header যাচাই
             if not file_data.startswith(b'SQLite format 3'):
-                request.session['restore_message'] = 'অবৈধ ফাইল! এটি SQLite ডেটাবেজ ফাইল নয়।'
+                request.session['restore_message'] = 'Invalid file! The uploaded file is not a valid SQLite database.'
                 request.session['restore_status'] = 'error'
                 return redirect('account_settings')
 
+            connection.close()
             with open(db_path, 'wb') as f:
                 f.write(file_data)
 
-            request.session['restore_message'] = f'✅ ডেটাবেজ সফলভাবে পুনরুদ্ধার হয়েছে! ({round(len(file_data)/1024/1024, 2)} MB)'
+            size_mb = round(len(file_data) / (1024 * 1024), 2)
+            request.session['restore_message'] = f'✅ Database restored successfully! ({size_mb} MB)'
             request.session['restore_status'] = 'success'
 
         elif fname.endswith('.zip'):
-            # ZIP থেকে db.sqlite3 বের করা
             import zipfile
             import io as _io
 
             zip_data = uploaded.read()
             with zipfile.ZipFile(_io.BytesIO(zip_data)) as zf:
-                # ZIP-এর মধ্যে db.sqlite3 খোঁজা
                 sqlite_names = [n for n in zf.namelist() if n.endswith('db.sqlite3') or n == 'db.sqlite3']
                 if not sqlite_names:
-                    request.session['restore_message'] = 'ZIP ফাইলের মধ্যে db.sqlite3 খুঁজে পাওয়া যায়নি।'
+                    request.session['restore_message'] = 'Invalid ZIP backup! Could not find db.sqlite3 inside the zip archive.'
                     request.session['restore_status'] = 'error'
                     return redirect('account_settings')
 
                 db_data = zf.read(sqlite_names[0])
                 if not db_data.startswith(b'SQLite format 3'):
-                    request.session['restore_message'] = 'ZIP-এর db.sqlite3 ফাইলটি অবৈধ।'
+                    request.session['restore_message'] = 'The db.sqlite3 file inside the ZIP archive is invalid.'
                     request.session['restore_status'] = 'error'
                     return redirect('account_settings')
 
+                connection.close()
                 with open(db_path, 'wb') as f:
                     f.write(db_data)
 
-            request.session['restore_message'] = f'✅ ZIP থেকে ডেটাবেজ সফলভাবে পুনরুদ্ধার হয়েছে!'
+                # Extract media files if present in the ZIP archive
+                for member in zf.namelist():
+                    if 'media/' in member:
+                        rel_path = member.split('media/', 1)[-1]
+                        if rel_path and not member.endswith('/'):
+                            target_path = os.path.join(settings.MEDIA_ROOT, rel_path)
+                            os.makedirs(os.path.dirname(target_path), exist_ok=True)
+                            with open(target_path, 'wb') as mf:
+                                mf.write(zf.read(member))
+
+            request.session['restore_message'] = '✅ Database and system files restored successfully from ZIP backup!'
             request.session['restore_status'] = 'success'
 
         else:
-            request.session['restore_message'] = 'শুধুমাত্র .sqlite3 বা .zip ফাইল গ্রহণযোগ্য।'
+            request.session['restore_message'] = 'Invalid file format! Only .sqlite3 or .zip backup files are supported.'
             request.session['restore_status'] = 'error'
             return redirect('account_settings')
 
     except Exception as e:
-        # ব্যর্থ হলে পুরনো DB ফিরিয়ে দেওয়া
         if os.path.exists(backup_path):
             import shutil
             shutil.copy2(backup_path, db_path)
-        request.session['restore_message'] = f'পুনরুদ্ধারে ত্রুটি: {str(e)}'
+        request.session['restore_message'] = f'Restore failed: {str(e)}'
         request.session['restore_status'] = 'error'
 
     return redirect('account_settings')
@@ -1445,3 +1459,61 @@ def clone_student_admission(request, pk):
         obj.student_name_en += " (Copy)"
     obj.save()
     return redirect('admissions')
+
+
+@login_required
+def attendance_view(request):
+    """
+    Dynamically loads all Students from StudentAdmission and Employees/Teachers from Employee
+    into the Attendance system.
+    """
+    import json
+    from apps.users.models import StudentAdmission, Employee
+
+    user_list = []
+
+    # 1. Load Students from StudentAdmission database
+    students = StudentAdmission.objects.all().order_by('desired_class', 'id')
+    for s in students:
+        display_name = s.student_name_bn or s.student_name_en or f"Student #{s.id}"
+        sid = s.admission_no or f"STU-{s.id:04d}"
+        class_grp = s.desired_class or "Class 6"
+        user_list.append({
+            'id': sid,
+            'name': display_name,
+            'role': 'Student',
+            'classGroup': class_grp,
+            'roll': str(s.roll_no or '')
+        })
+
+    # 2. Load Employees / Teachers / Staff from Employee database
+    employees = Employee.objects.all().order_by('role', 'name')
+    for e in employees:
+        emp_role = 'Teacher' if ('TEACH' in (e.role or '').upper() or 'TEACH' in (e.dept or '').upper()) else 'Staff'
+        eid = e.emp_id or f"EMP-{e.id:03d}"
+        user_list.append({
+            'id': eid,
+            'name': e.name,
+            'role': emp_role,
+            'classGroup': e.dept or ('Teachers' if emp_role == 'Teacher' else 'Staff'),
+            'roll': e.emp_id
+        })
+
+    # Fallback demo users if database is empty
+    if not user_list:
+        user_list = [
+            {'id': "S-501", 'name': "Arif Rahman", 'role': "Student", 'classGroup': "Class 9", 'roll': "101"},
+            {'id': "S-502", 'name': "Nusrat Jahan", 'role': "Student", 'classGroup': "Class 9", 'roll': "102"},
+            {'id': "T-101", 'name': "Dr. Rafiqul Islam", 'role': "Teacher", 'classGroup': "Teachers", 'roll': "T-101"},
+            {'id': "ST-201", 'name': "Kamal De", 'role': "Staff", 'classGroup': "Staff", 'roll': "ST-201"}
+        ]
+
+    # Collect unique classes/groups for the dropdown filters
+    groups = sorted(list(set([u['classGroup'] for u in user_list if u['classGroup']])))
+
+    context = {
+        'db_users_json': json.dumps(user_list, ensure_ascii=False),
+        'available_groups': groups,
+        'user_count': len(user_list)
+    }
+    return render(request, 'attendance.html', context)

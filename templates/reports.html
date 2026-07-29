@@ -632,6 +632,17 @@
                 let addr = profile.address || '';
                 if(profile.eiin) addr += ' | EIIN: ' + profile.eiin;
                 if(addr) document.getElementById('printSchoolAddress').innerText = addr;
+
+                if (profile.sealSrc) {
+                    const ps = document.getElementById('printSeal');
+                    const psfb = document.getElementById('printSealFallback');
+                    if (ps) { ps.src = profile.sealSrc; ps.style.display = 'block'; }
+                    if (psfb) { psfb.style.display = 'none'; }
+                }
+                if (profile.sigSrc) {
+                    const psig = document.getElementById('printSig');
+                    if (psig) { psig.src = profile.sigSrc; psig.style.display = 'block'; }
+                }
             }
         } catch(e) {}
         
