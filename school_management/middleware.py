@@ -61,12 +61,14 @@ def auto_repair_student_admission_schema():
                     cursor.execute("ALTER TABLE users_studentadmission ADD COLUMN present_post_office varchar(100) DEFAULT '';")
                 if 'permanent_post_office' not in columns:
                     cursor.execute("ALTER TABLE users_studentadmission ADD COLUMN permanent_post_office varchar(100) DEFAULT '';")
-        ensure_default_students()
     except Exception as e:
         print("StudentAdmission schema auto-repair warning:", e)
 
 
 def ensure_default_students():
+    import os
+    if os.environ.get('SEED_DEFAULT_DATA', '').lower() != 'true':
+        return
     try:
         from apps.users.models import StudentAdmission
         if StudentAdmission.objects.count() == 0:

@@ -63,8 +63,9 @@ def check_permission(user):
 
 def seed_initial_sample_questions():
     """Auto populate initial sample NCTB CQs and MCQs in English and Bangla"""
+    import os
     try:
-        if QuestionBank.objects.count() == 0:
+        if QuestionBank.objects.count() == 0 and os.environ.get('SEED_DEFAULT_DATA', '').lower() == 'true':
             from seed_question_paper import seed
             seed()
     except Exception:

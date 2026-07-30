@@ -13,8 +13,9 @@ def admit_card_dashboard_view(request):
     class_name = request.GET.get('class_name', '').strip()
     search_query = request.GET.get('search_query', '').strip() or request.GET.get('roll_no', '').strip()
     
-    # Ensure test dummy data exists if DB is empty
-    if StudentAdmission.objects.count() == 0:
+    # Ensure test dummy data exists if DB is empty and explicitly enabled
+    import os
+    if StudentAdmission.objects.count() == 0 and os.environ.get('SEED_DEFAULT_DATA', '').lower() == 'true':
         import datetime
         StudentAdmission.objects.create(
             admission_no="ADM-2026-001",

@@ -5,8 +5,8 @@ from django.conf import settings
 try:
     from supabase import create_client, Client
     
-    SUPABASE_URL = getattr(settings, 'SUPABASE_URL', 'https://ivclauhftgpjghvqigaj.supabase.co')
-    SUPABASE_KEY = getattr(settings, 'SUPABASE_KEY', 'sb_publishable_UnTiIPs3X526ipGKjExIqA_zOxdkCI6')
+    SUPABASE_URL = os.environ.get('SUPABASE_URL') or getattr(settings, 'SUPABASE_URL', 'https://ivclauhftgpjghvqigaj.supabase.co')
+    SUPABASE_KEY = os.environ.get('SUPABASE_KEY') or getattr(settings, 'SUPABASE_KEY', 'sb_publishable_UnTiIPs3X526ipGKjExIqA_zOxdkCI6')
     
     supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 except Exception as e:

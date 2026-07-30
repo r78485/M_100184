@@ -7,6 +7,23 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Automatically load environment variables from .env file if it exists
+for _env_filename in ['.env', '.env.local', 'supabase.env']:
+    _env_path = BASE_DIR / _env_filename
+    if _env_path.exists():
+        try:
+            with open(_env_path, 'r', encoding='utf-8') as _f:
+                for _line in _f:
+                    _line = _line.strip()
+                    if _line and not _line.startswith('#') and '=' in _line:
+                        _k, _v = _line.split('=', 1)
+                        _k = _k.strip()
+                        _v = _v.strip().strip('"').strip("'")
+                        if _k and _k not in os.environ:
+                            os.environ[_k] = _v
+        except Exception as _e:
+            print(f"Notice: Could not read {_env_filename}: {_e}")
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-replace-this-in-production'
 
@@ -126,16 +143,55 @@ if IS_VERCEL:
 else:
     DEFAULT_DB_PATH = BASE_DIR / 'db.sqlite3'
 
+# 1. Detect PostgreSQL / Supabase connection URL from any common env variable
+_db_url = None
+_db_env_keys = [
+    'DATABASE_URL',
+    'SUPABASE_DB_URL',
+    'SUPABASE_DATABASE_URL',
+    'POSTGRES_URL',
+    'POSTGRES_PRISMA_URL',
+    'POSTGRES_URL_NON_POOLING',
+    'SUPABASE_POSTGRES_URL',
+    'DB_URL',
+    'POSTGRESQL_URL',
+]
+# Also check SUPABASE_URL if the user pasted a postgres connection URL there
+_supa_val = os.environ.get('SUPABASE_URL', '').strip()
+if _supa_val.startswith('postgres://') or _supa_val.startswith('postgresql://'):
+    _db_url = _supa_val
+
+if not _db_url:
+    for _key in _db_env_keys:
+        _val = os.environ.get(_key, '').strip()
+        if _val and (_val.startswith('postgres://') or _val.startswith('postgresql://') or _val.startswith('sqlite://')):
+            _db_url = _val
+            break
+
+if _db_url:
+    os.environ['DATABASE_URL'] = _db_url
 
 try:
     import dj_database_url
+    _default_conn_url = _db_url if _db_url else f'sqlite:///{DEFAULT_DB_PATH}'
+    _is_remote_db = _default_conn_url.startswith('postgres://') or _default_conn_url.startswith('postgresql://')
     DATABASES = {
         'default': dj_database_url.config(
-            default=f'sqlite:///{DEFAULT_DB_PATH}',
-            conn_max_age=600
+            default=_default_conn_url,
+            conn_max_age=0 if (IS_VERCEL or _is_remote_db) else 600,
+            ssl_require=_is_remote_db
         )
     }
-except ImportError:
+    if DATABASES['default']['ENGINE'] in ['django.db.backends.postgresql', 'django.db.backends.postgresql_psycopg2']:
+        DATABASES['default'].setdefault('OPTIONS', {})
+        DATABASES['default']['OPTIONS']['sslmode'] = 'require'
+        if 'pooler.supabase.com' in str(DATABASES['default'].get('HOST', '')) or str(DATABASES['default'].get('PORT', '')) == '6543':
+            DATABASES['default']['OPTIONS']['options'] = '-c default_transaction_isolation=read_committed'
+        print("✅ Database Setup: Using Remote PostgreSQL / Supabase DB")
+    else:
+        print("ℹ️ Database Setup: Using local SQLite DB")
+except Exception as _db_err:
+    print("Database configuration notice:", _db_err)
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
